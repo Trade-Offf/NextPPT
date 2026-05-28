@@ -1,3 +1,3 @@
-export * from './slide';
-export * from './messages';
-export * from './export';
+export * from './slide.ts';
+export * from './messages.ts';
+export * from './export.ts';
