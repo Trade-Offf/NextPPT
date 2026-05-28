@@ -57,7 +57,7 @@ export function SlideListPane() {
 
   return (
     <aside
-      className="shrink-0 bg-white border-r border-[var(--rule)] overflow-y-auto flex flex-col gap-2 p-2"
+      className="shrink-0 h-full bg-white border-r border-[var(--rule)] overflow-y-auto flex flex-col gap-2 p-2"
       style={{ width: THUMB_W + 16 }}
     >
       {slides.map((slide, idx) => (

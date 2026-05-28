@@ -54,6 +54,19 @@ export async function screenshotSlides(
     const fileUrl = `file://${htmlPath}`;
     await page.goto(fileUrl, { waitUntil: 'networkidle0', timeout: 60_000 });
 
+    // Freeze animations and hide browser-injected media controls for clean screenshots
+    await page.addStyleTag({
+      content: `
+        *, *::before, *::after {
+          animation-duration: 0s !important;
+          animation-delay: 0s !important;
+          transition-duration: 0s !important;
+        }
+        ::-webkit-media-controls { display: none !important; }
+        video::-webkit-media-controls { display: none !important; }
+      `,
+    });
+
     // Wait for MathJax/KaTeX/Mermaid
     await page.evaluate(() => {
       return new Promise<void>((resolve) => {
@@ -66,8 +79,9 @@ export async function screenshotSlides(
       });
     });
 
-    // Count slides
-    const totalSlides = await page.$$eval(SLIDE_SELECTOR, (els) => els.length);
+    // Get all slide elements by index (more reliable than nth-child selectors)
+    const allSlideHandles = await page.$$(SLIDE_SELECTOR);
+    const totalSlides = allSlideHandles.length;
 
     const ordinals = parsePageRange(pageRange, totalSlides);
     onProgress(0, ordinals.length);
@@ -77,23 +91,21 @@ export async function screenshotSlides(
 
     for (let i = 0; i < ordinals.length; i++) {
       const ordinal = ordinals[i]!;
-      const el = await page.$(
-        `${SLIDE_SELECTOR}:nth-child(${ordinal}), ${SLIDE_SELECTOR}[data-page="${ordinal}"]`,
-      );
-
-      if (!el) {
-        // fallback: scroll to the nth slide
-        await page.evaluate((idx) => {
-          const slides = document.querySelectorAll('section.slide');
-          slides[idx]?.scrollIntoView();
-        }, ordinal - 1);
-      }
-
+      const el = allSlideHandles[ordinal - 1];
       const outFile = path.join(outDir, `slide-${String(ordinal).padStart(4, '0')}.png`);
 
       if (el) {
+        // Scroll element into view to avoid stale positioning, then screenshot the element
+        await el.scrollIntoView();
+        await new Promise((r) => setTimeout(r, 80)); // brief settle for animations
         await el.screenshot({ path: outFile, type: 'png' });
       } else {
+        // Fallback: viewport screenshot
+        await page.evaluate((idx: number) => {
+          const slides = document.querySelectorAll<HTMLElement>('section[class~="slide"]');
+          slides[idx]?.scrollIntoView({ behavior: 'instant' });
+        }, ordinal - 1);
+        await new Promise((r) => setTimeout(r, 80));
         await page.screenshot({ path: outFile, type: 'png', clip: { x: 0, y: 0, width: viewportWidth, height: viewportHeight } });
       }
 

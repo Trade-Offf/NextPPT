@@ -128,7 +128,7 @@ export function EditorPage() {
       </header>
 
       {/* Body */}
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         <SlideListPane />
 
         {/* Canvas area */}
