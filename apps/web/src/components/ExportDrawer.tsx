@@ -2,6 +2,29 @@ import { useState } from 'react';
 import type { ExportFormat, ExportResolution, ExportPageRange } from '@hds/protocol';
 import { useDeckStore } from '../store/deckStore.js';
 
+/** Recursively append all files from a directory handle to FormData */
+async function appendDirFiles(
+  dir: FileSystemDirectoryHandle,
+  prefix: string,
+  form: FormData,
+  depth = 0,
+): Promise<void> {
+  if (depth > 3) return; // safety limit
+  for await (const [name, entry] of dir as unknown as AsyncIterable<[string, FileSystemHandle]>) {
+    if (name.startsWith('.')) continue; // skip hidden dirs like .hds-backup
+    const relPath = prefix ? `${prefix}/${name}` : name;
+    if (entry.kind === 'file') {
+      const ext = name.split('.').pop()?.toLowerCase() ?? '';
+      if (['png','jpg','jpeg','gif','webp','svg','avif','woff','woff2','ttf','css'].includes(ext)) {
+        const file = await (entry as FileSystemFileHandle).getFile();
+        form.append('files', file, relPath);
+      }
+    } else if (entry.kind === 'directory') {
+      await appendDirFiles(entry as FileSystemDirectoryHandle, relPath, form, depth + 1);
+    }
+  }
+}
+
 interface ExportDrawerProps {
   open: boolean;
   onClose: () => void;
@@ -38,21 +61,13 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
         JSON.stringify({ title: meta?.title ?? 'deck', author: meta?.author ?? '' }),
       );
 
+      // Send the original HTML (with relative paths) so Puppeteer can resolve assets
       const deckBlob = new Blob([rawHtml], { type: 'text/html' });
       formData.append('files', deckBlob, 'deck.html');
 
-      // Append asset files when we have dirHandle
+      // Send ALL files from the directory so Puppeteer can load images
       if (dirHandle) {
-        try {
-          const assetsDir = await dirHandle.getDirectoryHandle('assets');
-          for await (const [name, entry] of assetsDir as unknown as AsyncIterable<[string, FileSystemHandle]>) {
-            if (entry.kind !== 'file') continue;
-            const file = await (entry as FileSystemFileHandle).getFile();
-            formData.append('files', file, `assets/${name}`);
-          }
-        } catch {
-          // no assets dir – ok
-        }
+        await appendDirFiles(dirHandle, '', formData);
       }
 
       const res = await fetch('/v1/export', {
@@ -70,11 +85,18 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
       let downloadUrl = '';
       let downloadFilename = '';
       let buffer = '';
+      let lastEvent = '';
 
       const handleSseLine = (line: string) => {
+        if (line.startsWith('event:')) { lastEvent = line.slice(6).trim(); return; }
         if (!line.startsWith('data:')) return;
         try {
           const data = JSON.parse(line.slice(5).trim()) as Record<string, unknown>;
+          if (lastEvent === 'error' || typeof data['message'] === 'string') {
+            setError(String(data['message'] ?? data['code'] ?? 'Export failed'));
+            lastEvent = '';
+            return;
+          }
           if (typeof data['current'] === 'number') {
             setProgress({ current: data['current'] as number, total: data['total'] as number });
           }
@@ -82,9 +104,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
             downloadUrl = data['url'] as string;
             downloadFilename = (data['filename'] as string | undefined) ?? 'export';
           }
-          if (typeof data['message'] === 'string') {
-            setError((data['message'] as string));
-          }
+          lastEvent = '';
         } catch { /* ignore malformed lines */ }
       };
 
@@ -106,9 +126,8 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        onClose(); // close only on success
       }
-
-      onClose();
     } catch (err) {
       setError(String(err));
     } finally {
