@@ -19,6 +19,9 @@ export interface SelectionState {
 export interface DeckStore {
   // ── File system ──────────────────────────────────────────
   dirHandle: FileSystemDirectoryHandle | null;
+  /** Immutable source filename (never written to) */
+  sourceFileName: string;
+  /** Working copy filename (written on save, defaults to source + '-hds') */
   deckFileName: string;
   rawHtml: string; // full deck HTML string
 
@@ -58,7 +61,8 @@ export interface DeckStore {
 
 export const useDeckStore = create<DeckStore>((set) => ({
   dirHandle: null,
-  deckFileName: 'deck.html',
+  sourceFileName: '',
+  deckFileName: '',
   rawHtml: '',
   headHtml: '',
   meta: null,
@@ -70,11 +74,14 @@ export const useDeckStore = create<DeckStore>((set) => ({
   isSaving: false,
   lastSavedAt: null,
 
-  openDirectory: (handle, fileName, html, headHtml, meta, slides) =>
-    set({ dirHandle: handle, deckFileName: fileName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false }),
+  openDirectory: (handle, fileName, html, headHtml, meta, slides) => {
+    // Derive working-copy filename: foo.html → foo-hds.html
+    const copyName = fileName.replace(/\.html$/i, '-hds.html');
+    set({ dirHandle: handle, sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false });
+  },
 
   closeDirectory: () =>
-    set({ dirHandle: null, rawHtml: '', headHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
+    set({ dirHandle: null, sourceFileName: '', deckFileName: '', rawHtml: '', headHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
 
   setSlides: (slides) => set({ slides }),
 

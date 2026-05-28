@@ -14,6 +14,7 @@ export function EditorPage() {
   const deckFileName = useDeckStore((s) => s.deckFileName);
   const rawHtml = useDeckStore((s) => s.rawHtml);
   const headHtml = useDeckStore((s) => s.headHtml);
+  const sourceFileName = useDeckStore((s) => s.sourceFileName);
   const isDirty = useDeckStore((s) => s.isDirty);
   const updateSlideHtml = useDeckStore((s) => s.updateSlideHtml);
   const setRawHtml = useDeckStore((s) => s.setRawHtml);
@@ -59,7 +60,7 @@ export function EditorPage() {
     markSaving();
     const rebuilt = rebuildDeckHtml(rawHtml, slides);
     setRawHtml(rebuilt);
-    await writeDeck(dirHandle, deckFileName, rebuilt);
+    await writeDeck(dirHandle, deckFileName, rebuilt, sourceFileName);
     markSaved();
   }, [dirHandle, deckFileName, rawHtml, slides, markSaving, setRawHtml, markSaved]);
 
@@ -103,10 +104,12 @@ export function EditorPage() {
     <div className="flex flex-col h-full">
       {/* Toolbar */}
       <header className="h-12 bg-white border-b border-[var(--rule)] flex items-center px-4 gap-3 shrink-0">
-        <span className="text-sm font-semibold text-[var(--ink)] mr-auto truncate">
-          {deckFileName}
-          {isDirty && <span className="ml-1.5 text-[var(--silver)] text-xs">●</span>}
-        </span>
+        <div className="mr-auto flex items-center gap-2 min-w-0">
+          <span className="text-xs text-[var(--silver)] truncate hidden sm:block">{sourceFileName}</span>
+          <span className="text-[var(--silver)] text-xs hidden sm:block">→</span>
+          <span className="text-sm font-semibold text-[var(--ink)] truncate">{deckFileName}</span>
+          {isDirty && <span className="text-orange-400 text-xs shrink-0" title="有未保存的修改">●</span>}
+        </div>
 
         <button
           onClick={handleSave}

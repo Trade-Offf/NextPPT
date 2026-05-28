@@ -115,11 +115,17 @@ export async function writeDeck(
   dir: FileSystemDirectoryHandle,
   fileName: string,
   html: string,
+  sourceFileName?: string,
 ): Promise<void> {
+  // Safety guard: never overwrite the source file
+  if (sourceFileName && fileName === sourceFileName) {
+    throw new Error(`Refusing to overwrite source file "${sourceFileName}". Save target must differ from source.`);
+  }
+
   // 1. Write backup first
   await writeBackup(dir, html);
 
-  // 2. Atomic write via temp file (not all browsers support rename, so write directly)
+  // 2. Write working copy
   const fh = await dir.getFileHandle(fileName, { create: true });
   const writable = await fh.createWritable();
   await writable.write(html);
