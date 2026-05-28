@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/* ── HDS Design Tokens ──────────────────────────────────── */
+:root {
+  --ink: #0c1e3c;
+  --cobalt: #1d4ed8;
+  --cobalt-lt: #eff6ff;
+  --slate: #475569;
+  --silver: #94a3b8;
+  --rule: #e2e8f0;
+  --paper: #fafbfc;
+}
+
+body {
+  background: #f1f5f9;
+  font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Prevent default slide overflows from expanding body */
+.canvas-host {
+  contain: strict;
+}
