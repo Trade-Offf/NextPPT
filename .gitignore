@@ -1,0 +1,57 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.suo
+*~
+.history/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.parcel-cache/
+
+# Build output
+dist/
+build/
+out/
+.next/
+.turbo/
+.vercel/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs / coverage
+logs/
+*.log
+coverage/
+.nyc_output/
+
+# Test artifacts
+playwright-report/
+test-results/
+__snapshots__/
+
+# Local user data produced by Studio
+.hds-backup/
+*.pptx
+*.pdf
+!docs/**/*.pptx
+!docs/**/*.pdf
