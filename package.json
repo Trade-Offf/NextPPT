@@ -8,13 +8,14 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter './apps/*' dev",
+    "dev": "concurrently --kill-others-on-fail --prefix-colors \"bgBlue.bold,bgGreen.bold\" --names \"API,WEB\" \"pnpm --filter @hds/api dev\" \"pnpm --filter @hds/web dev\"",
     "build": "pnpm --filter '@hds/protocol' build && pnpm --parallel --filter './apps/*' build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test"
   },
   "devDependencies": {
+    "concurrently": "^10.0.0",
     "typescript": "^5.5.4"
   }
 }
