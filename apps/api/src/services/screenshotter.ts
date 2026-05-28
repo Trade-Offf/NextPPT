@@ -24,8 +24,19 @@ export async function screenshotSlides(
 ): Promise<ScreenshotResult[]> {
   const { viewportWidth, viewportHeight, deviceScaleFactor, pageRange, onProgress } = opts;
 
+  // Prefer system Chrome to avoid puppeteer cache path issues.
+  // Falls back to puppeteer's bundled chrome if system Chrome not found.
+  const SYSTEM_CHROME_MAC = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  const SYSTEM_CHROME_LINUX = '/usr/bin/google-chrome-stable';
+  const { existsSync } = await import('node:fs');
+  const executablePath =
+    existsSync(SYSTEM_CHROME_MAC) ? SYSTEM_CHROME_MAC :
+    existsSync(SYSTEM_CHROME_LINUX) ? SYSTEM_CHROME_LINUX :
+    undefined; // let puppeteer auto-detect
+
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
