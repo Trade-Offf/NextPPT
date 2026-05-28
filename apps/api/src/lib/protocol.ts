@@ -5,7 +5,23 @@
  */
 
 export type ExportFormat = 'pptx' | 'pdf';
+export type ExportResolution = '1280x720@2x' | '1920x1080@2x' | '3840x2160@2x';
+export type ExportWatermark = 'on' | 'off';
 export type ExportPageRange = string;
+
+export interface ExportRequestMeta {
+  title?: string;
+  author?: string;
+  currentOrdinal?: number;
+}
+
+export interface ExportOptions {
+  format: ExportFormat;
+  resolution: ExportResolution;
+  watermark: ExportWatermark;
+  pageRange: ExportPageRange;
+  meta: ExportRequestMeta;
+}
 
 /** Parses e.g. "1,3-5,8" into sorted unique ordinals */
 export function parsePageRange(range: ExportPageRange, total: number): number[] {

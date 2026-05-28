@@ -1,6 +1,6 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { parsePageRange, exportFilename } from '../lib/protocol.js';
-import type { ExportOptions } from '@hds/protocol';
+import type { ExportOptions } from '../lib/protocol.js';
 import { screenshotSlides } from '../services/screenshotter.js';
 import { buildPptx } from '../services/pptxBuilder.js';
 import { buildPdf } from '../services/pdfBuilder.js';

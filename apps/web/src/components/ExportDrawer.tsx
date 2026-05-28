@@ -68,26 +68,44 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let downloadUrl = '';
+      let downloadFilename = '';
+      let buffer = '';
+
+      const handleSseLine = (line: string) => {
+        if (!line.startsWith('data:')) return;
+        try {
+          const data = JSON.parse(line.slice(5).trim()) as Record<string, unknown>;
+          if (typeof data['current'] === 'number') {
+            setProgress({ current: data['current'] as number, total: data['total'] as number });
+          }
+          if (typeof data['url'] === 'string') {
+            downloadUrl = data['url'] as string;
+            downloadFilename = (data['filename'] as string | undefined) ?? 'export';
+          }
+          if (typeof data['message'] === 'string') {
+            setError((data['message'] as string));
+          }
+        } catch { /* ignore malformed lines */ }
+      };
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const text = decoder.decode(value, { stream: true });
-        // Parse SSE lines
-        for (const line of text.split('\n')) {
-          if (line.startsWith('data:')) {
-            const data = JSON.parse(line.slice(5).trim());
-            if (data.current !== undefined) setProgress({ current: data.current, total: data.total });
-            if (data.url) downloadUrl = data.url;
-          }
-        }
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        lines.forEach(handleSseLine);
       }
+      // flush remaining
+      buffer.split('\n').forEach(handleSseLine);
 
       if (downloadUrl) {
         const a = document.createElement('a');
         a.href = downloadUrl;
-        a.download = '';
+        a.download = downloadFilename;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
       }
 
       onClose();
