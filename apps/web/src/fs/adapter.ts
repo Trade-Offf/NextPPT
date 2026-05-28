@@ -217,3 +217,21 @@ export function rebuildDeckHtml(
 
   return `<!doctype html>\n${doc.documentElement.outerHTML}`;
 }
+
+/**
+ * Like rebuildDeckHtml but restores blob: URLs back to original relative paths.
+ * Used for export so Puppeteer can resolve the actual files on disk.
+ */
+export function rebuildDeckHtmlForExport(
+  originalHtml: string,
+  slides: Pick<SlideState, 'id' | 'html'>[],
+  blobToPath: Map<string, string>,
+): string {
+  // Rebuild with current edits
+  let rebuilt = rebuildDeckHtml(originalHtml, slides);
+  // Replace any blob: URLs with their original relative paths
+  for (const [blobUrl, relPath] of blobToPath) {
+    rebuilt = rebuilt.split(blobUrl).join(relPath);
+  }
+  return rebuilt;
+}

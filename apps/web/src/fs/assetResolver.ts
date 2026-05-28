@@ -73,3 +73,10 @@ export function revokeAssetCache() {
   for (const url of blobCache.values()) URL.revokeObjectURL(url);
   blobCache.clear();
 }
+
+/** Returns a map of blob: URL → original relative path for export */
+export function getBlobToPathMap(): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const [rel, blobUrl] of blobCache) map.set(blobUrl, rel);
+  return map;
+}

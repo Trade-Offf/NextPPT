@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { ExportFormat, ExportResolution, ExportPageRange } from '@hds/protocol';
 import { useDeckStore } from '../store/deckStore.js';
+import { rebuildDeckHtmlForExport } from '../fs/adapter.js';
+import { getBlobToPathMap } from '../fs/assetResolver.js';
 
 /** Recursively append all files from a directory handle to FormData */
 async function appendDirFiles(
@@ -61,8 +63,9 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
         JSON.stringify({ title: meta?.title ?? 'deck', author: meta?.author ?? '' }),
       );
 
-      // Send the original HTML (with relative paths) so Puppeteer can resolve assets
-      const deckBlob = new Blob([rawHtml], { type: 'text/html' });
+      // Rebuild HTML from edited slides; restore blob: → relative paths for Puppeteer
+      const exportHtml = rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
+      const deckBlob = new Blob([exportHtml], { type: 'text/html' });
       formData.append('files', deckBlob, 'deck.html');
 
       // Send ALL files from the directory so Puppeteer can load images
