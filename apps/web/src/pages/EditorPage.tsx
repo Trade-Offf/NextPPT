@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useDeckStore } from '../store/deckStore.js';
-import { ScaledCanvas } from '../components/CanvasFrame.js';
+import { ScaledCanvas, type CanvasHandle } from '../components/CanvasFrame.js';
 import { SlideListPane } from '../components/SlideListPane.js';
 import { PropertyPane } from '../components/PropertyPane.js';
 import { ExportDrawer } from '../components/ExportDrawer.js';
@@ -23,6 +23,7 @@ export function EditorPage() {
   const [exportOpen, setExportOpen] = useState(false);
   const [containerWidth, setContainerWidth] = useState(800);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<CanvasHandle>(null);
 
   const currentSlide = slides.find((s) => s.id === currentSlideId);
 
@@ -37,15 +38,17 @@ export function EditorPage() {
   }, []);
 
   // Handle runtime messages from iframe
-  const handleMessage = useCallback((_msg: RuntimeMessage) => {
-    // Selection is handled inside ScaledCanvas component directly
-  }, []);
+  const handleMessage = useCallback((msg: RuntimeMessage) => {
+    // When iframe applies a patch, update store so re-render keeps the change
+    if (msg.type === 'patched' && currentSlideId) {
+      updateSlideHtml(currentSlideId, msg.html);
+    }
+  }, [currentSlideId, updateSlideHtml]);
 
-  // Patch from PropertyPane
+  // Forward patch from PropertyPane into the iframe
   const handlePatch = useCallback(
     (selector: string, ops: PatchOp[]) => {
-      // TODO: forward to iframe via ref; for now mark dirty
-      console.debug('patch', selector, ops);
+      canvasRef.current?.sendMessage({ type: 'patch', selector, ops });
     },
     [],
   );
@@ -129,6 +132,7 @@ export function EditorPage() {
         <main ref={canvasContainerRef} className="flex-1 min-w-0 bg-[#e8edf3] flex items-center justify-center p-6 overflow-auto canvas-host">
           <div className="shadow-lg rounded overflow-hidden">
             <ScaledCanvas
+              ref={canvasRef}
               sectionHtml={currentSlide.html}
               headHtml={headHtml}
               assetsBaseUrl={assetsBaseUrl}

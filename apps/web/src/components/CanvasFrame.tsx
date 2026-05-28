@@ -2,9 +2,13 @@
  * CanvasFrame – renders a single slide in a sandboxed iframe.
  * Communicates with editor-runtime via postMessage.
  */
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import type { HostMessage, RuntimeMessage } from '@hds/protocol';
 import { useDeckStore } from '../store/deckStore.js';
+
+export interface CanvasHandle {
+  sendMessage: (msg: HostMessage) => void;
+}
 
 // Inline the runtime script source (vite will inline via ?raw import)
 // For now we embed a minimal stub; the real runtime is compiled separately.
@@ -70,10 +74,13 @@ interface CanvasFrameProps {
   /** Base URL so relative assets resolve (file:// or blob:) */
   assetsBaseUrl: string;
   onMessage?: (msg: RuntimeMessage) => void;
+  /** Optional external ref to the iframe element */
+  iframeRef?: React.RefObject<HTMLIFrameElement | null>;
 }
 
-export function CanvasFrame({ sectionHtml, headHtml = '', assetsBaseUrl, onMessage }: CanvasFrameProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+export function CanvasFrame({ sectionHtml, headHtml = '', assetsBaseUrl, onMessage, iframeRef: externalRef }: CanvasFrameProps) {
+  const internalRef = useRef<HTMLIFrameElement>(null);
+  const iframeRef = externalRef ?? internalRef;
   const onMessageRef = useRef(onMessage);
   onMessageRef.current = onMessage;
 
@@ -133,44 +140,52 @@ ${headHtml}
 }
 
 /** Scale canvas to fill container width, maintain 16:9 */
-export function ScaledCanvas(props: CanvasFrameProps & { containerWidth: number }) {
-  const { containerWidth, ...rest } = props;
+export const ScaledCanvas = forwardRef<CanvasHandle, CanvasFrameProps & { containerWidth: number }>(
+  function ScaledCanvas(props, ref) {
+    const { containerWidth, ...rest } = props;
+    const scale = containerWidth / 1280;
+    const setSelection = useDeckStore((s) => s.setSelection);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const scale = containerWidth / 1280;
-  const setSelection = useDeckStore((s) => s.setSelection);
+    useImperativeHandle(ref, () => ({
+      sendMessage: (msg: HostMessage) => {
+        iframeRef.current?.contentWindow?.postMessage(msg, '*');
+      },
+    }));
 
-  const handleMsg = useCallback((msg: RuntimeMessage) => {
-    if (msg.type === 'select') {
-      setSelection({
-        selector: msg.selector,
-        tagName: msg.tagName,
-        bbox: msg.bbox as unknown as DOMRect,
-        styleSnapshot: msg.styleSnapshot,
-      });
-    }
-    if (msg.type === 'clear-select') setSelection(null);
-    props.onMessage?.(msg);
-  }, [props, setSelection]);
+    const handleMsg = useCallback((msg: RuntimeMessage) => {
+      if (msg.type === 'select') {
+        setSelection({
+          selector: msg.selector,
+          tagName: msg.tagName,
+          bbox: msg.bbox as unknown as DOMRect,
+          styleSnapshot: msg.styleSnapshot,
+        });
+      }
+      if (msg.type === 'clear-select') setSelection(null);
+      props.onMessage?.(msg);
+    }, [props, setSelection]);
 
-  return (
-    <div
-      style={{
-        width: containerWidth,
-        height: Math.round(containerWidth * (720 / 1280)),
-        overflow: 'hidden',
-        position: 'relative',
-      }}
-    >
+    return (
       <div
         style={{
-          transform: `scale(${scale})`,
-          transformOrigin: 'top left',
-          width: 1280,
-          height: 720,
+          width: containerWidth,
+          height: Math.round(containerWidth * (720 / 1280)),
+          overflow: 'hidden',
+          position: 'relative',
         }}
       >
-        <CanvasFrame {...rest} onMessage={handleMsg} />
+        <div
+          style={{
+            transform: `scale(${scale})`,
+            transformOrigin: 'top left',
+            width: 1280,
+            height: 720,
+          }}
+        >
+          <CanvasFrame {...rest} iframeRef={iframeRef} onMessage={handleMsg} />
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
