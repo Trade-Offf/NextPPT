@@ -2,13 +2,19 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 import { exportHandler } from './routes/export.js';
+import { assetRoutes } from './routes/assets.js';
 
 const app = Fastify({ logger: true });
 
-await app.register(cors, { origin: ['http://localhost:5173', 'http://localhost:4173'] });
+await app.register(cors, {
+  origin: ['http://localhost:5173', 'http://localhost:4173'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'X-HDS-Trace-Id'],
+});
 await app.register(multipart, { limits: { fileSize: 200 * 1024 * 1024 } }); // 200 MB
 
 app.post('/v1/export', exportHandler);
+await app.register(assetRoutes);
 
 app.get('/healthz', async () => ({ ok: true }));
 

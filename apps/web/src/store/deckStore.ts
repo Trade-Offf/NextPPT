@@ -23,6 +23,8 @@ export interface DeckStore {
   rawHtml: string; // full deck HTML string
 
   // ── Parsed deck ──────────────────────────────────────────
+  /** Serialised <head> content from the original document (styles, fonts) */
+  headHtml: string;
   meta: DeckMeta | null;
   slides: SlideState[];
 
@@ -37,7 +39,7 @@ export interface DeckStore {
   lastSavedAt: number | null;
 
   // ── Actions ──────────────────────────────────────────────
-  openDirectory: (handle: FileSystemDirectoryHandle, fileName: string, html: string, meta: DeckMeta, slides: SlideState[]) => void;
+  openDirectory: (handle: FileSystemDirectoryHandle, fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[]) => void;
   closeDirectory: () => void;
 
   setSlides: (slides: SlideState[]) => void;
@@ -58,6 +60,7 @@ export const useDeckStore = create<DeckStore>((set) => ({
   dirHandle: null,
   deckFileName: 'deck.html',
   rawHtml: '',
+  headHtml: '',
   meta: null,
   slides: [],
   currentSlideId: null,
@@ -67,11 +70,11 @@ export const useDeckStore = create<DeckStore>((set) => ({
   isSaving: false,
   lastSavedAt: null,
 
-  openDirectory: (handle, fileName, html, meta, slides) =>
-    set({ dirHandle: handle, deckFileName: fileName, rawHtml: html, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false }),
+  openDirectory: (handle, fileName, html, headHtml, meta, slides) =>
+    set({ dirHandle: handle, deckFileName: fileName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false }),
 
   closeDirectory: () =>
-    set({ dirHandle: null, rawHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
+    set({ dirHandle: null, rawHtml: '', headHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
 
   setSlides: (slides) => set({ slides }),
 

@@ -82,7 +82,7 @@ export async function findDeckFile(
   return null;
 }
 
-export function parseDeck(html: string): { meta: DeckMeta; slides: SlideState[] } {
+export function parseDeck(html: string): { meta: DeckMeta; headHtml: string; slides: SlideState[] } {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const sections = Array.from(doc.querySelectorAll<HTMLElement>(SLIDE_SELECTOR));
 
@@ -96,6 +96,9 @@ export function parseDeck(html: string): { meta: DeckMeta; slides: SlideState[] 
     return { id, ordinal, html: el.outerHTML, thumbnail: null };
   });
 
+  // Extract all head content so iframe can inherit styles and fonts
+  const headHtml = doc.head.innerHTML;
+
   const meta: DeckMeta = {
     version: 1,
     title: doc.querySelector('title')?.textContent ?? undefined,
@@ -103,7 +106,7 @@ export function parseDeck(html: string): { meta: DeckMeta; slides: SlideState[] 
     assets: [],
   };
 
-  return { meta, slides };
+  return { meta, headHtml, slides };
 }
 
 // ─── Writing deck ─────────────────────────────────────────────────────────

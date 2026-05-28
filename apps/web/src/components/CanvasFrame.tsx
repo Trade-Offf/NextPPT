@@ -65,23 +65,40 @@ const RUNTIME_STUB = `
 interface CanvasFrameProps {
   /** Outer HTML of the <section class="slide"> */
   sectionHtml: string;
+  /** Full <head> innerHTML from the original document (styles, fonts, etc.) */
+  headHtml?: string;
   /** Base URL so relative assets resolve (file:// or blob:) */
   assetsBaseUrl: string;
   onMessage?: (msg: RuntimeMessage) => void;
 }
 
-export function CanvasFrame({ sectionHtml, assetsBaseUrl, onMessage }: CanvasFrameProps) {
+export function CanvasFrame({ sectionHtml, headHtml = '', assetsBaseUrl, onMessage }: CanvasFrameProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const onMessageRef = useRef(onMessage);
   onMessageRef.current = onMessage;
 
-  // Build srcdoc
+  // Build srcdoc – inject original head so styles/fonts are preserved
   const srcdoc = `<!doctype html><html><head>
 <meta charset="UTF-8">
 <base href="${assetsBaseUrl}">
+${headHtml}
 <style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{width:1280px;height:720px;overflow:hidden;background:#fff;}
+  html,body{
+    width:1280px;height:720px;
+    overflow:hidden;
+    /* Keep body constraints but don't override slide bg */
+    margin:0;padding:0;
+    scroll-snap-type:none !important;
+  }
+  /* Remove body-level centering/gap from original layout */
+  body{display:block !important;gap:0 !important;padding:0 !important;}
+  /* Ensure the extracted slide fills the viewport */
+  section.slide,section[class~="slide"]{
+    width:1280px !important;
+    min-height:720px !important;
+    max-height:720px !important;
+    flex-shrink:0 !important;
+  }
 </style>
 </head><body>${sectionHtml}<script>${RUNTIME_STUB}<\/script></body></html>`;
 
@@ -118,6 +135,7 @@ export function CanvasFrame({ sectionHtml, assetsBaseUrl, onMessage }: CanvasFra
 /** Scale canvas to fill container width, maintain 16:9 */
 export function ScaledCanvas(props: CanvasFrameProps & { containerWidth: number }) {
   const { containerWidth, ...rest } = props;
+
   const scale = containerWidth / 1280;
   const setSelection = useDeckStore((s) => s.setSelection);
 

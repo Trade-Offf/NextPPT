@@ -30,4 +30,5 @@ export interface AssetEntry {
 /** HDS requires each slide to be a <section class="slide"> at 1280×720 */
 export const SLIDE_WIDTH = 1280;
 export const SLIDE_HEIGHT = 720;
-export const SLIDE_SELECTOR = 'section.slide';
+/** Matches <section class="slide"> and <section class="slide p1 ..."> */
+export const SLIDE_SELECTOR = 'section[class~="slide"]';

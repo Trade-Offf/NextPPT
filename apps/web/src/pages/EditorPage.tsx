@@ -13,6 +13,7 @@ export function EditorPage() {
   const dirHandle = useDeckStore((s) => s.dirHandle);
   const deckFileName = useDeckStore((s) => s.deckFileName);
   const rawHtml = useDeckStore((s) => s.rawHtml);
+  const headHtml = useDeckStore((s) => s.headHtml);
   const isDirty = useDeckStore((s) => s.isDirty);
   const updateSlideHtml = useDeckStore((s) => s.updateSlideHtml);
   const setRawHtml = useDeckStore((s) => s.setRawHtml);
@@ -91,8 +92,9 @@ export function EditorPage() {
     );
   }
 
-  // Derive blob: URL as base for assets (simplest cross-origin solution)
-  const assetsBaseUrl = dirHandle ? '/' : '';
+  // Assets are served through /v1/asset?path=... proxy (avoids file:// null-origin restriction)
+  // The proxy is only available when the API is running; fallback to empty base otherwise.
+  const assetsBaseUrl = '/v1/asset-base/';
 
   return (
     <div className="flex flex-col h-full">
@@ -128,6 +130,7 @@ export function EditorPage() {
           <div className="shadow-lg rounded overflow-hidden">
             <ScaledCanvas
               sectionHtml={currentSlide.html}
+              headHtml={headHtml}
               assetsBaseUrl={assetsBaseUrl}
               containerWidth={containerWidth}
               onMessage={handleMessage}

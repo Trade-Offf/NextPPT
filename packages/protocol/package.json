@@ -5,6 +5,9 @@
   "description": "Shared types for HDS Slide Protocol, postMessage protocol, and Export API",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit"

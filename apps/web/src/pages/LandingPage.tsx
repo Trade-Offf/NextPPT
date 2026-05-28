@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useDeckStore } from '../store/deckStore.js';
 import { pickDirectory, recallHandle, verifyPermission, findDeckFile, parseDeck } from '../fs/adapter.js';
+import { resolveAssetsInHtml, revokeAssetCache } from '../fs/assetResolver.js';
 
 export function LandingPage() {
   const openDirectory = useDeckStore((s) => s.openDirectory);
@@ -18,8 +19,21 @@ export function LandingPage() {
       if (!result) throw new Error('未找到 HTML 幻灯片文件。请确认文件夹中包含带有 <section class="slide"> 的 HTML 文件。');
 
       const { fileName, html } = result;
-      const { meta, slides } = parseDeck(html);
-      openDirectory(handle, fileName, html, meta, slides);
+      const { meta, headHtml: rawHead, slides: rawSlides } = parseDeck(html);
+
+      // Revoke previous session's blob URLs
+      revokeAssetCache();
+
+      // Resolve all relative assets to blob: URLs so the srcdoc iframe can load them
+      const resolvedSlides = await Promise.all(
+        rawSlides.map(async (slide) => ({
+          ...slide,
+          html: await resolveAssetsInHtml(slide.html, handle),
+        })),
+      );
+      const headHtml = await resolveAssetsInHtml(rawHead, handle);
+
+      openDirectory(handle, fileName, html, headHtml, meta, resolvedSlides);
     } catch (err) {
       setError(String(err));
     } finally {
