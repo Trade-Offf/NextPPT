@@ -1,6 +1,5 @@
 import puppeteer from 'puppeteer';
-import { parsePageRange } from '@hds/protocol';
-import { SLIDE_SELECTOR } from '@hds/protocol';
+import { parsePageRange, SLIDE_SELECTOR } from '../lib/protocol.js';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
