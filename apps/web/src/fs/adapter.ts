@@ -53,6 +53,36 @@ export async function pickDirectory(): Promise<FileSystemDirectoryHandle> {
   return handle;
 }
 
+/** Single-file mode: pick one self-contained .html file (no folder). */
+export async function pickFile(): Promise<{ fileName: string; html: string }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [handle] = (await (window as any).showOpenFilePicker({
+    types: [{ description: 'HTML', accept: { 'text/html': ['.html', '.htm'] } }],
+    multiple: false,
+  })) as FileSystemFileHandle[];
+  const file = await handle.getFile();
+  const html = await file.text();
+  return { fileName: handle.name, html };
+}
+
+/** Single-file mode: prompt "save as" and write the working copy, returning its handle. */
+export async function saveAsNewFile(suggestedName: string, html: string): Promise<FileSystemFileHandle> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handle = (await (window as any).showSaveFilePicker({
+    suggestedName,
+    types: [{ description: 'HTML', accept: { 'text/html': ['.html'] } }],
+  })) as FileSystemFileHandle;
+  await writeFileHandle(handle, html);
+  return handle;
+}
+
+/** Single-file mode: write to an already-acquired file handle (no backup dir available). */
+export async function writeFileHandle(handle: FileSystemFileHandle, html: string): Promise<void> {
+  const writable = await handle.createWritable();
+  await writable.write(html);
+  await writable.close();
+}
+
 export async function verifyPermission(handle: FileSystemDirectoryHandle): Promise<boolean> {
   // queryPermission / requestPermission are part of File System Access API (Chrome-only)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -204,16 +234,22 @@ export function rebuildDeckHtml(
   slides: Pick<SlideState, 'id' | 'html'>[],
 ): string {
   const doc = new DOMParser().parseFromString(originalHtml, 'text/html');
-  const sections = Array.from(doc.querySelectorAll<HTMLElement>(SLIDE_SELECTOR));
+  const oldSections = Array.from(doc.querySelectorAll<HTMLElement>(SLIDE_SELECTOR));
+  const first = oldSections[0];
+  if (!first || !first.parentElement) return `<!doctype html>\n${doc.documentElement.outerHTML}`;
+  const parent = first.parentElement;
 
-  slides.forEach(({ id, html }, idx) => {
-    const target = sections.find((el) => el.getAttribute('data-page-id') === id) ?? sections[idx];
-    if (!target) return;
+  // Rebuild the slide list in order (handles add / remove / reorder).
+  const newNodes: Element[] = [];
+  for (const { html } of slides) {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
-    const newSection = tmp.firstElementChild;
-    if (newSection) target.replaceWith(newSection);
-  });
+    const node = tmp.firstElementChild;
+    if (node) newNodes.push(node);
+  }
+
+  for (const node of newNodes) parent.insertBefore(node, first);
+  oldSections.forEach((s) => s.remove());
 
   return `<!doctype html>\n${doc.documentElement.outerHTML}`;
 }

@@ -65,6 +65,8 @@ export interface SelectMessage {
   bbox: SerializedDOMRect;
   /** Computed style snapshot for property panel pre-fill */
   styleSnapshot: StyleSnapshot;
+  /** Selected element attributes relevant to the property panel (href, target, …) */
+  attrs?: Record<string, string>;
 }
 
 export interface ClearSelectMessage {

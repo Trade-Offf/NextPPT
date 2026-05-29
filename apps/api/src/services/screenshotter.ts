@@ -49,6 +49,12 @@ export async function screenshotSlides(
   try {
     const page = await browser.newPage();
 
+    // tsx/esbuild wraps named functions with a `__name(...)` helper. When our
+    // page.evaluate callbacks are serialized and run in the browser, that helper
+    // is undefined → "ReferenceError: __name is not defined". Define a no-op in
+    // every document (string form bypasses esbuild compilation) so evaluates work.
+    await page.evaluateOnNewDocument('globalThis.__name = globalThis.__name || ((fn) => fn);');
+
     await page.setViewport({ width: viewportWidth, height: viewportHeight, deviceScaleFactor });
 
     const fileUrl = `file://${htmlPath}`;
@@ -67,17 +73,56 @@ export async function screenshotSlides(
       `,
     });
 
-    // Wait for MathJax/KaTeX/Mermaid
+    // ── Mermaid bootstrap (TRD §6.5.3) ──────────────────────────────────────
+    // The deck may contain raw Mermaid source that was never rendered to SVG
+    // (e.g. authored by an AI tool). Render any unrendered nodes here.
+    await page.evaluate(async () => {
+      interface MermaidApi {
+        initialize: (cfg: Record<string, unknown>) => void;
+        run: (opts: { nodes: Element[] }) => Promise<void>;
+      }
+      const w = window as unknown as { mermaid?: MermaidApi };
+      const SEL =
+        'pre.mermaid:not([data-mermaid-rendered]):not([data-mermaid-error]),' +
+        'div.mermaid:not([data-mermaid-rendered]):not([data-mermaid-error]),' +
+        '[data-mermaid]:not([data-mermaid-rendered]):not([data-mermaid-error])';
+      const nodes = Array.from(document.querySelectorAll<HTMLElement>(SEL));
+      if (!nodes.length) return;
+
+      try {
+        if (!w.mermaid) {
+          // Non-literal URL so the bundler/TS treats this as a runtime import.
+          const cdn = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+          const mod = await import(/* @vite-ignore */ cdn);
+          const api = mod.default as MermaidApi;
+          api.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+          w.mermaid = api;
+        }
+        await w.mermaid!.run({ nodes });
+        nodes.forEach((n) => n.setAttribute('data-mermaid-rendered', 'true'));
+      } catch (err) {
+        nodes.forEach((n) => n.setAttribute('data-mermaid-error', String(err)));
+      }
+    });
+
+    // Wait until every Mermaid node is either rendered or marked errored.
     await page.evaluate(() => {
       return new Promise<void>((resolve) => {
-        // KaTeX renders synchronously; Mermaid may be async
-        if ((window as unknown as { mermaid?: { run?: () => Promise<void> } }).mermaid?.run) {
-          void (window as unknown as { mermaid: { run: () => Promise<void> } }).mermaid.run().then(() => resolve());
-        } else {
-          resolve();
-        }
+        const deadline = Date.now() + 8000;
+        const check = () => {
+          const all = document.querySelectorAll('pre.mermaid, div.mermaid, [data-mermaid]');
+          const done = Array.from(all).every(
+            (el) => el.hasAttribute('data-mermaid-rendered') || el.hasAttribute('data-mermaid-error'),
+          );
+          if (done || Date.now() > deadline) resolve();
+          else requestAnimationFrame(check);
+        };
+        check();
       });
     });
+
+    // Wait for web fonts (KaTeX/Google Fonts) to settle before capture.
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
 
     // Get all slide elements by index (more reliable than nth-child selectors)
     const allSlideHandles = await page.$$(SLIDE_SELECTOR);

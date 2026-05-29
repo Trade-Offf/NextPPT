@@ -68,6 +68,14 @@ export async function resolveAssetsInHtml(
   return result;
 }
 
+/**
+ * Register a freshly written asset so that exports can map its blob: URL back to
+ * the on-disk relative path. Used after replacing an image (F-08).
+ */
+export function registerBlobPath(relativePath: string, blobUrl: string) {
+  blobCache.set(relativePath, blobUrl);
+}
+
 /** Revoke all cached blob URLs (call on directory close). */
 export function revokeAssetCache() {
   for (const url of blobCache.values()) URL.revokeObjectURL(url);

@@ -1,23 +1,266 @@
 @import "tailwindcss";
 
-/* ── HDS Design Tokens ──────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   HDS · macOS-flavoured design tokens
+   ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  --ink: #0c1e3c;
-  --cobalt: #1d4ed8;
-  --cobalt-lt: #eff6ff;
-  --slate: #475569;
-  --silver: #94a3b8;
-  --rule: #e2e8f0;
-  --paper: #fafbfc;
+  /* System palette (macOS Aqua, light) */
+  --system-blue: #007aff;
+  --system-blue-press: #0063d1;
+
+  /* Label colors */
+  --label: #1d1d1f;
+  --secondary-label: #51515c;
+  --tertiary-label: #8e8e93;
+
+  /* Surfaces */
+  --window-bg: #ececec;
+  --content-bg: #ffffff;
+  --control-bg: #f5f5f7;
+  --editor-bg: #1e1e1e;
+  --rule: #e3e3e6;
+  --separator: #d8d8dc;
+  --cobalt-lt: #eaf3ff;
+
+  /* Vibrancy (translucent sidebars/toolbars) */
+  --vibrancy-sidebar: rgba(246, 246, 248, 0.72);
+  --vibrancy-toolbar: rgba(250, 250, 252, 0.8);
+  --vibrancy-panel: rgba(248, 248, 250, 0.78);
+
+  /* Legacy aliases kept for any remaining references */
+  --ink: var(--label);
+  --cobalt: var(--system-blue);
+  --slate: var(--secondary-label);
+  --silver: var(--tertiary-label);
+  --paper: var(--control-bg);
+
+  --radius-window: 12px;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --system-blue: #0a84ff;
+    --system-blue-press: #0a6fd6;
+    --label: #f5f5f7;
+    --secondary-label: #aeaeb2;
+    --tertiary-label: #8e8e93;
+    --window-bg: #1c1c1e;
+    --content-bg: #242426;
+    --control-bg: #2c2c2e;
+    --editor-bg: #1e1e1e;
+    --rule: #38383a;
+    --separator: #48484a;
+    --cobalt-lt: #1a2b40;
+    --vibrancy-sidebar: rgba(40, 40, 43, 0.7);
+    --vibrancy-toolbar: rgba(36, 36, 38, 0.78);
+    --vibrancy-panel: rgba(38, 38, 41, 0.76);
+    color-scheme: dark;
+  }
+}
+
+html, body, #root {
+  height: 100%;
 }
 
 body {
-  background: #f1f5f9;
-  font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+  background: var(--window-bg);
+  color: var(--label);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    'Inter', 'Noto Sans SC', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Prevent default slide overflows from expanding body */
 .canvas-host {
   contain: strict;
 }
+
+/* ── Traffic lights ──────────────────────────────────────────────────────── */
+.hds-traffic-lights {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.tl {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  display: inline-block;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18);
+}
+.tl-red { background: #ff5f57; }
+.tl-amber { background: #febc2e; }
+.tl-green { background: #28c840; }
+
+/* ── Unified toolbar (vibrancy) ──────────────────────────────────────────── */
+.hds-toolbar {
+  background: var(--vibrancy-toolbar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--separator);
+}
+
+/* ── Sidebar / panel vibrancy ────────────────────────────────────────────── */
+.hds-sidebar {
+  background: var(--vibrancy-sidebar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-right: 0.5px solid var(--separator);
+}
+.hds-panel {
+  background: var(--vibrancy-panel);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-left: 0.5px solid var(--separator);
+}
+
+/* ── Canvas stage ────────────────────────────────────────────────────────── */
+.hds-canvas-stage {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.03), transparent 70%),
+    var(--window-bg);
+}
+.hds-canvas-card {
+  border-radius: 10px;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.06),
+    0 8px 28px rgba(0, 0, 0, 0.16);
+  background: #fff;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.hds-btn {
+  border-radius: 7px;
+  border: 0.5px solid var(--separator);
+  background: var(--content-bg);
+  color: var(--label);
+  box-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.06);
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+.hds-btn:hover:not(:disabled) { background: var(--control-bg); }
+.hds-btn:active:not(:disabled) { background: var(--separator); }
+
+.hds-btn-primary {
+  border-radius: 7px;
+  background: var(--system-blue);
+  color: #fff;
+  border: 0.5px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 122, 255, 0.35);
+  transition: background 0.12s ease;
+}
+.hds-btn-primary:hover:not(:disabled) { background: var(--system-blue-press); }
+.hds-btn-primary:active:not(:disabled) { background: var(--system-blue-press); }
+.hds-btn-primary:disabled { opacity: 0.5; }
+
+/* ── Segmented control ───────────────────────────────────────────────────── */
+.hds-segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--control-bg);
+  border: 0.5px solid var(--separator);
+  gap: 2px;
+}
+.hds-segment {
+  padding: 3px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  color: var(--secondary-label);
+  transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+.hds-segment:hover { color: var(--label); }
+.hds-segment.is-active {
+  background: var(--content-bg);
+  color: var(--label);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Window chrome (landing) ─────────────────────────────────────────────── */
+.hds-landing-bg {
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(0, 122, 255, 0.12), transparent 60%),
+    linear-gradient(180deg, #e9eef5 0%, #eef1f6 100%);
+}
+@media (prefers-color-scheme: dark) {
+  .hds-landing-bg {
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(10, 132, 255, 0.18), transparent 60%),
+      linear-gradient(180deg, #15161a 0%, #1b1c20 100%);
+  }
+}
+.hds-window {
+  background: var(--content-bg);
+  border-radius: var(--radius-window);
+  border: 0.5px solid var(--separator);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.05),
+    0 24px 60px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+}
+.hds-window-titlebar {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  position: relative;
+  background: var(--vibrancy-toolbar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--separator);
+}
+.hds-window-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary-label);
+  pointer-events: none;
+}
+
+/* ── Drawer slide-in ─────────────────────────────────────────────────────── */
+.hds-drawer {
+  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.22);
+  animation: hds-slide-in 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+}
+@keyframes hds-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* ── macOS overlay scrollbars ────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.28) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.26);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.4); background-clip: content-box; }
+@media (prefers-color-scheme: dark) {
+  * { scrollbar-color: rgba(255, 255, 255, 0.3) transparent; }
+  *::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.28); background-clip: content-box; }
+  *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.45); background-clip: content-box; }
+}
+
+/* ── macOS-style form controls ───────────────────────────────────────────── */
+input[type="text"], input[type="url"], input[type="number"], textarea, select {
+  background: var(--content-bg);
+  color: var(--label);
+}
+input[type="checkbox"], input[type="radio"] { accent-color: var(--system-blue); }
+input[type="range"] { accent-color: var(--system-blue); }

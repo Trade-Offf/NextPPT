@@ -149,26 +149,22 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
       <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
 
       {/* Drawer */}
-      <aside className="fixed right-0 top-0 h-full w-80 bg-white border-l border-[var(--rule)] z-50 flex flex-col shadow-xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--rule)]">
-          <h2 className="text-base font-semibold text-[var(--ink)]">导出</h2>
-          <button onClick={onClose} className="text-[var(--silver)] hover:text-[var(--ink)]">✕</button>
+      <aside className="hds-panel hds-drawer fixed right-0 top-0 h-full w-80 z-50 flex flex-col">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--separator)]">
+          <h2 className="text-base font-semibold text-[var(--label)]">导出</h2>
+          <button onClick={onClose} className="text-[var(--tertiary-label)] hover:text-[var(--label)]">✕</button>
         </div>
 
         <div className="flex-1 overflow-y-auto flex flex-col gap-5 p-5">
           {/* Format */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-[var(--slate)]">格式</span>
-            <div className="flex gap-2">
+            <span className="text-xs font-medium text-[var(--secondary-label)]">格式</span>
+            <div className="hds-segmented w-full">
               {(['pptx', 'pdf'] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setFormat(f)}
-                  className={`flex-1 py-2 rounded-md border text-sm font-medium transition-colors ${
-                    format === f
-                      ? 'bg-[var(--cobalt)] text-white border-[var(--cobalt)]'
-                      : 'border-[var(--rule)] text-[var(--slate)] hover:border-[var(--cobalt)]'
-                  }`}
+                  className={`hds-segment flex-1 ${format === f ? 'is-active' : ''}`}
                 >
                   {f.toUpperCase()}
                 </button>
@@ -184,9 +180,9 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
               onChange={(e) => setResolution(e.target.value as ExportResolution)}
               className="border border-[var(--rule)] rounded-md px-3 py-2 text-sm"
             >
-              <option value="1280x720@2x">标准 1280×720@2x</option>
-              <option value="1920x1080@2x" disabled>高清 1920×1080@2x（Pro）</option>
-              <option value="3840x2160@2x" disabled>4K（Pro）</option>
+              <option value="1280x720@2x">标准 · 2560×1440</option>
+              <option value="1920x1080@2x">高清 · 3840×2160</option>
+              <option value="3840x2160@2x">超清 4K · 5120×2880</option>
             </select>
           </label>
 
@@ -255,7 +251,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
           <button
             onClick={handleExport}
             disabled={exporting}
-            className="w-full py-2.5 rounded-lg bg-[var(--cobalt)] text-white text-sm font-medium disabled:opacity-50 hover:bg-blue-700 transition-colors"
+            className="hds-btn-primary w-full py-2.5 text-sm font-medium"
           >
             {exporting ? '导出中…' : `开始导出 ${format.toUpperCase()}`}
           </button>

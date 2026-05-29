@@ -4,67 +4,12 @@
  */
 import { useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import type { HostMessage, RuntimeMessage } from '@hds/protocol';
+import RUNTIME_SOURCE from 'virtual:editor-runtime';
 import { useDeckStore } from '../store/deckStore.js';
 
 export interface CanvasHandle {
   sendMessage: (msg: HostMessage) => void;
 }
-
-// Inline the runtime script source (vite will inline via ?raw import)
-// For now we embed a minimal stub; the real runtime is compiled separately.
-const RUNTIME_STUB = `
-(function(){
-  var TARGET=window.parent;
-  function send(m){TARGET.postMessage(m,'*');}
-  function buildSel(el){
-    if(el===document.body)return 'body';
-    var parts=[];var cur=el;
-    while(cur&&cur!==document.body){
-      var tag=cur.tagName.toLowerCase();var parent=cur.parentElement;if(!parent)break;
-      var sibs=Array.from(parent.children).filter(function(c){return c.tagName===cur.tagName;});
-      var idx=sibs.indexOf(cur)+1;
-      parts.unshift(sibs.length===1?tag:tag+':nth-of-type('+idx+')');
-      cur=parent;
-    }
-    return parts.join(' > ');
-  }
-  var overlay=null;
-  function showOverlay(el){
-    if(overlay)overlay.remove();
-    overlay=document.createElement('div');
-    var r=el.getBoundingClientRect();
-    Object.assign(overlay.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',border:'2px solid #1d4ed8',borderRadius:'2px',pointerEvents:'none',zIndex:'99999',boxSizing:'border-box'});
-    document.body.appendChild(overlay);
-  }
-  function clearOverlay(){if(overlay){overlay.remove();overlay=null;}}
-  function styleSnapshot(el){var cs=getComputedStyle(el);return{fontSize:cs.fontSize,fontWeight:cs.fontWeight,color:cs.color,textAlign:cs.textAlign,textDecoration:cs.textDecoration};}
-  function applyPatch(sel,ops){
-    var el=document.querySelector(sel);if(!el)return false;
-    ops.forEach(function(op){
-      if(op.kind==='text'){el.textContent=op.value;}
-      else if(op.kind==='attr'){op.value===null?el.removeAttribute(op.name):el.setAttribute(op.name,op.value);}
-      else if(op.kind==='style'){op.value===null?el.style.removeProperty(op.name):el.style.setProperty(op.name,op.value);}
-      else if(op.kind==='class'){(op.add||[]).forEach(function(c){el.classList.add(c);});(op.remove||[]).forEach(function(c){el.classList.remove(c);});}
-    });return true;
-  }
-  function serialize(){return(document.querySelector('section.slide')||document.body).outerHTML;}
-  window.addEventListener('message',function(evt){
-    var msg=evt.data;if(!msg||!msg.type)return;
-    if(msg.type==='init'){document.body.innerHTML=msg.sectionHtml;send({type:'ready'});return;}
-    if(msg.type==='patch'){var ok=applyPatch(msg.selector,msg.ops);ok?send({type:'patched',html:serialize()}):send({type:'error',code:'PATCH_SELECTOR_MISS',message:'not found: '+msg.selector});return;}
-    if(msg.type==='request-html'){send({type:'response-html',html:serialize()});return;}
-  });
-  document.addEventListener('click',function(e){
-    var target=e.target;
-    if(!target||target===document.body){clearOverlay();send({type:'clear-select'});return;}
-    e.preventDefault();e.stopPropagation();
-    showOverlay(target);
-    var r=target.getBoundingClientRect();
-    send({type:'select',selector:buildSel(target),tagName:target.tagName.toLowerCase(),bbox:{x:r.x,y:r.y,width:r.width,height:r.height,top:r.top,left:r.left,bottom:r.bottom,right:r.right},styleSnapshot:styleSnapshot(target)});
-  },true);
-  send({type:'ready'});
-})();
-`;
 
 interface CanvasFrameProps {
   /** Outer HTML of the <section class="slide"> */
@@ -82,7 +27,7 @@ export function CanvasFrame({ sectionHtml, headHtml = '', assetsBaseUrl, onMessa
   const internalRef = useRef<HTMLIFrameElement>(null);
   const iframeRef = externalRef ?? internalRef;
   const onMessageRef = useRef(onMessage);
-  onMessageRef.current = onMessage;
+  useEffect(() => { onMessageRef.current = onMessage; });
 
   // Build srcdoc – inject original head so styles/fonts are preserved
   const srcdoc = `<!doctype html><html><head>
@@ -107,7 +52,7 @@ ${headHtml}
     flex-shrink:0 !important;
   }
 </style>
-</head><body>${sectionHtml}<script>${RUNTIME_STUB}<\/script></body></html>`;
+</head><body>${sectionHtml}<script data-hds-runtime>${RUNTIME_SOURCE}${'<'}/script></body></html>`;
 
   useEffect(() => {
     const handler = (evt: MessageEvent) => {
@@ -160,6 +105,7 @@ export const ScaledCanvas = forwardRef<CanvasHandle, CanvasFrameProps & { contai
           tagName: msg.tagName,
           bbox: msg.bbox as unknown as DOMRect,
           styleSnapshot: msg.styleSnapshot,
+          attrs: msg.attrs,
         });
       }
       if (msg.type === 'clear-select') setSelection(null);

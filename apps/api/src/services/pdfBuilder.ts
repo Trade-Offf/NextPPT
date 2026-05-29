@@ -18,10 +18,8 @@ export async function buildPdf(
 ): Promise<string> {
   const { tmpDir } = opts;
 
-  // Try puppeteer PDF if all screenshots have a common source page
-  // (For simplicity, build PDF by re-using an in-memory concatenation approach)
-  const { default: pdfLib } = await import('pdf-lib');
-  const { PDFDocument } = pdfLib;
+  // pdf-lib is CJS and exposes named exports; there is no usable default export.
+  const { PDFDocument } = await import('pdf-lib');
 
   const pdf = await PDFDocument.create();
 

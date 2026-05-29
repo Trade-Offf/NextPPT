@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useDeckStore } from '../store/deckStore.js';
 import type { PatchOp } from '@hds/protocol';
 
@@ -11,24 +11,21 @@ const TEXT_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'li'
 export function PropertyPane({ onPatch }: PropertyPaneProps) {
   const selection = useDeckStore((s) => s.selection);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Sync textarea content when selection changes
-  useEffect(() => {
-    if (textAreaRef.current && selection) {
-      // Content filled by caller; keep as-is
-    }
-  }, [selection?.selector]);
+  const [dragOver, setDragOver] = useState(false);
 
   if (!selection) {
     return (
-      <aside className="w-[280px] shrink-0 bg-white border-l border-[var(--rule)] p-4 flex items-center justify-center">
-        <p className="text-[var(--silver)] text-sm text-center">点击页面元素<br />选中后可编辑属性</p>
+      <aside className="hds-panel w-[300px] shrink-0 p-4 flex items-center justify-center">
+        <p className="text-[var(--tertiary-label)] text-sm text-center leading-relaxed">点击页面元素选中<br />双击文本可直接改字</p>
       </aside>
     );
   }
 
-  const { selector, tagName, styleSnapshot } = selection;
+  const { selector, tagName, styleSnapshot, attrs } = selection;
   const isTextEl = TEXT_TAGS.has(tagName);
+  const deco = styleSnapshot.textDecoration ?? '';
+  const hasUnderline = deco.includes('underline');
+  const hasLineThrough = deco.includes('line-through');
 
   const patch = (ops: PatchOp[]) => onPatch(selector, ops);
 
@@ -37,14 +34,27 @@ export function PropertyPane({ onPatch }: PropertyPaneProps) {
     if (!isNaN(n) && n > 0) patch([{ kind: 'style', name: 'font-size', value: `${n}px` }]);
   };
 
+  const toggleDecoration = (token: 'underline' | 'line-through') => {
+    const tokens = new Set(deco.split(' ').filter((t) => t === 'underline' || t === 'line-through'));
+    if (tokens.has(token)) tokens.delete(token);
+    else tokens.add(token);
+    patch([{ kind: 'style', name: 'text-decoration', value: tokens.size ? Array.from(tokens).join(' ') : 'none' }]);
+  };
+
+  const replaceImage = (file: File) => {
+    const blobUrl = URL.createObjectURL(file);
+    patch([{ kind: 'attr', name: 'src', value: blobUrl }]);
+    window.dispatchEvent(new CustomEvent('hds-replace-image', { detail: { file, blobUrl, selector } }));
+  };
+
   return (
-    <aside className="w-[280px] shrink-0 bg-white border-l border-[var(--rule)] overflow-y-auto flex flex-col">
+    <aside className="hds-panel w-[300px] shrink-0 overflow-y-auto flex flex-col">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-[var(--rule)] flex items-center gap-2">
-        <code className="text-xs bg-[var(--cobalt-lt)] text-[var(--cobalt)] px-1.5 py-0.5 rounded font-mono shrink-0">
+      <div className="px-4 py-3 border-b border-[var(--separator)] flex items-center gap-2">
+        <code className="text-xs bg-[var(--cobalt-lt)] text-[var(--system-blue)] px-1.5 py-0.5 rounded font-mono shrink-0">
           {`<${tagName}>`}
         </code>
-        <span className="text-[10px] text-[var(--silver)] truncate" title={selector}>{selector}</span>
+        <span className="text-[10px] text-[var(--tertiary-label)] truncate" title={selector}>{selector}</span>
       </div>
 
       <div className="flex flex-col gap-4 p-4">
@@ -153,6 +163,25 @@ export function PropertyPane({ onPatch }: PropertyPaneProps) {
           </div>
         </label>
 
+        {/* ── Text decoration (F-07) ────────────────────── */}
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-[var(--slate)]">文本装饰</span>
+          <div className="flex gap-1">
+            <button
+              className={`flex-1 border rounded py-1 text-xs transition-colors ${hasUnderline ? 'bg-[var(--cobalt-lt)] border-[var(--cobalt)] text-[var(--cobalt)]' : 'border-[var(--rule)] hover:border-[var(--cobalt)]'}`}
+              onClick={() => toggleDecoration('underline')}
+            >
+              <span style={{ textDecoration: 'underline' }}>下划线</span>
+            </button>
+            <button
+              className={`flex-1 border rounded py-1 text-xs transition-colors ${hasLineThrough ? 'bg-[var(--cobalt-lt)] border-[var(--cobalt)] text-[var(--cobalt)]' : 'border-[var(--rule)] hover:border-[var(--cobalt)]'}`}
+              onClick={() => toggleDecoration('line-through')}
+            >
+              <span style={{ textDecoration: 'line-through' }}>删除线</span>
+            </button>
+          </div>
+        </label>
+
         {/* ── Background color ──────────────────────────── */}
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium text-[var(--slate)]">背景色</span>
@@ -174,24 +203,68 @@ export function PropertyPane({ onPatch }: PropertyPaneProps) {
           </div>
         </label>
 
-        {/* ── Image src replacement ─────────────────────── */}
+        {/* ── Image src replacement (F-08) ──────────────── */}
         {tagName === 'img' && (
-          <label className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-[var(--slate)]">替换图片</span>
-            <input
-              type="file"
-              accept="image/*"
-              className="text-xs text-[var(--slate)] file:mr-2 file:rounded file:border-0 file:bg-[var(--cobalt-lt)] file:px-2 file:py-1 file:text-xs file:text-[var(--cobalt)] file:cursor-pointer"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const blobUrl = URL.createObjectURL(file);
-                patch([{ kind: 'attr', name: 'src', value: blobUrl }]);
-                // Notify parent to persist the file to disk
-                window.dispatchEvent(new CustomEvent('hds-replace-image', { detail: { file, selector } }));
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragOver(false);
+                const file = e.dataTransfer.files?.[0];
+                if (file?.type.startsWith('image/')) replaceImage(file);
               }}
-            />
-          </label>
+              className={`rounded-lg border-2 border-dashed px-3 py-4 text-center transition-colors ${
+                dragOver ? 'border-[var(--cobalt)] bg-[var(--cobalt-lt)]' : 'border-[var(--rule)]'
+              }`}
+            >
+              <p className="text-[11px] text-[var(--silver)] mb-2">拖拽图片到此处，或</p>
+              <input
+                id="hds-img-input"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) replaceImage(file);
+                  e.target.value = '';
+                }}
+              />
+              <label
+                htmlFor="hds-img-input"
+                className="inline-block cursor-pointer rounded-md bg-[var(--cobalt-lt)] px-3 py-1 text-xs text-[var(--cobalt)] hover:opacity-80"
+              >
+                选择文件
+              </label>
+            </div>
+          </div>
+        )}
+
+        {/* ── Link (F-07) ───────────────────────────────── */}
+        {tagName === 'a' && (
+          <div className="flex flex-col gap-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-[var(--slate)]">链接地址</span>
+              <input
+                type="url"
+                placeholder="https://…"
+                defaultValue={attrs?.href ?? ''}
+                className="w-full border border-[var(--rule)] rounded px-2 py-1 text-sm focus:outline-none focus:border-[var(--cobalt)]"
+                onBlur={(e) => patch([{ kind: 'attr', name: 'href', value: e.target.value || null }])}
+                onKeyDown={(e) => { if (e.key === 'Enter') patch([{ kind: 'attr', name: 'href', value: (e.target as HTMLInputElement).value || null }]); }}
+              />
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                defaultChecked={attrs?.target === '_blank'}
+                onChange={(e) => patch([{ kind: 'attr', name: 'target', value: e.target.checked ? '_blank' : null }])}
+              />
+              <span className="text-xs text-[var(--slate)]">在新标签页打开</span>
+            </label>
+          </div>
         )}
 
         {/* ── Opacity ───────────────────────────────────── */}

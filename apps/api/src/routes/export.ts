@@ -59,9 +59,16 @@ export async function exportHandler(req: FastifyRequest, reply: FastifyReply) {
     meta: JSON.parse(fields['meta'] ?? '{}') as ExportOptions['meta'],
   };
 
-  const [resPart, scalePart] = opts.resolution.split('@');
-  const [viewportWidth, viewportHeight] = (resPart ?? '1280x720').split('x').map(Number) as [number, number];
-  const deviceScaleFactor = parseInt(scalePart?.replace('x', '') ?? '2', 10);
+  // Slides are authored at a fixed 1280x720 canvas, so output resolution is
+  // controlled purely by the device scale factor (supersampling), not viewport.
+  const SCALE_BY_RESOLUTION: Record<string, number> = {
+    '1280x720@2x': 2, // 2560x1440
+    '1920x1080@2x': 3, // 3840x2160 (~4K)
+    '3840x2160@2x': 4, // 5120x2880
+  };
+  const viewportWidth = 1280;
+  const viewportHeight = 720;
+  const deviceScaleFactor = SCALE_BY_RESOLUTION[opts.resolution] ?? 2;
 
   // 2. Now set up SSE
   reply.raw.setHeader('Content-Type', 'text/event-stream');
