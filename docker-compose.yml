@@ -6,7 +6,7 @@ services:
     environment:
       - PORT=3000
       - HOST=0.0.0.0
-      - CORS_ORIGIN=https://next-ppt.com
+      - CORS_ORIGIN=https://next-ppt.com,https://www.next-ppt.com,https://htmldeckstudio.pages.dev
     expose:
       - "3000"
     restart: always
