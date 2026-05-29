@@ -4,6 +4,12 @@ import { useDeckStore } from '../store/deckStore.js';
 import { rebuildDeckHtmlForExport } from '../fs/adapter.js';
 import { getBlobToPathMap } from '../fs/assetResolver.js';
 
+/**
+ * Base URL of the export API. Empty in dev (Vite proxies /v1 to localhost:3000);
+ * in production set VITE_API_BASE to e.g. https://api.next-ppt.com at build time.
+ */
+const API_BASE = import.meta.env.VITE_API_BASE ?? '';
+
 /** Recursively append all files from a directory handle to FormData */
 async function appendDirFiles(
   dir: FileSystemDirectoryHandle,
@@ -73,7 +79,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
         await appendDirFiles(dirHandle, '', formData);
       }
 
-      const res = await fetch('/v1/export', {
+      const res = await fetch(`${API_BASE}/v1/export`, {
         method: 'POST',
         body: formData,
         headers: { 'X-HDS-Trace-Id': crypto.randomUUID() },
@@ -124,7 +130,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
 
       if (downloadUrl) {
         const a = document.createElement('a');
-        a.href = downloadUrl;
+        a.href = downloadUrl.startsWith('http') ? downloadUrl : `${API_BASE}${downloadUrl}`;
         a.download = downloadFilename;
         document.body.appendChild(a);
         a.click();

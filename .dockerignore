@@ -1,0 +1,13 @@
+**/node_modules
+**/dist
+**/.turbo
+**/.puppeteer
+apps/web/dist
+.git
+.github
+.hds-backup
+**/*.log
+**/.DS_Store
+**/.env
+**/.env.*
+docs/assets

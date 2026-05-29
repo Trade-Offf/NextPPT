@@ -6,8 +6,15 @@ import { assetRoutes } from './routes/assets.js';
 
 const app = Fastify({ logger: true });
 
+const corsOrigins = (
+  process.env['CORS_ORIGIN'] ?? 'http://localhost:5173,http://localhost:4173'
+)
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 await app.register(cors, {
-  origin: ['http://localhost:5173', 'http://localhost:4173'],
+  origin: corsOrigins,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'X-HDS-Trace-Id'],
 });
@@ -20,4 +27,5 @@ await app.register(assetRoutes);
 app.get('/healthz', async () => ({ ok: true }));
 
 const port = parseInt(process.env['PORT'] ?? '3000', 10);
-await app.listen({ port, host: '127.0.0.1' });
+const host = process.env['HOST'] ?? '0.0.0.0';
+await app.listen({ port, host });

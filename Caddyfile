@@ -1,0 +1,11 @@
+api.next-ppt.com {
+	# Stream SSE export progress without buffering.
+	reverse_proxy api:3000 {
+		flush_interval -1
+	}
+
+	# Allow large multipart uploads (deck + all images). Backend caps at 200MB.
+	request_body {
+		max_size 210MB
+	}
+}
