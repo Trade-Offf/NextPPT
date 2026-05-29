@@ -10,6 +10,8 @@
 | --- | --- | --- |
 | [PRD.md](PRD.md) | 产品需求文档 · 由产品负责人维护 | Draft v0.1 |
 | [TRD.md](TRD.md) | 技术方案文档 · 由架构师维护 | Draft v0.1 |
+| [GROWTH.md](GROWTH.md) | 增长与运营思路 · 定位/渠道/冷启动/护城河 | Draft v0.1 |
+| [ROADMAP.md](ROADMAP.md) | 产品优化建议与路线图 · 优先级分层 | Draft v0.1 |
 
 ## 一句话产品定位
 

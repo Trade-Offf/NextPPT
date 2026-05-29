@@ -1,71 +1,111 @@
+<div align="center">
+
 # HTML Deck Studio
 
-> Trim AI-generated HTML decks in the browser, then export pixel-perfect PPTX / PDF in one click.
+**Trim AI-generated HTML decks in your browser, then export pixel-perfect PPTX / PDF in one click.**
 
-HTML Deck Studio 是一个纯 Web 工具站：用户在自己的 AI 工具（Cursor / Claude / ChatGPT / Codex 等）中生成 HTML 演示稿，拖入本工具后即可在浏览器内点选元素、所见即所得地微调文字与图片，再一键导出图片型 PPTX / PDF。
+English | [简体中文](README.zh-CN.md)
 
-> 上游不管 HTML 是怎么来的，下游一定能给出可投影的 PPT/PDF。
+[![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+![Local-first](https://img.shields.io/badge/local--first-no%20upload-blue.svg)
+![Status](https://img.shields.io/badge/status-MVP-orange.svg)
 
-## 仓库结构
+</div>
 
+> Your AI tool already writes beautiful `deck.html`. This is the missing last mile: edit it like a doc, ship it as a slide.
+
+<!-- TODO: replace with a real demo GIF. A 10s loop of "open folder → click to edit a title → export PPTX" is worth more than this whole README. -->
+<div align="center">
+  <img src="docs/assets/demo.gif" alt="HTML Deck Studio demo" width="760" />
+  <br />
+  <sub>Demo placeholder · drop a <code>demo.gif</code> into <code>docs/assets/</code></sub>
+</div>
+
+## Why this exists
+
+In the last 18 months, "let the AI write the slides as HTML" quietly became a real workflow. Cursor / Claude / ChatGPT are great at Flex/Grid layouts, KaTeX, Mermaid and custom fonts — and terrible at native PowerPoint XML. So people generate a gorgeous `deck.html` instead of fighting Keynote.
+
+Then three problems show up, every single time:
+
+- **Last-minute edits hurt.** The night before the talk your advisor says "change that one line on slide 16." Now you're back in the AI tool: prompt, wait, diff, save. Once is fine. The tenth time you want to scream.
+- **Projectors want PPT/PDF.** Schools require a `.pptx` upload, clients want a `.pdf`, and raw HTML on a projector loves to drop fonts or stall on the network.
+- **Privacy anxiety is real.** Thesis defenses, client proposals, internal decks — people don't want to upload any of it to an online editor.
+
+HTML Deck Studio does exactly one thing well: **take HTML you already have, let you point-and-edit it in the browser, and export an industrial-grade PPT/PDF — without your files ever leaving your machine.**
+
+It is *not* an AI slide generator, not another DSL like reveal.js / Slidev, not a cloud editor. It's a pair of scissors for AI decks.
+
+## Quick start
+
+```bash
+# 1. install
+pnpm install
+
+# 2. run web app + stateless export service
+pnpm dev
+# web → http://localhost:5173   api → http://localhost:3000
 ```
-html-deck-studio/
-├── docs/                        # 设计文档（PRD / TRD / 评审基线）
-│   ├── README.md                # 文档目录
-│   ├── PRD.md                   # 产品需求
-│   └── TRD.md                   # 技术方案
-├── .gitignore
-├── LICENSE                      # MIT
-└── README.md                    # 本文件
+
+Then, in a Chromium browser (Chrome / Edge / Brave / Arc):
+
+1. **Open** a folder that contains your `deck.html` (with images/assets), or just drag in a single self-contained `.html`.
+2. **Edit** — click any element to tweak font / color / size, double-click text to edit inline, drop a new image to replace one, or flip to **Code** mode for raw HTML.
+3. **Export** — pick PPTX or PDF, choose a resolution (up to 4K), download. Done.
+
+Your edits are written back to disk automatically (debounced), with timestamped snapshots in `.hds-backup/` so you can never trash the original.
+
+## How it works
+
+Two pieces: a browser SPA that does all the editing, and a stateless service that only shows up at export time and forgets everything the moment it's done.
+
+```mermaid
+flowchart LR
+  ai["AI tool outputs deck.html"] --> open["Open folder / single HTML in browser"]
+  open --> edit["Click & double-click to edit text, images"]
+  edit --> save["Auto-write back to local disk + backup"]
+  edit --> export["One-click export"]
+  export --> svc["Stateless export service (Puppeteer)"]
+  svc --> file["PPTX / PDF downloaded"]
+  file --> done["Project · submit · share"]
 ```
 
-随实现推进将出现：
+- **Editing** lives entirely in the browser via the File System Access API — read, edit, write, never upload.
+- **Export** ships the deck to a short-lived Puppeteer worker that screenshots each slide at high DPI, builds the PPTX/PDF, returns it, and wipes the temp files. No database, no object storage.
 
-```
-apps/
-  web/                           # 前端 SPA (React + Vite)
-  api/                           # 无状态导出服务 (Node + Fastify + Puppeteer)
-  marketing/                     # 营销站
-packages/
-  protocol/                      # HDS Slide Protocol 共享类型
-  telemetry/                     # OTel / Sentry / PostHog 封装
-```
+## Features
 
-## 开始阅读
+- **Point-and-edit, no DSL.** Any `<section class="slide">` deck works. Click to select, double-click to edit text inline, property panel for font / weight / color / align / underline / strikethrough / link.
+- **Mermaid, rendered live.** Write raw Mermaid source; it renders in the editor and stays crisp in the export.
+- **High-fidelity export.** Image-based PPTX / PDF that looks exactly like your HTML. Standard 2560×1440 up to 4K, single page / ranges supported.
+- **Two ways in.** A folder (reads/writes sibling images, keeps backups) or a single self-contained HTML file (saved as a copy, images inlined as base64).
+- **Local-first & private.** Files stay on your disk. The server only touches your content for the seconds it takes to export, then destroys it.
+- **Code mode.** Monaco editor for the current slide when you want raw control, with validation before it commits.
 
-1. [docs/README.md](docs/README.md) · 文档导航
-2. [docs/PRD.md](docs/PRD.md) · 产品需求（14 章）
-3. [docs/TRD.md](docs/TRD.md) · 技术方案（15 章 + 2 附录）
+## Browser support
 
-## 里程碑
+The editor needs the File System Access API, which today means Chromium-based browsers.
 
-| 里程碑 | 周期 | 关键交付 |
+| Browser | Folder mode | Single-file mode |
 | --- | --- | --- |
-| M1 MVP | 4 周 | Chromium 浏览器内"打开 → 编辑 → 导出 PPTX/PDF"闭环 |
-| M2 兜底与示例 | 3 周 | Safari/Firefox ZIP 兜底；示例模板；历史恢复 |
-| M3 计费 | 3 周 | Stripe Checkout、匿名免费额度、license key |
-| M4 账号与协作 | 6 周 | 可选邮箱账号、云项目库、团队空间 |
+| Chrome / Edge / Brave / Arc / Opera | Yes | Yes |
+| Safari / Firefox | Not yet (ZIP fallback planned) | Not yet |
 
-## 设计决策（v1）
+## Privacy
 
-| 决策 | 结论 |
-| --- | --- |
-| 部署形态 | 纯 Web SPA + 无状态导出服务 |
-| 本地文件读写 | 仅 Chromium 系（File System Access API） |
-| PPT 导出形态 | 图片型，每页一张 2560×1440 PNG |
-| 用户体系 | v1 匿名即用；M3 起匿名 + license key；M4 起可选账号 |
-| Mermaid 支持 | v1 兼容（运行时渲染 + 截图前等待 SVG 完成） |
-| 单页导出 | v1 支持（导出抽屉提供页码范围） |
-| 自定义调色板 | 不做（保留预设 8 色） |
-| 移动端预览 | 不做（提示需桌面端使用） |
+This is the whole point, so it's worth saying plainly: **during editing, your data never leaves your machine.** The only moment a file touches a server is when you click export — it lives in a temp dir for a few dozen seconds and is deleted right after. Nothing is persisted, nothing is trained on.
 
-## 开发约定
+## Roadmap & growth
 
-- 包管理：pnpm（待落地）
-- TypeScript 严格模式
-- Conventional Commits
-- 分支策略：trunk-based，feature/* + 自动 preview 部署
-- 详情见 [docs/TRD.md](docs/TRD.md) §13 发布与运维
+- [docs/ROADMAP.md](docs/ROADMAP.md) — what's next and why, prioritized.
+- [docs/GROWTH.md](docs/GROWTH.md) — positioning, channels and how we plan to grow it.
+- [docs/PRD.md](docs/PRD.md) · [docs/TRD.md](docs/TRD.md) — product and technical specs.
+
+## Contributing
+
+This started as a tool I wanted for myself, and the best version of it will come from people who actually live this workflow. Issues and PRs are the way — async beats chat groups for open source.
+
+Please feel free to use and contribute to the development. If it saves you one painful night before a talk, that's already worth it.
 
 ## License
 
