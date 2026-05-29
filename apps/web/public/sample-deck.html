@@ -1,0 +1,1638 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI 提效场景分享 · 开发者视角</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #0d1117; /* github dark 风 */
+        --bg-2: #161b22;
+        --bg-3: #1c222b;
+        --line: #30363d;
+        --line-soft: #21262d;
+        --text: #e6edf3;
+        --text-2: #c9d1d9;
+        --muted: #8b949e;
+        --muted-2: #6e7681;
+        --accent: #f78166; /* 终端橙，克制但有辨识度 */
+        --green: #3fb950;
+        --blue: #58a6ff;
+        --yellow: #d29922;
+        --purple: #bc8cff;
+        --red: #f85149;
+
+        /* 响应式字号梯度 */
+        --fs-hero: clamp(40px, 6vw, 96px);
+        --fs-h2: clamp(32px, 3.5vw, 56px);
+        --fs-h3: clamp(28px, 2.8vw, 44px);
+        --fs-h4: clamp(20px, 2vw, 24px);
+        --fs-body: clamp(13px, 1.2vw, 16px);
+        --fs-body-lg: clamp(16px, 1.5vw, 22px);
+        --fs-mono: clamp(11px, 1vw, 15px);
+        --fs-mono-md: clamp(12px, 1.1vw, 16px);
+        --fs-caption: clamp(10px, 0.9vw, 13px);
+
+        --lh-tight: 1.15;
+        --lh-base: 1.55;
+        --lh-loose: 1.7;
+      }
+
+      html {
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        background: #000;
+        font-family:
+          "Inter",
+          "PingFang SC",
+          -apple-system,
+          sans-serif;
+        padding: clamp(20px, 3vh, 40px) clamp(10px, 2vw, 20px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(20px, 3vh, 28px);
+        color: var(--text);
+      }
+
+      .slide {
+        width: 1280px;
+        min-height: 100dvh;
+        max-height: 100dvh;
+        background: var(--bg);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        box-sizing: border-box;
+      }
+
+      /* 细微的噪点 */
+      .slide::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.03 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        pointer-events: none;
+        mix-blend-mode: screen;
+      }
+
+      /* ========== 通用：顶部状态栏（像 IDE/终端 tab） ========== */
+      .titlebar {
+        height: 32px;
+        background: var(--bg-2);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        gap: 14px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+      }
+      .tb-dots {
+        display: flex;
+        gap: 6px;
+      }
+      .tb-dots span {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: var(--muted-2);
+        opacity: 0.5;
+      }
+      .tb-dots span:nth-child(1) {
+        background: #f85149;
+        opacity: 0.8;
+      }
+      .tb-dots span:nth-child(2) {
+        background: #d29922;
+        opacity: 0.8;
+      }
+      .tb-dots span:nth-child(3) {
+        background: #3fb950;
+        opacity: 0.8;
+      }
+      .tb-path {
+        color: var(--text-2);
+      }
+      .tb-path .dim {
+        color: var(--muted);
+      }
+      .tb-right {
+        margin-left: auto;
+        color: var(--muted-2);
+      }
+
+      /* ========== 页面内容 ========== */
+      .body {
+        flex: 1 1 auto;
+        min-height: 0;
+        padding: clamp(32px, 4vh, 56px) clamp(48px, 5vw, 72px)
+          clamp(24px, 3vh, 40px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: clamp(12px, 2vh, 24px);
+        position: relative;
+        z-index: 1;
+      }
+
+      /* ========== 通用：页眉 kicker ========== */
+      .kicker {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-mono);
+        color: var(--accent);
+        letter-spacing: 1px;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+      .kicker::before {
+        content: "//";
+        color: var(--muted-2);
+        font-weight: 700;
+      }
+
+      .page-title {
+        font-size: var(--fs-h3);
+        font-weight: 800;
+        line-height: var(--lh-tight);
+        letter-spacing: -1px;
+        margin-bottom: clamp(8px, 1vh, 14px);
+        color: var(--text);
+      }
+      .page-title .hl {
+        color: var(--accent);
+      }
+      .page-title .code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 36px;
+        color: var(--green);
+        background: rgba(63, 185, 80, 0.1);
+        padding: 0 10px;
+        border-radius: 4px;
+      }
+      .page-lead {
+        font-size: var(--fs-body);
+        color: var(--muted);
+        line-height: var(--lh-base);
+        max-width: 820px;
+        margin-bottom: 0;
+      }
+
+      /* ========== 页脚 ========== */
+      .footer {
+        flex-shrink: 0;
+        padding: clamp(16px, 2vh, 24px) clamp(48px, 5vw, 72px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-caption);
+        color: var(--muted-2);
+        z-index: 2;
+      }
+      .footer .mid {
+        color: var(--muted);
+      }
+      .footer .accent {
+        color: var(--accent);
+      }
+
+      /* ============================================================= */
+      /* P1 封面                                                        */
+      /* ============================================================= */
+      .p1 .body {
+        justify-content: center;
+        gap: clamp(16px, 2vh, 28px);
+      }
+      .p1-prompt {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 15px;
+        color: var(--green);
+        margin-bottom: 28px;
+      }
+      .p1-prompt .user {
+        color: var(--blue);
+      }
+      .p1-prompt .cursor {
+        display: inline-block;
+        width: 10px;
+        height: 18px;
+        background: var(--accent);
+        vertical-align: middle;
+        margin-left: 4px;
+        animation: blink 1s infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      .p1-title {
+        font-size: var(--fs-hero);
+        font-weight: 900;
+        line-height: var(--lh-tight);
+        letter-spacing: clamp(-4px, -0.3vw, -2px);
+        margin-bottom: clamp(16px, 2vh, 24px);
+      }
+      .p1-title .hl {
+        color: var(--accent);
+      }
+      .p1-title .dim {
+        color: var(--muted);
+        font-weight: 400;
+      }
+      .p1-sub {
+        font-size: var(--fs-body-lg);
+        color: var(--text-2);
+        margin-bottom: clamp(32px, 4vh, 48px);
+        line-height: var(--lh-base);
+        max-width: 880px;
+      }
+      .p1-meta {
+        display: flex;
+        gap: clamp(32px, 4vw, 48px);
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-mono);
+        color: var(--muted);
+      }
+      .p1-meta div b {
+        display: block;
+        color: var(--accent);
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 11px;
+        letter-spacing: 1.5px;
+      }
+      .p1-meta div span {
+        color: var(--text);
+        font-size: 14px;
+      }
+      .p1-deco {
+        position: absolute;
+        right: 72px;
+        top: 80px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--muted-2);
+        text-align: right;
+        line-height: 1.8;
+      }
+      .p1-deco .bar {
+        display: inline-block;
+        width: 120px;
+        height: 1px;
+        background: var(--line);
+        margin: 10px 0;
+      }
+
+      /* ============================================================= */
+      /* P2 肯定上一位的方向                                              */
+      /* ============================================================= */
+      /* P2专用布局优化 - 确保架构图完整显示 */
+      .slide:nth-child(2) .body {
+        justify-content: flex-start;
+        gap: clamp(8px, 1.2vh, 16px);
+        padding-top: clamp(24px, 3vh, 40px);
+        padding-bottom: clamp(20px, 2.5vh, 32px);
+      }
+
+      .slide:nth-child(2) .page-title {
+        margin-bottom: clamp(6px, 0.8vh, 10px);
+        font-size: clamp(26px, 3.2vw, 40px);
+      }
+
+      .slide:nth-child(2) .page-lead {
+        font-size: clamp(12px, 1.1vw, 15px);
+      }
+
+      .quote-block {
+        background: var(--bg-2);
+        border-left: 3px solid var(--accent);
+        padding: clamp(16px, 2vh, 20px) clamp(20px, 2.5vw, 28px);
+        margin-bottom: 0;
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-body);
+        color: var(--text-2);
+        line-height: var(--lh-loose);
+        flex-shrink: 0;
+      }
+      .quote-block b {
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .arch-diagram {
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: clamp(18px, 2.2vh, 24px);
+        display: flex;
+        flex-direction: column;
+        gap: clamp(8px, 1vh, 12px);
+        position: relative;
+        flex-shrink: 0;
+      }
+      .arch-diagram::before {
+        content: "// team-workflow.arch";
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        background: var(--bg);
+        padding: 0 10px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .arch-layer {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .arch-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-caption);
+        color: var(--muted);
+        width: clamp(90px, 10vw, 110px);
+        text-align: right;
+        flex-shrink: 0;
+      }
+      .arch-nodes {
+        display: flex;
+        gap: 10px;
+        flex: 1;
+      }
+      .arch-node {
+        flex: 1;
+        background: var(--bg-3);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: clamp(8px, 1vh, 10px) clamp(10px, 1.2vw, 14px);
+        font-size: var(--fs-body);
+        color: var(--text-2);
+        text-align: center;
+        position: relative;
+      }
+      .arch-node.accent {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(247, 129, 102, 0.08);
+      }
+      .arch-node .tiny {
+        display: block;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .arch-flow {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-body);
+        color: var(--muted);
+        text-align: center;
+        padding: clamp(1px, 0.2vh, 2px) 0;
+      }
+      .arch-caption {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-caption);
+        color: var(--muted);
+        margin-top: clamp(6px, 0.8vh, 10px);
+        padding-top: clamp(8px, 1vh, 12px);
+        border-top: 1px dashed var(--line);
+        line-height: var(--lh-base);
+      }
+      .arch-caption b {
+        color: var(--green);
+      }
+
+      /* ============================================================= */
+      /* P3 我的补充视角                                                 */
+      /* ============================================================= */
+      /* P3专用布局优化 */
+      .slide:nth-child(3) .body {
+        justify-content: flex-start;
+        gap: clamp(10px, 1.5vh, 18px);
+        padding-top: clamp(28px, 3.5vh, 44px);
+      }
+
+      .vs-wrap {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: clamp(20px, 2.5vw, 28px);
+        flex: 1 1 auto;
+        min-height: 0;
+        align-items: stretch;
+      }
+      .vs-col {
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: clamp(20px, 2.5vh, 28px);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow-y: auto;
+      }
+
+      /* VS列滚动条 */
+      .vs-col::-webkit-scrollbar {
+        width: 4px;
+      }
+      .vs-col::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
+      }
+      .vs-col.mine {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(247, 129, 102, 0.1);
+      }
+      .vs-tag {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-caption);
+        color: var(--muted);
+        margin-bottom: clamp(8px, 1vh, 12px);
+        flex-shrink: 0;
+      }
+      .vs-col.mine .vs-tag {
+        color: var(--accent);
+      }
+      .vs-title {
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+      }
+      .vs-desc {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px dashed var(--line);
+      }
+      .vs-list {
+        list-style: none;
+        font-size: 13.5px;
+        line-height: 1.8;
+        color: var(--text-2);
+        flex: 1;
+      }
+      .vs-list li {
+        padding-left: 20px;
+        position: relative;
+        margin-bottom: 6px;
+      }
+      .vs-list li::before {
+        content: "→";
+        position: absolute;
+        left: 0;
+        color: var(--muted-2);
+        font-family: "JetBrains Mono", monospace;
+      }
+      .vs-col.mine .vs-list li::before {
+        color: var(--accent);
+      }
+      .vs-plus {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 28px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      /* ============================================================= */
+      /* P4/P5/P6 场景卡片页（共享样式）                                   */
+      /* ============================================================= */
+      /* 场景页面专用布局优化 */
+      .slide:nth-child(4) .body,
+      .slide:nth-child(5) .body,
+      .slide:nth-child(6) .body {
+        justify-content: flex-start;
+        gap: clamp(10px, 1.5vh, 18px);
+        padding-top: clamp(28px, 3.5vh, 44px);
+        padding-bottom: clamp(24px, 3vh, 36px);
+      }
+
+      .scene-layout {
+        display: grid;
+        grid-template-columns: 1fr clamp(400px, 35vw, 480px);
+        gap: clamp(28px, 3vw, 40px);
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+      .scene-left {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(12px, 1.5vh, 18px);
+        min-height: 0;
+      }
+      .scene-badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-caption);
+        color: var(--muted);
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+      .scene-badge .num {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .scene-title {
+        font-size: var(--fs-h3);
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: clamp(6px, 1vh, 8px);
+        line-height: var(--lh-tight);
+      }
+      .scene-sub {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-body);
+        color: var(--green);
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+      .scene-block {
+        margin-bottom: 0;
+      }
+      .scene-block h4 {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-caption);
+        color: var(--accent);
+        letter-spacing: 1.5px;
+        margin-bottom: clamp(6px, 0.8vh, 10px);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .scene-block h4::before {
+        content: "#";
+        color: var(--muted-2);
+      }
+      .scene-pain {
+        font-size: var(--fs-body);
+        color: var(--text-2);
+        line-height: var(--lh-loose);
+        padding: clamp(12px, 1.5vh, 14px) clamp(14px, 1.8vw, 18px);
+        background: rgba(248, 81, 73, 0.06);
+        border-left: 2px solid var(--red);
+        border-radius: 0 4px 4px 0;
+      }
+      .scene-pain b {
+        color: var(--red);
+        font-weight: 600;
+      }
+      .scene-solution {
+        font-size: var(--fs-body);
+        color: var(--text-2);
+        line-height: var(--lh-loose);
+        padding: clamp(12px, 1.5vh, 14px) clamp(14px, 1.8vw, 18px);
+        background: rgba(63, 185, 80, 0.06);
+        border-left: 2px solid var(--green);
+        border-radius: 0 4px 4px 0;
+      }
+      .scene-solution b {
+        color: var(--green);
+        font-weight: 600;
+      }
+
+      /* 右侧：代码/示意框 */
+      .scene-right {
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .scene-right-head {
+        background: var(--bg-3);
+        border-bottom: 1px solid var(--line);
+        padding: clamp(8px, 1vh, 10px) clamp(12px, 1.5vw, 16px);
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-caption);
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+      .scene-right-body {
+        padding: clamp(16px, 2vh, 20px);
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-mono);
+        line-height: var(--lh-loose);
+        color: var(--text-2);
+        flex: 1 1 auto;
+        min-height: 0;
+        max-height: 45dvh;
+        overflow-y: auto;
+      }
+
+      /* 滚动条低调化 */
+      .scene-right-body::-webkit-scrollbar {
+        width: 4px;
+      }
+      .scene-right-body::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
+      }
+      .scene-right-body::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .scene-right-body .cm {
+        color: var(--muted);
+      }
+      .scene-right-body .kw {
+        color: var(--purple);
+      }
+      .scene-right-body .str {
+        color: var(--green);
+      }
+      .scene-right-body .fn {
+        color: var(--blue);
+      }
+      .scene-right-body .num {
+        color: var(--yellow);
+      }
+      .scene-right-body .hi {
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .scene-metrics {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(12px, 1.5vw, 14px);
+        margin-top: 0;
+        flex-shrink: 0;
+      }
+      .scene-metric {
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: clamp(12px, 1.5vh, 16px) clamp(14px, 1.8vw, 18px);
+      }
+      .scene-metric .v {
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: -1px;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .scene-metric .v .u {
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 400;
+        margin-left: 2px;
+      }
+      .scene-metric .l {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 1px;
+      }
+
+      /* ============================================================= */
+      /* P7 AI 与生产关系                                                */
+      /* ============================================================= */
+      /* P7专用布局优化 */
+      .slide:nth-child(7) .body {
+        justify-content: flex-start;
+        gap: clamp(10px, 1.5vh, 18px);
+        padding-top: clamp(28px, 3.5vh, 44px);
+      }
+
+      .hist-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: clamp(16px, 2vw, 20px);
+        margin-bottom: 0;
+      }
+      .hist-card {
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: clamp(18px, 2vh, 22px);
+        position: relative;
+      }
+      .hist-card.now {
+        border-color: var(--accent);
+        background: rgba(247, 129, 102, 0.05);
+      }
+      .hist-era {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        color: var(--muted-2);
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+      }
+      .hist-card.now .hist-era {
+        color: var(--accent);
+      }
+      .hist-main {
+        font-size: var(--fs-h4);
+        font-weight: 800;
+        margin-bottom: clamp(3px, 0.5vh, 4px);
+        letter-spacing: -0.3px;
+      }
+      .hist-main .x {
+        color: var(--muted);
+        font-weight: 400;
+        font-size: 14px;
+        margin: 0 6px;
+      }
+      .hist-main .obj {
+        color: var(--accent);
+      }
+      .hist-desc {
+        font-size: 12.5px;
+        color: var(--muted);
+        line-height: 1.6;
+        margin-top: 10px;
+      }
+
+      .golden {
+        background: linear-gradient(
+          90deg,
+          rgba(247, 129, 102, 0.1),
+          rgba(247, 129, 102, 0.03)
+        );
+        border-top: 1px solid var(--accent);
+        border-bottom: 1px solid var(--accent);
+        padding: clamp(16px, 2vh, 24px) clamp(20px, 3vw, 32px);
+        font-size: var(--fs-body-lg);
+        line-height: var(--lh-base);
+        font-weight: 600;
+        color: var(--text);
+        letter-spacing: -0.3px;
+        position: relative;
+        flex-shrink: 0;
+      }
+      .golden::before {
+        content: '"';
+        position: absolute;
+        left: 16px;
+        top: 4px;
+        font-size: 40px;
+        color: var(--accent);
+        opacity: 0.5;
+        font-weight: 400;
+      }
+      .golden .hl {
+        color: var(--accent);
+        font-weight: 800;
+      }
+      .golden .tag {
+        display: block;
+        margin-top: 8px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 1.5px;
+        font-weight: 400;
+      }
+
+      /* ============================================================= */
+      /* P8 方法论 · 收束                                                 */
+      /* ============================================================= */
+      /* P8专用布局优化 - 确保所有内容完整显示 */
+      .slide:last-child .body {
+        justify-content: flex-start;
+        gap: clamp(8px, 1vh, 14px);
+        padding-top: clamp(24px, 3vh, 40px);
+        padding-bottom: clamp(20px, 2.5vh, 32px);
+      }
+
+      .method-title {
+        font-size: var(--fs-h2);
+        font-weight: 900;
+        line-height: var(--lh-tight);
+        letter-spacing: clamp(-2px, -0.2vw, -1px);
+        margin-bottom: clamp(12px, 1.5vh, 16px);
+      }
+      .method-title .hl {
+        color: var(--accent);
+      }
+      .method-title .arrow {
+        color: var(--muted);
+        font-weight: 400;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 36px;
+        margin: 0 12px;
+      }
+      .method-sub {
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-body);
+        color: var(--green);
+        margin-bottom: 0;
+        flex-shrink: 0;
+      }
+      .m-formula {
+        background: var(--bg-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: clamp(16px, 2vh, 24px) clamp(20px, 2.5vw, 28px);
+        margin-bottom: 0;
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-mono-md);
+        color: var(--text);
+        line-height: var(--lh-loose);
+        flex: 0 1 auto;
+        min-height: 0;
+        max-height: 25dvh;
+        overflow-y: auto;
+      }
+
+      /* 公式块滚动条 */
+      .m-formula::-webkit-scrollbar {
+        width: 4px;
+      }
+      .m-formula::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
+      }
+      .m-formula .cm {
+        color: var(--muted);
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+      }
+      .m-formula .v {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .m-formula .eq {
+        color: var(--muted-2);
+        margin: 0 8px;
+      }
+      .m-formula .g {
+        color: var(--green);
+        font-weight: 700;
+      }
+
+      .m-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: clamp(12px, 1.5vw, 16px);
+      }
+      .m-item {
+        padding: clamp(14px, 1.8vh, 18px);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--bg-2);
+      }
+      .m-item .n {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      .m-item .t {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+        line-height: 1.5;
+      }
+      .m-item .t .dim {
+        color: var(--muted);
+        font-weight: 400;
+      }
+
+      .thx {
+        margin-top: 0;
+        text-align: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: var(--fs-body);
+        color: var(--muted);
+        flex-shrink: 0;
+      }
+      .thx .prompt {
+        color: var(--green);
+      }
+      .thx .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 14px;
+        background: var(--accent);
+        vertical-align: middle;
+        margin-left: 4px;
+        animation: blink 1s infinite;
+      }
+      /* ========== PDF 导出按钮 ========== */
+      #pdf-btn {
+        position: fixed;
+        top: 16px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 16px;
+        background: var(--bg-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s, color 0.15s;
+        user-select: none;
+      }
+      #pdf-btn:hover {
+        background: var(--bg-3);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      #pdf-btn svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+      }
+
+      /* ========== 打印 / PDF 样式 ========== */
+      @media print {
+        @page {
+          size: 1280px 720px landscape;
+          margin: 0;
+        }
+
+        html {
+          scroll-snap-type: none;
+        }
+
+        body {
+          background: #000;
+          padding: 0;
+          gap: 0;
+          display: block;
+        }
+
+        #pdf-btn {
+          display: none !important;
+        }
+
+        .slide {
+          width: 1280px;
+          min-height: 720px;
+          max-height: none;
+          page-break-after: always;
+          break-after: page;
+          box-shadow: none;
+          overflow: visible;
+        }
+
+        .slide:last-of-type {
+          page-break-after: avoid;
+          break-after: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- PDF 导出按钮 -->
+    <button id="pdf-btn" onclick="window.print()" title="导出为 PDF">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12H13"/>
+        <path d="M8 2V10"/>
+        <path d="M5 7L8 10L11 7"/>
+        <path d="M2 14H14"/>
+      </svg>
+      导出 PDF
+    </button>
+
+    <!-- ============ P1 封面 ============ -->
+    <section class="slide p1">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">~/share/2026-q2/</span>ai-practice.md
+        </div>
+        <div class="tb-right">10 min · live demo</div>
+      </div>
+      <div class="body">
+        <div class="p1-deco">
+          INTERNAL SHARING<br />
+          <span class="bar"></span><br />
+          2026.04 · VOL.01
+        </div>
+
+        <div class="p1-prompt">
+          <span class="user">$ dev</span>
+          <span style="color: var(--text-2)">./start-sharing</span>
+          <span style="color: var(--yellow)">--topic</span>
+          <span style="color: var(--accent)">"ai-practice"</span
+          ><span class="cursor"></span>
+        </div>
+
+        <h1 class="p1-title">
+          把 AI 塞进<br />
+          <span class="hl">每天的工作流</span>里<span class="dim">。</span>
+        </h1>
+        <p class="p1-sub">
+          一个开发者视角的 AI 提效实践 —— 从<b style="color: var(--accent)"
+            >自身痛点</b
+          >出发，<br />
+          聊三个已经在用的场景，以及我对 AI 与生产关系的理解。
+        </p>
+
+        <div class="p1-meta">
+          <div><b>SPEAKER</b><span>Rico · AI Dev</span></div>
+          <div><b>FOLLOW-UP</b><span>@xxx</span></div>
+          <div><b>SCOPE</b><span>3 × Atomic Scenarios</span></div>
+        </div>
+      </div>
+      <div class="footer">
+        <div>AI · EVERYDAY PRACTICE</div>
+        <div class="mid">"Ship small, ship often."</div>
+        <div><span class="accent">01</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P2 肯定上一位的方向 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">chapter-01/</span>previous-talk.md
+        </div>
+        <div class="tb-right">承接</div>
+      </div>
+      <div class="body">
+        <div class="kicker">CHAPTER 01 · 承接上一位同事的方向</div>
+        <h2 class="page-title">
+          <span class="hl">"单点 × 工作流"</span> 是正确的骨架。
+        </h2>
+        <p class="page-lead">
+          上一位同事已经给出了非常清晰的<b style="color: var(--text)"
+            >自顶向下</b
+          >路径：从整体工作生产关系出发，<br />
+          在产/设/技/测各环节做单点提效，同时统一上下游信息标识与口径。
+        </p>
+
+        <div class="quote-block">
+          <b>// 我完全认同这条路径：</b><br />
+          单点提效是<b>原子能力</b>，工作流是<b>组合模式</b>。<br />
+          没有原子能力的稳定，任何"全流程 AI"都会在复杂度里失控。
+        </div>
+
+        <div class="arch-diagram">
+          <div class="arch-layer">
+            <div class="arch-label">Layer 3 · 整合</div>
+            <div class="arch-nodes">
+              <div class="arch-node" style="flex: 3">
+                统一工作流编排 · Workflow Orchestration
+              </div>
+            </div>
+          </div>
+          <div class="arch-flow">▲ &nbsp; 成熟后收束 &nbsp; ▲</div>
+          <div class="arch-layer">
+            <div class="arch-label">Layer 2 · 协议</div>
+            <div class="arch-nodes">
+              <div class="arch-node">信息标识</div>
+              <div class="arch-node">输出口径</div>
+              <div class="arch-node">数据结构</div>
+              <div class="arch-node">上下游契约</div>
+            </div>
+          </div>
+          <div class="arch-flow">▲ &nbsp; 统一标准 &nbsp; ▲</div>
+          <div class="arch-layer">
+            <div class="arch-label">Layer 1 · 原子</div>
+            <div class="arch-nodes">
+              <div class="arch-node accent">
+                产品<span class="tiny">PRD 结构化</span>
+              </div>
+              <div class="arch-node accent">
+                设计<span class="tiny">组件规范</span>
+              </div>
+              <div class="arch-node accent">
+                技术<span class="tiny">接口文档</span>
+              </div>
+              <div class="arch-node accent">
+                测试<span class="tiny">用例生成</span>
+              </div>
+            </div>
+          </div>
+          <div class="arch-caption">
+            <b>共识：</b
+            >先保证原子层的"可用、稳定、有效"，再谈协议层的统一，最终才是整合层的工作流编排。
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div>CH.01 · ACKNOWLEDGE</div>
+        <div class="mid">Atomic → Protocol → Orchestration</div>
+        <div><span class="accent">02</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P3 我的补充视角 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">chapter-02/</span>my-perspective.md
+        </div>
+        <div class="tb-right">补充视角</div>
+      </div>
+      <div class="body">
+        <div class="kicker">CHAPTER 02 · 我想补充的另一半视角</div>
+        <h2 class="page-title">
+          <span class="hl">自顶向下</span> 之外，<br />
+          还需要 <span class="hl">自下而上</span> 的视角。
+        </h2>
+        <p class="page-lead">
+          顶层设计告诉我们"工作流该长什么样"；开发者视角告诉我们"**今天哪件事最烦**"。<br />
+          两条路径交汇的地方，才是真正能落地的 AI 应用场景。
+        </p>
+
+        <div class="vs-wrap">
+          <div class="vs-col">
+            <div class="vs-tag">// APPROACH A</div>
+            <div class="vs-title">
+              自顶向下
+              <span
+                style="color: var(--muted); font-weight: 400; font-size: 16px"
+                >Top-Down</span
+              >
+            </div>
+            <div class="vs-desc">
+              从完整工作流反推需要哪些 AI 能力，强调架构完整性与协作标准化。
+            </div>
+            <ul class="vs-list">
+              <li>视角：组织 / 工作流</li>
+              <li>起点：应该有什么</li>
+              <li>优势：体系化、可规划</li>
+              <li>风险：离真实痛点较远</li>
+            </ul>
+          </div>
+
+          <div class="vs-plus">&</div>
+
+          <div class="vs-col mine">
+            <div class="vs-tag">// APPROACH B · MINE</div>
+            <div class="vs-title">
+              自下而上
+              <span
+                style="color: var(--muted); font-weight: 400; font-size: 16px"
+                >Bottom-Up</span
+              >
+            </div>
+            <div class="vs-desc">
+              从开发者每天真实遇到的高频低价值工作出发，先解决"我自己被哪件小事卡住"。
+            </div>
+            <ul class="vs-list">
+              <li>视角：个体 / 工作现场</li>
+              <li>起点：当下最烦什么</li>
+              <li>优势：落地快、信号真实</li>
+              <li>输出：3 个已落地的提效场景 ↓</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div>CH.02 · MY ANGLE</div>
+        <div class="mid">
+          Technology in service of the person doing the work.
+        </div>
+        <div><span class="accent">03</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P4 场景 ① 接口文档 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">scenarios/01_</span>api-doc-auto.md
+        </div>
+        <div class="tb-right">scene 1 / 3</div>
+      </div>
+      <div class="body">
+        <div class="kicker">SCENARIO 01 · ENGINEERING</div>
+
+        <div class="scene-layout">
+          <div class="scene-left">
+            <div class="scene-badge">
+              <span class="num">No.01</span> &nbsp;//&nbsp; 前后端联调场景
+            </div>
+            <div class="scene-title">自动化接口文档</div>
+            <div class="scene-sub">
+              lark-cli + 约束 schema &rarr; 开发完成即文档完成
+            </div>
+
+            <div class="scene-block">
+              <h4>PAIN · 这件小事每天都烦我</h4>
+              <div class="scene-pain">
+                接口改了 → <b>手动改文档</b> → 前端不知道字段变了 →
+                <b>拉群对齐</b> → 联调卡住。<br />
+                每周花在这条链路上的隐性成本，远超想象。
+              </div>
+            </div>
+
+            <div class="scene-block">
+              <h4>FIX · 用约束替代描述</h4>
+              <div class="scene-solution">
+                让 AI 从代码中按<b>固定 schema</b>
+                生成文档，而不是让人"写得更勤快"。<br />
+                核心思路：<b>约束先于生成</b>，保证输出可预测、可 diff、可复用。
+              </div>
+            </div>
+
+            <div class="scene-metrics">
+              <div class="scene-metric">
+                <div class="v">+20<span class="u">%</span></div>
+                <div class="l">JOINT DEBUG EFFICIENCY</div>
+              </div>
+              <div class="scene-metric">
+                <div class="v">&darr;<span class="u"> query</span></div>
+                <div class="l">FIELD INQUIRY FREQ.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scene-right">
+            <div class="scene-right-head">
+              <span>$ lark-cli gen:doc</span>
+              <span>● live</span>
+            </div>
+            <div class="scene-right-body">
+              <span class="cm"># 输入：已变更的后端接口</span><br />
+              <span class="kw">POST</span>
+              <span class="str">/api/strategy/list</span><br />
+              <br />
+              <span class="cm"># 约束 schema</span><br />
+              <span class="fn">@DocField</span>(name=<span class="str"
+                >"page"</span
+              >, type=<span class="num">int</span>)<br />
+              <span class="fn">@DocField</span>(name=<span class="str"
+                >"size"</span
+              >, type=<span class="num">int</span>)<br />
+              <br />
+              <span class="cm"># 输出：规范化文档</span><br />
+              <span class="hi">→ strategy-list.md</span><br />
+              &nbsp;&nbsp;✓ 字段说明<br />
+              &nbsp;&nbsp;✓ 返回结构<br />
+              &nbsp;&nbsp;✓ 调用示例<br />
+              &nbsp;&nbsp;✓ 变更 diff<br />
+              <br />
+              <span class="cm"># 关键：开发完成 = 文档完成</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div>SCENE 01 · API DOC</div>
+        <div class="mid">Constraint before generation.</div>
+        <div><span class="accent">04</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P5 场景 ② 日报 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">scenarios/02_</span>daily-report.md
+        </div>
+        <div class="tb-right">scene 2 / 3</div>
+      </div>
+      <div class="body">
+        <div class="kicker">SCENARIO 02 · TEAM SYNC</div>
+
+        <div class="scene-layout">
+          <div class="scene-left">
+            <div class="scene-badge">
+              <span class="num">No.02</span> &nbsp;//&nbsp; 每日同步场景
+            </div>
+            <div class="scene-title">日报结构化工具 · Peter</div>
+            <div class="scene-sub">
+              口语化输入 &rarr; Summary / Plan / Blocker 三段式
+            </div>
+
+            <div class="scene-block">
+              <h4>PAIN · 写日报比干活还累</h4>
+              <div class="scene-pain">
+                工作记忆是<b>碎片化</b>的，但日报要求是<b>结构化</b>的。<br />
+                每天花 15–20 分钟组织措辞，而 leader 扫一眼 30 秒就过了。
+              </div>
+            </div>
+
+            <div class="scene-block">
+              <h4>FIX · 把格式交给模板，把判断留给人</h4>
+              <div class="scene-solution">
+                让 AI 做<b>信息抽取 + 结构化填充</b
+                >，开发者只需"想到啥说啥"。<br />
+                本质是<b>降低写作负担</b>，而不是替代思考。
+              </div>
+            </div>
+
+            <div class="scene-metrics">
+              <div class="scene-metric">
+                <div class="v">&darr;<span class="u"> min</span></div>
+                <div class="l">AVG. WRITING TIME</div>
+              </div>
+              <div class="scene-metric">
+                <div class="v">100<span class="u">%</span></div>
+                <div class="l">TEMPLATE CONSISTENCY</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scene-right">
+            <div class="scene-right-head">
+              <span>peter.compose()</span>
+              <span>● parsing</span>
+            </div>
+            <div class="scene-right-body">
+              <span class="cm">// INPUT · 碎片化语音/文字</span><br />
+              <span class="str"
+                >"今天改了登录接口，<br />
+                &nbsp;明天要联调，<br />
+                &nbsp;服务端还没给 token..."</span
+              ><br />
+              <br />
+              <span class="kw">extract</span>(input) <span class="cm">→ {</span
+              ><br />
+              &nbsp;&nbsp;<span class="fn">project</span>:
+              <span class="str">"auth-service"</span>,<br />
+              &nbsp;&nbsp;<span class="fn">action</span>:
+              <span class="str">"接口改造"</span>,<br />
+              &nbsp;&nbsp;<span class="fn">blocker</span>:
+              <span class="str">"token 待提供"</span><br />
+              <span class="cm">}</span><br />
+              <br />
+              <span class="cm">// OUTPUT · 结构化日报</span><br />
+              <span class="hi">📋 Summary of today</span><br />
+              <span class="hi">📅 Plan for tomorrow</span><br />
+              <span class="hi">🚧 Blocker / Risk</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div>SCENE 02 · DAILY REPORT</div>
+        <div class="mid">Format to the machine, judgment to the human.</div>
+        <div><span class="accent">05</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P6 场景 ③ 面试 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">scenarios/03_</span>hiring-toolkit.md
+        </div>
+        <div class="tb-right">scene 3 / 3</div>
+      </div>
+      <div class="body">
+        <div class="kicker">SCENARIO 03 · HIRING</div>
+
+        <div class="scene-layout">
+          <div class="scene-left">
+            <div class="scene-badge">
+              <span class="num">No.03</span> &nbsp;//&nbsp; 面试前后场景
+            </div>
+            <div class="scene-title">招聘面试提效工具</div>
+            <div class="scene-sub">
+              面前 · 题单生成 &nbsp;|&nbsp; 面后 · 证据导向面评卡片
+            </div>
+
+            <div class="scene-block">
+              <h4>PAIN · 面试质量不该靠状态</h4>
+              <div class="scene-pain">
+                题单临时准备 → 问题停在<b>泛问</b>层面；<br />
+                面评写作依赖记忆 → 结论缺<b>证据支撑</b>，流转效率低。
+              </div>
+            </div>
+
+            <div class="scene-block">
+              <h4>FIX · 把"准备"和"沉淀"自动化</h4>
+              <div class="scene-solution">
+                面前：简历 + JD → <b>45 min 高密度题单</b>（基础盘点 / 项目验真
+                / 深度追问）<br />
+                面后：录屏转写 + 结论倾向 → <b>结构化面评卡片</b>（证据 → 判断 →
+                风险）
+              </div>
+            </div>
+
+            <div class="scene-metrics">
+              <div class="scene-metric">
+                <div class="v">&darr;<span class="u"> min</span></div>
+                <div class="l">PREP &amp; REVIEW TIME</div>
+              </div>
+              <div class="scene-metric">
+                <div class="v">&uarr;<span class="u"> %</span></div>
+                <div class="l">EVIDENCE-BACKED RATE</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="scene-right">
+            <div class="scene-right-head">
+              <span>interview.pipeline</span>
+              <span>● running</span>
+            </div>
+            <div class="scene-right-body">
+              <span class="cm">// BEFORE · 面前</span><br />
+              <span class="kw">input</span>: resume.pdf + jd.md<br />
+              <span class="kw">output</span>:
+              <span class="hi">question-sheet</span><br />
+              &nbsp;&nbsp;├─ 基础盘点 (10 min)<br />
+              &nbsp;&nbsp;├─ 项目验真 (15 min)<br />
+              &nbsp;&nbsp;├─ 深度追问 (15 min)<br />
+              &nbsp;&nbsp;└─ 开放交流 (5 min)<br />
+              <br />
+              <span class="cm">// AFTER · 面后</span><br />
+              <span class="kw">input</span>: transcript + verdict<br />
+              <span class="kw">output</span>: <span class="hi">review-card</span
+              ><br />
+              &nbsp;&nbsp;├─ 证据片段<br />
+              &nbsp;&nbsp;├─ 能力判断<br />
+              &nbsp;&nbsp;└─ 风险提示<br />
+              <br />
+              <span class="cm">// 核心：结论要可追溯</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div>SCENE 03 · HIRING</div>
+        <div class="mid">Evidence-driven, not memory-driven.</div>
+        <div><span class="accent">06</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P7 观点：AI 与生产关系 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">chapter-03/</span>ai-and-labor.md
+        </div>
+        <div class="tb-right">观点</div>
+      </div>
+      <div class="body">
+        <div class="kicker">CHAPTER 03 · 我对 AI 与生产关系的理解</div>
+        <h2 class="page-title">
+          AI 不淘汰人 —— <br />
+          它只是<span class="hl">改写了"熟练"的定义</span>。
+        </h2>
+        <p class="page-lead">
+          每一次生产力跃迁，都不是让"人"消失，而是让"不使用新工具的人"被使用新工具的人替代。
+        </p>
+
+        <div class="hist-grid">
+          <div class="hist-card">
+            <div class="hist-era">18TH · INDUSTRIAL</div>
+            <div class="hist-main">
+              电力 <span class="x">→</span> <span class="obj">蒸汽机</span>
+            </div>
+            <div class="hist-desc">
+              动力源更替，工厂形态被重塑，但"使用动力的人"从未消失。
+            </div>
+          </div>
+          <div class="hist-card">
+            <div class="hist-era">19TH · TEXTILE</div>
+            <div class="hist-main">
+              纺织机 <span class="x">→</span> <span class="obj">纺织女工</span>
+            </div>
+            <div class="hist-desc">
+              机器重新定义了"熟练"的标准，懂操作新机器的人成为新一代熟练工。
+            </div>
+          </div>
+          <div class="hist-card now">
+            <div class="hist-era">21ST · INTELLIGENCE · 我们</div>
+            <div class="hist-main">
+              AI <span class="x">→</span> <span class="obj">开发者</span>
+            </div>
+            <div class="hist-desc">
+              AI 只是工具。早接触、多接触的人，会成为下一代"熟练工人"。
+            </div>
+          </div>
+        </div>
+
+        <div class="golden">
+          AI 不淘汰人，<span class="hl"
+            >只有熟练使用更高生产力的人，才会淘汰使用落后生产力的人。</span
+          >
+          <span class="tag">// MY TAKE</span>
+        </div>
+      </div>
+      <div class="footer">
+        <div>CH.03 · PERSPECTIVE</div>
+        <div class="mid">Be the one who adapts first.</div>
+        <div><span class="accent">07</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P8 方法论 · 收束 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">chapter-04/</span>engineering-principles.md
+        </div>
+        <div class="tb-right">收束</div>
+      </div>
+      <div class="body">
+        <div class="kicker">CHAPTER 04 · 工程方法论 · 落地前的三条戒律</div>
+
+        <h2 class="method-title">
+          <span class="hl">边界</span><span class="arrow">&gt;</span>能力
+          &nbsp;·&nbsp; <span class="hl">约束</span
+          ><span class="arrow">&gt;</span>扩展 &nbsp;·&nbsp;
+          <span class="hl">复用</span><span class="arrow">&gt;</span>炫技
+        </h2>
+        <div class="method-sub">
+          // 三条排序优先级，决定一套 AI 实践能不能在团队里活下去
+        </div>
+
+        <div class="m-formula">
+          <span class="cm"
+            ># 原子提效的算术题 —— 为什么先别想着"全流程 AI"</span
+          >
+          <span class="v">3%</span> <span class="eq">×</span>
+          <span class="v">10 scenes</span> <span class="eq">≈</span>
+          <span class="g">30% total gain</span> &nbsp;&nbsp;<span class="cm"
+            >// 每个场景只做 3% 的改善，10 个就是 30%</span
+          ><br />
+          <span class="v">∞ complexity</span> <span class="eq">×</span>
+          <span class="v">1 mega-system</span> <span class="eq">=</span>
+          <span style="color: var(--red); font-weight: 700"
+            >out of control</span
+          >
+          &nbsp;&nbsp;<span class="cm"
+            >// 一次性接入全流程，大概率在复杂度里失控</span
+          >
+        </div>
+
+        <div class="m-bottom">
+          <div class="m-item">
+            <div class="n">// RULE 01</div>
+            <div class="t">先做减法，<span class="dim">再谈系统。</span></div>
+          </div>
+          <div class="m-item">
+            <div class="n">// RULE 02</div>
+            <div class="t">
+              先做局部闭环，<span class="dim">再谈全局整合。</span>
+            </div>
+          </div>
+          <div class="m-item">
+            <div class="n">// RULE 03</div>
+            <div class="t">
+              先让用户拿到结果，<span class="dim">再谈理念完整性。</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="golden" style="margin-top: 28px">
+          一套工具如果不能在 <span class="hl">10 分钟内被看懂</span>、在<span
+            class="hl"
+            >一次使用中被感知到价值</span
+          >，<br />
+          它就会沦为少数人的技术自娱。
+          <span class="tag"
+            >// THE REAL CHALLENGE IS ADOPTION, NOT CAPABILITY</span
+          >
+        </div>
+
+        <div class="thx">
+          <span class="prompt">$ dev</span> ./end-of-talk &nbsp;·&nbsp; Thanks
+          &amp; Q&amp;A &nbsp;·&nbsp; 欢迎吐槽<span class="cursor"></span>
+        </div>
+      </div>
+      <div class="footer">
+        <div>CH.04 · CLOSING</div>
+        <div class="mid accent">
+          Boundary &gt; Capability · Constraint &gt; Expansion · Reuse &gt;
+          Show-off
+        </div>
+        <div><span class="accent">08</span> / 08</div>
+      </div>
+    </section>
+  </body>
+</html>

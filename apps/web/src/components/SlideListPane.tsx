@@ -2,13 +2,12 @@ import { useState } from 'react';
 import { useDeckStore } from '../store/deckStore.js';
 import { cn } from '../lib/cn.js';
 
-const THUMB_W = 176; // px – thumbnail display width
-const THUMB_H = Math.round(THUMB_W * (720 / 1280)); // 99px
+const SIDEBAR_W = 200; // px – sidebar total width
 
-/** A scaled-down live iframe preview of one slide */
+/** A scaled-down live iframe preview of one slide.
+ *  Fluid: fills its card width and scales the 1280x720 frame via container query
+ *  units, so it never overflows regardless of card padding/sidebar width. */
 function SlideThumbnail({ sectionHtml, headHtml }: { sectionHtml: string; headHtml: string }) {
-  const scale = THUMB_W / 1280;
-
   const srcdoc = `<!doctype html><html><head>
 <meta charset="UTF-8">
 ${headHtml}
@@ -21,8 +20,9 @@ ${headHtml}
   return (
     <div
       style={{
-        width: THUMB_W,
-        height: THUMB_H,
+        width: '100%',
+        aspectRatio: '1280 / 720',
+        containerType: 'inline-size',
         overflow: 'hidden',
         position: 'relative',
         borderRadius: 6,
@@ -33,7 +33,10 @@ ${headHtml}
         style={{
           width: 1280,
           height: 720,
-          transform: `scale(${scale})`,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          transform: 'scale(calc(100cqw / 1280px))',
           transformOrigin: 'top left',
           pointerEvents: 'none',
         }}
@@ -65,7 +68,7 @@ export function SlideListPane() {
   return (
     <aside
       className="hds-sidebar shrink-0 h-full overflow-y-auto flex flex-col gap-2 p-3"
-      style={{ width: THUMB_W + 24 }}
+      style={{ width: SIDEBAR_W }}
     >
       {slides.map((slide, idx) => (
         <div

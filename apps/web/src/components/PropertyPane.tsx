@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDeckStore } from '../store/deckStore.js';
 import type { PatchOp } from '@hds/protocol';
 
@@ -8,30 +8,52 @@ interface PropertyPaneProps {
 
 const TEXT_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'li', 'td', 'th', 'label', 'a', 'button', 'strong', 'em', 'code', 'pre']);
 
+const TEXT_COLORS = ['#e6edf3', '#ffffff', '#0d1117', '#1d4ed8', '#475569', '#ef4444', '#22c55e', '#f59e0b', '#bc8cff', '#f78166'];
+const BG_COLORS = ['transparent', '#0d1117', '#161b22', '#ffffff', '#eff6ff', '#fef9c3', '#fce7f3'];
+
 export function PropertyPane({ onPatch }: PropertyPaneProps) {
   const selection = useDeckStore((s) => s.selection);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [fontSize, setFontSize] = useState(16);
+  const [opacity, setOpacity] = useState(1);
+
+  const selector = selection?.selector;
+  const snapFontSize = selection?.styleSnapshot.fontSize;
+
+  // Re-sync local control state whenever the selected element changes.
+  useEffect(() => {
+    if (snapFontSize) setFontSize(Math.round(parseFloat(snapFontSize)) || 16);
+    setOpacity(1);
+  }, [selector, snapFontSize]);
 
   if (!selection) {
     return (
-      <aside className="hds-panel w-[300px] shrink-0 p-4 flex items-center justify-center">
-        <p className="text-[var(--tertiary-label)] text-sm text-center leading-relaxed">点击页面元素选中<br />双击文本可直接改字</p>
+      <aside className="hds-panel w-[300px] shrink-0 p-6 flex flex-col items-center justify-center gap-3 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-[var(--control-bg)] border border-[var(--separator)] flex items-center justify-center">
+          <svg className="w-6 h-6 text-[var(--tertiary-label)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+          </svg>
+        </div>
+        <p className="text-[var(--secondary-label)] text-sm leading-relaxed">在画布上点选一个元素</p>
+        <p className="text-[var(--tertiary-label)] text-xs leading-relaxed">双击文本可直接改字</p>
       </aside>
     );
   }
 
-  const { selector, tagName, styleSnapshot, attrs } = selection;
+  const { tagName, styleSnapshot, attrs } = selection;
   const isTextEl = TEXT_TAGS.has(tagName);
   const deco = styleSnapshot.textDecoration ?? '';
   const hasUnderline = deco.includes('underline');
   const hasLineThrough = deco.includes('line-through');
 
-  const patch = (ops: PatchOp[]) => onPatch(selector, ops);
+  const patch = (ops: PatchOp[]) => onPatch(selector!, ops);
 
-  const commitFontSize = (val: string) => {
-    const n = parseFloat(val);
-    if (!isNaN(n) && n > 0) patch([{ kind: 'style', name: 'font-size', value: `${n}px` }]);
+  const commitFontSize = (n: number) => {
+    if (!isNaN(n) && n > 0) {
+      setFontSize(n);
+      patch([{ kind: 'style', name: 'font-size', value: `${n}px` }]);
+    }
   };
 
   const toggleDecoration = (token: 'underline' | 'line-through') => {
@@ -47,241 +69,274 @@ export function PropertyPane({ onPatch }: PropertyPaneProps) {
     window.dispatchEvent(new CustomEvent('hds-replace-image', { detail: { file, blobUrl, selector } }));
   };
 
+  const fontWeight = (() => {
+    const w = parseInt(styleSnapshot.fontWeight);
+    if (w >= 800) return '800';
+    if (w >= 700) return '700';
+    if (w >= 600) return '600';
+    if (w >= 500) return '500';
+    if (w <= 300) return '300';
+    return '400';
+  })();
+
   return (
     <aside className="hds-panel w-[300px] shrink-0 overflow-y-auto flex flex-col">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-[var(--separator)] flex items-center gap-2">
-        <code className="text-xs bg-[var(--cobalt-lt)] text-[var(--system-blue)] px-1.5 py-0.5 rounded font-mono shrink-0">
+      {/* Header: tag chip + selector path */}
+      <div className="px-4 py-3 border-b border-[var(--separator)] flex items-center gap-2 sticky top-0 z-10 bg-[var(--vibrancy-panel)] backdrop-blur">
+        <code className="text-[11px] bg-[var(--cobalt-lt)] text-[var(--system-blue)] px-2 py-0.5 rounded-md font-mono font-medium shrink-0">
           {`<${tagName}>`}
         </code>
-        <span className="text-[10px] text-[var(--tertiary-label)] truncate" title={selector}>{selector}</span>
+        <span className="text-[10px] text-[var(--tertiary-label)] truncate font-mono" title={selector}>{selector}</span>
       </div>
 
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-5 p-4">
 
-        {/* ── Text content ─────────────────────────────── */}
+        {/* ── 文字 ─────────────────────────────────────── */}
         {isTextEl && (
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-[var(--slate)]">文本内容</span>
-            <textarea
-              ref={textAreaRef}
-              rows={3}
-              placeholder="输入文字后按 Enter 确认，Shift+Enter 换行"
-              className="w-full border border-[var(--rule)] rounded px-2 py-1.5 text-sm resize-y leading-snug focus:outline-none focus:border-[var(--cobalt)]"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  patch([{ kind: 'text', value: e.currentTarget.value }]);
-                  e.currentTarget.blur();
-                }
-              }}
-              onBlur={(e) => {
-                if (e.target.value.trim()) {
-                  patch([{ kind: 'text', value: e.target.value }]);
-                }
-              }}
-            />
-            <span className="text-[10px] text-[var(--silver)]">Enter 应用 · Shift+Enter 换行</span>
-          </label>
+          <section>
+            <div className="hds-inspector-label">文字</div>
+            <div className="hds-inspector-section">
+              <div className="hds-inspector-block">
+                <textarea
+                  ref={textAreaRef}
+                  rows={3}
+                  placeholder="输入文字后按 Enter 确认，Shift+Enter 换行"
+                  className="hds-input leading-snug"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      patch([{ kind: 'text', value: e.currentTarget.value }]);
+                      e.currentTarget.blur();
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value.trim()) patch([{ kind: 'text', value: e.target.value }]);
+                  }}
+                />
+                <span className="text-[10px] text-[var(--tertiary-label)]">Enter 应用 · Shift+Enter 换行</span>
+              </div>
+            </div>
+          </section>
         )}
 
-        {/* ── Font size ─────────────────────────────────── */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-[var(--slate)]">字号</span>
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              defaultValue={Math.round(parseFloat(styleSnapshot.fontSize))}
-              step={1}
-              min={8}
-              max={400}
-              className="w-20 border border-[var(--rule)] rounded px-2 py-1 text-sm font-mono focus:outline-none focus:border-[var(--cobalt)]"
-              onBlur={(e) => commitFontSize(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') commitFontSize((e.target as HTMLInputElement).value); }}
-            />
-            <span className="text-xs text-[var(--silver)]">px</span>
-          </div>
-        </label>
+        {/* ── 排版 ─────────────────────────────────────── */}
+        <section>
+          <div className="hds-inspector-label">排版</div>
+          <div className="hds-inspector-section">
+            {/* Font size */}
+            <div className="hds-inspector-row">
+              <span className="hds-row-label">字号</span>
+              <div className="hds-row-control">
+                <div className="hds-stepper">
+                  <button type="button" title="减小" onClick={() => commitFontSize(Math.max(8, fontSize - 1))}>−</button>
+                  <input
+                    type="number"
+                    min={8}
+                    max={400}
+                    value={fontSize}
+                    onChange={(e) => setFontSize(parseInt(e.target.value) || 0)}
+                    onBlur={(e) => commitFontSize(parseFloat(e.target.value))}
+                    onKeyDown={(e) => { if (e.key === 'Enter') commitFontSize(parseFloat((e.target as HTMLInputElement).value)); }}
+                  />
+                  <button type="button" title="增大" onClick={() => commitFontSize(Math.min(400, fontSize + 1))}>＋</button>
+                </div>
+                <span className="text-[11px] text-[var(--tertiary-label)]">px</span>
+              </div>
+            </div>
 
-        {/* ── Font weight ───────────────────────────────── */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-[var(--slate)]">字重</span>
-          <select
-            defaultValue={(() => {
-              const w = parseInt(styleSnapshot.fontWeight);
-              if (w >= 700) return '700';
-              if (w <= 300) return '300';
-              return '400';
-            })()}
-            className="border border-[var(--rule)] rounded px-2 py-1 text-sm focus:outline-none focus:border-[var(--cobalt)]"
-            onChange={(e) => patch([{ kind: 'style', name: 'font-weight', value: e.target.value }])}
-          >
-            <option value="300">Light 300</option>
-            <option value="400">Normal 400</option>
-            <option value="500">Medium 500</option>
-            <option value="600">SemiBold 600</option>
-            <option value="700">Bold 700</option>
-            <option value="800">ExtraBold 800</option>
-            <option value="900">Black 900</option>
-          </select>
-        </label>
+            {/* Font weight */}
+            <div className="hds-inspector-row">
+              <span className="hds-row-label">字重</span>
+              <div className="hds-row-control">
+                <select
+                  className="hds-input"
+                  value={fontWeight}
+                  onChange={(e) => patch([{ kind: 'style', name: 'font-weight', value: e.target.value }])}
+                >
+                  <option value="300">Light · 300</option>
+                  <option value="400">Regular · 400</option>
+                  <option value="500">Medium · 500</option>
+                  <option value="600">SemiBold · 600</option>
+                  <option value="700">Bold · 700</option>
+                  <option value="800">Heavy · 800</option>
+                  <option value="900">Black · 900</option>
+                </select>
+              </div>
+            </div>
 
-        {/* ── Color ────────────────────────────────────── */}
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-[var(--slate)]">颜色</span>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <input
-              type="color"
-              className="w-8 h-8 cursor-pointer rounded border border-[var(--rule)] shrink-0"
-              onChange={(e) => patch([{ kind: 'style', name: 'color', value: e.target.value }])}
-            />
-            {['#e6edf3', '#ffffff', '#0d1117', '#1d4ed8', '#475569', '#ef4444', '#22c55e', '#f59e0b', '#bc8cff', '#f78166'].map((c) => (
-              <button
-                key={c}
-                title={c}
-                className="w-5 h-5 rounded-full border border-[var(--rule)] shrink-0 hover:scale-110 transition-transform"
-                style={{ background: c }}
-                onClick={() => patch([{ kind: 'style', name: 'color', value: c }])}
-              />
-            ))}
-          </div>
-        </label>
+            {/* Align */}
+            <div className="hds-inspector-block">
+              <span className="hds-block-label">对齐</span>
+              <div className="hds-segmented is-fill">
+                {([
+                  ['left', 'M3 5h18M3 10h12M3 15h18M3 20h12'],
+                  ['center', 'M3 5h18M6 10h12M3 15h18M6 20h12'],
+                  ['right', 'M3 5h18M9 10h12M3 15h18M9 20h12'],
+                  ['justify', 'M3 5h18M3 10h18M3 15h18M3 20h18'],
+                ] as const).map(([align, d]) => (
+                  <button
+                    key={align}
+                    type="button"
+                    title={align}
+                    className={`hds-segment is-icon ${styleSnapshot.textAlign === align ? 'is-active' : ''}`}
+                    onClick={() => patch([{ kind: 'style', name: 'text-align', value: align }])}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round"><path d={d} /></svg>
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* ── Text align ────────────────────────────────── */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-[var(--slate)]">对齐</span>
-          <div className="flex gap-1">
-            {(['left', 'center', 'right', 'justify'] as const).map((align) => (
-              <button
-                key={align}
-                className="flex-1 border border-[var(--rule)] rounded py-1 text-xs hover:bg-[var(--cobalt-lt)] hover:border-[var(--cobalt)] transition-colors"
-                onClick={() => patch([{ kind: 'style', name: 'text-align', value: align }])}
-              >
-                {align === 'left' ? '左' : align === 'center' ? '中' : align === 'right' ? '右' : '两端'}
-              </button>
-            ))}
-          </div>
-        </label>
-
-        {/* ── Text decoration (F-07) ────────────────────── */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-[var(--slate)]">文本装饰</span>
-          <div className="flex gap-1">
-            <button
-              className={`flex-1 border rounded py-1 text-xs transition-colors ${hasUnderline ? 'bg-[var(--cobalt-lt)] border-[var(--cobalt)] text-[var(--cobalt)]' : 'border-[var(--rule)] hover:border-[var(--cobalt)]'}`}
-              onClick={() => toggleDecoration('underline')}
-            >
-              <span style={{ textDecoration: 'underline' }}>下划线</span>
-            </button>
-            <button
-              className={`flex-1 border rounded py-1 text-xs transition-colors ${hasLineThrough ? 'bg-[var(--cobalt-lt)] border-[var(--cobalt)] text-[var(--cobalt)]' : 'border-[var(--rule)] hover:border-[var(--cobalt)]'}`}
-              onClick={() => toggleDecoration('line-through')}
-            >
-              <span style={{ textDecoration: 'line-through' }}>删除线</span>
-            </button>
-          </div>
-        </label>
-
-        {/* ── Background color ──────────────────────────── */}
-        <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium text-[var(--slate)]">背景色</span>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <input
-              type="color"
-              className="w-8 h-8 cursor-pointer rounded border border-[var(--rule)] shrink-0"
-              onChange={(e) => patch([{ kind: 'style', name: 'background-color', value: e.target.value }])}
-            />
-            {['transparent', '#0d1117', '#161b22', '#ffffff', '#eff6ff', '#fef9c3', '#fce7f3'].map((c) => (
-              <button
-                key={c}
-                title={c}
-                className="w-5 h-5 rounded-full border border-[var(--rule)] shrink-0 hover:scale-110 transition-transform"
-                style={{ background: c === 'transparent' ? 'repeating-conic-gradient(#ccc 0% 25%, white 0% 50%) 0 0/8px 8px' : c }}
-                onClick={() => patch([{ kind: 'style', name: 'background-color', value: c === 'transparent' ? 'transparent' : c }])}
-              />
-            ))}
-          </div>
-        </label>
-
-        {/* ── Image src replacement (F-08) ──────────────── */}
-        {tagName === 'img' && (
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-[var(--slate)]">替换图片</span>
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={(e) => {
-                e.preventDefault();
-                setDragOver(false);
-                const file = e.dataTransfer.files?.[0];
-                if (file?.type.startsWith('image/')) replaceImage(file);
-              }}
-              className={`rounded-lg border-2 border-dashed px-3 py-4 text-center transition-colors ${
-                dragOver ? 'border-[var(--cobalt)] bg-[var(--cobalt-lt)]' : 'border-[var(--rule)]'
-              }`}
-            >
-              <p className="text-[11px] text-[var(--silver)] mb-2">拖拽图片到此处，或</p>
-              <input
-                id="hds-img-input"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) replaceImage(file);
-                  e.target.value = '';
-                }}
-              />
-              <label
-                htmlFor="hds-img-input"
-                className="inline-block cursor-pointer rounded-md bg-[var(--cobalt-lt)] px-3 py-1 text-xs text-[var(--cobalt)] hover:opacity-80"
-              >
-                选择文件
-              </label>
+            {/* Decoration */}
+            <div className="hds-inspector-block">
+              <span className="hds-block-label">文本装饰</span>
+              <div className="hds-segmented is-fill">
+                <button
+                  type="button"
+                  className={`hds-segment ${hasUnderline ? 'is-active' : ''}`}
+                  onClick={() => toggleDecoration('underline')}
+                >
+                  <span style={{ textDecoration: 'underline' }}>下划线</span>
+                </button>
+                <button
+                  type="button"
+                  className={`hds-segment ${hasLineThrough ? 'is-active' : ''}`}
+                  onClick={() => toggleDecoration('line-through')}
+                >
+                  <span style={{ textDecoration: 'line-through' }}>删除线</span>
+                </button>
+              </div>
             </div>
           </div>
-        )}
+        </section>
 
-        {/* ── Link (F-07) ───────────────────────────────── */}
-        {tagName === 'a' && (
-          <div className="flex flex-col gap-2">
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-[var(--slate)]">链接地址</span>
-              <input
-                type="url"
-                placeholder="https://…"
-                defaultValue={attrs?.href ?? ''}
-                className="w-full border border-[var(--rule)] rounded px-2 py-1 text-sm focus:outline-none focus:border-[var(--cobalt)]"
-                onBlur={(e) => patch([{ kind: 'attr', name: 'href', value: e.target.value || null }])}
-                onKeyDown={(e) => { if (e.key === 'Enter') patch([{ kind: 'attr', name: 'href', value: (e.target as HTMLInputElement).value || null }]); }}
-              />
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                defaultChecked={attrs?.target === '_blank'}
-                onChange={(e) => patch([{ kind: 'attr', name: 'target', value: e.target.checked ? '_blank' : null }])}
-              />
-              <span className="text-xs text-[var(--slate)]">在新标签页打开</span>
-            </label>
-          </div>
-        )}
+        {/* ── 外观 ─────────────────────────────────────── */}
+        <section>
+          <div className="hds-inspector-label">外观</div>
+          <div className="hds-inspector-section">
+            {/* Text color */}
+            <div className="hds-inspector-block">
+              <span className="hds-block-label">文字颜色</span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <input
+                  type="color"
+                  className="hds-swatch-native"
+                  onChange={(e) => patch([{ kind: 'style', name: 'color', value: e.target.value }])}
+                />
+                {TEXT_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    title={c}
+                    className="hds-swatch"
+                    style={{ background: c }}
+                    onClick={() => patch([{ kind: 'style', name: 'color', value: c }])}
+                  />
+                ))}
+              </div>
+            </div>
 
-        {/* ── Opacity ───────────────────────────────────── */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-[var(--slate)]">透明度</span>
-          <div className="flex items-center gap-2">
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              defaultValue={1}
-              className="flex-1"
-              onChange={(e) => patch([{ kind: 'style', name: 'opacity', value: e.target.value }])}
-            />
+            {/* Background color */}
+            <div className="hds-inspector-block">
+              <span className="hds-block-label">背景色</span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <input
+                  type="color"
+                  className="hds-swatch-native"
+                  onChange={(e) => patch([{ kind: 'style', name: 'background-color', value: e.target.value }])}
+                />
+                {BG_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    title={c}
+                    className="hds-swatch"
+                    style={{ background: c === 'transparent' ? 'repeating-conic-gradient(#ccc 0% 25%, white 0% 50%) 0 0/8px 8px' : c }}
+                    onClick={() => patch([{ kind: 'style', name: 'background-color', value: c === 'transparent' ? 'transparent' : c }])}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Opacity */}
+            <div className="hds-inspector-block">
+              <div className="flex items-center justify-between">
+                <span className="hds-block-label">透明度</span>
+                <span className="text-[11px] text-[var(--tertiary-label)] font-mono tabular-nums">{Math.round(opacity * 100)}%</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={opacity}
+                className="w-full"
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value);
+                  setOpacity(v);
+                  patch([{ kind: 'style', name: 'opacity', value: String(v) }]);
+                }}
+              />
+            </div>
+
+            {/* Image replacement (img) */}
+            {tagName === 'img' && (
+              <div className="hds-inspector-block">
+                <span className="hds-block-label">替换图片</span>
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragOver(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (file?.type.startsWith('image/')) replaceImage(file);
+                  }}
+                  className={`rounded-lg border border-dashed px-3 py-4 text-center transition-colors ${
+                    dragOver ? 'border-[var(--system-blue)] bg-[var(--cobalt-lt)]' : 'border-[var(--separator)]'
+                  }`}
+                >
+                  <p className="text-[11px] text-[var(--tertiary-label)] mb-2">拖拽图片到此处，或</p>
+                  <input
+                    id="hds-img-input"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) replaceImage(file);
+                      e.target.value = '';
+                    }}
+                  />
+                  <label htmlFor="hds-img-input" className="hds-btn inline-block cursor-pointer px-3 py-1 text-xs">选择文件</label>
+                </div>
+              </div>
+            )}
+
+            {/* Link (a) */}
+            {tagName === 'a' && (
+              <div className="hds-inspector-block">
+                <span className="hds-block-label">链接</span>
+                <input
+                  type="url"
+                  placeholder="https://…"
+                  defaultValue={attrs?.href ?? ''}
+                  className="hds-input"
+                  onBlur={(e) => patch([{ kind: 'attr', name: 'href', value: e.target.value || null }])}
+                  onKeyDown={(e) => { if (e.key === 'Enter') patch([{ kind: 'attr', name: 'href', value: (e.target as HTMLInputElement).value || null }]); }}
+                />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    defaultChecked={attrs?.target === '_blank'}
+                    onChange={(e) => patch([{ kind: 'attr', name: 'target', value: e.target.checked ? '_blank' : null }])}
+                  />
+                  <span className="text-xs text-[var(--secondary-label)]">在新标签页打开</span>
+                </label>
+              </div>
+            )}
           </div>
-        </label>
+        </section>
 
       </div>
     </aside>
