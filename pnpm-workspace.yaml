@@ -5,3 +5,8 @@ packages:
 onlyBuiltDependencies:
   - esbuild
   - puppeteer
+
+# Disable pnpm's default 24h new-package cooldown (default minimumReleaseAge=1440),
+# which otherwise blocks our committed lockfile's recently published deps in clean
+# Docker/CI builds with ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION.
+minimumReleaseAge: 0

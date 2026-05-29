@@ -31,7 +31,7 @@ WORKDIR /app
 
 # Install dependencies first (better layer caching). This also triggers
 # puppeteer's postinstall to download Chromium into PUPPETEER_CACHE_DIR.
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml .npmrc ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY apps/api/package.json apps/api/
 COPY packages/protocol/package.json packages/protocol/
 RUN pnpm install --frozen-lockfile
