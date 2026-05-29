@@ -16,6 +16,7 @@ export interface SelectionState {
   bbox: DOMRect;
   styleSnapshot: StyleSnapshot;
   attrs?: Record<string, string>;
+  text?: string;
 }
 
 export interface DeckStore {

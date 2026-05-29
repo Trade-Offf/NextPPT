@@ -67,6 +67,8 @@ export interface SelectMessage {
   styleSnapshot: StyleSnapshot;
   /** Selected element attributes relevant to the property panel (href, target, …) */
   attrs?: Record<string, string>;
+  /** Current text content for back-filling the text editor in the panel */
+  text?: string;
 }
 
 export interface ClearSelectMessage {

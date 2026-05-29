@@ -640,3 +640,109 @@ select.hds-input {
 }
 .hds-copy-btn:hover { background: rgba(0, 122, 255, 0.18); }
 .hds-copy-btn.is-copied { color: var(--system-green, #34c759); background: rgba(52, 199, 89, 0.14); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HDS · Editor full-bleed stage (floating chrome)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hds-stage {
+  background:
+    radial-gradient(900px 600px at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%),
+    radial-gradient(1100px 700px at 50% 120%, rgba(0, 122, 255, 0.08), transparent 60%),
+    linear-gradient(180deg, #1c1d22 0%, #161719 100%);
+}
+
+/* Glass capsule for floating controls */
+.hds-floating-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 9999px;
+  background: rgba(30, 31, 36, 0.62);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
+  backdrop-filter: saturate(180%) blur(22px);
+  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 10px 30px rgba(0, 0, 0, 0.4);
+  color: #f2f3f5;
+}
+/* On the dark stage, segmented control needs a darker base */
+.hds-floating-bar .hds-segmented {
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.hds-floating-bar .hds-segment { color: rgba(255, 255, 255, 0.6); }
+.hds-floating-bar .hds-segment:hover { color: #fff; }
+.hds-floating-bar .hds-segment.is-active {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  box-shadow: none;
+}
+/* Subtle ghost button inside the dark capsule */
+.hds-bar-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.82);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.hds-bar-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.hds-bar-btn:disabled { opacity: 0.4; }
+/* Icon toggle inside the dark capsule (panel show/hide) */
+.hds-bar-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 26px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.55);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.hds-bar-icon:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.hds-bar-icon.is-active { color: rgba(255, 255, 255, 0.95); }
+
+/* Floating left thumbnail rail & right inspector — dark glass that blends with
+   the stage. Scope dark design tokens here so the inner controls (which all use
+   these CSS vars) adapt automatically, with no markup changes. */
+.hds-floating-rail,
+.hds-floating-inspector {
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(28, 29, 33, 0.72) !important;
+  -webkit-backdrop-filter: saturate(160%) blur(22px);
+  backdrop-filter: saturate(160%) blur(22px);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.45);
+
+  --label: #f5f5f7;
+  --secondary-label: #aeaeb2;
+  --tertiary-label: #8e8e93;
+  --content-bg: #242426;
+  --control-bg: #2c2c2e;
+  --separator: #3a3a3d;
+  --rule: #38383a;
+  --cobalt-lt: #1a2b40;
+  --vibrancy-panel: transparent;
+  --vibrancy-sidebar: transparent;
+}
+.hds-floating-rail {
+  animation: hdsSlideInLeft 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hds-floating-inspector {
+  animation: hdsSlideInRight 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes hdsSlideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes hdsSlideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-floating-rail,
+  .hds-floating-inspector { animation: none; }
+}

@@ -30,25 +30,34 @@ export function EditorPage() {
   const markSaving = useDeckStore((s) => s.markSaving);
   const markSaved = useDeckStore((s) => s.markSaved);
 
+  const selection = useDeckStore((s) => s.selection);
+
   const [exportOpen, setExportOpen] = useState(false);
-  const [containerWidth, setContainerWidth] = useState(800);
+  const [railOpen, setRailOpen] = useState(true);
+  const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [containerSize, setContainerSize] = useState({ w: 800, h: 450 });
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<CanvasHandle>(null);
 
   const currentSlide = slides.find((s) => s.id === currentSlideId);
 
-  // Measure container width for responsive canvas scaling.
-  // Re-attaches when returning from code mode (the <main> remounts).
+  // Measure the available canvas area (width AND height) so the slide fits the
+  // full-bleed stage completely. The observer re-fires automatically when the
+  // floating inspector toggles (it changes <main>'s right inset → resize).
   useEffect(() => {
     if (viewMode !== 'visual' || !canvasContainerRef.current) return;
     const el = canvasContainerRef.current;
-    setContainerWidth(Math.floor(el.clientWidth));
-    const ro = new ResizeObserver(([entry]) => {
-      if (entry) setContainerWidth(Math.floor(entry.contentRect.width));
-    });
+    const measure = () => setContainerSize({ w: Math.floor(el.clientWidth), h: Math.floor(el.clientHeight) });
+    measure();
+    const ro = new ResizeObserver(() => measure());
     ro.observe(el);
     return () => ro.disconnect();
   }, [viewMode]);
+
+  // Fit the 16:9 slide within the measured area by the tighter dimension.
+  const fitWidth = Math.max(0, Math.min(containerSize.w, Math.round((containerSize.h * 1280) / 720)));
+
+  const showInspector = viewMode === 'visual' && !!selection && inspectorOpen;
 
   // Handle runtime messages from iframe
   const handleMessage = useCallback((msg: RuntimeMessage) => {
@@ -153,30 +162,36 @@ export function EditorPage() {
   const assetsBaseUrl = '/v1/asset-base/';
 
   return (
-    <div className="flex flex-col h-full">
-      {/* macOS-style unified toolbar / title bar */}
-      <header className="hds-toolbar h-14 flex items-center px-4 gap-3 shrink-0">
-        <div className="hds-traffic-lights" aria-hidden>
-          <span className="tl tl-red" />
-          <span className="tl tl-amber" />
-          <span className="tl tl-green" />
-        </div>
+    <div className="relative h-full hds-stage overflow-hidden">
+      {/* ── Floating chrome ─────────────────────────────────────── */}
+      {/* Top-left: sidebar toggle + filename + save status */}
+      <div className="absolute top-4 left-4 z-20 hds-floating-bar">
+        <button
+          onClick={() => setRailOpen((v) => !v)}
+          className={`hds-bar-icon ${railOpen ? 'is-active' : ''}`}
+          aria-label={railOpen ? '收起页面列表' : '展开页面列表'}
+          title={railOpen ? '收起页面列表' : '展开页面列表'}
+        >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
+            <rect x="2.5" y="3.5" width="15" height="13" rx="2.5" />
+            <path d="M7.5 3.5v13" />
+          </svg>
+        </button>
+        <span className="text-[13px] font-semibold truncate max-w-[200px] px-1">{deckFileName}</span>
+        <span className="text-[11px] shrink-0 select-none pr-1" title={lastSavedAt ? `上次保存 ${new Date(lastSavedAt).toLocaleTimeString()}` : sourceFileName}>
+          {isSaving ? (
+            <span className="text-white/55">保存中…</span>
+          ) : isDirty ? (
+            <span className="text-amber-300">● 未保存</span>
+          ) : lastSavedAt ? (
+            <span className="text-emerald-300">✓ 已保存</span>
+          ) : null}
+        </span>
+      </div>
 
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-[13px] font-semibold text-[var(--label)] truncate">{deckFileName}</span>
-          <span className="text-[11px] shrink-0 select-none" title={lastSavedAt ? `上次保存 ${new Date(lastSavedAt).toLocaleTimeString()}` : sourceFileName}>
-            {isSaving ? (
-              <span className="text-[var(--tertiary-label)]">保存中…</span>
-            ) : isDirty ? (
-              <span className="text-amber-500">● 未保存</span>
-            ) : lastSavedAt ? (
-              <span className="text-emerald-500">✓ 已保存</span>
-            ) : null}
-          </span>
-        </div>
-
-        {/* View-mode segmented control (F-10) */}
-        <div className="mx-auto hds-segmented" role="tablist">
+      {/* Top-center: view-mode segmented control (F-10) */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 hds-floating-bar">
+        <div className="hds-segmented" role="tablist">
           <button
             role="tab"
             aria-selected={viewMode === 'visual'}
@@ -194,46 +209,69 @@ export function EditorPage() {
             代码
           </button>
         </div>
+      </div>
 
+      {/* Top-right: inspector toggle + save + export */}
+      <div className="absolute top-4 right-4 z-20 hds-floating-bar">
         <button
-          onClick={() => void handleSave()}
-          disabled={!isDirty}
-          className="hds-btn px-3 py-1.5 text-xs disabled:opacity-40"
+          onClick={() => setInspectorOpen((v) => !v)}
+          className={`hds-bar-icon ${inspectorOpen ? 'is-active' : ''}`}
+          aria-label={inspectorOpen ? '收起检查器' : '展开检查器'}
+          title={selection ? (inspectorOpen ? '收起检查器' : '展开检查器') : '检查器（选中元素后可用）'}
         >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
+            <rect x="2.5" y="3.5" width="15" height="13" rx="2.5" />
+            <path d="M12.5 3.5v13" />
+          </svg>
+        </button>
+        <button onClick={() => void handleSave()} disabled={!isDirty} className="hds-bar-btn">
           保存
         </button>
-
-        <button
-          onClick={() => setExportOpen(true)}
-          className="hds-btn-primary px-3 py-1.5 text-xs"
-        >
+        <button onClick={() => setExportOpen(true)} className="hds-btn-primary px-4 py-1.5 text-xs rounded-full">
           导出
         </button>
-      </header>
+      </div>
 
-      {/* Body */}
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        <SlideListPane />
-
-        {viewMode === 'code' ? (
+      {/* ── Body ────────────────────────────────────────────────── */}
+      {viewMode === 'code' ? (
+        <div className="absolute inset-0 pt-20 px-3 pb-3 flex">
           <CodeEditorPane key={currentSlideId} />
-        ) : (
-          <main ref={canvasContainerRef} className="flex-1 min-w-0 hds-canvas-stage flex items-center justify-center p-8 overflow-auto canvas-host">
+        </div>
+      ) : (
+        <>
+          {/* Floating thumbnail rail (collapsible) */}
+          {railOpen && (
+            <div className="absolute left-3 top-20 bottom-3 z-10">
+              <SlideListPane floating />
+            </div>
+          )}
+
+          {/* Full-bleed canvas area (insets leave room for floating chrome) */}
+          <main
+            ref={canvasContainerRef}
+            className="absolute flex items-center justify-center canvas-host transition-[left,right] duration-200 ease-out"
+            style={{ top: 80, bottom: 16, left: railOpen ? 224 : 16, right: showInspector ? 328 : 16 }}
+          >
             <div className="hds-canvas-card overflow-hidden">
               <ScaledCanvas
                 ref={canvasRef}
                 sectionHtml={currentSlide.html}
                 headHtml={headHtml}
                 assetsBaseUrl={assetsBaseUrl}
-                containerWidth={containerWidth}
+                containerWidth={fitWidth}
                 onMessage={handleMessage}
               />
             </div>
           </main>
-        )}
 
-        {viewMode === 'visual' && <PropertyPane onPatch={handlePatch} />}
-      </div>
+          {/* On-demand floating inspector — mounts only when selected and opened */}
+          {showInspector && (
+            <div className="absolute right-3 top-20 bottom-3 z-10">
+              <PropertyPane onPatch={handlePatch} floating onClose={() => setInspectorOpen(false)} />
+            </div>
+          )}
+        </>
+      )}
 
       <ExportDrawer open={exportOpen} onClose={() => setExportOpen(false)} />
     </div>

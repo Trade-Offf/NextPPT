@@ -285,6 +285,7 @@ document.addEventListener(
       },
       styleSnapshot: styleSnapshot(target),
       attrs,
+      text: target.textContent ?? '',
     });
   },
   true,

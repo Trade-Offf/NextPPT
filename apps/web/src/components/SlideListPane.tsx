@@ -53,7 +53,7 @@ ${headHtml}
   );
 }
 
-export function SlideListPane() {
+export function SlideListPane({ floating = false }: { floating?: boolean } = {}) {
   const slides = useDeckStore((s) => s.slides);
   const headHtml = useDeckStore((s) => s.headHtml);
   const currentId = useDeckStore((s) => s.currentSlideId);
@@ -67,7 +67,9 @@ export function SlideListPane() {
 
   return (
     <aside
-      className="hds-sidebar shrink-0 h-full overflow-y-auto flex flex-col gap-2 p-3"
+      className={`hds-sidebar shrink-0 overflow-y-auto flex flex-col gap-2 p-3 ${
+        floating ? 'hds-floating-rail h-full' : 'h-full'
+      }`}
       style={{ width: SIDEBAR_W }}
     >
       {slides.map((slide, idx) => (

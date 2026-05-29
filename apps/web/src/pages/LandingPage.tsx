@@ -147,7 +147,7 @@ export function LandingPage() {
 
   return (
     <div className="hds-hero-bg min-h-screen w-full flex items-center justify-center px-6 py-10 lg:py-16">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-16 items-center">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
 
         {/* ── Left: product narrative ───────────────────────────── */}
         <div className="hds-fade-up max-w-xl mx-auto lg:mx-0 text-center lg:text-left">
@@ -164,33 +164,16 @@ export function LandingPage() {
             把任意 AI 生成的 HTML 幻灯片拖进来，所见即所得地点选改字、替换图片、实时渲染 Mermaid，再一键导出 PPTX / PDF。无需登录，全程本地。
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-2 justify-center lg:justify-start">
+          <div className="mt-8 flex flex-wrap gap-2 justify-center lg:justify-start">
             {FEATURES.map((f) => (
               <span key={f.label} className="hds-pill">{f.label}</span>
             ))}
           </div>
-
-          <div className="mt-8 flex items-center gap-3 justify-center lg:justify-start flex-wrap">
-            <button
-              onClick={() => { if (DIR_API_SUPPORTED) void handlePickFolder(); else void handlePickFile(); }}
-              disabled={loading || !FS_API_SUPPORTED}
-              className="hds-btn-primary px-5 py-2.5 text-sm disabled:opacity-40"
-            >
-              {loading ? '加载中…' : '打开我的演示稿'}
-            </button>
-            <button
-              onClick={() => setShowGuide(true)}
-              className="hds-btn px-5 py-2.5 text-sm inline-flex items-center gap-1.5"
-            >
-              <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M10 2.5l1.6 4.3 4.4.3-3.4 2.9 1.1 4.3L10 12.2 6.3 14.6l1.1-4.3-3.4-2.9 4.4-.3z" /></svg>
-              用 AI 生成演示稿
-            </button>
-          </div>
         </div>
 
-        {/* ── Right: action card ────────────────────────────────── */}
-        <div className="hds-fade-up hds-fade-up-delay w-full max-w-md mx-auto">
-          <div className="hds-glass-card p-6 sm:p-7">
+        {/* ── Right: the single action hub ───────────────────────── */}
+        <div className="hds-fade-up hds-fade-up-delay w-full max-w-lg mx-auto lg:mx-0 lg:justify-self-end">
+          <div className="hds-glass-card p-7 sm:p-8">
             {!FS_API_SUPPORTED ? (
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800 leading-relaxed">
                 <p className="font-medium mb-1">当前浏览器不支持本地文件读写</p>
@@ -207,11 +190,11 @@ export function LandingPage() {
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                   onDragLeave={() => setDragOver(false)}
                   onDrop={handleDrop}
-                  className={`relative w-full rounded-2xl px-6 py-10 flex flex-col items-center gap-3 text-center transition-colors group border-2 border-dashed cursor-pointer ${
+                  className={`relative w-full rounded-2xl px-6 py-14 flex flex-col items-center gap-3 text-center transition-colors group border-2 border-dashed cursor-pointer ${
                     dragOver ? 'border-[var(--system-blue)] bg-[var(--cobalt-lt)]' : 'border-[var(--rule)] hover:border-[var(--system-blue)] hover:bg-[var(--cobalt-lt)]'
                   } ${loading ? 'opacity-60 pointer-events-none' : ''}`}
                 >
-                  <svg className="w-11 h-11 text-[var(--tertiary-label)] group-hover:text-[var(--system-blue)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-12 h-12 text-[var(--tertiary-label)] group-hover:text-[var(--system-blue)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
                   </svg>
                   <span className="text-sm font-medium text-[var(--label)] group-hover:text-[var(--system-blue)]">
@@ -270,10 +253,6 @@ export function LandingPage() {
               </div>
             )}
           </div>
-
-          <p className="mt-5 text-center text-[11px] text-[var(--tertiary-label)]">
-            本地优先 · 无需登录 · 数据不离开本机
-          </p>
         </div>
       </div>
 

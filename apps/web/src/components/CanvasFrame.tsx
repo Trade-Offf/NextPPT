@@ -106,6 +106,7 @@ export const ScaledCanvas = forwardRef<CanvasHandle, CanvasFrameProps & { contai
           bbox: msg.bbox as unknown as DOMRect,
           styleSnapshot: msg.styleSnapshot,
           attrs: msg.attrs,
+          text: msg.text,
         });
       }
       if (msg.type === 'clear-select') setSelection(null);

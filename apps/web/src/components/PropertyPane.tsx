@@ -4,6 +4,10 @@ import type { PatchOp } from '@hds/protocol';
 
 interface PropertyPaneProps {
   onPatch: (selector: string, ops: PatchOp[]) => void;
+  /** Floating inspector variant: rounded glass card with slide-in animation. */
+  floating?: boolean;
+  /** When provided (floating), shows a close (×) button in the header. */
+  onClose?: () => void;
 }
 
 const TEXT_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'li', 'td', 'th', 'label', 'a', 'button', 'strong', 'em', 'code', 'pre']);
@@ -11,25 +15,28 @@ const TEXT_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'li'
 const TEXT_COLORS = ['#e6edf3', '#ffffff', '#0d1117', '#1d4ed8', '#475569', '#ef4444', '#22c55e', '#f59e0b', '#bc8cff', '#f78166'];
 const BG_COLORS = ['transparent', '#0d1117', '#161b22', '#ffffff', '#eff6ff', '#fef9c3', '#fce7f3'];
 
-export function PropertyPane({ onPatch }: PropertyPaneProps) {
+export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPaneProps) {
   const selection = useDeckStore((s) => s.selection);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [dragOver, setDragOver] = useState(false);
   const [fontSize, setFontSize] = useState(16);
   const [opacity, setOpacity] = useState(1);
+  const [textValue, setTextValue] = useState('');
 
   const selector = selection?.selector;
   const snapFontSize = selection?.styleSnapshot.fontSize;
+  const snapText = selection?.text ?? '';
 
   // Re-sync local control state whenever the selected element changes.
   useEffect(() => {
     if (snapFontSize) setFontSize(Math.round(parseFloat(snapFontSize)) || 16);
     setOpacity(1);
-  }, [selector, snapFontSize]);
+    setTextValue(snapText);
+  }, [selector, snapFontSize, snapText]);
 
   if (!selection) {
     return (
-      <aside className="hds-panel w-[300px] shrink-0 p-6 flex flex-col items-center justify-center gap-3 text-center">
+      <aside className={`hds-panel w-[300px] shrink-0 p-6 flex flex-col items-center justify-center gap-3 text-center ${floating ? 'hds-floating-inspector h-full' : ''}`}>
         <div className="w-12 h-12 rounded-2xl bg-[var(--control-bg)] border border-[var(--separator)] flex items-center justify-center">
           <svg className="w-6 h-6 text-[var(--tertiary-label)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
@@ -80,13 +87,23 @@ export function PropertyPane({ onPatch }: PropertyPaneProps) {
   })();
 
   return (
-    <aside className="hds-panel w-[300px] shrink-0 overflow-y-auto flex flex-col">
+    <aside className={`hds-panel w-[300px] shrink-0 overflow-y-auto flex flex-col ${floating ? 'hds-floating-inspector h-full' : ''}`}>
       {/* Header: tag chip + selector path */}
-      <div className="px-4 py-3 border-b border-[var(--separator)] flex items-center gap-2 sticky top-0 z-10 bg-[var(--vibrancy-panel)] backdrop-blur">
+      <div className={`px-4 py-3 border-b border-[var(--separator)] flex items-center gap-2 sticky top-0 z-10 backdrop-blur ${floating ? 'bg-[rgba(28,29,33,0.82)]' : 'bg-[var(--vibrancy-panel)]'}`}>
         <code className="text-[11px] bg-[var(--cobalt-lt)] text-[var(--system-blue)] px-2 py-0.5 rounded-md font-mono font-medium shrink-0">
           {`<${tagName}>`}
         </code>
-        <span className="text-[10px] text-[var(--tertiary-label)] truncate font-mono" title={selector}>{selector}</span>
+        <span className="text-[10px] text-[var(--tertiary-label)] truncate font-mono flex-1 min-w-0" title={selector}>{selector}</span>
+        {floating && onClose && (
+          <button
+            onClick={onClose}
+            aria-label="收起检查器"
+            title="收起"
+            className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[var(--secondary-label)] hover:bg-[var(--control-bg)] hover:text-[var(--label)] transition-colors"
+          >
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round"><path d="M2 2l8 8M10 2l-8 8" /></svg>
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-5 p-4">
@@ -100,17 +117,18 @@ export function PropertyPane({ onPatch }: PropertyPaneProps) {
                 <textarea
                   ref={textAreaRef}
                   rows={3}
+                  value={textValue}
                   placeholder="输入文字后按 Enter 确认，Shift+Enter 换行"
                   className="hds-input leading-snug"
+                  onChange={(e) => {
+                    setTextValue(e.target.value);
+                    patch([{ kind: 'text', value: e.target.value }]);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault();
-                      patch([{ kind: 'text', value: e.currentTarget.value }]);
                       e.currentTarget.blur();
                     }
-                  }}
-                  onBlur={(e) => {
-                    if (e.target.value.trim()) patch([{ kind: 'text', value: e.target.value }]);
                   }}
                 />
                 <span className="text-[10px] text-[var(--tertiary-label)]">Enter 应用 · Shift+Enter 换行</span>
