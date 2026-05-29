@@ -71,6 +71,21 @@ export async function exportHandler(req: FastifyRequest, reply: FastifyReply) {
   const deviceScaleFactor = SCALE_BY_RESOLUTION[opts.resolution] ?? 2;
 
   // 2. Now set up SSE
+  // @fastify/cors sets CORS headers on the Fastify reply, but this handler writes
+  // directly to reply.raw (bypassing Fastify's reply lifecycle), so the CORS
+  // headers are lost. Echo the allowed Origin onto the raw response ourselves.
+  const reqOrigin = req.headers.origin;
+  const allowedOrigins = (
+    process.env['CORS_ORIGIN'] ?? 'http://localhost:5173,http://localhost:4173'
+  )
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  if (reqOrigin && allowedOrigins.includes(reqOrigin)) {
+    reply.raw.setHeader('Access-Control-Allow-Origin', reqOrigin);
+    reply.raw.setHeader('Vary', 'Origin');
+  }
+
   reply.raw.setHeader('Content-Type', 'text/event-stream');
   reply.raw.setHeader('Cache-Control', 'no-cache');
   reply.raw.setHeader('Connection', 'keep-alive');
