@@ -132,6 +132,20 @@ body {
   background: #fff;
 }
 
+/* ── Interaction affordances (app-wide) ──────────────────────────────────── */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+label[for],
+summary { cursor: pointer; }
+button:disabled,
+[aria-disabled='true'] { cursor: not-allowed; }
+
+/* Visible keyboard focus for interactive elements (mouse clicks stay clean). */
+:where(a, button, [role='button'], input, textarea, select):focus-visible {
+  outline: 2px solid var(--system-blue);
+  outline-offset: 2px;
+}
+
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .hds-btn {
   border-radius: 7px;
@@ -422,50 +436,6 @@ select.hds-input {
 /* ═══════════════════════════════════════════════════════════════════════════
    HDS · Landing hero
    ═══════════════════════════════════════════════════════════════════════════ */
-.hds-hero-bg {
-  position: relative;
-  isolation: isolate;
-  background:
-    radial-gradient(900px 520px at 12% 8%, rgba(126, 20, 255, 0.16), transparent 60%),
-    radial-gradient(820px 520px at 92% 92%, rgba(188, 140, 255, 0.16), transparent 60%),
-    radial-gradient(700px 460px at 78% 4%, rgba(64, 220, 200, 0.12), transparent 60%),
-    linear-gradient(180deg, #eef1f7 0%, #f4f6fa 100%);
-}
-.hds-hero-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
-  background-size: 44px 44px;
-  -webkit-mask-image: radial-gradient(circle at 50% 35%, black, transparent 78%);
-  mask-image: radial-gradient(circle at 50% 35%, black, transparent 78%);
-  pointer-events: none;
-}
-@media (prefers-color-scheme: dark) {
-  .hds-hero-bg {
-    background:
-      radial-gradient(900px 520px at 12% 8%, rgba(10, 132, 255, 0.22), transparent 60%),
-      radial-gradient(820px 520px at 92% 92%, rgba(188, 140, 255, 0.18), transparent 60%),
-      radial-gradient(700px 460px at 78% 4%, rgba(50, 200, 180, 0.14), transparent 60%),
-      linear-gradient(180deg, #131418 0%, #17181d 100%);
-  }
-  .hds-hero-bg::before {
-    background-image:
-      linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  }
-}
-
-.hds-hero-title {
-  color: var(--label);
-  background: linear-gradient(120deg, var(--label) 30%, var(--system-blue) 75%, #bc8cff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
 
 .hds-pill {
   display: inline-flex;
@@ -638,7 +608,7 @@ select.hds-input {
   border-radius: 7px;
   transition: background 0.12s ease, color 0.12s ease;
 }
-.hds-copy-btn:hover { background: rgba(126, 20, 255, 0.18); }
+.hds-copy-btn:hover { background: color-mix(in srgb, var(--system-blue) 20%, transparent); }
 .hds-copy-btn.is-copied { color: var(--system-green, #34c759); background: rgba(52, 199, 89, 0.14); }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -688,6 +658,37 @@ select.hds-input {
   margin-top: 18px;
   padding-top: 16px;
   border-top: 0.5px solid var(--separator);
+}
+
+/* Scenario cards as accordion */
+.hds-acc {
+  padding: 0;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.hds-acc:hover { border-color: rgba(255, 255, 255, 0.14); }
+.hds-acc.is-open { background: rgba(255, 255, 255, 0.03); }
+.hds-acc-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 22px;
+  text-align: left;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--label);
+}
+.hds-acc-chev {
+  flex-shrink: 0;
+  color: var(--secondary-label);
+  transition: transform 0.2s ease;
+}
+.hds-acc.is-open .hds-acc-chev { transform: rotate(180deg); }
+.hds-acc-body {
+  padding: 2px 22px 22px;
+  animation: hdsFadeUp 0.18s ease both;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -798,79 +799,98 @@ select.hds-input {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   HDS · Cinema theme — landing + guide only (editor untouched)
-   Near-black stage, warm-white ink, a single amber spotlight accent.
-   Scoped entirely under .hds-cinema so the editor's tokens never change.
+   HDS · Landing / guide theme — scoped under .hds-cinema, editor untouched.
+   Near-black Linear-style palette, cool indigo accent.
    ═══════════════════════════════════════════════════════════════════════════ */
 .hds-cinema {
-  --label: #f5f3ef;
-  --secondary-label: #b3aea3;
-  --tertiary-label: #7c776d;
-  --window-bg: #0b0b0e;
-  --content-bg: #131217;
-  --control-bg: #1b1a20;
-  --separator: rgba(245, 243, 239, 0.10);
-  --rule: rgba(245, 243, 239, 0.07);
-  --system-blue: #f5a623;
-  --system-blue-press: #ffc24b;
-  --cobalt-lt: rgba(245, 166, 35, 0.13);
-  --vibrancy-panel: rgba(20, 19, 24, 0.55);
-  --vibrancy-toolbar: rgba(11, 11, 14, 0.72);
+  --label: #f7f8f8;
+  --secondary-label: #a0a4ab;
+  --tertiary-label: #6b7077;
+  --window-bg: #08090a;
+  --content-bg: #0e0f12;
+  --control-bg: #16181c;
+  --separator: rgba(255, 255, 255, 0.09);
+  --rule: rgba(255, 255, 255, 0.06);
+  --system-blue: #8b8ef0;
+  --system-blue-press: #a3a6f5;
+  --cobalt-lt: rgba(139, 142, 240, 0.12);
+  --vibrancy-panel: rgba(18, 19, 22, 0.6);
+  --vibrancy-toolbar: rgba(8, 9, 10, 0.72);
   color-scheme: dark;
   color: var(--label);
   background: var(--window-bg);
 }
 
-/* Hero: near-black + a soft amber spotlight that follows the cursor (--spot-x/y) */
-.hds-hero-bg.hds-cinema {
+/* Linear-style page stage: near-black + a soft cool top glow + faint grid */
+.hds-hero {
+  position: relative;
   background:
-    radial-gradient(640px 640px at var(--spot-x, 28%) var(--spot-y, 16%), rgba(245, 166, 35, 0.13), transparent 62%),
-    radial-gradient(900px 760px at 92% 110%, rgba(245, 166, 35, 0.05), transparent 60%),
-    radial-gradient(720px 540px at 4% 102%, rgba(150, 150, 170, 0.05), transparent 60%),
-    #0b0b0e;
+    radial-gradient(1100px 560px at 50% -10%, rgba(139, 142, 240, 0.12), transparent 60%),
+    radial-gradient(760px 520px at 82% 4%, rgba(96, 110, 200, 0.06), transparent 55%),
+    transparent;
 }
-.hds-hero-bg.hds-cinema::before {
+.hds-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   background-image:
-    linear-gradient(to right, rgba(245, 243, 239, 0.028) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(245, 243, 239, 0.028) 1px, transparent 1px);
-  -webkit-mask-image: radial-gradient(circle at 50% 28%, #000 0%, transparent 72%);
-  mask-image: radial-gradient(circle at 50% 28%, #000 0%, transparent 72%);
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+  -webkit-mask-image: radial-gradient(circle at 50% 22%, #000 0%, transparent 70%);
+  mask-image: radial-gradient(circle at 50% 22%, #000 0%, transparent 70%);
 }
 
-/* Kill the gradient-clip title — flat warm-white ink, amber only on a key word */
-.hds-cinema .hds-hero-title {
-  background: none;
-  -webkit-text-fill-color: currentColor;
+/* Headline accent — kept monochrome-cool, used on a single key word */
+.hds-hero-title {
+  letter-spacing: -0.03em;
+  line-height: 1.04;
   color: var(--label);
-  letter-spacing: -0.025em;
 }
-.hds-hero-accent { color: var(--system-blue); }
+.hds-hero-accent {
+  background: linear-gradient(180deg, #c9cbff, #8b8ef0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
 
-/* Pills → quiet dark chips with a glowing amber dot */
+/* Pills → quiet dark chips with a subtle cool dot */
 .hds-cinema .hds-pill {
-  background: rgba(245, 243, 239, 0.04);
-  border-color: rgba(245, 243, 239, 0.10);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.09);
   color: var(--secondary-label);
 }
 .hds-cinema .hds-pill::before {
   background: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15), 0 0 12px rgba(245, 166, 35, 0.6);
+  box-shadow: 0 0 0 3px rgba(139, 142, 240, 0.16);
 }
 
-/* Glass surfaces → deep dark glass */
+/* Glass surfaces → refined dark panels with a hairline top sheen */
 .hds-cinema .hds-glass-card {
-  background: rgba(18, 17, 22, 0.66);
-  border-color: rgba(245, 243, 239, 0.10);
+  background: rgba(255, 255, 255, 0.022);
+  border-color: rgba(255, 255, 255, 0.08);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.04) inset,
-    0 30px 80px rgba(0, 0, 0, 0.6);
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 24px 70px rgba(0, 0, 0, 0.5);
 }
 
-/* Amber primary button needs dark ink for contrast */
-.hds-cinema .hds-btn-primary { color: #1a1205; box-shadow: 0 1px 2px rgba(245, 166, 35, 0.4); }
-.hds-cinema .hds-step-num { color: #1a1205; }
-.hds-cinema .hds-segment.is-active { color: var(--system-blue); background: rgba(245, 243, 239, 0.07); }
-.hds-cinema .hds-code-block { background: #0e0d12; }
+/* Linear primary button = near-white plate, dark ink */
+.hds-cinema .hds-btn-primary {
+  background: #f7f8f8;
+  color: #08090a;
+  border-color: transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.hds-cinema .hds-btn-primary:hover:not(:disabled) { background: #ffffff; }
+.hds-cinema .hds-step-num {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--label);
+  border: 0.5px solid var(--separator);
+}
+.hds-cinema .hds-segment.is-active { color: var(--label); background: rgba(255, 255, 255, 0.08); }
+.hds-cinema .hds-code-block { background: #0b0c0e; }
 
 /* Section eyebrow / divider rules on dark */
 .hds-cinema .hds-hairline { border-color: var(--separator); }
@@ -884,4 +904,81 @@ select.hds-input {
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.02;
+}
+
+/* ── Sticky top navigation (Linear-style) ────────────────────────────────── */
+.hds-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  border-bottom: 0.5px solid transparent;
+  background: transparent;
+  transition: background 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
+}
+.hds-nav.is-scrolled {
+  background: rgba(8, 9, 10, 0.72);
+  border-bottom-color: var(--separator);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  backdrop-filter: saturate(160%) blur(14px);
+}
+.hds-nav-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--secondary-label);
+  transition: color 0.15s ease;
+}
+.hds-nav-link:hover { color: var(--label); }
+
+.hds-emblem { filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55)); }
+
+/* Metallic word accent for the wordmark in nav/footer */
+.hds-wordmark {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--label);
+}
+
+/* ── Editor preview (DOM mock product shot) ──────────────────────────────── */
+.hds-preview-glow {
+  position: absolute;
+  inset: -10% -6% auto -6%;
+  height: 70%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(139, 142, 240, 0.22), transparent 70%);
+  filter: blur(18px);
+}
+.hds-preview-frame {
+  position: relative;
+  z-index: 1;
+  border-radius: 14px;
+  border: 0.5px solid var(--separator);
+  background: #0e0f12;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 40px 120px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+.hds-preview-chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-bottom: 0.5px solid var(--separator);
+  background: rgba(255, 255, 255, 0.02);
+}
+.hds-preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+.hds-preview-selected {
+  outline: 1.5px solid var(--system-blue);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Section eyebrow numbering (FIG 0.x feel) */
+.hds-fig-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tertiary-label);
 }

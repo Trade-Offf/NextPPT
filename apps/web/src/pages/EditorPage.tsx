@@ -284,7 +284,7 @@ export function EditorPage() {
           aria-label="返回首页"
           title="返回首页"
         >
-          <img src="/logo-mark.svg" alt="NextPPT" className="w-full h-full" />
+          <img src="/icon-192.png" alt="NextPPT" className="w-full h-full" />
         </button>
         <span className="w-px h-4 bg-white/15 shrink-0" />
         <button
