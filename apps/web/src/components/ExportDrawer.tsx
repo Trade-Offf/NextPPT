@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ExportFormat, ExportResolution, ExportPageRange } from '@hds/protocol';
 import { useDeckStore } from '../store/deckStore.js';
 import { rebuildDeckHtmlForExport } from '../fs/adapter.js';
@@ -39,6 +40,7 @@ interface ExportDrawerProps {
 }
 
 export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
+  const { t } = useTranslation('editor');
   const meta = useDeckStore((s) => s.meta);
   const slides = useDeckStore((s) => s.slides);
   const rawHtml = useDeckStore((s) => s.rawHtml);
@@ -138,7 +140,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
         onClose(); // close only on success
       }
     } catch (err) {
-      setError(String(err));
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setExporting(false);
       setProgress(null);
@@ -157,14 +159,14 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
       {/* Drawer */}
       <aside className="hds-panel hds-drawer fixed right-0 top-0 h-full w-80 z-50 flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--separator)]">
-          <h2 className="text-base font-semibold text-[var(--label)]">导出</h2>
+          <h2 className="text-base font-semibold text-[var(--label)]">{t('exportDrawer.title')}</h2>
           <button onClick={onClose} className="text-[var(--tertiary-label)] hover:text-[var(--label)]">✕</button>
         </div>
 
         <div className="flex-1 overflow-y-auto flex flex-col gap-5 p-5">
           {/* Format */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-[var(--secondary-label)]">格式</span>
+            <span className="text-xs font-medium text-[var(--secondary-label)]">{t('exportDrawer.format')}</span>
             <div className="hds-segmented w-full">
               {(['pptx', 'pdf'] as const).map((f) => (
                 <button
@@ -180,25 +182,25 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
 
           {/* Resolution */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-[var(--slate)]">分辨率</span>
+            <span className="text-xs font-medium text-[var(--slate)]">{t('exportDrawer.resolution')}</span>
             <select
               value={resolution}
               onChange={(e) => setResolution(e.target.value as ExportResolution)}
               className="border border-[var(--rule)] rounded-md px-3 py-2 text-sm"
             >
-              <option value="1280x720@2x">标准 · 2560×1440</option>
-              <option value="1920x1080@2x">高清 · 3840×2160</option>
-              <option value="3840x2160@2x">超清 4K · 5120×2880</option>
+              <option value="1280x720@2x">{t('exportDrawer.resStandard')}</option>
+              <option value="1920x1080@2x">{t('exportDrawer.resHd')}</option>
+              <option value="3840x2160@2x">{t('exportDrawer.resUhd')}</option>
             </select>
           </label>
 
           {/* Page range */}
           <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium text-[var(--slate)]">页码范围</span>
+            <span className="text-xs font-medium text-[var(--slate)]">{t('exportDrawer.pageRange')}</span>
             <div className="flex flex-col gap-2">
               {[
-                { label: '全部页面', value: 'all' },
-                { label: '当前页', value: 'current' },
+                { label: t('exportDrawer.rangeAll'), value: 'all' },
+                { label: t('exportDrawer.rangeCurrent'), value: 'current' },
               ].map(({ label, value }) => (
                 <label key={value} className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -219,14 +221,14 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
                   checked={pageRange !== 'all' && pageRange !== 'current'}
                   onChange={() => setPageRange('1')}
                 />
-                <span className="text-sm text-[var(--slate)]">自定义</span>
+                <span className="text-sm text-[var(--slate)]">{t('exportDrawer.rangeCustom')}</span>
               </label>
               {pageRange !== 'all' && pageRange !== 'current' && (
                 <input
                   type="text"
                   value={pageRange}
                   onChange={(e) => setPageRange(e.target.value)}
-                  placeholder={`1-${totalSlides} 或 1,3-5,8`}
+                  placeholder={t('exportDrawer.rangePlaceholder', { total: totalSlides })}
                   className="border border-[var(--rule)] rounded px-2 py-1 text-sm font-mono"
                 />
               )}
@@ -240,7 +242,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
           {progress && (
             <div className="flex flex-col gap-1">
               <div className="flex justify-between text-xs text-[var(--slate)]">
-                <span>截图进度</span>
+                <span>{t('exportDrawer.progress')}</span>
                 <span>{progress.current} / {progress.total}</span>
               </div>
               <div className="h-1.5 bg-[var(--rule)] rounded-full overflow-hidden">
@@ -259,7 +261,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
             disabled={exporting}
             className="hds-btn-primary w-full py-2.5 text-sm font-medium"
           >
-            {exporting ? '导出中…' : `开始导出 ${format.toUpperCase()}`}
+            {exporting ? t('exportDrawer.exporting') : t('exportDrawer.start', { format: format.toUpperCase() })}
           </button>
         </div>
       </aside>

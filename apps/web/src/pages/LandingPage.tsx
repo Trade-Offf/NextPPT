@@ -1,22 +1,19 @@
 import { useRef } from 'react';
-import { useDeckStore } from '../store/deckStore.js';
+import { Trans, useTranslation } from 'react-i18next';
 import { useOpenDeck, DIR_API_SUPPORTED, FILE_API_SUPPORTED, FS_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
+import { useGuideNav } from '../hooks/useGuideNav.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { EditorPreview } from '../components/EditorPreview.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
 
-const PAINS = [
-  '没精力从头做 PPT，于是把文档丢给 AI，让它直接生成一份演示。',
-  '但 AI 产出的 PPT 往往简陋——越来越多人改用 HTML 网页来承接，更精致、更有设计感。',
-  '可一旦想改个字体、调个配色、换句文案，又得回到对话里重新描述，token 哗哗地烧，还要来回等待。',
-];
-
 export function LandingPage() {
-  const openGuide = useDeckStore((s) => s.openGuide);
+  const { t } = useTranslation('landing');
+  const { openGuide } = useGuideNav();
   const {
     loading,
     error,
+    formatError,
     dragOver,
     setDragOver,
     handlePickFolder,
@@ -27,6 +24,7 @@ export function LandingPage() {
   } = useOpenDeck();
 
   const rootRef = useRef<HTMLDivElement>(null);
+  const pains = t('value.pains', { returnObjects: true }) as string[];
 
   const openPrimary = () => {
     if (DIR_API_SUPPORTED) void handlePickFolder();
@@ -76,22 +74,22 @@ export function LandingPage() {
       <section id="top" className="hds-hero relative px-6 pt-16 sm:pt-24 pb-16">
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <h1 className="hero-h1 hds-hero-title hds-display text-[clamp(2.3rem,5.6vw,4rem)]">
-            AI 写的 HTML，<br className="hidden sm:block" />秒变<span className="hds-hero-accent"> 可点编辑 </span>的演示稿
+            {t('hero.titleA')}<br className="hidden sm:block" />{t('hero.titleB')}<span className="hds-hero-accent"> {t('hero.titleAccent')} </span>{t('hero.titleC')}
           </h1>
           <p className="hero-sub mt-6 text-[15px] sm:text-[17px] text-[var(--secondary-label)] leading-relaxed max-w-xl mx-auto">
-            把任意 AI 生成的 HTML 幻灯片拖进来，所见即所得地改字、换图、实时渲染 Mermaid，再一键导出 PPTX / PDF。
+            {t('hero.subtitle')}
           </p>
           <div className="hero-cta mt-9 flex flex-wrap items-center justify-center gap-3">
             {FS_API_SUPPORTED ? (
               <button onClick={openPrimary} disabled={loading} className="hds-btn-primary px-6 py-3 text-sm disabled:opacity-50">
-                {loading ? '加载中…' : '打开文件 / 拖到此处'}
+                {loading ? t('hero.loading') : t('hero.ctaOpen')}
               </button>
             ) : (
-              <span className="text-sm text-[var(--secondary-label)]">请用 Chrome / Edge 等 Chromium 浏览器打开</span>
+              <span className="text-sm text-[var(--secondary-label)]">{t('hero.unsupported')}</span>
             )}
-            <button onClick={() => openGuide('generate')} className="hds-btn px-5 py-3 text-sm">看 30 秒使用指南</button>
+            <button onClick={() => openGuide('generate')} className="hds-btn px-5 py-3 text-sm">{t('hero.ctaGuide')}</button>
           </div>
-          <p className="hero-support mt-4 text-xs text-[var(--tertiary-label)]">支持文件夹（可读写配套图片）或单个自包含 HTML · 需 Chromium 内核浏览器</p>
+          <p className="hero-support mt-4 text-xs text-[var(--tertiary-label)]">{t('hero.support')}</p>
         </div>
 
         <div id="preview" className="hero-preview relative z-10 mt-14 sm:mt-16 scroll-mt-20">
@@ -104,13 +102,13 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left — why this exists */}
           <div>
-            <p className="reveal-pain hds-fig-label">为什么需要 NextPPT</p>
+            <p className="reveal-pain hds-fig-label">{t('value.eyebrow')}</p>
             <h2 className="reveal-pain mt-3 text-3xl lg:text-[2.5rem] font-bold tracking-tight text-[var(--label)] leading-tight">
-              AI 能生成，却<span className="hds-hero-accent">改不动</span>
+              {t('value.titleA')}<span className="hds-hero-accent">{t('value.titleAccent')}</span>
             </h2>
-            <p className="reveal-pain mt-3 text-[15px] text-[var(--secondary-label)]">那最后一步，交给我们。</p>
+            <p className="reveal-pain mt-3 text-[15px] text-[var(--secondary-label)]">{t('value.subtitle')}</p>
             <div className="mt-8 flex flex-col gap-5">
-              {PAINS.map((p, i) => (
+              {pains.map((p, i) => (
                 <div key={i} className="reveal-pain flex gap-4">
                   <span className="shrink-0 mt-0.5 w-6 h-6 rounded-full border border-[var(--separator)] bg-white/[0.04] grid place-items-center text-[11px] font-mono text-[var(--secondary-label)]">{i + 1}</span>
                   <p className="text-[15px] text-[var(--secondary-label)] leading-relaxed">{p}</p>
@@ -119,7 +117,14 @@ export function LandingPage() {
             </div>
             <div className="reveal-pain mt-6 rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-5">
               <p className="text-[15px] text-[var(--label)] leading-relaxed">
-                <span className="hds-hero-accent font-semibold">NextPPT</span> 让你把这份 HTML 直接拖进来，在页面上点选就能改字体、配色和内容——所见即所得，<span className="font-medium">不再为改一个字重开一轮 AI 对话</span>。
+                <Trans
+                  t={t}
+                  i18nKey="value.solution"
+                  components={{
+                    brand: <span className="hds-hero-accent font-semibold" />,
+                    em: <span className="font-medium" />,
+                  }}
+                />
               </p>
             </div>
           </div>
@@ -129,11 +134,15 @@ export function LandingPage() {
             <div className="hds-glass-card p-7 sm:p-8">
             {!FS_API_SUPPORTED ? (
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 text-sm text-[var(--secondary-label)] leading-relaxed">
-                <p className="font-medium text-[var(--label)] mb-1">当前浏览器不支持本地文件读写</p>
+                <p className="font-medium text-[var(--label)] mb-1">{t('hub.unsupportedTitle')}</p>
                 <p>
-                  本功能依赖 File System Access API，目前仅 Chromium 内核浏览器支持。请使用{' '}
-                  <a className="underline" href="https://www.google.com/chrome/" target="_blank" rel="noreferrer">Chrome</a>{' '}
-                  或 Edge / Brave / Arc 打开本页面。
+                  <Trans
+                    t={t}
+                    i18nKey="hub.unsupportedBody"
+                    components={{
+                      a: <a className="underline" href="https://www.google.com/chrome/" target="_blank" rel="noreferrer" />,
+                    }}
+                  />
                 </p>
               </div>
             ) : (
@@ -151,32 +160,32 @@ export function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
                   </svg>
                   <span className="text-sm font-medium text-[var(--label)] group-hover:text-[var(--system-blue)]">
-                    {loading ? '加载中…' : '点击选择，或拖拽文件夹 / HTML 到此处'}
+                    {loading ? t('hero.loading') : t('hub.dropTitle')}
                   </span>
-                  <span className="text-xs text-[var(--tertiary-label)] leading-relaxed">文件夹模式可读写配套图片；单个 HTML 适合自包含演示稿</span>
+                  <span className="text-xs text-[var(--tertiary-label)] leading-relaxed">{t('hub.dropHint')}</span>
                 </div>
 
                 <div className="mt-4 flex items-center justify-center gap-2.5">
                   {DIR_API_SUPPORTED && (
-                    <button onClick={handlePickFolder} disabled={loading} className="hds-btn-primary px-4 py-2 text-xs disabled:opacity-40">打开文件夹</button>
+                    <button onClick={handlePickFolder} disabled={loading} className="hds-btn-primary px-4 py-2 text-xs disabled:opacity-40">{t('hub.openFolder')}</button>
                   )}
                   {FILE_API_SUPPORTED && (
-                    <button onClick={handlePickFile} disabled={loading} className="hds-btn px-4 py-2 text-xs disabled:opacity-40">打开单个 HTML</button>
+                    <button onClick={handlePickFile} disabled={loading} className="hds-btn px-4 py-2 text-xs disabled:opacity-40">{t('hub.openSingle')}</button>
                   )}
                 </div>
 
                 {DIR_API_SUPPORTED && (
                   <button onClick={handleRecall} disabled={loading} className="mt-3 text-xs text-[var(--system-blue)] hover:underline self-center disabled:opacity-40 block mx-auto">
-                    重新打开上次的文件夹
+                    {t('hub.recall')}
                   </button>
                 )}
 
                 <div className="mt-5 pt-4 border-t border-[var(--separator)]">
-                  <p className="text-xs text-[var(--secondary-label)] text-center mb-3">还没有演示稿？</p>
+                  <p className="text-xs text-[var(--secondary-label)] text-center mb-3">{t('hub.noDeck')}</p>
                   <div className="flex items-center justify-center gap-2.5 flex-wrap">
-                    <button onClick={loadSampleTemplate} disabled={loading} className="hds-btn px-3.5 py-1.5 text-xs disabled:opacity-40">用示例模板体验</button>
-                    <a href="/sample-deck.html" download="sample-deck.html" className="hds-btn px-3.5 py-1.5 text-xs inline-block">下载示例模板</a>
-                    <button onClick={() => openGuide('generate')} className="hds-btn px-3.5 py-1.5 text-xs">让 AI 帮我写</button>
+                    <button onClick={loadSampleTemplate} disabled={loading} className="hds-btn px-3.5 py-1.5 text-xs disabled:opacity-40">{t('hub.sample')}</button>
+                    <a href="/sample-deck.html" download="sample-deck.html" className="hds-btn px-3.5 py-1.5 text-xs inline-block">{t('hub.downloadSample')}</a>
+                    <button onClick={() => openGuide('generate')} className="hds-btn px-3.5 py-1.5 text-xs">{t('hub.aiHelp')}</button>
                   </div>
                 </div>
               </>
@@ -185,12 +194,17 @@ export function LandingPage() {
             {error && (
               <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-300 leading-relaxed">
                 <p>{error}</p>
-                {/未找到|未在该 HTML/.test(error) && (
+                {formatError && (
                   <p className="mt-2 text-red-300/80">
-                    没有现成的演示稿？点上方「用示例模板体验」「下载示例模板」，或{' '}
-                    <button onClick={() => openGuide('existing')} className="underline font-medium">查看格式要求</button>
-                    {' '}了解如何让 HTML 带上{' '}
-                    <code className="font-mono">&lt;section class="slide"&gt;</code>。
+                    <Trans
+                      t={t}
+                      i18nKey="hub.errorRecover"
+                      values={{ tag: '<section class="slide">' }}
+                      components={{
+                        btn: <button onClick={() => openGuide('existing')} className="underline font-medium" />,
+                        code: <code className="font-mono" />,
+                      }}
+                    />
                   </p>
                 )}
               </div>
@@ -208,31 +222,31 @@ export function LandingPage() {
               <img src="/brand-n.png" alt="" className="hds-emblem w-6 h-6" />
               <span className="hds-wordmark">NextPPT</span>
             </div>
-            <p className="mt-3 text-xs text-[var(--tertiary-label)] leading-relaxed">下一代 PPT，从 HTML 开始。本地优先，数据不离开你的机器。</p>
+            <p className="mt-3 text-xs text-[var(--tertiary-label)] leading-relaxed">{t('footer.tagline')}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">产品</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">{t('footer.colProduct')}</p>
             <ul className="space-y-2 text-[var(--secondary-label)]">
-              <li><button onClick={() => document.getElementById('preview')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-[var(--label)]">效果预览</button></li>
-              <li><button onClick={() => document.getElementById('start')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-[var(--label)]">开始使用</button></li>
+              <li><button onClick={() => document.getElementById('preview')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-[var(--label)]">{t('footer.preview')}</button></li>
+              <li><button onClick={() => document.getElementById('start')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-[var(--label)]">{t('footer.start')}</button></li>
             </ul>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">资源</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">{t('footer.colResources')}</p>
             <ul className="space-y-2 text-[var(--secondary-label)]">
-              <li><button onClick={() => openGuide('generate')} className="hover:text-[var(--label)]">使用指南</button></li>
-              <li><a href="/sample-deck.html" download className="hover:text-[var(--label)]">示例模板</a></li>
+              <li><button onClick={() => openGuide('generate')} className="hover:text-[var(--label)]">{t('footer.guide')}</button></li>
+              <li><a href="/sample-deck.html" download className="hover:text-[var(--label)]">{t('footer.sample')}</a></li>
             </ul>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">关于</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">{t('footer.colAbout')}</p>
             <ul className="space-y-2 text-[var(--secondary-label)]">
-              <li><span>本地优先</span></li>
-              <li><span>无需登录</span></li>
+              <li><span>{t('footer.localFirst')}</span></li>
+              <li><span>{t('footer.noLogin')}</span></li>
             </ul>
           </div>
         </div>
-        <p className="max-w-5xl mx-auto mt-10 text-xs text-[var(--tertiary-label)]">© {new Date().getFullYear()} NextPPT</p>
+        <p className="max-w-5xl mx-auto mt-10 text-xs text-[var(--tertiary-label)]">{t('footer.copy', { year: new Date().getFullYear() })}</p>
       </footer>
       </div>
     </div>

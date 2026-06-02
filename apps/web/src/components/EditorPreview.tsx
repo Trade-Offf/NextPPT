@@ -1,9 +1,12 @@
+import { useTranslation } from 'react-i18next';
+
 /**
  * A static DOM mock of the editor, used as the hero "product shot" (Linear-style
  * framed screenshot). Purely decorative — no real editor logic — so it stays
  * cheap and never touches the actual EditorPage.
  */
 export function EditorPreview() {
+  const { t } = useTranslation('landing');
   return (
     <div className="relative w-full max-w-4xl mx-auto">
       <div className="hds-preview-glow" aria-hidden="true" />
@@ -31,9 +34,9 @@ export function EditorPreview() {
           {/* Canvas */}
           <div className="flex-1 p-5 sm:p-7 flex items-center justify-center bg-[#0b0c0e]">
             <div className="w-full aspect-video rounded-lg bg-gradient-to-br from-[#15161b] to-[#0e0f13] border border-[var(--separator)] p-6 sm:p-8 flex flex-col justify-center">
-              <span className="text-[10px] font-mono tracking-widest uppercase text-[var(--system-blue)]">Q3 Roadmap</span>
+              <span className="text-[10px] font-mono tracking-widest uppercase text-[var(--system-blue)]">{t('preview.eyebrow')}</span>
               <h3 className="hds-preview-selected mt-2 text-lg sm:text-2xl font-bold text-[var(--label)] w-fit">
-                把草稿，做成能上台的演示
+                {t('preview.heading')}
               </h3>
               <div className="mt-4 space-y-2">
                 <div className="h-2 rounded-full bg-white/10 w-4/5" />
@@ -51,7 +54,7 @@ export function EditorPreview() {
 
           {/* Right inspector */}
           <div className="hidden lg:flex flex-col gap-3 w-52 shrink-0 p-4 border-l border-[var(--separator)] bg-white/[0.015]">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--tertiary-label)]">文本</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--tertiary-label)]">{t('preview.inspectorText')}</p>
             <div className="space-y-2">
               <div className="h-7 rounded-md border border-[var(--separator)] bg-white/[0.03]" />
               <div className="flex gap-2">
@@ -59,7 +62,7 @@ export function EditorPreview() {
                 <div className="h-7 w-7 rounded-md border border-[var(--system-blue)] bg-[var(--cobalt-lt)]" />
               </div>
             </div>
-            <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--tertiary-label)]">排版</p>
+            <p className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--tertiary-label)]">{t('preview.inspectorLayout')}</p>
             <div className="grid grid-cols-3 gap-2">
               {[0, 1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="h-6 rounded border border-[var(--separator)] bg-white/[0.03]" />

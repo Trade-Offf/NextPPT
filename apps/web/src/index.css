@@ -929,6 +929,25 @@ select.hds-input {
 }
 .hds-nav-link:hover { color: var(--label); }
 
+/* ── Language switcher (zh / EN) ─────────────────────────────────────────── */
+.hds-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  user-select: none;
+}
+.hds-lang-btn {
+  color: var(--tertiary-label);
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.hds-lang-btn:hover { color: var(--label); }
+.hds-lang-btn.is-active { color: var(--label); font-weight: 600; }
+.hds-lang-sep { color: var(--separator); }
+
 .hds-emblem { filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55)); }
 
 /* Metallic word accent for the wordmark in nav/footer */

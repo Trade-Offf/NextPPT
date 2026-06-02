@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
 import { cn } from '../lib/cn.js';
 
@@ -54,6 +55,7 @@ ${headHtml}
 }
 
 export function SlideListPane({ floating = false }: { floating?: boolean } = {}) {
+  const { t } = useTranslation('editor');
   const slides = useDeckStore((s) => s.slides);
   const headHtml = useDeckStore((s) => s.headHtml);
   const currentId = useDeckStore((s) => s.currentSlideId);
@@ -97,7 +99,7 @@ export function SlideListPane({ floating = false }: { floating?: boolean } = {})
           <button
             onClick={() => setCurrentSlide(slide.id)}
             className="block w-full text-left cursor-pointer"
-            title={`第 ${idx + 1} 页`}
+            title={t('slideList.page', { n: idx + 1 })}
           >
             <SlideThumbnail sectionHtml={slide.html} headHtml={headHtml} />
           </button>
@@ -109,10 +111,10 @@ export function SlideListPane({ floating = false }: { floating?: boolean } = {})
 
           {/* Hover actions */}
           <div className="absolute right-1.5 top-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ActionBtn title="上移" disabled={idx === 0} onClick={() => reorderSlides(idx, idx - 1)}>↑</ActionBtn>
-            <ActionBtn title="下移" disabled={idx === slides.length - 1} onClick={() => reorderSlides(idx, idx + 1)}>↓</ActionBtn>
-            <ActionBtn title="复制" onClick={() => duplicateSlide(slide.id)}>⧉</ActionBtn>
-            <ActionBtn title="删除" disabled={slides.length <= 1} danger onClick={() => deleteSlide(slide.id)}>✕</ActionBtn>
+            <ActionBtn title={t('slideList.moveUp')} disabled={idx === 0} onClick={() => reorderSlides(idx, idx - 1)}>↑</ActionBtn>
+            <ActionBtn title={t('slideList.moveDown')} disabled={idx === slides.length - 1} onClick={() => reorderSlides(idx, idx + 1)}>↓</ActionBtn>
+            <ActionBtn title={t('slideList.duplicate')} onClick={() => duplicateSlide(slide.id)}>⧉</ActionBtn>
+            <ActionBtn title={t('slideList.delete')} disabled={slides.length <= 1} danger onClick={() => deleteSlide(slide.id)}>✕</ActionBtn>
           </div>
         </div>
       ))}

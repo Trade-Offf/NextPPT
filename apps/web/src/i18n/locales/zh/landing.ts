@@ -1,0 +1,68 @@
+export default {
+  nav: {
+    homeAria: 'NextPPT 首页',
+    guide: '使用指南',
+    openFile: '打开文件',
+  },
+  hero: {
+    titleA: 'AI 写的 HTML，',
+    titleB: '秒变',
+    titleAccent: '可点编辑',
+    titleC: '的演示稿',
+    subtitle:
+      '把任意 AI 生成的 HTML 幻灯片拖进来，所见即所得地改字、换图、实时渲染 Mermaid，再一键导出 PPTX / PDF。',
+    ctaOpen: '打开文件 / 拖到此处',
+    loading: '加载中…',
+    ctaGuide: '看 30 秒使用指南',
+    unsupported: '请用 Chrome / Edge 等 Chromium 浏览器打开',
+    support: '支持文件夹（可读写配套图片）或单个自包含 HTML · 需 Chromium 内核浏览器',
+  },
+  value: {
+    eyebrow: '为什么需要 NextPPT',
+    titleA: 'AI 能生成，却',
+    titleAccent: '改不动',
+    subtitle: '那最后一步，交给我们。',
+    pains: [
+      '没精力从头做 PPT，于是把文档丢给 AI，让它直接生成一份演示。',
+      '但 AI 产出的 PPT 往往简陋——越来越多人改用 HTML 网页来承接，更精致、更有设计感。',
+      '可一旦想改个字体、调个配色、换句文案，又得回到对话里重新描述，token 哗哗地烧，还要来回等待。',
+    ],
+    solution:
+      '<brand>NextPPT</brand> 让你把这份 HTML 直接拖进来，在页面上点选就能改字体、配色和内容——所见即所得，<em>不再为改一个字重开一轮 AI 对话</em>。',
+  },
+  hub: {
+    unsupportedTitle: '当前浏览器不支持本地文件读写',
+    unsupportedBody:
+      '本功能依赖 File System Access API，目前仅 Chromium 内核浏览器支持。请使用 <a>Chrome</a> 或 Edge / Brave / Arc 打开本页面。',
+    dropTitle: '点击选择，或拖拽文件夹 / HTML 到此处',
+    dropHint: '文件夹模式可读写配套图片；单个 HTML 适合自包含演示稿',
+    openFolder: '打开文件夹',
+    openSingle: '打开单个 HTML',
+    recall: '重新打开上次的文件夹',
+    noDeck: '还没有演示稿？',
+    sample: '用示例模板体验',
+    downloadSample: '下载示例模板',
+    aiHelp: '让 AI 帮我写',
+    errorRecover:
+      '没有现成的演示稿？点上方「用示例模板体验」「下载示例模板」，或 <btn>查看格式要求</btn> 了解如何让 HTML 带上 <code>{{tag}}</code>。',
+  },
+  preview: {
+    eyebrow: 'Q3 Roadmap',
+    heading: '把草稿，做成能上台的演示',
+    inspectorText: '文本',
+    inspectorLayout: '排版',
+  },
+  footer: {
+    tagline: '下一代 PPT，从 HTML 开始。本地优先，数据不离开你的机器。',
+    colProduct: '产品',
+    preview: '效果预览',
+    start: '开始使用',
+    colResources: '资源',
+    guide: '使用指南',
+    sample: '示例模板',
+    colAbout: '关于',
+    localFirst: '本地优先',
+    noLogin: '无需登录',
+    copy: '© {{year}} NextPPT',
+  },
+};

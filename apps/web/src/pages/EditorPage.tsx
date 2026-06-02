@@ -1,5 +1,8 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
+import { useGuideNav } from '../hooks/useGuideNav.js';
+import { LanguageSwitcher } from '../components/LanguageSwitcher.js';
 import { ScaledCanvas, type CanvasHandle } from '../components/CanvasFrame.js';
 import { SlideListPane } from '../components/SlideListPane.js';
 import { PropertyPane } from '../components/PropertyPane.js';
@@ -14,6 +17,8 @@ import { recordSnapshot, listSnapshots } from '../fs/history.js';
 import { registerBlobPath, resolveAssetsInHtml, revokeAssetCache } from '../fs/assetResolver.js';
 
 export function EditorPage() {
+  const { t } = useTranslation('editor');
+  const { openGuide } = useGuideNav();
   const slides = useDeckStore((s) => s.slides);
   const currentSlideId = useDeckStore((s) => s.currentSlideId);
   const dirHandle = useDeckStore((s) => s.dirHandle);
@@ -39,7 +44,6 @@ export function EditorPage() {
   const redo = useDeckStore((s) => s.redo);
   const canUndo = useDeckStore((s) => s.past.length > 0);
   const canRedo = useDeckStore((s) => s.future.length > 0);
-  const openGuide = useDeckStore((s) => s.openGuide);
   const closeDirectory = useDeckStore((s) => s.closeDirectory);
 
   const selection = useDeckStore((s) => s.selection);
@@ -105,7 +109,7 @@ export function EditorPage() {
     if (!dirHandle && !fileHandle && deckFileName === '') return;
     // First save in single-file mode: explain the copy behaviour first, then
     // let the user trigger the native picker from a fresh gesture (the modal
-    // button click). Bail before markSaving so status stays "未保存".
+    // button click). Bail before markSaving so status stays "unsaved".
     if (!dirHandle && !fileHandle) {
       setFirstSavePromptOpen(true);
       return;
@@ -167,7 +171,7 @@ export function EditorPage() {
   }, [rawHtml, slides, dirHandle, historyCtx, applyRestoredDeck]);
 
   // Return to the landing page. Confirm first if there are unsaved changes;
-  // closeDirectory() clears slides so App falls back to LandingPage.
+  // closeDirectory() clears slides so HomeRoute falls back to LandingPage.
   const doLeaveHome = useCallback(() => {
     setLeaveHomePromptOpen(false);
     revokeAssetCache();
@@ -264,7 +268,7 @@ export function EditorPage() {
   if (!currentSlide) {
     return (
       <div className="flex-1 flex items-center justify-center text-[var(--silver)]">
-        没有可编辑的幻灯片
+        {t('page.noSlide')}
       </div>
     );
   }
@@ -281,8 +285,8 @@ export function EditorPage() {
         <button
           onClick={requestLeaveHome}
           className="w-7 h-7 rounded-lg overflow-hidden shrink-0 shadow-sm hover:brightness-110 transition"
-          aria-label="返回首页"
-          title="返回首页"
+          aria-label={t('page.backHome')}
+          title={t('page.backHome')}
         >
           <img src="/icon-192.png" alt="NextPPT" className="w-full h-full" />
         </button>
@@ -290,8 +294,8 @@ export function EditorPage() {
         <button
           onClick={() => setRailOpen((v) => !v)}
           className={`hds-bar-icon ${railOpen ? 'is-active' : ''}`}
-          aria-label={railOpen ? '收起页面列表' : '展开页面列表'}
-          title={railOpen ? '收起页面列表' : '展开页面列表'}
+          aria-label={railOpen ? t('page.collapseRail') : t('page.expandRail')}
+          title={railOpen ? t('page.collapseRail') : t('page.expandRail')}
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <rect x="2.5" y="3.5" width="15" height="13" rx="2.5" />
@@ -299,21 +303,21 @@ export function EditorPage() {
           </svg>
         </button>
         <span className="text-[13px] font-semibold truncate max-w-[200px] px-1">{deckFileName}</span>
-        <span className="text-[11px] shrink-0 select-none" title={lastSavedAt ? `上次保存 ${new Date(lastSavedAt).toLocaleTimeString()}` : sourceFileName}>
+        <span className="text-[11px] shrink-0 select-none" title={lastSavedAt ? t('status.lastSaved', { time: new Date(lastSavedAt).toLocaleTimeString() }) : sourceFileName}>
           {isSaving ? (
-            <span className="text-white/55">保存中…</span>
+            <span className="text-white/55">{t('status.saving')}</span>
           ) : isDirty ? (
             mode === 'file' && !fileHandle
-              ? <span className="text-amber-300">● 未保存 · 点保存创建副本</span>
-              : <span className="text-amber-300">● 未保存</span>
+              ? <span className="text-amber-300">{t('status.unsavedCopy')}</span>
+              : <span className="text-amber-300">{t('status.unsaved')}</span>
           ) : lastSavedAt ? (
-            <span className="text-emerald-300">✓ 已保存</span>
+            <span className="text-emerald-300">{t('status.saved')}</span>
           ) : null}
         </span>
 
         {/* Copy mental-model hint: original file is never touched */}
         <div className="relative group shrink-0">
-          <button className="hds-bar-icon" aria-label="保存位置说明" title="保存位置说明">
+          <button className="hds-bar-icon" aria-label={t('saveHint.title')} title={t('saveHint.title')}>
             <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
               <circle cx="10" cy="10" r="7.5" />
               <path d="M10 9v4" strokeLinecap="round" />
@@ -321,8 +325,15 @@ export function EditorPage() {
             </svg>
           </button>
           <div className="hidden group-hover:block absolute left-0 top-full mt-2 w-64 p-3 rounded-xl text-[11px] leading-relaxed z-30 bg-[rgba(24,25,29,0.96)] border border-white/12 text-white/75 shadow-2xl">
-            <p className="text-white/90 font-medium mb-1.5">原文件不会被改动</p>
-            <p>源文件 <span className="text-white/90 font-mono">{sourceFileName}</span> 保持原样，所有编辑都写入副本：</p>
+            <p className="text-white/90 font-medium mb-1.5">{t('saveHint.originalUntouched')}</p>
+            <p>
+              <Trans
+                t={t}
+                i18nKey="saveHint.sourceKept"
+                values={{ name: sourceFileName }}
+                components={{ file: <span className="text-white/90 font-mono" /> }}
+              />
+            </p>
             <p className="mt-1 text-emerald-300 font-mono break-all">{deckFileName}</p>
           </div>
         </div>
@@ -332,8 +343,8 @@ export function EditorPage() {
           onClick={() => undo()}
           disabled={!canUndo}
           className="hds-bar-icon disabled:opacity-30"
-          aria-label="撤销"
-          title="撤销 (⌘Z)"
+          aria-label={t('page.undo')}
+          title={t('page.undoTitle')}
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <path d="M7 6L3.5 9.5 7 13" strokeLinecap="round" strokeLinejoin="round" />
@@ -344,8 +355,8 @@ export function EditorPage() {
           onClick={() => redo()}
           disabled={!canRedo}
           className="hds-bar-icon disabled:opacity-30"
-          aria-label="重做"
-          title="重做 (⇧⌘Z)"
+          aria-label={t('page.redo')}
+          title={t('page.redoTitle')}
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <path d="M13 6l3.5 3.5L13 13" strokeLinecap="round" strokeLinejoin="round" />
@@ -363,7 +374,7 @@ export function EditorPage() {
             className={`hds-segment ${viewMode === 'visual' ? 'is-active' : ''}`}
             onClick={() => setViewMode('visual')}
           >
-            视觉
+            {t('page.viewVisual')}
           </button>
           <button
             role="tab"
@@ -371,7 +382,7 @@ export function EditorPage() {
             className={`hds-segment ${viewMode === 'code' ? 'is-active' : ''}`}
             onClick={() => setViewMode('code')}
           >
-            代码
+            {t('page.viewCode')}
           </button>
         </div>
       </div>
@@ -381,8 +392,8 @@ export function EditorPage() {
         <button
           onClick={() => setInspectorOpen((v) => !v)}
           className={`hds-bar-icon ${inspectorOpen ? 'is-active' : ''}`}
-          aria-label={inspectorOpen ? '收起检查器' : '展开检查器'}
-          title={selection ? (inspectorOpen ? '收起检查器' : '展开检查器') : '检查器（选中元素后可用）'}
+          aria-label={inspectorOpen ? t('page.collapseInspector') : t('page.expandInspector')}
+          title={selection ? (inspectorOpen ? t('page.collapseInspector') : t('page.expandInspector')) : t('page.inspectorDisabled')}
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <rect x="2.5" y="3.5" width="15" height="13" rx="2.5" />
@@ -393,8 +404,8 @@ export function EditorPage() {
           onClick={() => setHistoryOpen(true)}
           disabled={snapshotCount === 0}
           className="hds-bar-icon disabled:opacity-30"
-          aria-label="历史版本"
-          title={snapshotCount === 0 ? '历史版本（保存后可用）' : '历史版本'}
+          aria-label={t('page.history')}
+          title={snapshotCount === 0 ? t('page.historyDisabled') : t('page.history')}
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <path d="M10 5.5V10l3 1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -402,16 +413,16 @@ export function EditorPage() {
           </svg>
         </button>
         <button onClick={() => void handleSave()} disabled={!isDirty} className="hds-bar-btn">
-          保存
+          {t('page.save')}
         </button>
         <button onClick={() => setExportOpen(true)} className="hds-btn-primary px-4 py-1.5 text-xs rounded-full">
-          导出
+          {t('page.export')}
         </button>
         <button
           onClick={() => openGuide('export')}
           className="hds-bar-icon"
-          aria-label="使用指南"
-          title="使用指南"
+          aria-label={t('page.guide')}
+          title={t('page.guide')}
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <circle cx="10" cy="10" r="7.5" />
@@ -419,6 +430,8 @@ export function EditorPage() {
             <circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="none" />
           </svg>
         </button>
+        <span className="w-px h-4 bg-white/15 shrink-0" />
+        <LanguageSwitcher />
       </div>
 
       {/* ── Body ────────────────────────────────────────────────── */}
@@ -474,32 +487,30 @@ export function EditorPage() {
 
       <ConfirmDialog
         open={leaveHomePromptOpen}
-        title="返回首页"
-        confirmLabel="放弃更改并返回"
-        cancelLabel="取消"
+        title={t('leaveHome.title')}
+        confirmLabel={t('leaveHome.confirm')}
         onConfirm={doLeaveHome}
         onCancel={() => setLeaveHomePromptOpen(false)}
         message={
           <>
-            <p>当前有未保存的更改，返回首页将丢失这些更改。</p>
-            <p className="mt-2 text-[var(--tertiary-label)]">如需保留，请先点「保存」再返回。</p>
+            <p>{t('leaveHome.msg1')}</p>
+            <p className="mt-2 text-[var(--tertiary-label)]">{t('leaveHome.msg2')}</p>
           </>
         }
       />
 
       <ConfirmDialog
         open={firstSavePromptOpen}
-        title="保存为副本"
-        confirmLabel="保存副本"
-        cancelLabel="取消"
+        title={t('firstSave.title')}
+        confirmLabel={t('firstSave.confirm')}
         onConfirm={() => void confirmFirstSave()}
         onCancel={() => setFirstSavePromptOpen(false)}
         message={
           <>
-            <p>为保护你打开的原文件，本工具不会改动它，而是把所有编辑保存到一个副本。</p>
-            <p className="mt-2">接下来会弹出系统保存框，默认文件名为：</p>
+            <p>{t('firstSave.msg1')}</p>
+            <p className="mt-2">{t('firstSave.msg2')}</p>
             <p className="mt-1 font-mono text-[var(--label)] break-all">{deckFileName}</p>
-            <p className="mt-2 text-[var(--tertiary-label)]">之后的保存会自动写入该副本，不再弹窗。</p>
+            <p className="mt-2 text-[var(--tertiary-label)]">{t('firstSave.msg3')}</p>
           </>
         }
       />

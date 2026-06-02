@@ -1,4 +1,7 @@
 import { defineConfig, transformWithEsbuild, type Plugin } from 'vite';
+// Loads vite-react-ssg's `declare module 'vite'` augmentation so `ssgOptions`
+// is recognised on the Vite config below.
+import type {} from 'vite-react-ssg';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import fs from 'node:fs';
@@ -44,5 +47,11 @@ export default defineConfig({
     proxy: {
       '/v1': 'http://localhost:3000',
     },
+  },
+  // vite-react-ssg: prerender one localized shell per route (zh + /en).
+  // `nested` → dist/guide/index.html, dist/en/index.html, dist/en/guide/index.html.
+  ssgOptions: {
+    dirStyle: 'nested',
+    includedRoutes: () => ['/', '/guide', '/en', '/en/guide'],
   },
 });

@@ -1,0 +1,76 @@
+export default {
+  header: {
+    back: '返回',
+    backHome: '回到 NextPPT',
+    title: '使用指南',
+    backToEdit: '返回编辑',
+    openFile: '打开 HTML 文件',
+  },
+  flow: {
+    eyebrow: '30 秒看懂',
+    steps: [
+      { title: '拿到 HTML', desc: '自己写或让 AI 生成一份 .html 演示稿' },
+      { title: '点选编辑', desc: '所见即所得地改字、换图、渲染 Mermaid' },
+      { title: '一键导出', desc: '生成可投影的 PPTX / PDF，全程本地' },
+    ],
+  },
+  generate: {
+    title: '我还没有 HTML',
+    intro:
+      '本工具负责<strong>编辑与导出</strong>，内容生成可交给任意 AI。复制下面这段提示词，几步就能拿到一份可直接打开的演示稿。',
+    steps: [
+      { title: '复制提示词', desc: '点右上角「复制提示词」，把下方整段提示词复制走。' },
+      { title: '填主题、丢给 AI', desc: '替换 {{topic}} 后，发给 ChatGPT / Claude / Gemini / Cursor 等任意 AI。' },
+      { title: '保存为 .html', desc: '把 AI 返回的完整代码保存为一个 .html 文件（例如 my-deck.html）。' },
+      { title: '回来打开它', desc: '回到本页点「打开单个 HTML 文件」或把文件直接拖进来，即可开始点选编辑、一键导出。' },
+    ],
+    promptLabel: '提示词',
+    copy: '复制提示词',
+    copied: '已复制',
+    expand: '展开查看',
+    collapse: '收起',
+    promptHint: '直接「复制提示词」粘到任意 AI 即可，无需阅读全文。需要核对时再「展开查看」。',
+    actionLabel: '已经让 AI 生成好了？',
+    openGenerated: '打开生成好的文件',
+  },
+  existing: {
+    title: '我已有 HTML',
+    intro: '已有 HTML？只要满足下面几条，就能直接打开编辑。大多数 AI 产出的演示稿已经符合。',
+    selfCheckLabel: '格式自检',
+    selfCheck: [
+      '每一页都是 <section class="slide">，且直接作为 <body> 的子元素排列。',
+      '每页固定 1280×720（16:9），并设置 overflow: hidden，内容不溢出。',
+      '所有样式写在 <head> 的 <style> 里，不外链本地 CSS 文件。',
+      '图片/图形用内联 <svg>、data: URI 或公网 https 绝对链接，不要相对路径。',
+      '文字用 h1/h2/p/li/strong 等语义标签承载，方便进编辑器后点选改字。',
+    ],
+    mistakesLabel: '常见错误对照',
+    mistakes: [
+      { label: '页面容器', good: '<section class="slide">', bad: '<div class="page"> 或漏掉 class="slide"' },
+      { label: '画布尺寸', good: '固定 1280px × 720px', bad: '用百分比 / 自适应高度，导出会变形' },
+      { label: '资源引用', good: 'data: URI / https 绝对链接', bad: './img.png、assets/x.svg 相对路径' },
+      { label: '样式位置', good: '写在 <head><style> 内', bad: '外链 <link rel="stylesheet">' },
+    ],
+    actionLabel: '格式没问题了？',
+    openMine: '打开我的 HTML',
+  },
+  export: {
+    title: '我要导出',
+    intro: '编辑满意后，点右上角「导出」生成可投影的 PPTX / PDF。导出前请了解：',
+    notes: [
+      '导出的是「图片型」PPT / PDF：每页一张高清图，文字在 PowerPoint 内不可再编辑；要改字请回本工具改完再重新导出。',
+      '导出前会等待字体与 Mermaid 渲染完成再截图，复杂页面稍慢属于正常现象。',
+      '可选导出范围：全部页 / 当前页 / 自定义页码（如 1,3-5,8）。',
+      '分辨率档位：标准 2560×1440 已足够投影；高清 / 4K 更清晰但更慢、文件更大。',
+      '全程在本地处理，数据不离开你的机器。',
+    ],
+    actionHasDeck: '演示稿已经打开。',
+    backToExport: '回到编辑器导出',
+    actionNoDeck: '先打开一份演示稿，才能导出。',
+    openFile: '打开 HTML 文件',
+  },
+  footer: {
+    backHome: '← 回到 NextPPT',
+    local: '本地优先 · 数据不离开你的机器',
+  },
+};

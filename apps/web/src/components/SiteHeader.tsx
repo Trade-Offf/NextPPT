@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useDeckStore } from '../store/deckStore.js';
+import { useTranslation } from 'react-i18next';
+import { useGuideNav } from '../hooks/useGuideNav.js';
+import { LanguageSwitcher } from './LanguageSwitcher.js';
 
 interface Props {
   /** Primary action — open a deck (folder / single file). */
@@ -9,7 +11,8 @@ interface Props {
 }
 
 export function SiteHeader({ onOpen, canOpen }: Props) {
-  const openGuide = useDeckStore((s) => s.openGuide);
+  const { t } = useTranslation('landing');
+  const { openGuide } = useGuideNav();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -25,16 +28,17 @@ export function SiteHeader({ onOpen, canOpen }: Props) {
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="flex items-center gap-2 shrink-0 transition-opacity hover:opacity-80"
-          aria-label="NextPPT 首页"
+          aria-label={t('nav.homeAria')}
         >
           <img src="/brand-n.png" alt="" className="hds-emblem w-7 h-7" />
           <span className="hds-wordmark text-sm">NextPPT</span>
         </button>
 
         <div className="ml-auto flex items-center gap-4 sm:gap-5">
-          <button onClick={() => openGuide('generate')} className="hds-nav-link">使用指南</button>
+          <button onClick={() => openGuide('generate')} className="hds-nav-link">{t('nav.guide')}</button>
+          <LanguageSwitcher />
           {canOpen && (
-            <button onClick={onOpen} className="hds-btn-primary px-4 py-1.5 text-xs">打开文件</button>
+            <button onClick={onOpen} className="hds-btn-primary px-4 py-1.5 text-xs">{t('nav.openFile')}</button>
           )}
         </div>
       </div>

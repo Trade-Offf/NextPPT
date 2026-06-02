@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite-react-ssg build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -16,10 +16,14 @@
     "@monaco-editor/react": "^4.7.0",
     "clsx": "^2.1.1",
     "gsap": "^3.15.0",
+    "i18next": "^26.3.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-i18next": "^17.0.8",
+    "react-router-dom": "^6.30.4",
     "tailwind-merge": "^2.5.5",
     "three": "^0.184.0",
+    "vite-react-ssg": "0.9.1-beta.1",
     "zustand": "^5.0.5"
   },
   "devDependencies": {

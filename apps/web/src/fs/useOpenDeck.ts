@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
 import { pickDirectory, pickFile, recallHandle, verifyPermission, findDeckFile, parseDeck } from './adapter.js';
 import { resolveAssetsInHtml, revokeAssetCache } from './assetResolver.js';
@@ -7,27 +8,41 @@ export const DIR_API_SUPPORTED = typeof window !== 'undefined' && 'showDirectory
 export const FILE_API_SUPPORTED = typeof window !== 'undefined' && 'showOpenFilePicker' in window;
 export const FS_API_SUPPORTED = DIR_API_SUPPORTED || FILE_API_SUPPORTED;
 
+/** Surface the human-readable message (already localised for thrown Errors)
+ *  without the `Error:` prefix that `String(err)` would add. */
+function errMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 /**
  * Everything needed to turn a folder / single HTML file into a loaded deck.
  * Shared by the landing page and the guide page so the guide can funnel a
  * reader straight into the editor ("read → act" in one place).
  */
 export function useOpenDeck() {
+  const { t } = useTranslation('editor');
   const openDirectory = useDeckStore((s) => s.openDirectory);
   const openFile = useDeckStore((s) => s.openFile);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** True when the failure was a missing/invalid `section.slide` (drives the
+   *  landing page's format-recovery hint, locale-independently). */
+  const [formatError, setFormatError] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
   const openDeck = async (handle: FileSystemDirectoryHandle) => {
     setLoading(true);
     setError(null);
+    setFormatError(false);
     try {
       const ok = await verifyPermission(handle);
-      if (!ok) throw new Error('需要文件夹访问权限');
+      if (!ok) throw new Error(t('errors.needPermission'));
 
       const result = await findDeckFile(handle);
-      if (!result) throw new Error('未找到 HTML 幻灯片文件。请确认文件夹中包含带有 <section class="slide"> 的 HTML 文件。');
+      if (!result) {
+        setFormatError(true);
+        throw new Error(t('errors.notFound'));
+      }
 
       const { fileName, html } = result;
       const { meta, headHtml: rawHead, slides: rawSlides } = parseDeck(html);
@@ -44,7 +59,7 @@ export function useOpenDeck() {
 
       openDirectory(handle, fileName, html, headHtml, meta, resolvedSlides);
     } catch (err) {
-      setError(String(err));
+      setError(errMessage(err));
     } finally {
       setLoading(false);
     }
@@ -53,9 +68,11 @@ export function useOpenDeck() {
   // Single self-contained HTML file (no folder, no relative assets).
   const openSingleFile = (fileName: string, html: string) => {
     setError(null);
+    setFormatError(false);
     const { meta, headHtml, slides } = parseDeck(html);
     if (!slides.length) {
-      setError('未在该 HTML 中找到 <section class="slide"> 幻灯片。');
+      setFormatError(true);
+      setError(t('errors.noSlides'));
       return;
     }
     revokeAssetCache();
@@ -68,7 +85,7 @@ export function useOpenDeck() {
       const handle = await pickDirectory();
       await openDeck(handle);
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') setError(String(err));
+      if ((err as Error).name !== 'AbortError') setError(errMessage(err));
     }
   };
 
@@ -78,7 +95,7 @@ export function useOpenDeck() {
       const { fileName, html } = await pickFile();
       openSingleFile(fileName, html);
     } catch (err) {
-      if ((err as Error).name !== 'AbortError') setError(String(err));
+      if ((err as Error).name !== 'AbortError') setError(errMessage(err));
     }
   };
 
@@ -87,10 +104,10 @@ export function useOpenDeck() {
     setError(null);
     try {
       const res = await fetch('/sample-deck.html');
-      if (!res.ok) throw new Error('示例模板加载失败，请稍后重试');
+      if (!res.ok) throw new Error(t('errors.sampleFailed'));
       openSingleFile('sample-deck.html', await res.text());
     } catch (err) {
-      setError(String(err));
+      setError(errMessage(err));
     } finally {
       setLoading(false);
     }
@@ -102,7 +119,7 @@ export function useOpenDeck() {
       if (!handle) return;
       await openDeck(handle);
     } catch (err) {
-      setError(String(err));
+      setError(errMessage(err));
     }
   };
 
@@ -122,7 +139,7 @@ export function useOpenDeck() {
       if (handle?.kind === 'file') {
         const file = await (handle as FileSystemFileHandle).getFile();
         if (!file.name.toLowerCase().endsWith('.html') && !file.name.toLowerCase().endsWith('.htm')) {
-          setError('请拖入 HTML 文件或包含 HTML 的文件夹。');
+          setError(t('errors.dropHtmlOnly'));
           return;
         }
         openSingleFile(file.name, await file.text());
@@ -134,16 +151,16 @@ export function useOpenDeck() {
         openSingleFile(plain.name, await plain.text());
         return;
       }
-      setError('请拖入 HTML 文件或包含 HTML 的文件夹。');
+      setError(t('errors.dropHtmlOnly'));
     } catch (err) {
-      setError(String(err));
+      setError(errMessage(err));
     }
   };
 
   return {
     loading,
     error,
-    setError,
+    formatError,
     dragOver,
     setDragOver,
     handlePickFolder,

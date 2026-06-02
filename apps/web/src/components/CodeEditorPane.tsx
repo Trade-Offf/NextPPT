@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Editor from '@monaco-editor/react';
 import { SLIDE_SELECTOR } from '@hds/protocol';
 import { useDeckStore } from '../store/deckStore.js';
@@ -12,6 +13,7 @@ import { useDeckStore } from '../store/deckStore.js';
  * switch, so the draft state initializes from the active slide directly.
  */
 export function CodeEditorPane() {
+  const { t } = useTranslation('editor');
   const slides = useDeckStore((s) => s.slides);
   const currentId = useDeckStore((s) => s.currentSlideId);
   const updateSlideHtml = useDeckStore((s) => s.updateSlideHtml);
@@ -26,27 +28,27 @@ export function CodeEditorPane() {
     const doc = new DOMParser().parseFromString(draft, 'text/html');
     const sec = doc.querySelector(SLIDE_SELECTOR);
     if (!sec) {
-      setError('无效：当前页必须包含 <section class="slide"> 根元素');
+      setError(t('code.invalid'));
       return;
     }
     updateSlideHtml(currentId, sec.outerHTML);
     setError(null);
     setDirty(false);
-  }, [draft, currentId, updateSlideHtml]);
+  }, [draft, currentId, updateSlideHtml, t]);
 
   return (
     <div className="flex-1 min-w-0 flex flex-col bg-[var(--editor-bg)]">
       <div className="flex items-center gap-3 px-4 py-2 border-b border-[var(--rule)] text-xs text-[var(--secondary-label)]">
-        <span>仅编辑当前页 HTML</span>
+        <span>{t('code.onlyCurrent')}</span>
         {error && <span className="text-red-500">{error}</span>}
         <div className="ml-auto flex items-center gap-2">
-          {dirty && <span className="text-amber-500">● 未应用</span>}
+          {dirty && <span className="text-amber-500">{t('code.notApplied')}</span>}
           <button
             onClick={apply}
             disabled={!dirty}
             className="hds-btn-primary px-3 py-1 text-xs disabled:opacity-40"
           >
-            应用更改
+            {t('code.apply')}
           </button>
         </div>
       </div>

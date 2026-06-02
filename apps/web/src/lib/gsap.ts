@@ -2,8 +2,11 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 
-// Register plugins exactly once for the whole app.
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+// Register plugins exactly once for the whole app. Guarded so the module is
+// import-safe during prerender (vite-react-ssg) where there is no DOM.
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger, useGSAP);
+}
 
 /** True when the user asked the OS to minimise motion. */
 export const prefersReducedMotion = () =>

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
 import type { PatchOp } from '@hds/protocol';
 
@@ -16,6 +17,7 @@ const TEXT_COLORS = ['#e6edf3', '#ffffff', '#0d1117', '#1d4ed8', '#475569', '#ef
 const BG_COLORS = ['transparent', '#0d1117', '#161b22', '#ffffff', '#eff6ff', '#fef9c3', '#fce7f3'];
 
 export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPaneProps) {
+  const { t } = useTranslation('editor');
   const selection = useDeckStore((s) => s.selection);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -47,8 +49,8 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
           </svg>
         </div>
-        <p className="text-[var(--secondary-label)] text-sm leading-relaxed">在画布上点选一个元素</p>
-        <p className="text-[var(--tertiary-label)] text-xs leading-relaxed">双击文本可直接改字</p>
+        <p className="text-[var(--secondary-label)] text-sm leading-relaxed">{t('inspector.emptyTitle')}</p>
+        <p className="text-[var(--tertiary-label)] text-xs leading-relaxed">{t('inspector.emptySubtitle')}</p>
       </aside>
     );
   }
@@ -102,8 +104,8 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
         {floating && onClose && (
           <button
             onClick={onClose}
-            aria-label="收起检查器"
-            title="收起"
+            aria-label={t('page.collapseInspector')}
+            title={t('inspector.close')}
             className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[var(--secondary-label)] hover:bg-[var(--control-bg)] hover:text-[var(--label)] transition-colors"
           >
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round"><path d="M2 2l8 8M10 2l-8 8" /></svg>
@@ -113,17 +115,17 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
 
       <div className="flex flex-col gap-5 p-4">
 
-        {/* ── 文字 ─────────────────────────────────────── */}
+        {/* ── Text ─────────────────────────────────────── */}
         {isTextEl && (
           <section>
-            <div className="hds-inspector-label">文字</div>
+            <div className="hds-inspector-label">{t('inspector.textLabel')}</div>
             <div className="hds-inspector-section">
               <div className="hds-inspector-block">
                 <textarea
                   ref={textAreaRef}
                   rows={3}
                   value={textValue}
-                  placeholder="输入文字后按 Enter 确认，Shift+Enter 换行"
+                  placeholder={t('inspector.textPlaceholder')}
                   className="hds-input leading-snug"
                   onChange={(e) => {
                     setTextValue(e.target.value);
@@ -136,22 +138,22 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
                     }
                   }}
                 />
-                <span className="text-[10px] text-[var(--tertiary-label)]">Enter 应用 · Shift+Enter 换行</span>
+                <span className="text-[10px] text-[var(--tertiary-label)]">{t('inspector.textHint')}</span>
               </div>
             </div>
           </section>
         )}
 
-        {/* ── 排版 ─────────────────────────────────────── */}
+        {/* ── Layout ───────────────────────────────────── */}
         <section>
-          <div className="hds-inspector-label">排版</div>
+          <div className="hds-inspector-label">{t('inspector.layoutLabel')}</div>
           <div className="hds-inspector-section">
             {/* Font size */}
             <div className="hds-inspector-row">
-              <span className="hds-row-label">字号</span>
+              <span className="hds-row-label">{t('inspector.fontSize')}</span>
               <div className="hds-row-control">
                 <div className="hds-stepper">
-                  <button type="button" title="减小" onClick={() => commitFontSize(Math.max(8, fontSize - 1))}>−</button>
+                  <button type="button" title={t('inspector.decrease')} onClick={() => commitFontSize(Math.max(8, fontSize - 1))}>−</button>
                   <input
                     type="number"
                     min={8}
@@ -161,7 +163,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
                     onBlur={(e) => commitFontSize(parseFloat(e.target.value))}
                     onKeyDown={(e) => { if (e.key === 'Enter') commitFontSize(parseFloat((e.target as HTMLInputElement).value)); }}
                   />
-                  <button type="button" title="增大" onClick={() => commitFontSize(Math.min(400, fontSize + 1))}>＋</button>
+                  <button type="button" title={t('inspector.increase')} onClick={() => commitFontSize(Math.min(400, fontSize + 1))}>＋</button>
                 </div>
                 <span className="text-[11px] text-[var(--tertiary-label)]">px</span>
               </div>
@@ -169,7 +171,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
 
             {/* Font weight */}
             <div className="hds-inspector-row">
-              <span className="hds-row-label">字重</span>
+              <span className="hds-row-label">{t('inspector.fontWeight')}</span>
               <div className="hds-row-control">
                 <select
                   className="hds-input"
@@ -189,7 +191,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
 
             {/* Align */}
             <div className="hds-inspector-block">
-              <span className="hds-block-label">对齐</span>
+              <span className="hds-block-label">{t('inspector.align')}</span>
               <div className="hds-segmented is-fill">
                 {([
                   ['left', 'M3 5h18M3 10h12M3 15h18M3 20h12'],
@@ -212,34 +214,34 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
 
             {/* Decoration */}
             <div className="hds-inspector-block">
-              <span className="hds-block-label">文本装饰</span>
+              <span className="hds-block-label">{t('inspector.decoration')}</span>
               <div className="hds-segmented is-fill">
                 <button
                   type="button"
                   className={`hds-segment ${hasUnderline ? 'is-active' : ''}`}
                   onClick={() => toggleDecoration('underline')}
                 >
-                  <span style={{ textDecoration: 'underline' }}>下划线</span>
+                  <span style={{ textDecoration: 'underline' }}>{t('inspector.underline')}</span>
                 </button>
                 <button
                   type="button"
                   className={`hds-segment ${hasLineThrough ? 'is-active' : ''}`}
                   onClick={() => toggleDecoration('line-through')}
                 >
-                  <span style={{ textDecoration: 'line-through' }}>删除线</span>
+                  <span style={{ textDecoration: 'line-through' }}>{t('inspector.lineThrough')}</span>
                 </button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* ── 外观 ─────────────────────────────────────── */}
+        {/* ── Appearance ───────────────────────────────── */}
         <section>
-          <div className="hds-inspector-label">外观</div>
+          <div className="hds-inspector-label">{t('inspector.appearanceLabel')}</div>
           <div className="hds-inspector-section">
             {/* Text color */}
             <div className="hds-inspector-block">
-              <span className="hds-block-label">文字颜色</span>
+              <span className="hds-block-label">{t('inspector.textColor')}</span>
               <div className="flex items-center gap-1.5 flex-wrap">
                 <input
                   type="color"
@@ -261,7 +263,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
 
             {/* Background color */}
             <div className="hds-inspector-block">
-              <span className="hds-block-label">背景色</span>
+              <span className="hds-block-label">{t('inspector.bgColor')}</span>
               <div className="flex items-center gap-1.5 flex-wrap">
                 <input
                   type="color"
@@ -284,7 +286,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
             {/* Opacity */}
             <div className="hds-inspector-block">
               <div className="flex items-center justify-between">
-                <span className="hds-block-label">透明度</span>
+                <span className="hds-block-label">{t('inspector.opacity')}</span>
                 <span className="text-[11px] text-[var(--tertiary-label)] font-mono tabular-nums">{Math.round(opacity * 100)}%</span>
               </div>
               <input
@@ -305,7 +307,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
             {/* Image replacement (img) */}
             {tagName === 'img' && (
               <div className="hds-inspector-block">
-                <span className="hds-block-label">替换图片</span>
+                <span className="hds-block-label">{t('inspector.replaceImage')}</span>
                 <div
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                   onDragLeave={() => setDragOver(false)}
@@ -319,7 +321,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
                     dragOver ? 'border-[var(--system-blue)] bg-[var(--cobalt-lt)]' : 'border-[var(--separator)]'
                   }`}
                 >
-                  <p className="text-[11px] text-[var(--tertiary-label)] mb-2">拖拽图片到此处，或</p>
+                  <p className="text-[11px] text-[var(--tertiary-label)] mb-2">{t('inspector.imageDropHint')}</p>
                   <input
                     id="hds-img-input"
                     type="file"
@@ -331,7 +333,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
                       e.target.value = '';
                     }}
                   />
-                  <label htmlFor="hds-img-input" className="hds-btn inline-block cursor-pointer px-3 py-1 text-xs">选择文件</label>
+                  <label htmlFor="hds-img-input" className="hds-btn inline-block cursor-pointer px-3 py-1 text-xs">{t('inspector.chooseFile')}</label>
                 </div>
               </div>
             )}
@@ -339,7 +341,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
             {/* Link (a) */}
             {tagName === 'a' && (
               <div className="hds-inspector-block">
-                <span className="hds-block-label">链接</span>
+                <span className="hds-block-label">{t('inspector.link')}</span>
                 <input
                   type="url"
                   placeholder="https://…"
@@ -354,7 +356,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
                     defaultChecked={attrs?.target === '_blank'}
                     onChange={(e) => patch([{ kind: 'attr', name: 'target', value: e.target.checked ? '_blank' : null }])}
                   />
-                  <span className="text-xs text-[var(--secondary-label)]">在新标签页打开</span>
+                  <span className="text-xs text-[var(--secondary-label)]">{t('inspector.openNewTab')}</span>
                 </label>
               </div>
             )}

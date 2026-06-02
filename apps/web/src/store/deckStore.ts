@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import type { DeckMeta, SlideEntry } from '@hds/protocol';
 import type { StyleSnapshot } from '@hds/protocol';
-import type { GuideTab } from '../data/guide.js';
 import { ulid } from '../lib/ulid.js';
 
 export interface SlideState extends SlideEntry {
@@ -61,14 +60,6 @@ export interface DeckStore {
   future: HistoryEntry[];
   undo: () => void;
   redo: () => void;
-
-  // ── Guide overlay ────────────────────────────────────────
-  guideOpen: boolean;
-  guideAnchor: GuideTab | null;
-  openGuide: (anchor?: GuideTab) => void;
-  closeGuide: () => void;
-  /** Internal: set overlay state WITHOUT touching history (for popstate / first load). */
-  _setGuide: (open: boolean, anchor: GuideTab | null) => void;
 
   // ── Actions ──────────────────────────────────────────────
   openDirectory: (handle: FileSystemDirectoryHandle, fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[]) => void;
@@ -144,8 +135,6 @@ export const useDeckStore = create<DeckStore>((set) => ({
   lastSavedAt: null,
   past: [],
   future: [],
-  guideOpen: false,
-  guideAnchor: null,
 
   openDirectory: (handle, fileName, html, headHtml, meta, slides) => {
     // Derive working-copy filename: foo.html → foo-hds.html
@@ -241,25 +230,6 @@ export const useDeckStore = create<DeckStore>((set) => ({
   markDirty: () => set({ isDirty: true }),
   markSaving: () => set({ isSaving: true }),
   markSaved: () => set({ isSaving: false, isDirty: false, lastSavedAt: Date.now() }),
-
-  openGuide: (anchor) => {
-    set({ guideOpen: true, guideAnchor: anchor ?? null });
-    if (typeof window === 'undefined') return;
-    const url = '/guide' + (anchor ? `#${anchor}` : '');
-    if (window.location.pathname + window.location.hash !== url) {
-      window.history.pushState({ hdsGuide: true }, '', url);
-    }
-  },
-  closeGuide: () => {
-    set({ guideOpen: false, guideAnchor: null });
-    if (typeof window === 'undefined') return;
-    if (!window.location.pathname.startsWith('/guide')) return;
-    // Prefer real back-navigation (restores prior scroll/entry); fall back to a
-    // clean replace when /guide was the first entry (e.g. opened via shared link).
-    if (window.history.state?.hdsGuide) window.history.back();
-    else window.history.replaceState({}, '', '/');
-  },
-  _setGuide: (open, anchor) => set({ guideOpen: open, guideAnchor: anchor }),
 
   undo: () =>
     set((s) => {

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { HistoryCtx, SnapshotMeta } from '../fs/history.js';
 import { listSnapshots, readSnapshot, deleteSnapshot } from '../fs/history.js';
 
@@ -9,15 +11,15 @@ interface HistoryDrawerProps {
   onRestore: (html: string) => Promise<void> | void;
 }
 
-function formatRelative(ts: number): string {
+function formatRelative(ts: number, t: TFunction<'editor'>): string {
   const diff = Date.now() - ts;
   const min = Math.floor(diff / 60000);
-  if (min < 1) return '刚刚';
-  if (min < 60) return `${min} 分钟前`;
+  if (min < 1) return t('historyDrawer.justNow');
+  if (min < 60) return t('historyDrawer.minutesAgo', { count: min });
   const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr} 小时前`;
+  if (hr < 24) return t('historyDrawer.hoursAgo', { count: hr });
   const day = Math.floor(hr / 24);
-  if (day < 30) return `${day} 天前`;
+  if (day < 30) return t('historyDrawer.daysAgo', { count: day });
   return new Date(ts).toLocaleDateString();
 }
 
@@ -28,6 +30,7 @@ function formatSize(bytes: number): string {
 }
 
 export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerProps) {
+  const { t } = useTranslation('editor');
   const [entries, setEntries] = useState<SnapshotMeta[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -107,8 +110,8 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
 
       <aside className="hds-panel hds-drawer fixed right-0 top-0 h-full w-[380px] z-50 flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--separator)]">
-          <h2 className="text-base font-semibold text-[var(--label)]">历史版本</h2>
-          <button onClick={onClose} className="text-[var(--tertiary-label)] hover:text-[var(--label)]" aria-label="关闭">✕</button>
+          <h2 className="text-base font-semibold text-[var(--label)]">{t('historyDrawer.title')}</h2>
+          <button onClick={onClose} className="text-[var(--tertiary-label)] hover:text-[var(--label)]" aria-label={t('historyDrawer.title')}>✕</button>
         </div>
 
         {/* Preview */}
@@ -116,7 +119,7 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
           <div className="rounded-lg overflow-hidden border border-[var(--separator)] bg-white aspect-video">
             {previewHtml ? (
               <iframe
-                title="快照预览"
+                title={t('historyDrawer.previewAlt')}
                 srcDoc={previewHtml}
                 sandbox=""
                 className="origin-top-left border-0 pointer-events-none"
@@ -124,7 +127,7 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xs text-[var(--tertiary-label)]">
-                {loading ? '加载中…' : '选择一个版本预览'}
+                {loading ? t('historyDrawer.loading') : t('historyDrawer.selectPrompt')}
               </div>
             )}
           </div>
@@ -134,7 +137,7 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
         <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1">
           {!loading && entries.length === 0 && (
             <div className="text-center text-xs text-[var(--tertiary-label)] py-10 px-4 leading-relaxed">
-              暂无历史版本。<br />每次保存都会自动记录一个可恢复的快照。
+              <Trans t={t} i18nKey="historyDrawer.empty" components={{ br: <br /> }} />
             </div>
           )}
           {entries.map((e) => (
@@ -146,7 +149,7 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
               }`}
             >
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] text-[var(--label)] truncate">{formatRelative(e.ts)}</p>
+                <p className="text-[13px] text-[var(--label)] truncate">{formatRelative(e.ts, t)}</p>
                 <p className="text-[11px] text-[var(--tertiary-label)]">
                   {new Date(e.ts).toLocaleString()} · {formatSize(e.size)}
                 </p>
@@ -155,10 +158,10 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
                 onClick={(ev) => { ev.stopPropagation(); void handleDelete(e.id); }}
                 disabled={busy}
                 className="opacity-0 group-hover:opacity-100 text-[var(--tertiary-label)] hover:text-red-500 transition-opacity text-xs px-1.5 py-1 disabled:opacity-30"
-                aria-label="删除此版本"
-                title="删除此版本"
+                aria-label={t('historyDrawer.deleteTitle')}
+                title={t('historyDrawer.deleteTitle')}
               >
-                删除
+                {t('historyDrawer.delete')}
               </button>
             </div>
           ))}
@@ -170,10 +173,10 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
             disabled={busy || !selectedId}
             className="hds-btn-primary w-full py-2.5 text-sm font-medium disabled:opacity-40"
           >
-            {busy ? '处理中…' : '恢复到此版本'}
+            {busy ? t('historyDrawer.restoring') : t('historyDrawer.restore')}
           </button>
           <p className="text-[11px] text-[var(--tertiary-label)] text-center mt-2 leading-relaxed">
-            恢复前会先把当前内容存为一个新版本，可随时再切回。
+            {t('historyDrawer.restoreHint')}
           </p>
         </div>
       </aside>
