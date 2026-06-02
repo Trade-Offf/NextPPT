@@ -4,9 +4,9 @@
    HDS · macOS-flavoured design tokens
    ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  /* System palette (macOS Aqua, light) */
-  --system-blue: #007aff;
-  --system-blue-press: #0063d1;
+  /* Brand palette (NextPPT violet) */
+  --system-blue: #7e14ff;
+  --system-blue-press: #6a0fd6;
 
   /* Label colors */
   --label: #1d1d1f;
@@ -20,7 +20,7 @@
   --editor-bg: #1e1e1e;
   --rule: #e3e3e6;
   --separator: #d8d8dc;
-  --cobalt-lt: #eaf3ff;
+  --cobalt-lt: #f3ebff;
 
   /* Vibrancy (translucent sidebars/toolbars) */
   --vibrancy-sidebar: rgba(246, 246, 248, 0.72);
@@ -41,8 +41,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --system-blue: #0a84ff;
-    --system-blue-press: #0a6fd6;
+    --system-blue: #a855ff;
+    --system-blue-press: #9333ea;
     --label: #f5f5f7;
     --secondary-label: #aeaeb2;
     --tertiary-label: #8e8e93;
@@ -52,7 +52,7 @@
     --editor-bg: #1e1e1e;
     --rule: #38383a;
     --separator: #48484a;
-    --cobalt-lt: #1a2b40;
+    --cobalt-lt: #2a1b40;
     --vibrancy-sidebar: rgba(40, 40, 43, 0.7);
     --vibrancy-toolbar: rgba(36, 36, 38, 0.78);
     --vibrancy-panel: rgba(38, 38, 41, 0.76);
@@ -149,7 +149,7 @@ body {
   background: var(--system-blue);
   color: #fff;
   border: 0.5px solid transparent;
-  box-shadow: 0 1px 2px rgba(0, 122, 255, 0.35);
+  box-shadow: 0 1px 2px rgba(126, 20, 255, 0.35);
   transition: background 0.12s ease;
 }
 .hds-btn-primary:hover:not(:disabled) { background: var(--system-blue-press); }
@@ -183,7 +183,7 @@ body {
 /* ── Window chrome (landing) ─────────────────────────────────────────────── */
 .hds-landing-bg {
   background:
-    radial-gradient(1200px 600px at 50% -10%, rgba(0, 122, 255, 0.12), transparent 60%),
+    radial-gradient(1200px 600px at 50% -10%, rgba(126, 20, 255, 0.12), transparent 60%),
     linear-gradient(180deg, #e9eef5 0%, #eef1f6 100%);
 }
 @media (prefers-color-scheme: dark) {
@@ -340,7 +340,7 @@ input[type="range"] { accent-color: var(--system-blue); }
   outline: none;
   background: var(--content-bg);
   border-color: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(126, 20, 255, 0.25);
 }
 textarea.hds-input { resize: vertical; }
 select.hds-input {
@@ -391,7 +391,7 @@ select.hds-input {
 }
 .hds-stepper:focus-within {
   border-color: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
+  box-shadow: 0 0 0 3px rgba(126, 20, 255, 0.25);
 }
 .hds-stepper input {
   width: 46px;
@@ -426,7 +426,7 @@ select.hds-input {
   position: relative;
   isolation: isolate;
   background:
-    radial-gradient(900px 520px at 12% 8%, rgba(0, 122, 255, 0.16), transparent 60%),
+    radial-gradient(900px 520px at 12% 8%, rgba(126, 20, 255, 0.16), transparent 60%),
     radial-gradient(820px 520px at 92% 92%, rgba(188, 140, 255, 0.16), transparent 60%),
     radial-gradient(700px 460px at 78% 4%, rgba(64, 220, 200, 0.12), transparent 60%),
     linear-gradient(180deg, #eef1f7 0%, #f4f6fa 100%);
@@ -486,7 +486,7 @@ select.hds-input {
   height: 6px;
   border-radius: 9999px;
   background: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.16);
+  box-shadow: 0 0 0 3px rgba(126, 20, 255, 0.16);
   flex-shrink: 0;
 }
 
@@ -638,8 +638,57 @@ select.hds-input {
   border-radius: 7px;
   transition: background 0.12s ease, color 0.12s ease;
 }
-.hds-copy-btn:hover { background: rgba(0, 122, 255, 0.18); }
+.hds-copy-btn:hover { background: rgba(126, 20, 255, 0.18); }
 .hds-copy-btn.is-copied { color: var(--system-green, #34c759); background: rgba(52, 199, 89, 0.14); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HDS · Guide full page
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hds-guide-page {
+  background: var(--window-bg);
+  animation: hdsFadeUp 0.18s ease both;
+}
+.hds-guide-header {
+  background: var(--vibrancy-toolbar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid var(--separator);
+}
+.hds-guide-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--system-blue);
+}
+/* "30-second overview" rhythm strip */
+.hds-guide-flow-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 15px;
+  border-radius: 12px;
+  background: var(--content-bg);
+  border: 0.5px solid var(--separator);
+}
+/* Each scenario card */
+.hds-guide-section {
+  background: var(--content-bg);
+  border: 0.5px solid var(--separator);
+  border-radius: 16px;
+  padding: 24px 22px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+/* In-place "open file" action footer inside each scenario */
+.hds-guide-action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 0.5px solid var(--separator);
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    HDS · Editor full-bleed stage (floating chrome)
@@ -647,7 +696,7 @@ select.hds-input {
 .hds-stage {
   background:
     radial-gradient(900px 600px at 50% 0%, rgba(255, 255, 255, 0.05), transparent 60%),
-    radial-gradient(1100px 700px at 50% 120%, rgba(0, 122, 255, 0.08), transparent 60%),
+    radial-gradient(1100px 700px at 50% 120%, rgba(126, 20, 255, 0.08), transparent 60%),
     linear-gradient(180deg, #1c1d22 0%, #161719 100%);
 }
 
@@ -710,7 +759,8 @@ select.hds-input {
 .hds-floating-rail,
 .hds-floating-inspector {
   border-radius: 16px;
-  overflow: hidden;
+  /* x clipped to keep rounded sides; y scrollable so long lists/inspector scroll */
+  overflow: hidden auto;
   background: rgba(28, 29, 33, 0.72) !important;
   -webkit-backdrop-filter: saturate(160%) blur(22px);
   backdrop-filter: saturate(160%) blur(22px);
@@ -724,7 +774,7 @@ select.hds-input {
   --control-bg: #2c2c2e;
   --separator: #3a3a3d;
   --rule: #38383a;
-  --cobalt-lt: #1a2b40;
+  --cobalt-lt: #2a1b40;
   --vibrancy-panel: transparent;
   --vibrancy-sidebar: transparent;
 }
@@ -745,4 +795,93 @@ select.hds-input {
 @media (prefers-reduced-motion: reduce) {
   .hds-floating-rail,
   .hds-floating-inspector { animation: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   HDS · Cinema theme — landing + guide only (editor untouched)
+   Near-black stage, warm-white ink, a single amber spotlight accent.
+   Scoped entirely under .hds-cinema so the editor's tokens never change.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hds-cinema {
+  --label: #f5f3ef;
+  --secondary-label: #b3aea3;
+  --tertiary-label: #7c776d;
+  --window-bg: #0b0b0e;
+  --content-bg: #131217;
+  --control-bg: #1b1a20;
+  --separator: rgba(245, 243, 239, 0.10);
+  --rule: rgba(245, 243, 239, 0.07);
+  --system-blue: #f5a623;
+  --system-blue-press: #ffc24b;
+  --cobalt-lt: rgba(245, 166, 35, 0.13);
+  --vibrancy-panel: rgba(20, 19, 24, 0.55);
+  --vibrancy-toolbar: rgba(11, 11, 14, 0.72);
+  color-scheme: dark;
+  color: var(--label);
+  background: var(--window-bg);
+}
+
+/* Hero: near-black + a soft amber spotlight that follows the cursor (--spot-x/y) */
+.hds-hero-bg.hds-cinema {
+  background:
+    radial-gradient(640px 640px at var(--spot-x, 28%) var(--spot-y, 16%), rgba(245, 166, 35, 0.13), transparent 62%),
+    radial-gradient(900px 760px at 92% 110%, rgba(245, 166, 35, 0.05), transparent 60%),
+    radial-gradient(720px 540px at 4% 102%, rgba(150, 150, 170, 0.05), transparent 60%),
+    #0b0b0e;
+}
+.hds-hero-bg.hds-cinema::before {
+  background-image:
+    linear-gradient(to right, rgba(245, 243, 239, 0.028) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 243, 239, 0.028) 1px, transparent 1px);
+  -webkit-mask-image: radial-gradient(circle at 50% 28%, #000 0%, transparent 72%);
+  mask-image: radial-gradient(circle at 50% 28%, #000 0%, transparent 72%);
+}
+
+/* Kill the gradient-clip title — flat warm-white ink, amber only on a key word */
+.hds-cinema .hds-hero-title {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--label);
+  letter-spacing: -0.025em;
+}
+.hds-hero-accent { color: var(--system-blue); }
+
+/* Pills → quiet dark chips with a glowing amber dot */
+.hds-cinema .hds-pill {
+  background: rgba(245, 243, 239, 0.04);
+  border-color: rgba(245, 243, 239, 0.10);
+  color: var(--secondary-label);
+}
+.hds-cinema .hds-pill::before {
+  background: var(--system-blue);
+  box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.15), 0 0 12px rgba(245, 166, 35, 0.6);
+}
+
+/* Glass surfaces → deep dark glass */
+.hds-cinema .hds-glass-card {
+  background: rgba(18, 17, 22, 0.66);
+  border-color: rgba(245, 243, 239, 0.10);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+/* Amber primary button needs dark ink for contrast */
+.hds-cinema .hds-btn-primary { color: #1a1205; box-shadow: 0 1px 2px rgba(245, 166, 35, 0.4); }
+.hds-cinema .hds-step-num { color: #1a1205; }
+.hds-cinema .hds-segment.is-active { color: var(--system-blue); background: rgba(245, 243, 239, 0.07); }
+.hds-cinema .hds-code-block { background: #0e0d12; }
+
+/* Section eyebrow / divider rules on dark */
+.hds-cinema .hds-hairline { border-color: var(--separator); }
+
+/* Scroll-reveal hook: GSAP drives these; if JS never runs they stay visible.
+   useGSAP sets the from-state before first paint, so there is no flash. */
+.hds-reveal { will-change: transform, opacity; }
+
+/* Big cinematic display type for the hero headline */
+.hds-display {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.02;
 }

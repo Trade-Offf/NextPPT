@@ -1,8 +1,10 @@
 <div align="center">
 
-# HTML Deck Studio
+<img src="apps/web/public/logo-mark.svg" alt="NextPPT" width="84" height="84" />
 
-**把 AI 产出的 HTML 演示稿,在浏览器里点哪改哪,一键导出工业级 PPTX / PDF。**
+# NextPPT
+
+**下一代 PPT，从 HTML 开始 —— 把 AI 产出的 HTML 演示稿,在浏览器里点哪改哪,一键导出工业级 PPTX / PDF。**
 
 [English](README.md) | 简体中文
 
@@ -17,7 +19,7 @@
 
 <!-- TODO: 换成真实 demo GIF。一个 10 秒的"打开文件夹 → 点一下改标题 → 导出 PPTX"循环,比这整篇 README 都管用。 -->
 <div align="center">
-  <img src="docs/assets/demo.gif" alt="HTML Deck Studio 演示" width="760" />
+  <img src="docs/assets/demo.gif" alt="NextPPT 演示" width="760" />
   <br />
   <sub>演示占位 · 把 <code>demo.gif</code> 放到 <code>docs/assets/</code> 即可</sub>
 </div>

@@ -9,15 +9,28 @@ import type { SlideState } from '../store/deckStore.js';
 
 const IDB_DB = 'hds-v1';
 const IDB_STORE = 'handles';
+export const IDB_SNAPSHOTS = 'snapshots';
 const BACKUP_DIR = '.hds-backup';
 const MAX_BACKUPS = 50;
 
 // ─── IndexedDB handle persistence ───────────────────────────────────────────
 
-function openIdb(): Promise<IDBDatabase> {
+/**
+ * Shared IndexedDB connection. v2 adds the `snapshots` object store used by
+ * single-file history (see fs/snapshots.ts). Both stores are created/ensured
+ * here so there is exactly one schema version for the `hds-v1` database.
+ */
+export function openIdb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_DB, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    const req = indexedDB.open(IDB_DB, 2);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+      if (!db.objectStoreNames.contains(IDB_SNAPSHOTS)) {
+        const store = db.createObjectStore(IDB_SNAPSHOTS, { keyPath: 'key' });
+        store.createIndex('deck', 'deck', { unique: false });
+      }
+    };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
@@ -162,7 +175,8 @@ export async function writeDeck(
   await writable.close();
 }
 
-async function writeBackup(dir: FileSystemDirectoryHandle, html: string): Promise<void> {
+/** Write a timestamped backup snapshot into `.hds-backup/` (folder mode). */
+export async function writeBackup(dir: FileSystemDirectoryHandle, html: string): Promise<void> {
   let backupDir: FileSystemDirectoryHandle;
   try {
     backupDir = await dir.getDirectoryHandle(BACKUP_DIR, { create: true });
@@ -189,6 +203,57 @@ async function pruneBackups(backupDir: FileSystemDirectoryHandle): Promise<void>
     const oldest = names.shift()!;
     await backupDir.removeEntry(oldest);
   }
+}
+
+// ─── Folder-mode backup listing (history drawer) ────────────────────────────
+
+export interface BackupEntry {
+  /** Backup file name, e.g. 2026-06-02T02-56-00-123Z.html */
+  name: string;
+  /** Epoch ms parsed from the file name. */
+  ts: number;
+  /** Byte size of the snapshot. */
+  size: number;
+}
+
+/** Parse a backup file name (ISO with [:.]→-) back to epoch ms. */
+function parseBackupTs(name: string): number {
+  const base = name.replace(/\.html$/i, '');
+  // 2026-06-02T02-56-00-123Z → 2026-06-02T02:56:00.123Z
+  const m = base.match(/^(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z$/);
+  if (!m) return 0;
+  const iso = `${m[1]}T${m[2]}:${m[3]}:${m[4]}.${m[5]}Z`;
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? 0 : t;
+}
+
+export async function listBackups(dir: FileSystemDirectoryHandle): Promise<BackupEntry[]> {
+  let backupDir: FileSystemDirectoryHandle;
+  try {
+    backupDir = await dir.getDirectoryHandle(BACKUP_DIR);
+  } catch {
+    return [];
+  }
+  const entries: BackupEntry[] = [];
+  for await (const [name, entry] of backupDir as unknown as AsyncIterable<[string, FileSystemHandle]>) {
+    if (entry.kind !== 'file' || !name.endsWith('.html')) continue;
+    const file = await (entry as FileSystemFileHandle).getFile();
+    entries.push({ name, ts: parseBackupTs(name), size: file.size });
+  }
+  entries.sort((a, b) => b.ts - a.ts); // newest first
+  return entries;
+}
+
+export async function readBackup(dir: FileSystemDirectoryHandle, name: string): Promise<string> {
+  const backupDir = await dir.getDirectoryHandle(BACKUP_DIR);
+  const fh = await backupDir.getFileHandle(name);
+  const file = await fh.getFile();
+  return file.text();
+}
+
+export async function deleteBackup(dir: FileSystemDirectoryHandle, name: string): Promise<void> {
+  const backupDir = await dir.getDirectoryHandle(BACKUP_DIR);
+  await backupDir.removeEntry(name);
 }
 
 // ─── Asset write ──────────────────────────────────────────────────────────

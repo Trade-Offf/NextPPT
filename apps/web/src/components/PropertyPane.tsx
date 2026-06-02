@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useDeckStore } from '../store/deckStore.js';
 import type { PatchOp } from '@hds/protocol';
 
@@ -27,12 +27,17 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
   const snapFontSize = selection?.styleSnapshot.fontSize;
   const snapText = selection?.text ?? '';
 
-  // Re-sync local control state whenever the selected element changes.
-  useEffect(() => {
+  // Re-sync local control state whenever the selected element (or its snapshot)
+  // changes. Done during render via a tracked key — the React-recommended
+  // alternative to a synchronous setState-in-effect.
+  const syncKey = `${selector ?? ''}|${snapFontSize ?? ''}|${snapText}`;
+  const [lastSyncKey, setLastSyncKey] = useState('');
+  if (syncKey !== lastSyncKey) {
+    setLastSyncKey(syncKey);
     if (snapFontSize) setFontSize(Math.round(parseFloat(snapFontSize)) || 16);
     setOpacity(1);
     setTextValue(snapText);
-  }, [selector, snapFontSize, snapText]);
+  }
 
   if (!selection) {
     return (

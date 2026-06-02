@@ -88,9 +88,9 @@ export function SlideListPane({ floating = false }: { floating?: boolean } = {})
           className={cn(
             'group relative rounded-lg border p-1 transition-all',
             slide.id === currentId
-              ? 'border-[var(--system-blue)] ring-2 ring-[rgba(0,122,255,0.35)]'
-              : 'border-[var(--rule)] hover:border-[rgba(0,122,255,0.6)]',
-            overIndex === idx && dragIndex !== null && dragIndex !== idx ? 'ring-2 ring-[rgba(0,122,255,0.5)]' : '',
+              ? 'border-[var(--system-blue)] ring-2 ring-[rgba(126,20,255,0.35)]'
+              : 'border-[var(--rule)] hover:border-[rgba(126,20,255,0.6)]',
+            overIndex === idx && dragIndex !== null && dragIndex !== idx ? 'ring-2 ring-[rgba(126,20,255,0.5)]' : '',
             dragIndex === idx ? 'opacity-40' : '',
           )}
         >

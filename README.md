@@ -1,8 +1,10 @@
 <div align="center">
 
-# HTML Deck Studio
+<img src="apps/web/public/logo-mark.svg" alt="NextPPT" width="84" height="84" />
 
-**Trim AI-generated HTML decks in your browser, then export pixel-perfect PPTX / PDF in one click.**
+# NextPPT
+
+**The next PPT — edit AI-generated HTML decks in your browser, then export pixel-perfect PPTX / PDF in one click.**
 
 English | [简体中文](README.zh-CN.md)
 
@@ -17,7 +19,7 @@ English | [简体中文](README.zh-CN.md)
 
 <!-- TODO: replace with a real demo GIF. A 10s loop of "open folder → click to edit a title → export PPTX" is worth more than this whole README. -->
 <div align="center">
-  <img src="docs/assets/demo.gif" alt="HTML Deck Studio demo" width="760" />
+  <img src="docs/assets/demo.gif" alt="NextPPT demo" width="760" />
   <br />
   <sub>Demo placeholder · drop a <code>demo.gif</code> into <code>docs/assets/</code></sub>
 </div>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="og-bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#faf7ff"/>
+      <stop offset="1" stop-color="#efe6ff"/>
+    </linearGradient>
+    <linearGradient id="og-mark" x1="120" y1="200" x2="320" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7e14ff"/>
+      <stop offset="1" stop-color="#a855ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#og-bg)"/>
+  <g transform="translate(110 215) scale(0.390625)">
+    <rect width="512" height="512" rx="116" fill="url(#og-mark)"/>
+    <path transform="translate(31 0) skewX(-7)" d="M148 126 L212 126 L300 280 L300 126 L364 126 L364 386 L300 386 L212 232 L212 386 L148 386 Z" fill="#ffffff"/>
+  </g>
+  <text x="352" y="300" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="108" font-weight="800" letter-spacing="-3" fill="#16121f">Next<tspan fill="#7e14ff">PPT</tspan></text>
+  <text x="356" y="372" font-family="'PingFang SC', 'Hiragino Sans GB', sans-serif" font-size="46" font-weight="600" fill="#3a3344">下一代 PPT，从 HTML 开始</text>
+  <text x="356" y="430" font-family="'PingFang SC', 'Hiragino Sans GB', sans-serif" font-size="28" font-weight="400" fill="#6b6675">把 AI 写的 HTML 幻灯片，变成可点编辑、一键导出的 PPT</text>
+</svg>

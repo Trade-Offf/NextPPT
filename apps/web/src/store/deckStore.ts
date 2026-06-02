@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { DeckMeta, SlideEntry } from '@hds/protocol';
 import type { StyleSnapshot } from '@hds/protocol';
+import type { GuideTab } from '../data/guide.js';
 import { ulid } from '../lib/ulid.js';
 
 export interface SlideState extends SlideEntry {
@@ -17,6 +18,12 @@ export interface SelectionState {
   styleSnapshot: StyleSnapshot;
   attrs?: Record<string, string>;
   text?: string;
+}
+
+/** Undo/redo snapshot of the editable deck content. */
+export interface HistoryEntry {
+  slides: SlideState[];
+  currentSlideId: string | null;
 }
 
 export interface DeckStore {
@@ -49,11 +56,28 @@ export interface DeckStore {
   isSaving: boolean;
   lastSavedAt: number | null;
 
+  // ── Undo / redo ──────────────────────────────────────────
+  past: HistoryEntry[];
+  future: HistoryEntry[];
+  undo: () => void;
+  redo: () => void;
+
+  // ── Guide overlay ────────────────────────────────────────
+  guideOpen: boolean;
+  guideAnchor: GuideTab | null;
+  openGuide: (anchor?: GuideTab) => void;
+  closeGuide: () => void;
+  /** Internal: set overlay state WITHOUT touching history (for popstate / first load). */
+  _setGuide: (open: boolean, anchor: GuideTab | null) => void;
+
   // ── Actions ──────────────────────────────────────────────
   openDirectory: (handle: FileSystemDirectoryHandle, fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[]) => void;
   openFile: (fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[]) => void;
   setWorkingFileHandle: (fh: FileSystemFileHandle) => void;
   closeDirectory: () => void;
+
+  /** Replace the working deck content from a restored snapshot (keeps handles). */
+  applyRestoredDeck: (html: string, headHtml: string, meta: DeckMeta, slides: SlideState[]) => void;
 
   setSlides: (slides: SlideState[]) => void;
   updateSlideHtml: (id: string, html: string) => void;
@@ -83,6 +107,17 @@ function setRootAttrs(html: string, attrs: Record<string, string>): string {
   return sec.outerHTML;
 }
 
+// ── Undo/redo internals ──────────────────────────────────────────────────────
+const HISTORY_LIMIT = 100;
+const COALESCE_MS = 500;
+/** Last time a text/patch edit pushed a history entry (for coalescing bursts). */
+let lastEditPush = 0;
+
+/** Build a `past` array with the current slide state appended (capped). */
+function pushPast(s: DeckStore): HistoryEntry[] {
+  return [...s.past, { slides: s.slides, currentSlideId: s.currentSlideId }].slice(-HISTORY_LIMIT);
+}
+
 /** Re-assign data-page ordinals (1-based) to match array order. */
 function renumber(slides: SlideState[]): SlideState[] {
   return slides.map((sl, idx) => {
@@ -107,19 +142,30 @@ export const useDeckStore = create<DeckStore>((set) => ({
   isDirty: false,
   isSaving: false,
   lastSavedAt: null,
+  past: [],
+  future: [],
+  guideOpen: false,
+  guideAnchor: null,
 
   openDirectory: (handle, fileName, html, headHtml, meta, slides) => {
     // Derive working-copy filename: foo.html → foo-hds.html
     const copyName = fileName.replace(/\.html$/i, '-hds.html');
-    set({ dirHandle: handle, fileHandle: null, mode: 'folder', sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false });
+    lastEditPush = 0;
+    set({ dirHandle: handle, fileHandle: null, mode: 'folder', sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false, past: [], future: [] });
   },
 
   openFile: (fileName, html, headHtml, meta, slides) => {
     const copyName = fileName.replace(/\.html?$/i, '-hds.html');
-    set({ dirHandle: null, fileHandle: null, mode: 'file', sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false });
+    lastEditPush = 0;
+    set({ dirHandle: null, fileHandle: null, mode: 'file', sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false, past: [], future: [] });
   },
 
   setWorkingFileHandle: (fh) => set({ fileHandle: fh }),
+
+  applyRestoredDeck: (html, headHtml, meta, slides) => {
+    lastEditPush = 0;
+    set({ rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, selection: null, isDirty: true, past: [], future: [] });
+  },
 
   closeDirectory: () =>
     set({ dirHandle: null, fileHandle: null, mode: 'folder', sourceFileName: '', deckFileName: '', rawHtml: '', headHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
@@ -127,7 +173,18 @@ export const useDeckStore = create<DeckStore>((set) => ({
   setSlides: (slides) => set({ slides }),
 
   updateSlideHtml: (id, html) =>
-    set((s) => ({ slides: s.slides.map((sl) => (sl.id === id ? { ...sl, html } : sl)), isDirty: true })),
+    set((s) => {
+      const now = Date.now();
+      const coalesce = now - lastEditPush < COALESCE_MS;
+      lastEditPush = now;
+      const next = {
+        slides: s.slides.map((sl) => (sl.id === id ? { ...sl, html } : sl)),
+        isDirty: true,
+      };
+      // Group rapid edits into one undo step; only the first in a burst pushes.
+      if (coalesce) return next;
+      return { ...next, past: pushPast(s), future: [] };
+    }),
 
   setThumbnail: (id, thumbnail) =>
     set((s) => ({ slides: s.slides.map((sl) => (sl.id === id ? { ...sl, thumbnail } : sl)) })),
@@ -145,7 +202,8 @@ export const useDeckStore = create<DeckStore>((set) => ({
         html: setRootAttrs(src.html, { 'data-page-id': newId }),
       };
       const next = [...s.slides.slice(0, idx + 1), clone, ...s.slides.slice(idx + 1)];
-      return { slides: renumber(next), currentSlideId: newId, selection: null, isDirty: true };
+      lastEditPush = 0; // structural op: don't coalesce a following text edit into it
+      return { slides: renumber(next), currentSlideId: newId, selection: null, isDirty: true, past: pushPast(s), future: [] };
     }),
 
   deleteSlide: (id) =>
@@ -157,7 +215,8 @@ export const useDeckStore = create<DeckStore>((set) => ({
       const current = s.currentSlideId === id
         ? next[Math.min(idx, next.length - 1)]?.id ?? null
         : s.currentSlideId;
-      return { slides: next, currentSlideId: current, selection: null, isDirty: true };
+      lastEditPush = 0;
+      return { slides: next, currentSlideId: current, selection: null, isDirty: true, past: pushPast(s), future: [] };
     }),
 
   reorderSlides: (fromIndex, toIndex) =>
@@ -167,7 +226,8 @@ export const useDeckStore = create<DeckStore>((set) => ({
       const moved = arr.splice(fromIndex, 1)[0];
       if (!moved) return {};
       arr.splice(toIndex, 0, moved);
-      return { slides: renumber(arr), isDirty: true };
+      lastEditPush = 0;
+      return { slides: renumber(arr), isDirty: true, past: pushPast(s), future: [] };
     }),
 
   setCurrentSlide: (id) => set({ currentSlideId: id, selection: null }),
@@ -181,4 +241,55 @@ export const useDeckStore = create<DeckStore>((set) => ({
   markDirty: () => set({ isDirty: true }),
   markSaving: () => set({ isSaving: true }),
   markSaved: () => set({ isSaving: false, isDirty: false, lastSavedAt: Date.now() }),
+
+  openGuide: (anchor) => {
+    set({ guideOpen: true, guideAnchor: anchor ?? null });
+    if (typeof window === 'undefined') return;
+    const url = '/guide' + (anchor ? `#${anchor}` : '');
+    if (window.location.pathname + window.location.hash !== url) {
+      window.history.pushState({ hdsGuide: true }, '', url);
+    }
+  },
+  closeGuide: () => {
+    set({ guideOpen: false, guideAnchor: null });
+    if (typeof window === 'undefined') return;
+    if (!window.location.pathname.startsWith('/guide')) return;
+    // Prefer real back-navigation (restores prior scroll/entry); fall back to a
+    // clean replace when /guide was the first entry (e.g. opened via shared link).
+    if (window.history.state?.hdsGuide) window.history.back();
+    else window.history.replaceState({}, '', '/');
+  },
+  _setGuide: (open, anchor) => set({ guideOpen: open, guideAnchor: anchor }),
+
+  undo: () =>
+    set((s) => {
+      if (!s.past.length) return {};
+      const prev = s.past[s.past.length - 1]!;
+      const present: HistoryEntry = { slides: s.slides, currentSlideId: s.currentSlideId };
+      lastEditPush = 0;
+      return {
+        slides: prev.slides,
+        currentSlideId: prev.currentSlideId,
+        past: s.past.slice(0, -1),
+        future: [present, ...s.future].slice(0, HISTORY_LIMIT),
+        selection: null,
+        isDirty: true,
+      };
+    }),
+
+  redo: () =>
+    set((s) => {
+      if (!s.future.length) return {};
+      const nextEntry = s.future[0]!;
+      const present: HistoryEntry = { slides: s.slides, currentSlideId: s.currentSlideId };
+      lastEditPush = 0;
+      return {
+        slides: nextEntry.slides,
+        currentSlideId: nextEntry.currentSlideId,
+        past: [...s.past, present].slice(-HISTORY_LIMIT),
+        future: s.future.slice(1),
+        selection: null,
+        isDirty: true,
+      };
+    }),
 }));
