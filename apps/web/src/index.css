@@ -1208,6 +1208,44 @@ select.hds-input {
 }
 .hds-nav-link:hover { color: var(--label); }
 
+/* ── Open-deck error (opaque on cinema hero) ─────────────────────────────── */
+.hds-open-error {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 69, 58, 0.28);
+  background: #1a1416;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+}
+.hds-open-error-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #f0e8e9;
+}
+.hds-open-error-code {
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #ffb4a8;
+  background: rgba(255, 69, 58, 0.12);
+  padding: 0 0.25em;
+  border-radius: 4px;
+}
+.hds-open-error-link {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 500;
+  color: var(--system-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.hds-open-error-link:hover { color: #7eb8ff; }
+
 /* ── Language switcher (zh / EN) ─────────────────────────────────────────── */
 .hds-lang {
   display: inline-flex;

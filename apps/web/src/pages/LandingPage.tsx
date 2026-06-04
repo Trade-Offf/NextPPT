@@ -6,6 +6,7 @@ import { useGuideNav } from '../hooks/useGuideNav.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { EditorPreview } from '../components/EditorPreview.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
+import { OpenDeckErrorAlert } from '../components/OpenDeckErrorAlert.js';
 
 export function LandingPage() {
   const { t } = useTranslation('landing');
@@ -26,9 +27,11 @@ export function LandingPage() {
   const rootRef = useRef<HTMLDivElement>(null);
   const pains = t('value.pains', { returnObjects: true }) as string[];
 
+  /** Main CTA / drop zone: open HTML file picker (folder via button below or drag). */
   const openPrimary = () => {
-    if (DIR_API_SUPPORTED) void handlePickFolder();
-    else void handlePickFile();
+    if (loading) return;
+    if (FILE_API_SUPPORTED) void handlePickFile();
+    else if (DIR_API_SUPPORTED) void handlePickFolder();
   };
 
   useGSAP(
@@ -78,7 +81,15 @@ export function LandingPage() {
           <p className="hero-sub mt-6 text-[15px] sm:text-[17px] text-[var(--secondary-label)] leading-relaxed max-w-xl mx-auto">
             {t('hero.subtitle')}
           </p>
-          <div className="hero-cta mt-9 flex flex-wrap items-center justify-center gap-3">
+          {error && (
+            <OpenDeckErrorAlert
+              className="mt-6 max-w-md mx-auto text-left"
+              error={error}
+              formatError={formatError}
+              onGoToGuide={() => openGuide('generate')}
+            />
+          )}
+          <div className={`hero-cta flex flex-wrap items-center justify-center gap-3 ${error ? 'mt-6' : 'mt-9'}`}>
             {FS_API_SUPPORTED ? (
               <button onClick={openPrimary} disabled={loading} className="hds-btn-primary px-6 py-3 text-sm disabled:opacity-50">
                 {loading ? t('hero.loading') : t('hero.ctaOpen')}
@@ -187,22 +198,6 @@ export function LandingPage() {
               </>
             )}
 
-            {error && (
-              <div className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-300 leading-relaxed">
-                <p>{error}</p>
-                {formatError && (
-                  <p className="mt-2 text-red-300/80">
-                    <Trans
-                      t={t}
-                      i18nKey="hub.errorRecover"
-                      components={{
-                        btn: <button onClick={() => openGuide('generate')} className="underline font-medium" />,
-                      }}
-                    />
-                  </p>
-                )}
-              </div>
-            )}
             </div>
           </div>
         </div>

@@ -38,6 +38,8 @@ const landing: typeof zh = {
       'This relies on the File System Access API, currently supported only by Chromium browsers. Please open this page in <a>Chrome</a> or Edge / Brave / Arc.',
     dropTitle: 'Click to choose, or drag a folder / HTML here',
     dropHint: 'Folder mode reads/writes paired images; a single HTML suits self-contained decks',
+    choosePrompt: 'What do you want to open?',
+    chooseCancel: 'Cancel',
     openFolder: 'Open folder',
     openSingle: 'Open single HTML',
     recall: 'Reopen last folder',

@@ -108,6 +108,12 @@ export async function verifyPermission(handle: FileSystemDirectoryHandle): Promi
 
 // ─── Reading deck ─────────────────────────────────────────────────────────
 
+/** Count slide sections the same way `parseDeck` does (avoids false positives from strings in script). */
+export function deckSlideCount(html: string): number {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.querySelectorAll(SLIDE_SELECTOR).length;
+}
+
 export async function findDeckFile(
   dir: FileSystemDirectoryHandle,
 ): Promise<{ fileName: string; html: string } | null> {
@@ -115,12 +121,7 @@ export async function findDeckFile(
     if (entry.kind !== 'file' || !name.endsWith('.html')) continue;
     const file = await (entry as FileSystemFileHandle).getFile();
     const html = await file.text();
-    if (html.includes(SLIDE_SELECTOR.replace('.', ' class="').replace('.', ' '))) {
-      // Quick heuristic match for <section class="slide">
-      return { fileName: name, html };
-    }
-    // Fallback: any html with the slide class
-    if (html.includes('class="slide"')) return { fileName: name, html };
+    if (deckSlideCount(html) > 0) return { fileName: name, html };
   }
   return null;
 }

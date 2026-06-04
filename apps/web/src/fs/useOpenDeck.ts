@@ -14,6 +14,12 @@ function errMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+function scrollToOpenError() {
+  requestAnimationFrame(() => {
+    document.getElementById('hds-open-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+
 /**
  * Everything needed to turn a folder / single HTML file into a loaded deck.
  * Shared by the landing page and the guide page so the guide can funnel a
@@ -34,6 +40,7 @@ export function useOpenDeck() {
     setLoading(true);
     setError(null);
     setFormatError(false);
+    let scrollFormatHint = false;
     try {
       const ok = await verifyPermission(handle);
       if (!ok) throw new Error(t('errors.needPermission'));
@@ -41,11 +48,17 @@ export function useOpenDeck() {
       const result = await findDeckFile(handle);
       if (!result) {
         setFormatError(true);
+        scrollFormatHint = true;
         throw new Error(t('errors.notFound'));
       }
 
       const { fileName, html } = result;
       const { meta, headHtml: rawHead, slides: rawSlides } = parseDeck(html);
+      if (!rawSlides.length) {
+        setFormatError(true);
+        scrollFormatHint = true;
+        throw new Error(t('errors.noSlides'));
+      }
 
       revokeAssetCache();
 
@@ -60,6 +73,7 @@ export function useOpenDeck() {
       openDirectory(handle, fileName, html, headHtml, meta, resolvedSlides);
     } catch (err) {
       setError(errMessage(err));
+      if (scrollFormatHint) scrollToOpenError();
     } finally {
       setLoading(false);
     }
@@ -73,6 +87,7 @@ export function useOpenDeck() {
     if (!slides.length) {
       setFormatError(true);
       setError(t('errors.noSlides'));
+      scrollToOpenError();
       return;
     }
     revokeAssetCache();
@@ -93,6 +108,10 @@ export function useOpenDeck() {
     if (!FILE_API_SUPPORTED) return;
     try {
       const { fileName, html } = await pickFile();
+      if (!/\.html?$/i.test(fileName)) {
+        setError(t('errors.dropHtmlOnly'));
+        return;
+      }
       openSingleFile(fileName, html);
     } catch (err) {
       if ((err as Error).name !== 'AbortError') setError(errMessage(err));

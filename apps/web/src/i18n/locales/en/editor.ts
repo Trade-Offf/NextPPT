@@ -138,10 +138,16 @@ const editor: typeof zh = {
     apply: 'Apply changes',
     invalid: 'Invalid: the current page must contain a <section class="slide"> root element',
   },
+  open: {
+    formatBrief:
+      'Not a deck (needs <code>section.slide</code>). Copy the prompt from the <link>guide</link> and have AI generate the file.',
+  },
   errors: {
     needPermission: 'Folder access permission is required',
-    notFound: 'No HTML slide file found. Make sure the folder contains an HTML file with <section class="slide">.',
-    noSlides: 'No <section class="slide"> slides found in this HTML.',
+    notFound:
+      'No recognizable slide HTML in this folder. You need at least one <section class="slide"> page.',
+    noSlides:
+      'This HTML has no <section class="slide"> pages, so it cannot be opened as a deck.',
     sampleFailed: 'Failed to load the sample template, please try again later',
     dropHtmlOnly: 'Please drop an HTML file or a folder containing HTML.',
   },

@@ -6,6 +6,7 @@ import { useOpenDeck, FILE_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
 import { useGuideNav } from '../hooks/useGuideNav.js';
 import { LanguageSwitcher } from '../components/LanguageSwitcher.js';
+import { OpenDeckErrorAlert } from '../components/OpenDeckErrorAlert.js';
 import type { GuideTab } from '../data/guide.js';
 
 const ANCHORS: readonly GuideTab[] = ['generate', 'edit', 'export'];
@@ -25,7 +26,7 @@ export function GuidePage() {
   const hashAnchor = anchorFromHash(hash);
 
   const hasDeck = useDeckStore((s) => s.slides.length > 0);
-  const { error, handlePickFile, handlePickFolder } = useOpenDeck();
+  const { error, formatError, handlePickFile, handlePickFolder } = useOpenDeck();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
@@ -280,9 +281,15 @@ export function GuidePage() {
         </div>
 
         {error && (
-          <div className="mt-8 bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-300 leading-relaxed">
-            {error}
-          </div>
+          <OpenDeckErrorAlert
+            className="mt-8 text-xs"
+            error={error}
+            formatError={formatError}
+            onGoToGuide={() => {
+              document.getElementById('guide-generate')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              setPromptOpen(true);
+            }}
+          />
         )}
 
         {/* Footer */}

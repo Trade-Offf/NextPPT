@@ -36,6 +36,8 @@ export default {
       '本功能依赖 File System Access API，目前仅 Chromium 内核浏览器支持。请使用 <a>Chrome</a> 或 Edge / Brave / Arc 打开本页面。',
     dropTitle: '点击选择，或拖拽文件夹 / HTML 到此处',
     dropHint: '文件夹模式可读写配套图片；单个 HTML 适合自包含演示稿',
+    choosePrompt: '要打开哪种？',
+    chooseCancel: '取消',
     openFolder: '打开文件夹',
     openSingle: '打开单个 HTML',
     recall: '重新打开上次的文件夹',

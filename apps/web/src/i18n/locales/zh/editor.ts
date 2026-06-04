@@ -136,10 +136,16 @@ export default {
     apply: '应用更改',
     invalid: '无效：当前页必须包含 <section class="slide"> 根元素',
   },
+  open: {
+    formatBrief:
+      '无法识别为幻灯片（需 <code>section.slide</code>）。到<link>使用指南</link>复制提示词，让 AI 按格式生成。',
+  },
   errors: {
     needPermission: '需要文件夹访问权限',
-    notFound: '未找到 HTML 幻灯片文件。请确认文件夹中包含带有 <section class="slide"> 的 HTML 文件。',
-    noSlides: '未在该 HTML 中找到 <section class="slide"> 幻灯片。',
+    notFound:
+      '文件夹里没有可识别的幻灯片 HTML。需要包含至少一个 <section class="slide"> 页面。',
+    noSlides:
+      '该 HTML 里没有 <section class="slide"> 幻灯片页，无法作为演示稿打开。',
     sampleFailed: '示例模板加载失败，请稍后重试',
     dropHtmlOnly: '请拖入 HTML 文件或包含 HTML 的文件夹。',
   },
