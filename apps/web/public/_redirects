@@ -1,2 +1,7 @@
-/en/*   /en/index.html   200
-/*      /index.html      200
+# SPA fallback for /en/* only. Do NOT use a global /* → index.html rule:
+# when a hashed /assets/*.js is missing (stale deploy, wrong output dir), that
+# catch-all returns HTML and the browser reports "Expected JavaScript but got
+# text/html". Static files under /assets/, /favicon*, images, etc. must 404
+# as real files — they are not rewritten.
+/en/guide/*  /en/guide/index.html  200
+/en/*        /en/index.html         200
