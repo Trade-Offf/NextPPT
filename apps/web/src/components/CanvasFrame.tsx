@@ -29,8 +29,14 @@ export function CanvasFrame({ sectionHtml, headHtml = '', assetsBaseUrl, onMessa
   const onMessageRef = useRef(onMessage);
   useEffect(() => { onMessageRef.current = onMessage; });
 
-  // Build srcdoc – inject original head so styles/fonts are preserved
-  const srcdoc = `<!doctype html><html><head>
+  // Build srcdoc – inject original head so styles/fonts are preserved.
+  // Frozen on first render of this mounted instance: the iframe is the live
+  // source of truth, so in-iframe edits (which echo back as new sectionHtml)
+  // must NOT rewrite srcDoc and reload it. External changes (undo/redo/restore/
+  // slide switch) remount this component via a `key`, rebuilding srcDoc fresh.
+  const srcDocRef = useRef<string | null>(null);
+  if (srcDocRef.current === null) {
+    srcDocRef.current = `<!doctype html><html><head>
 <meta charset="UTF-8">
 <base href="${assetsBaseUrl}">
 ${headHtml}
@@ -53,6 +59,8 @@ ${headHtml}
   }
 </style>
 </head><body>${sectionHtml}<script data-hds-runtime>${RUNTIME_SOURCE}${'<'}/script></body></html>`;
+  }
+  const srcdoc = srcDocRef.current;
 
   useEffect(() => {
     const handler = (evt: MessageEvent) => {

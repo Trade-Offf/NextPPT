@@ -10,7 +10,24 @@ export type HostMessage =
   | InitMessage
   | PatchMessage
   | RequestHtmlMessage
-  | DisableScriptsMessage;
+  | DisableScriptsMessage
+  | InsertImageMessage
+  | DeleteElementMessage
+  | SelectElementMessage
+  | SetModeMessage;
+
+/** Canvas interaction mode. `edit` = content editing, `drag` = freeform transform. */
+export type InteractionMode = 'edit' | 'drag';
+
+/**
+ * Switch the in-iframe interaction mode. The two modes are strictly exclusive:
+ * `edit` enables click-select + double-click inline editing (no handles, no
+ * dragging); `drag` enables move/resize/delete with handles (no inline editing).
+ */
+export interface SetModeMessage {
+  type: 'set-mode';
+  mode: InteractionMode;
+}
 
 export interface InitMessage {
   type: 'init';
@@ -32,6 +49,37 @@ export type PatchOp =
   | { kind: 'attr'; name: string; value: string | null }
   | { kind: 'style'; name: string; value: string | null }
   | { kind: 'class'; add?: string[]; remove?: string[] };
+
+/**
+ * Insert a new <img> as an absolutely-positioned, freely-transformable element.
+ * Position/size are percentages of the 1280x720 slide so they are
+ * resolution-independent and export-stable. The host generates `id` (used as a
+ * stable `data-hds-id` selector) and resolves `src` (blob: in folder mode,
+ * data: URI in single-file mode) before sending.
+ */
+export interface InsertImageMessage {
+  type: 'insert-image';
+  id: string;
+  src: string;
+  leftPct: number;
+  topPct: number;
+  widthPct: number;
+}
+
+export interface DeleteElementMessage {
+  type: 'delete-element';
+  selector: string;
+}
+
+/**
+ * Re-select an element by selector. The host sends this after the iframe
+ * reloads (which happens whenever the slide HTML is replaced) so the in-iframe
+ * selection overlay / transform handles are restored without a manual re-click.
+ */
+export interface SelectElementMessage {
+  type: 'select-element';
+  selector: string;
+}
 
 export interface RequestHtmlMessage {
   type: 'request-html';

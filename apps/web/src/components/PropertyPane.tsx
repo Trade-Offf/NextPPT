@@ -5,10 +5,14 @@ import type { PatchOp } from '@hds/protocol';
 
 interface PropertyPaneProps {
   onPatch: (selector: string, ops: PatchOp[]) => void;
+  /** Remove the selected element from the slide (used for inserted images). */
+  onDelete?: (selector: string) => void;
   /** Floating inspector variant: rounded glass card with slide-in animation. */
   floating?: boolean;
   /** When provided (floating), shows a close (×) button in the header. */
   onClose?: () => void;
+  /** Canvas interaction mode. In 'drag' the panel shows freeform controls. */
+  mode?: 'edit' | 'drag';
 }
 
 const TEXT_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'li', 'td', 'th', 'label', 'a', 'button', 'strong', 'em', 'code', 'pre']);
@@ -16,7 +20,7 @@ const TEXT_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'li'
 const TEXT_COLORS = ['#e6edf3', '#ffffff', '#0d1117', '#1d4ed8', '#475569', '#ef4444', '#22c55e', '#f59e0b', '#bc8cff', '#f78166'];
 const BG_COLORS = ['transparent', '#0d1117', '#161b22', '#ffffff', '#eff6ff', '#fef9c3', '#fce7f3'];
 
-export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPaneProps) {
+export function PropertyPane({ onPatch, onDelete, floating = false, onClose, mode = 'edit' }: PropertyPaneProps) {
   const { t } = useTranslation('editor');
   const selection = useDeckStore((s) => s.selection);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -115,8 +119,82 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
 
       <div className="flex flex-col gap-5 p-4">
 
+        {/* ── Freeform transform (drag mode) ───────────── */}
+        {mode === 'drag' && (
+          <section>
+            <div className="hds-inspector-label">{t('inspector.freeformLabel')}</div>
+            <div className="flex flex-col gap-2.5">
+              {/* Position + size readout */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="hds-xform-stat">
+                  <div className="hds-xform-stat-label">{t('inspector.position')}</div>
+                  <div className="hds-xform-stat-value">{Math.round(selection.bbox.left)} · {Math.round(selection.bbox.top)}</div>
+                </div>
+                <div className="hds-xform-stat">
+                  <div className="hds-xform-stat-label">{t('inspector.size')}</div>
+                  <div className="hds-xform-stat-value">{Math.round(selection.bbox.width)} × {Math.round(selection.bbox.height)}</div>
+                </div>
+              </div>
+
+              {/* Z-order */}
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" className="hds-xform-btn" onClick={() => patch([{ kind: 'style', name: 'z-index', value: '10000' }])}>
+                  <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 4h12" /><path d="M10 16V8" /><path d="m6.5 11.5 3.5-3.5 3.5 3.5" />
+                  </svg>
+                  {t('inspector.bringToFront')}
+                </button>
+                <button type="button" className="hds-xform-btn" onClick={() => patch([{ kind: 'style', name: 'z-index', value: '1' }])}>
+                  <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 16h12" /><path d="M10 4v8" /><path d="m6.5 8.5 3.5 3.5 3.5-3.5" />
+                  </svg>
+                  {t('inspector.sendToBack')}
+                </button>
+              </div>
+
+              {/* Restore auto layout */}
+              <button
+                type="button"
+                className="hds-xform-btn"
+                onClick={() =>
+                  patch([
+                    { kind: 'style', name: 'position', value: null },
+                    { kind: 'style', name: 'left', value: null },
+                    { kind: 'style', name: 'top', value: null },
+                    { kind: 'style', name: 'width', value: null },
+                    { kind: 'style', name: 'height', value: null },
+                    { kind: 'style', name: 'margin', value: null },
+                    { kind: 'style', name: 'z-index', value: null },
+                    { kind: 'style', name: 'transform', value: null },
+                    { kind: 'style', name: 'transform-origin', value: null },
+                    { kind: 'attr', name: 'data-hds-free', value: null },
+                    { kind: 'attr', name: 'data-hds-id', value: null },
+                  ])
+                }
+              >
+                <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 6h12M4 10h12M4 14h7" />
+                </svg>
+                {t('inspector.restoreAutoLayout')}
+              </button>
+
+              {/* Delete */}
+              {onDelete && (
+                <button type="button" onClick={() => onDelete(selector!)} className="hds-xform-btn is-danger">
+                  <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4.5 6h11" /><path d="M8 6V4.5h4V6" /><path d="m6.5 6 .6 9.5h5.8L13.5 6" /><path d="M8.5 9v4M11.5 9v4" />
+                  </svg>
+                  {t('inspector.deleteElement')}
+                </button>
+              )}
+
+              <p className="text-[10px] text-[var(--tertiary-label)] leading-relaxed pt-0.5">{t('inspector.freeformHint')}</p>
+            </div>
+          </section>
+        )}
+
         {/* ── Text ─────────────────────────────────────── */}
-        {isTextEl && (
+        {mode === 'edit' && isTextEl && (
           <section>
             <div className="hds-inspector-label">{t('inspector.textLabel')}</div>
             <div className="hds-inspector-section">
@@ -145,6 +223,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
         )}
 
         {/* ── Layout ───────────────────────────────────── */}
+        {mode === 'edit' && (
         <section>
           <div className="hds-inspector-label">{t('inspector.layoutLabel')}</div>
           <div className="hds-inspector-section">
@@ -234,8 +313,10 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
             </div>
           </div>
         </section>
+        )}
 
         {/* ── Appearance ───────────────────────────────── */}
+        {mode === 'edit' && (
         <section>
           <div className="hds-inspector-label">{t('inspector.appearanceLabel')}</div>
           <div className="hds-inspector-section">
@@ -335,6 +416,15 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
                   />
                   <label htmlFor="hds-img-input" className="hds-btn inline-block cursor-pointer px-3 py-1 text-xs">{t('inspector.chooseFile')}</label>
                 </div>
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={() => onDelete(selector!)}
+                    className="hds-btn-danger mt-2 w-full px-3 py-1.5 text-xs"
+                  >
+                    {t('inspector.deleteImage')}
+                  </button>
+                )}
               </div>
             )}
 
@@ -362,6 +452,7 @@ export function PropertyPane({ onPatch, floating = false, onClose }: PropertyPan
             )}
           </div>
         </section>
+        )}
 
       </div>
     </aside>

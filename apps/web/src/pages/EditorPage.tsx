@@ -11,10 +11,40 @@ import { ExportDrawer } from '../components/ExportDrawer.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
 import { HistoryDrawer } from '../components/HistoryDrawer.js';
 import type { PatchOp, RuntimeMessage } from '@hds/protocol';
-import { writeDeck, rebuildDeckHtml, writeAsset, saveAsNewFile, writeFileHandle, parseDeck } from '../fs/adapter.js';
+import { writeDeck, rebuildDeckHtmlForExport, writeAsset, saveAsNewFile, writeFileHandle, parseDeck } from '../fs/adapter.js';
 import type { HistoryCtx } from '../fs/history.js';
 import { recordSnapshot, listSnapshots } from '../fs/history.js';
-import { registerBlobPath, resolveAssetsInHtml, revokeAssetCache } from '../fs/assetResolver.js';
+import { registerBlobPath, getBlobToPathMap, resolveAssetsInHtml, revokeAssetCache } from '../fs/assetResolver.js';
+import { ulid } from '../lib/ulid.js';
+
+const SLIDE_W = 1280;
+const SLIDE_H = 720;
+const DEFAULT_INSERT_WIDTH_RATIO = 0.36; // newly dropped images span ~36% of the slide width
+
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadImageSize(file: File): Promise<{ width: number; height: number }> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      resolve({ width: img.naturalWidth || 1, height: img.naturalHeight || 1 });
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => {
+      resolve({ width: 1, height: 1 });
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+}
 
 export function EditorPage() {
   const { t } = useTranslation('editor');
@@ -55,6 +85,11 @@ export function EditorPage() {
   const [firstSavePromptOpen, setFirstSavePromptOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
   const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [dragActive, setDragActive] = useState(false);
+  // Canvas interaction mode. 'edit' = safe content editing (select + double-click
+  // text + property panel). 'drag' = freeform move/resize/delete. Strictly
+  // exclusive so users don't accidentally move things while editing.
+  const [interactionMode, setInteractionMode] = useState<'edit' | 'drag'>('edit');
 
   // Stable history context for the drawer / snapshot calls.
   const historyCtx = useMemo<HistoryCtx>(
@@ -65,6 +100,7 @@ export function EditorPage() {
   );
   const [containerSize, setContainerSize] = useState({ w: 800, h: 450 });
   const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const canvasCardRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<CanvasHandle>(null);
 
   const currentSlide = slides.find((s) => s.id === currentSlideId);
@@ -87,13 +123,79 @@ export function EditorPage() {
 
   const showInspector = viewMode === 'visual' && !!selection && inspectorOpen;
 
+  // Replacing slide HTML reloads the srcdoc iframe, which clears the in-iframe
+  // selection overlay/handles. Track the live selector and restore it once the
+  // reloaded runtime reports `ready`, so a selected (e.g. just-inserted) image
+  // keeps its handles instead of needing a manual re-click.
+  const lastSelectorRef = useRef<string | null>(null);
+  const pendingReselectRef = useRef<{ slideId: string; selector: string } | null>(null);
+
+  // ── Live iframe (Phase 0) ──────────────────────────────────────────────────
+  // The canvas iframe is the live source of truth: edits made inside it (move,
+  // resize, text, patches) must NOT reload it. We only remount (via `canvasKey`)
+  // when the slide HTML changes for an EXTERNAL reason — undo/redo, snapshot
+  // restore, or switching slides — never for our own `patched` echo.
+  const lastPatchedHtmlRef = useRef<string | null>(null);
+  const prevHtmlRef = useRef<string | undefined>(undefined);
+  const prevSlideIdRef = useRef<string | null>(null);
+  const [canvasKey, setCanvasKey] = useState(0);
+
+  // Mirror the mode into a ref so `handleMessage` (and the post-remount `ready`
+  // handler) always reads the latest value without re-subscribing.
+  const interactionModeRef = useRef(interactionMode);
+  interactionModeRef.current = interactionMode;
+
   // Handle runtime messages from iframe
   const handleMessage = useCallback((msg: RuntimeMessage) => {
-    // When iframe applies a patch, update store so re-render keeps the change
+    if (msg.type === 'select') lastSelectorRef.current = msg.selector;
+    if (msg.type === 'clear-select') lastSelectorRef.current = null;
+    // When iframe applies a patch, update store so re-render keeps the change.
     if (msg.type === 'patched' && currentSlideId) {
+      if (lastSelectorRef.current) {
+        pendingReselectRef.current = { slideId: currentSlideId, selector: lastSelectorRef.current };
+      }
+      // Mark this html as self-originated so the diff effect won't remount.
+      lastPatchedHtmlRef.current = msg.html;
       updateSlideHtml(currentSlideId, msg.html);
     }
+    // After an external remount the runtime re-reports `ready`; re-sync the mode
+    // (it defaults to 'edit' on a fresh runtime) and restore the prior selection.
+    if (msg.type === 'ready') {
+      canvasRef.current?.sendMessage({ type: 'set-mode', mode: interactionModeRef.current });
+      const pending = pendingReselectRef.current;
+      pendingReselectRef.current = null;
+      if (pending && pending.slideId === currentSlideId) {
+        canvasRef.current?.sendMessage({ type: 'select-element', selector: pending.selector });
+      }
+    }
   }, [currentSlideId, updateSlideHtml]);
+
+  // Push mode changes to the live iframe.
+  useEffect(() => {
+    canvasRef.current?.sendMessage({ type: 'set-mode', mode: interactionMode });
+  }, [interactionMode]);
+
+  // Remount the iframe only on external, same-slide HTML changes (undo/redo,
+  // restore). Slide switches are handled by `currentSlideId` in the key; our own
+  // `patched` echoes are skipped because the live iframe already reflects them.
+  useEffect(() => {
+    const html = currentSlide?.html;
+    if (prevSlideIdRef.current !== currentSlideId) {
+      prevSlideIdRef.current = currentSlideId ?? null;
+      prevHtmlRef.current = html;
+      return;
+    }
+    if (html !== prevHtmlRef.current) {
+      prevHtmlRef.current = html;
+      if (html !== lastPatchedHtmlRef.current) setCanvasKey((k) => k + 1);
+    }
+  }, [currentSlideId, currentSlide?.html]);
+
+  // Switching slides remounts the runtime; drop any stale selection state.
+  useEffect(() => {
+    lastSelectorRef.current = null;
+    pendingReselectRef.current = null;
+  }, [currentSlideId]);
 
   // Forward patch from PropertyPane into the iframe
   const handlePatch = useCallback(
@@ -102,6 +204,11 @@ export function EditorPage() {
     },
     [],
   );
+
+  // Delete the selected element (inserted image) from inside the iframe.
+  const handleDeleteElement = useCallback((selector: string) => {
+    canvasRef.current?.sendMessage({ type: 'delete-element', selector });
+  }, []);
 
   // Save to disk. Folder mode → writeDeck (+ .hds-backup). File mode → write
   // to the working file handle (acquired on first save).
@@ -115,7 +222,9 @@ export function EditorPage() {
       return;
     }
     markSaving();
-    const rebuilt = rebuildDeckHtml(rawHtml, slides);
+    // Restore blob: URLs (inserted/replaced images) back to on-disk relative
+    // paths so the saved file reloads correctly in a later session.
+    const rebuilt = rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
     setRawHtml(rebuilt);
     try {
       if (dirHandle) {
@@ -136,7 +245,7 @@ export function EditorPage() {
   const confirmFirstSave = useCallback(async () => {
     setFirstSavePromptOpen(false);
     markSaving();
-    const rebuilt = rebuildDeckHtml(rawHtml, slides);
+    const rebuilt = rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
     setRawHtml(rebuilt);
     try {
       const fh = await saveAsNewFile(deckFileName, rebuilt);
@@ -153,7 +262,7 @@ export function EditorPage() {
   // then parse + resolve assets and apply. The resulting dirty state auto-saves.
   const handleRestore = useCallback(async (snapshotHtml: string) => {
     try {
-      const current = rebuildDeckHtml(rawHtml, slides);
+      const current = rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
       await recordSnapshot(historyCtx, current);
     } catch (err) {
       console.error('snapshot-before-restore failed', err);
@@ -235,35 +344,130 @@ export function EditorPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [viewMode, undo, redo]);
 
-  // Handle image replacement from PropertyPane (F-08).
-  // Folder mode: persist the file to assets/ and register the blob→path map so
-  // export restores the on-disk relative path.
-  // File mode (no folder): inline the new image as a base64 data URI so the
-  // single HTML stays self-contained, then revoke the temporary blob URL.
+  // Persist an image file and return a `src` usable inside the iframe.
+  // Folder mode: write to assets/ and register the blob→path map so export can
+  // restore the on-disk relative path (the same blob URL must be the one shown).
+  // File mode: inline as a base64 data URI so the single HTML stays self-contained.
+  const persistImageFile = useCallback(
+    async (file: File, existingBlobUrl?: string): Promise<string> => {
+      if (dirHandle) {
+        const blobUrl = existingBlobUrl ?? URL.createObjectURL(file);
+        const relativePath = await writeAsset(dirHandle, file);
+        registerBlobPath(relativePath, blobUrl);
+        return blobUrl;
+      }
+      return fileToDataUrl(file);
+    },
+    [dirHandle],
+  );
+
+  // Handle image replacement from PropertyPane (F-08). The preview blob URL was
+  // already patched in by PropertyPane; folder mode just persists + registers it,
+  // file mode swaps in the self-contained data URI and frees the preview blob.
   useEffect(() => {
     const handler = async (e: Event) => {
       const { file, blobUrl, selector } = (e as CustomEvent<{ file: File; blobUrl: string; selector: string }>).detail;
       try {
-        if (dirHandle) {
-          const relativePath = await writeAsset(dirHandle, file);
-          registerBlobPath(relativePath, blobUrl);
-          return;
+        const src = await persistImageFile(file, blobUrl);
+        if (!dirHandle) {
+          canvasRef.current?.sendMessage({ type: 'patch', selector, ops: [{ kind: 'attr', name: 'src', value: src }] });
+          URL.revokeObjectURL(blobUrl);
         }
-        const dataUrl = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(file);
-        });
-        canvasRef.current?.sendMessage({ type: 'patch', selector, ops: [{ kind: 'attr', name: 'src', value: dataUrl }] });
-        URL.revokeObjectURL(blobUrl);
       } catch (err) {
         console.error('image replace failed', err);
       }
     };
     window.addEventListener('hds-replace-image', handler as EventListener);
     return () => window.removeEventListener('hds-replace-image', handler as EventListener);
-  }, [dirHandle]);
+  }, [dirHandle, persistImageFile]);
+
+  // Drop an image file onto the canvas → insert it as a freely-transformable,
+  // percentage-positioned <img>. Coordinates are converted from client px to
+  // slide % exactly once here (the iframe works in native 1280×720 space after).
+  const handleDropImage = useCallback(
+    async (file: File, clientX: number, clientY: number) => {
+      const card = canvasCardRef.current;
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      if (rect.width === 0) return;
+      const scale = rect.width / SLIDE_W;
+
+      const { width: natW, height: natH } = await loadImageSize(file);
+      const aspect = natW / Math.max(1, natH);
+      let widthPx = SLIDE_W * DEFAULT_INSERT_WIDTH_RATIO;
+      let heightPx = widthPx / aspect;
+      if (heightPx > SLIDE_H * 0.9) {
+        heightPx = SLIDE_H * 0.9;
+        widthPx = heightPx * aspect;
+      }
+
+      // Center the image on the drop point, then clamp fully inside the slide.
+      const dropX = (clientX - rect.left) / scale;
+      const dropY = (clientY - rect.top) / scale;
+      const leftPx = Math.max(0, Math.min(SLIDE_W - widthPx, dropX - widthPx / 2));
+      const topPx = Math.max(0, Math.min(SLIDE_H - heightPx, dropY - heightPx / 2));
+
+      try {
+        const src = await persistImageFile(file);
+        // Inserting an image is a freeform action: switch to drag mode so the
+        // user can immediately position/resize it. Send set-mode BEFORE insert so
+        // the runtime is already in drag mode when it selects (handles show, and
+        // the idempotent set-mode from the effect won't deselect it afterwards).
+        setInteractionMode('drag');
+        canvasRef.current?.sendMessage({ type: 'set-mode', mode: 'drag' });
+        canvasRef.current?.sendMessage({
+          type: 'insert-image',
+          id: ulid(),
+          src,
+          leftPct: (leftPx / SLIDE_W) * 100,
+          topPct: (topPx / SLIDE_H) * 100,
+          widthPct: (widthPx / SLIDE_W) * 100,
+        });
+      } catch (err) {
+        console.error('image insert failed', err);
+      }
+    },
+    [persistImageFile],
+  );
+
+  // Window-level drag tracking activates the drop overlay (the sandboxed iframe
+  // would otherwise swallow drag events over the slide). Counter handles nested
+  // dragenter/leave firing across child elements.
+  useEffect(() => {
+    if (viewMode !== 'visual') return;
+    let depth = 0;
+    const hasFiles = (e: DragEvent) =>
+      Array.from(e.dataTransfer?.items ?? []).some((i) => i.kind === 'file');
+    const onEnter = (e: DragEvent) => {
+      if (!hasFiles(e)) return;
+      depth++;
+      setDragActive(true);
+    };
+    const onLeave = () => {
+      depth = Math.max(0, depth - 1);
+      if (depth === 0) setDragActive(false);
+    };
+    // Prevent the browser from navigating to / opening a file dropped anywhere
+    // outside the canvas overlay (default behaviour would unload the app).
+    const onOver = (e: DragEvent) => {
+      if (hasFiles(e)) e.preventDefault();
+    };
+    const onDrop = (e: DragEvent) => {
+      if (hasFiles(e)) e.preventDefault();
+      depth = 0;
+      setDragActive(false);
+    };
+    window.addEventListener('dragenter', onEnter);
+    window.addEventListener('dragleave', onLeave);
+    window.addEventListener('dragover', onOver);
+    window.addEventListener('drop', onDrop);
+    return () => {
+      window.removeEventListener('dragenter', onEnter);
+      window.removeEventListener('dragleave', onLeave);
+      window.removeEventListener('dragover', onOver);
+      window.removeEventListener('drop', onDrop);
+    };
+  }, [viewMode]);
 
   if (!currentSlide) {
     return (
@@ -365,30 +569,43 @@ export function EditorPage() {
         </button>
       </div>
 
-      {/* Top-center: view-mode segmented control (F-10) */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 hds-floating-bar">
-        <div className="hds-segmented" role="tablist">
-          <button
-            role="tab"
-            aria-selected={viewMode === 'visual'}
-            className={`hds-segment ${viewMode === 'visual' ? 'is-active' : ''}`}
-            onClick={() => setViewMode('visual')}
-          >
-            {t('page.viewVisual')}
-          </button>
-          <button
-            role="tab"
-            aria-selected={viewMode === 'code'}
-            className={`hds-segment ${viewMode === 'code' ? 'is-active' : ''}`}
-            onClick={() => setViewMode('code')}
-          >
-            {t('page.viewCode')}
-          </button>
+      {/* Top-center: primary interaction-mode pill (edit / drag). Hidden in code mode. */}
+      {viewMode === 'visual' && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 hds-floating-bar">
+          <div className="hds-segmented" role="tablist">
+            <button
+              role="tab"
+              aria-selected={interactionMode === 'edit'}
+              className={`hds-segment ${interactionMode === 'edit' ? 'is-active' : ''}`}
+              onClick={() => setInteractionMode('edit')}
+            >
+              {t('page.modeEdit')}
+            </button>
+            <button
+              role="tab"
+              aria-selected={interactionMode === 'drag'}
+              className={`hds-segment ${interactionMode === 'drag' ? 'is-active' : ''}`}
+              onClick={() => setInteractionMode('drag')}
+            >
+              {t('page.modeDrag')}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Top-right: inspector toggle + save + export */}
+      {/* Top-right: code toggle (de-emphasized) + inspector + save + export */}
       <div className="absolute top-4 right-4 z-20 hds-floating-bar">
+        <button
+          onClick={() => setViewMode(viewMode === 'code' ? 'visual' : 'code')}
+          className={`hds-bar-icon ${viewMode === 'code' ? 'is-active' : ''}`}
+          aria-label={t('page.viewCode')}
+          title={t('page.viewCode')}
+        >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7.5 6.5 4 10l3.5 3.5M12.5 6.5 16 10l-3.5 3.5" />
+          </svg>
+        </button>
+        <span className="w-px h-4 bg-white/15 shrink-0" />
         <button
           onClick={() => setInspectorOpen((v) => !v)}
           className={`hds-bar-icon ${inspectorOpen ? 'is-active' : ''}`}
@@ -454,8 +671,9 @@ export function EditorPage() {
             className="absolute flex items-center justify-center canvas-host transition-[left,right] duration-200 ease-out"
             style={{ top: 80, bottom: 16, left: railOpen ? 224 : 16, right: showInspector ? 328 : 16 }}
           >
-            <div className="hds-canvas-card overflow-hidden">
+            <div ref={canvasCardRef} className="hds-canvas-card overflow-hidden relative">
               <ScaledCanvas
+                key={`${currentSlideId}:${canvasKey}`}
                 ref={canvasRef}
                 sectionHtml={currentSlide.html}
                 headHtml={headHtml}
@@ -463,13 +681,30 @@ export function EditorPage() {
                 containerWidth={fitWidth}
                 onMessage={handleMessage}
               />
+              {dragActive && (
+                <div
+                  className="hds-drop-overlay"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragActive(false);
+                    const file = Array.from(e.dataTransfer.files).find((f) => f.type.startsWith('image/'));
+                    if (file) void handleDropImage(file, e.clientX, e.clientY);
+                  }}
+                >
+                  <span className="hds-drop-hint">{t('imageDrop.hint')}</span>
+                </div>
+              )}
             </div>
           </main>
 
           {/* On-demand floating inspector — mounts only when selected and opened */}
           {showInspector && (
             <div className="absolute right-3 top-20 bottom-3 z-10">
-              <PropertyPane onPatch={handlePatch} floating onClose={() => setInspectorOpen(false)} />
+              <PropertyPane mode={interactionMode} onPatch={handlePatch} onDelete={handleDeleteElement} floating onClose={() => setInspectorOpen(false)} />
             </div>
           )}
         </>

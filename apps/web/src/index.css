@@ -132,6 +132,31 @@ body {
   background: #fff;
 }
 
+/* Drag-and-drop image insertion: overlay covers the slide while a file is
+   being dragged so the sandboxed iframe can't swallow the drop. */
+.hds-drop-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 122, 255, 0.1);
+  border: 2px dashed var(--system-blue);
+  border-radius: 10px;
+  backdrop-filter: blur(1px);
+}
+.hds-drop-hint {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--system-blue);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
 /* ── Interaction affordances (app-wide) ──────────────────────────────────── */
 button:not(:disabled),
 [role='button']:not([aria-disabled='true']),
@@ -169,6 +194,16 @@ button:disabled,
 .hds-btn-primary:hover:not(:disabled) { background: var(--system-blue-press); }
 .hds-btn-primary:active:not(:disabled) { background: var(--system-blue-press); }
 .hds-btn-primary:disabled { opacity: 0.5; }
+
+.hds-btn-danger {
+  border-radius: 7px;
+  border: 0.5px solid rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.hds-btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.85); color: #fff; }
+.hds-btn-danger:active:not(:disabled) { background: #ef4444; color: #fff; }
 
 /* ── Segmented control ───────────────────────────────────────────────────── */
 .hds-segmented {
@@ -779,6 +814,54 @@ select.hds-input {
   --vibrancy-panel: transparent;
   --vibrancy-sidebar: transparent;
 }
+/* Freeform transform panel (drag mode inspector) */
+.hds-xform-stat {
+  border-radius: 11px;
+  background: var(--control-bg);
+  border: 0.5px solid var(--separator);
+  padding: 9px 11px;
+  min-width: 0;
+}
+.hds-xform-stat-label {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tertiary-label);
+}
+.hds-xform-stat-value {
+  margin-top: 3px;
+  font-size: 13px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--label);
+}
+.hds-xform-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  border-radius: 9px;
+  border: 0.5px solid var(--separator);
+  background: var(--control-bg);
+  color: var(--label);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.hds-xform-btn:hover { border-color: var(--system-blue); color: var(--system-blue); }
+.hds-xform-btn:active { background: var(--separator); }
+.hds-xform-btn svg { opacity: 0.85; }
+.hds-xform-btn.is-danger { color: #ff7a7a; }
+.hds-xform-btn.is-danger:hover {
+  border-color: #ff7a7a;
+  background: color-mix(in srgb, #ff7a7a 14%, transparent);
+  color: #ff7a7a;
+}
+
 .hds-floating-rail {
   animation: hdsSlideInLeft 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -947,6 +1030,13 @@ select.hds-input {
 .hds-lang-btn:hover { color: var(--label); }
 .hds-lang-btn.is-active { color: var(--label); font-weight: 600; }
 .hds-lang-sep { color: var(--separator); }
+
+/* Inside the dark floating bar the generic label variables resolve to dark
+   colours; override to white-on-dark to stay readable. */
+.hds-floating-bar .hds-lang-btn { color: rgba(255, 255, 255, 0.45); }
+.hds-floating-bar .hds-lang-btn:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.hds-floating-bar .hds-lang-btn.is-active { color: #fff; font-weight: 600; }
+.hds-floating-bar .hds-lang-sep { color: rgba(255, 255, 255, 0.25); }
 
 .hds-emblem { filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55)); }
 
