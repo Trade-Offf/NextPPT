@@ -726,6 +726,153 @@ select.hds-input {
   animation: hdsFadeUp 0.18s ease both;
 }
 
+/* ── Guide: linear illustrated story steps ─────────────────────────────────── */
+.hds-guide-story {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: center;
+  background: var(--content-bg);
+  border: 0.5px solid var(--separator);
+  border-radius: 18px;
+  padding: 18px;
+}
+@media (min-width: 768px) {
+  .hds-guide-story {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+    gap: 30px;
+    padding: 26px;
+  }
+  .hds-guide-story.is-reverse > *:first-child { order: 2; }
+}
+.hds-guide-illus-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.hds-guide-illus {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  background: #0d0d10;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+.hds-guide-illus img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+.hds-guide-story-body { min-width: 0; }
+.hds-guide-step-tag {
+  display: inline-block;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--label);
+}
+.hds-term {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--secondary-label);
+  background: var(--cobalt-lt);
+  border-radius: 9px;
+  padding: 8px 11px;
+}
+.hds-term::before {
+  content: "i";
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--system-blue);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  font-style: normal;
+  font-family: ui-serif, Georgia, serif;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.hds-guide-abilities {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 13px 18px;
+}
+@media (min-width: 520px) {
+  .hds-guide-abilities { grid-template-columns: 1fr 1fr; }
+}
+.hds-guide-abilities li { display: flex; gap: 9px; align-items: flex-start; }
+.hds-ability-tick { flex-shrink: 0; margin-top: 1px; color: var(--system-blue); }
+
+/* Looping micro-demo under the edit illustration */
+.hds-mini-demo { display: flex; flex-direction: column; gap: 7px; }
+.hds-mini-slide {
+  position: relative;
+  height: 92px;
+  border-radius: 11px;
+  border: 0.5px solid var(--separator);
+  background: linear-gradient(140deg, #17171b, #101014);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  overflow: hidden;
+}
+.hds-mini-line {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  width: 72%;
+}
+.hds-mini-line.is-title {
+  height: 12px;
+  width: 56%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--system-blue), color-mix(in srgb, var(--system-blue) 55%, #fff));
+}
+.hds-mini-line.is-short { width: 42%; }
+.hds-mini-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #fff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  transform: translate(150px, 60px);
+}
+.hds-mini-caption {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--tertiary-label);
+  text-align: center;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hds-mini-cursor { animation: hdsMiniCursor 4s cubic-bezier(0.5, 0, 0.2, 1) infinite; }
+  .hds-mini-slide .is-title { animation: hdsMiniSelect 4s ease-in-out infinite; }
+}
+@keyframes hdsMiniCursor {
+  0%   { transform: translate(150px, 60px); opacity: 0; }
+  12%  { opacity: 1; }
+  38%  { transform: translate(34px, 20px); }
+  58%  { transform: translate(34px, 20px); }
+  70%  { transform: translate(40px, 24px); }
+  88%  { transform: translate(150px, 60px); opacity: 1; }
+  100% { transform: translate(150px, 60px); opacity: 0; }
+}
+@keyframes hdsMiniSelect {
+  0%, 40%   { box-shadow: none; }
+  46%, 80%  { box-shadow: 0 0 0 2px var(--content-bg), 0 0 0 4px var(--system-blue); }
+  100%      { box-shadow: none; }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    HDS · Editor full-bleed stage (floating chrome)
    ═══════════════════════════════════════════════════════════════════════════ */

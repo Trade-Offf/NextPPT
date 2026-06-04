@@ -10,7 +10,7 @@ export default {
     titleAccent: '可点编辑',
     titleC: '的演示稿',
     subtitle:
-      '把任意 AI 生成的 HTML 幻灯片拖进来，所见即所得地改字、换图、实时渲染 Mermaid，再一键导出 PPTX / PDF。',
+      '把 AI 生成的演示稿拖进来，点一下就能改字、换图、挪位置，再一键导出能投影的 PPT / PDF。',
     ctaOpen: '打开文件 / 拖到此处',
     loading: '加载中…',
     ctaGuide: '看 30 秒使用指南',
@@ -44,7 +44,7 @@ export default {
     downloadSample: '下载示例模板',
     aiHelp: '让 AI 帮我写',
     errorRecover:
-      '没有现成的演示稿？点上方「用示例模板体验」「下载示例模板」，或 <btn>查看格式要求</btn> 了解如何让 HTML 带上 <code>{{tag}}</code>。',
+      '这份文件可能格式不对、打不开。最省事的办法，是用我们的提示词 <btn>让 AI 重做一份</btn>。',
   },
   preview: {
     eyebrow: 'Q3 Roadmap',

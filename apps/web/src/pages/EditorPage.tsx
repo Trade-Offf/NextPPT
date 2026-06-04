@@ -145,11 +145,9 @@ export function EditorPage() {
   const interactionModeRef = useRef(interactionMode);
   interactionModeRef.current = interactionMode;
 
-  // Handle runtime messages from iframe
   const handleMessage = useCallback((msg: RuntimeMessage) => {
     if (msg.type === 'select') lastSelectorRef.current = msg.selector;
     if (msg.type === 'clear-select') lastSelectorRef.current = null;
-    // When iframe applies a patch, update store so re-render keeps the change.
     if (msg.type === 'patched' && currentSlideId) {
       if (lastSelectorRef.current) {
         pendingReselectRef.current = { slideId: currentSlideId, selector: lastSelectorRef.current };
@@ -170,7 +168,6 @@ export function EditorPage() {
     }
   }, [currentSlideId, updateSlideHtml]);
 
-  // Push mode changes to the live iframe.
   useEffect(() => {
     canvasRef.current?.sendMessage({ type: 'set-mode', mode: interactionMode });
   }, [interactionMode]);
@@ -197,7 +194,6 @@ export function EditorPage() {
     pendingReselectRef.current = null;
   }, [currentSlideId]);
 
-  // Forward patch from PropertyPane into the iframe
   const handlePatch = useCallback(
     (selector: string, ops: PatchOp[]) => {
       canvasRef.current?.sendMessage({ type: 'patch', selector, ops });
@@ -205,7 +201,6 @@ export function EditorPage() {
     [],
   );
 
-  // Delete the selected element (inserted image) from inside the iframe.
   const handleDeleteElement = useCallback((selector: string) => {
     canvasRef.current?.sendMessage({ type: 'delete-element', selector });
   }, []);
@@ -310,7 +305,6 @@ export function EditorPage() {
     return () => clearTimeout(t);
   }, [slides, isDirty, isSaving, dirHandle, fileHandle, handleSave]);
 
-  // Keyboard save shortcut
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
@@ -477,14 +471,11 @@ export function EditorPage() {
     );
   }
 
-  // Assets are served through /v1/asset?path=... proxy (avoids file:// null-origin restriction)
-  // The proxy is only available when the API is running; fallback to empty base otherwise.
   const assetsBaseUrl = '/v1/asset-base/';
 
   return (
     <div className="relative h-full hds-stage overflow-hidden">
-      {/* ── Floating chrome ─────────────────────────────────────── */}
-      {/* Top-left: sidebar toggle + filename + save status */}
+      {/* Top-left: sidebar toggle, filename, save status */}
       <div className="absolute top-4 left-4 z-20 hds-floating-bar">
         <button
           onClick={requestLeaveHome}
@@ -718,7 +709,6 @@ export function EditorPage() {
         onClose={() => setHistoryOpen(false)}
         onRestore={handleRestore}
       />
-
 
       <ConfirmDialog
         open={leaveHomePromptOpen}

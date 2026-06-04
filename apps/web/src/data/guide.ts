@@ -1,10 +1,10 @@
 /**
- * Shared identifier for the three guide scenarios, used as section anchors on
- * the guide page (#generate / #existing / #export) and as the optional target
- * when opening the guide from elsewhere in the app.
+ * Shared identifier for the three guide steps, used as section anchors on the
+ * guide page (#generate / #edit / #export) and as the optional target when
+ * opening the guide from elsewhere in the app.
  *
- * The actual guide copy (prompt, manual steps, self-check, mistakes, export
- * notes) lives in the i18n resources under the `guide` and `prompt`
- * namespaces — see `src/i18n/locales/*`.
+ * The actual guide copy (prompt, steps, edit abilities, export notes) lives in
+ * the i18n resources under the `guide` and `prompt` namespaces — see
+ * `src/i18n/locales/*`.
  */
-export type GuideTab = 'generate' | 'existing' | 'export';
+export type GuideTab = 'generate' | 'edit' | 'export';

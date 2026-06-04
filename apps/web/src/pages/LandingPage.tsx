@@ -68,9 +68,8 @@ export function LandingPage() {
       <SiteFluidBackdrop />
 
       <div className="relative z-10">
-      <SiteHeader onOpen={openPrimary} canOpen={FS_API_SUPPORTED} />
+      <SiteHeader />
 
-      {/* ── Hero ─────────────────────────────────────────────────── */}
       <section id="top" className="hds-hero relative px-6 pt-16 sm:pt-24 pb-16">
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <h1 className="hero-h1 hds-hero-title hds-display text-[clamp(2.3rem,5.6vw,4rem)]">
@@ -97,10 +96,8 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Second screen: pain narrative (left) + action hub (right) ── */}
       <section id="start" className="value-section px-6 py-20 lg:py-28 scroll-mt-20">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left — why this exists */}
           <div>
             <p className="reveal-pain hds-fig-label">{t('value.eyebrow')}</p>
             <h2 className="reveal-pain mt-3 text-3xl lg:text-[2.5rem] font-bold tracking-tight text-[var(--label)] leading-tight">
@@ -129,7 +126,6 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Right — action hub */}
           <div className="reveal-start w-full max-w-md lg:justify-self-end">
             <div className="hds-glass-card p-7 sm:p-8">
             {!FS_API_SUPPORTED ? (
@@ -199,10 +195,8 @@ export function LandingPage() {
                     <Trans
                       t={t}
                       i18nKey="hub.errorRecover"
-                      values={{ tag: '<section class="slide">' }}
                       components={{
-                        btn: <button onClick={() => openGuide('existing')} className="underline font-medium" />,
-                        code: <code className="font-mono" />,
+                        btn: <button onClick={() => openGuide('generate')} className="underline font-medium" />,
                       }}
                     />
                   </p>
@@ -214,7 +208,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Footer ───────────────────────────────────────────────── */}
       <footer className="border-t border-[var(--separator)] px-6 py-12">
         <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
           <div className="col-span-2 sm:col-span-1">

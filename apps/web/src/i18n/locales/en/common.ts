@@ -13,7 +13,7 @@ const common: typeof zh = {
     guide: {
       title: 'Guide · NextPPT — The next-gen deck, born from HTML',
       description:
-        "NextPPT guide: no HTML yet? Generate one with a prompt. Already have HTML? Run the format checklist. Then export to PPTX / PDF in one click.",
+        'NextPPT guide: no deck yet? Generate one with a prompt. Then click to change text and images, move things around, and export a projector-ready PPT / PDF in one click. Fully local.',
     },
   },
   language: {

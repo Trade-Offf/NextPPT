@@ -12,7 +12,7 @@ const landing: typeof zh = {
     titleAccent: 'click-to-edit',
     titleC: 'deck',
     subtitle:
-      'Drop in any AI-generated HTML slides, then edit text, swap images and render Mermaid live — all WYSIWYG — and export to PPTX / PDF in one click.',
+      'Drop in an AI-generated deck, then click to change text, swap images and move things around — and export a projector-ready PPT / PDF in one click.',
     ctaOpen: 'Open a file / drop it here',
     loading: 'Loading…',
     ctaGuide: 'Watch the 30-second guide',
@@ -46,7 +46,7 @@ const landing: typeof zh = {
     downloadSample: 'Download sample',
     aiHelp: 'Let AI write it',
     errorRecover:
-      'No deck on hand? Use “Try the sample” or “Download sample” above, or <btn>see the format requirements</btn> to learn how to give your HTML a <code>{{tag}}</code>.',
+      'This file may be in the wrong format to open. The easiest fix is to <btn>have an AI remake it</btn> with our prompt.',
   },
   preview: {
     eyebrow: 'Q3 Roadmap',

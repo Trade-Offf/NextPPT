@@ -3,14 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useGuideNav } from '../hooks/useGuideNav.js';
 import { LanguageSwitcher } from './LanguageSwitcher.js';
 
-interface Props {
-  /** Primary action — open a deck (folder / single file). */
-  onOpen: () => void;
-  /** Whether opening files is supported in this browser. */
-  canOpen: boolean;
-}
-
-export function SiteHeader({ onOpen, canOpen }: Props) {
+export function SiteHeader() {
   const { t } = useTranslation('landing');
   const { openGuide } = useGuideNav();
   const [scrolled, setScrolled] = useState(false);
@@ -37,9 +30,6 @@ export function SiteHeader({ onOpen, canOpen }: Props) {
         <div className="ml-auto flex items-center gap-4 sm:gap-5">
           <button onClick={() => openGuide('generate')} className="hds-nav-link">{t('nav.guide')}</button>
           <LanguageSwitcher />
-          {canOpen && (
-            <button onClick={onOpen} className="hds-btn-primary px-4 py-1.5 text-xs">{t('nav.openFile')}</button>
-          )}
         </div>
       </div>
     </header>

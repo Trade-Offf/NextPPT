@@ -11,7 +11,7 @@ export default {
     guide: {
       title: '使用指南 · NextPPT — 下一代 PPT，从 HTML 开始',
       description:
-        'NextPPT 使用指南：没有 HTML 就用提示词让 AI 生成，已有 HTML 看格式自检与常见错误，编辑满意后一键导出 PPTX / PDF。',
+        'NextPPT 使用指南：没有演示稿就用提示词让 AI 生成，拿回来点一下就能改字换图、挪位置，再一键导出能投影的 PPT / PDF。全程本地。',
     },
   },
   language: {
