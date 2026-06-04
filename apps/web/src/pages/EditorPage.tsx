@@ -205,6 +205,13 @@ export function EditorPage() {
     canvasRef.current?.sendMessage({ type: 'delete-element', selector });
   }, []);
 
+  const handleZOrder = useCallback(
+    (selector: string, op: 'front' | 'back' | 'forward' | 'backward') => {
+      canvasRef.current?.sendMessage({ type: 'z-order', selector, op });
+    },
+    [],
+  );
+
   // Save to disk. Folder mode → writeDeck (+ .hds-backup). File mode → write
   // to the working file handle (acquired on first save).
   const handleSave = useCallback(async () => {
@@ -695,7 +702,7 @@ export function EditorPage() {
           {/* On-demand floating inspector — mounts only when selected and opened */}
           {showInspector && (
             <div className="absolute right-3 top-20 bottom-3 z-10">
-              <PropertyPane mode={interactionMode} onPatch={handlePatch} onDelete={handleDeleteElement} floating onClose={() => setInspectorOpen(false)} />
+              <PropertyPane mode={interactionMode} onPatch={handlePatch} onDelete={handleDeleteElement} onZOrder={handleZOrder} floating onClose={() => setInspectorOpen(false)} />
             </div>
           )}
         </>

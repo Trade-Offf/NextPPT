@@ -3,10 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
 import type { PatchOp } from '@hds/protocol';
 
+type ZOrderOp = 'front' | 'back' | 'forward' | 'backward';
+
 interface PropertyPaneProps {
   onPatch: (selector: string, ops: PatchOp[]) => void;
   /** Remove the selected element from the slide (used for inserted images). */
   onDelete?: (selector: string) => void;
+  /** Re-stack the selected free element relative to its peers. */
+  onZOrder?: (selector: string, op: ZOrderOp) => void;
   /** Floating inspector variant: rounded glass card with slide-in animation. */
   floating?: boolean;
   /** When provided (floating), shows a close (×) button in the header. */
@@ -20,7 +24,7 @@ const TEXT_TAGS = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'span', 'li'
 const TEXT_COLORS = ['#e6edf3', '#ffffff', '#0d1117', '#1d4ed8', '#475569', '#ef4444', '#22c55e', '#f59e0b', '#bc8cff', '#f78166'];
 const BG_COLORS = ['transparent', '#0d1117', '#161b22', '#ffffff', '#eff6ff', '#fef9c3', '#fce7f3'];
 
-export function PropertyPane({ onPatch, onDelete, floating = false, onClose, mode = 'edit' }: PropertyPaneProps) {
+export function PropertyPane({ onPatch, onDelete, onZOrder, floating = false, onClose, mode = 'edit' }: PropertyPaneProps) {
   const { t } = useTranslation('editor');
   const selection = useDeckStore((s) => s.selection);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -66,6 +70,21 @@ export function PropertyPane({ onPatch, onDelete, floating = false, onClose, mod
   const hasLineThrough = deco.includes('line-through');
 
   const patch = (ops: PatchOp[]) => onPatch(selector!, ops);
+  const zOrder = (op: ZOrderOp) => onZOrder?.(selector!, op);
+
+  // Freeform readout: prefer slide-native geometry (resolution-independent);
+  // fall back to the scaled bounding box for not-yet-detached flow elements.
+  const rect = selection.rect;
+  const posX = rect ? rect.left : Math.round(selection.bbox.left);
+  const posY = rect ? rect.top : Math.round(selection.bbox.top);
+  const sizeW = rect ? rect.width : Math.round(selection.bbox.width);
+  const sizeH = rect ? rect.height : Math.round(selection.bbox.height);
+
+  // Stacking position among free shapes (1-based). Absent until the element is
+  // detached, in which case the first z-order action will detach it for us.
+  const layer = selection.layer;
+  const atTop = layer ? layer.index >= layer.count : false;
+  const atBottom = layer ? layer.index <= 1 : false;
 
   const commitFontSize = (n: number) => {
     if (!isNaN(n) && n > 0) {
@@ -128,28 +147,50 @@ export function PropertyPane({ onPatch, onDelete, floating = false, onClose, mod
               <div className="grid grid-cols-2 gap-2">
                 <div className="hds-xform-stat">
                   <div className="hds-xform-stat-label">{t('inspector.position')}</div>
-                  <div className="hds-xform-stat-value">{Math.round(selection.bbox.left)} · {Math.round(selection.bbox.top)}</div>
+                  <div className="hds-xform-stat-value">{posX} · {posY}</div>
                 </div>
                 <div className="hds-xform-stat">
                   <div className="hds-xform-stat-label">{t('inspector.size')}</div>
-                  <div className="hds-xform-stat-value">{Math.round(selection.bbox.width)} × {Math.round(selection.bbox.height)}</div>
+                  <div className="hds-xform-stat-value">{sizeW} × {sizeH}</div>
                 </div>
               </div>
 
-              {/* Z-order */}
-              <div className="grid grid-cols-2 gap-2">
-                <button type="button" className="hds-xform-btn" onClick={() => patch([{ kind: 'style', name: 'z-index', value: '10000' }])}>
-                  <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4h12" /><path d="M10 16V8" /><path d="m6.5 11.5 3.5-3.5 3.5 3.5" />
-                  </svg>
-                  {t('inspector.bringToFront')}
-                </button>
-                <button type="button" className="hds-xform-btn" onClick={() => patch([{ kind: 'style', name: 'z-index', value: '1' }])}>
-                  <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 16h12" /><path d="M10 4v8" /><path d="m6.5 8.5 3.5 3.5 3.5-3.5" />
-                  </svg>
-                  {t('inspector.sendToBack')}
-                </button>
+              {/* Layer / z-order */}
+              <div className="hds-layer-group">
+                <div className="hds-layer-head">
+                  <span className="hds-layer-title">{t('inspector.layerLabel')}</span>
+                  {layer ? (
+                    <span className="hds-layer-readout">{t('inspector.layerPosition', { index: layer.index, count: layer.count })}</span>
+                  ) : (
+                    <span className="hds-layer-hint-inline">{t('inspector.layerHint')}</span>
+                  )}
+                </div>
+                <div className="hds-layer-grid">
+                  <button type="button" className="hds-xform-btn" disabled={atTop} title={t('inspector.bringToFront')} onClick={() => zOrder('front')}>
+                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 4h12" /><path d="M10 16V8" /><path d="m6.5 11.5 3.5-3.5 3.5 3.5" />
+                    </svg>
+                    {t('inspector.bringToFront')}
+                  </button>
+                  <button type="button" className="hds-xform-btn" disabled={atBottom} title={t('inspector.sendToBack')} onClick={() => zOrder('back')}>
+                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M4 16h12" /><path d="M10 4v8" /><path d="m6.5 8.5 3.5 3.5 3.5-3.5" />
+                    </svg>
+                    {t('inspector.sendToBack')}
+                  </button>
+                  <button type="button" className="hds-xform-btn" disabled={atTop} title={t('inspector.bringForward')} onClick={() => zOrder('forward')}>
+                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10 16V5" /><path d="m6 9 4-4 4 4" />
+                    </svg>
+                    {t('inspector.bringForward')}
+                  </button>
+                  <button type="button" className="hds-xform-btn" disabled={atBottom} title={t('inspector.sendBackward')} onClick={() => zOrder('backward')}>
+                    <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M10 4v11" /><path d="m6 11 4 4 4-4" />
+                    </svg>
+                    {t('inspector.sendBackward')}
+                  </button>
+                </div>
               </div>
 
               {/* Restore auto layout */}

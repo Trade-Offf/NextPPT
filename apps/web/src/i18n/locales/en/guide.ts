@@ -6,7 +6,6 @@ const guide: typeof zh = {
     backHome: 'Back to NextPPT',
     title: 'Guide',
     backToEdit: 'Back to editor',
-    openFile: 'Open a file',
   },
   flow: {
     eyebrow: 'Three simple steps',
@@ -24,7 +23,7 @@ const guide: typeof zh = {
       { title: 'Copy this prompt', desc: 'Click "Copy prompt" below — the whole thing is copied, nothing to write yourself.' },
       { title: 'Send it to an AI, add your topic', desc: 'Paste it into ChatGPT, Claude, Gemini, Copilot or any AI, and replace {{topic}} with your subject.' },
       { title: 'Save the file', desc: 'The AI returns some code; save it as a file as instructed (any name, e.g. my-deck.html).' },
-      { title: 'Come back and open it', desc: 'Return here, click "Open a file" or just drag the file in, and start editing.' },
+      { title: 'Come back and open it', desc: 'Go back to the home page, open a folder or drag the file in, and start editing.' },
     ],
     promptLabel: 'Prompt to copy',
     copy: 'Copy prompt',

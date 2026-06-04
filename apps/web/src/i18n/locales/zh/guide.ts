@@ -4,7 +4,6 @@ export default {
     backHome: '回到 NextPPT',
     title: '使用指南',
     backToEdit: '返回编辑',
-    openFile: '打开文件',
   },
   flow: {
     eyebrow: '三步就搞定',
@@ -22,7 +21,7 @@ export default {
       { title: '复制这段提示词', desc: '点下面的「复制提示词」，整段就复制好了，一个字都不用自己写。' },
       { title: '发给 AI，填上主题', desc: '粘贴给 ChatGPT、豆包、Kimi、Claude、Gemini 等任意 AI，把 {{topic}} 换成你的主题。' },
       { title: '把文件存下来', desc: 'AI 会回一段代码，按它的提示保存成一个文件（名字随便起，比如 我的演示.html）。' },
-      { title: '回来打开它', desc: '回到这里点「打开文件」，或把文件直接拖进来，就能开始改了。' },
+      { title: '回来打开它', desc: '回到首页，打开文件夹或拖入文件，就能开始改了。' },
     ],
     promptLabel: '要复制的提示词',
     copy: '复制提示词',

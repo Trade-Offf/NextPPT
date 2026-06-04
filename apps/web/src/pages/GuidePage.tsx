@@ -5,6 +5,7 @@ import { useDeckStore } from '../store/deckStore.js';
 import { useOpenDeck, FILE_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
 import { useGuideNav } from '../hooks/useGuideNav.js';
+import { LanguageSwitcher } from '../components/LanguageSwitcher.js';
 import type { GuideTab } from '../data/guide.js';
 
 const ANCHORS: readonly GuideTab[] = ['generate', 'edit', 'export'];
@@ -116,11 +117,10 @@ export function GuidePage() {
             </button>
             <span className="hidden sm:inline text-[var(--tertiary-label)]">·</span>
             <h1 className="hidden sm:block text-sm font-medium text-[var(--secondary-label)]">{t('header.title')}</h1>
-            <div className="ml-auto">
-              {hasDeck ? (
+            <div className="ml-auto flex items-center gap-3 sm:gap-4">
+              <LanguageSwitcher />
+              {hasDeck && (
                 <button onClick={closeGuide} className="hds-btn-primary px-3.5 py-1.5 text-xs">{t('header.backToEdit')}</button>
-              ) : (
-                <OpenButton label={t('header.openFile')} />
               )}
             </div>
           </div>

@@ -11,13 +11,12 @@ English | [简体中文](README.zh-CN.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
 ![Local-first](https://img.shields.io/badge/local--first-no%20upload-blue.svg)
-![Status](https://img.shields.io/badge/status-MVP-orange.svg)
+![Open Source](https://img.shields.io/badge/open%20source-free-orange.svg)
 
 </div>
 
-> Your AI tool already writes beautiful `deck.html`. This is the missing last mile: edit it like a doc, ship it as a slide.
+> Your AI tool already writes beautiful `deck.html`. NextPPT is the missing last mile: click to fix one word, drag to rearrange, ship it as a slide — without another prompt round.
 
-<!-- TODO: replace with a real demo GIF. A 10s loop of "open folder → click to edit a title → export PPTX" is worth more than this whole README. -->
 <div align="center">
   <img src="docs/assets/demo.gif" alt="NextPPT demo" width="760" />
   <br />
@@ -26,88 +25,83 @@ English | [简体中文](README.zh-CN.md)
 
 ## Why this exists
 
-In the last 18 months, "let the AI write the slides as HTML" quietly became a real workflow. Cursor / Claude / ChatGPT are great at Flex/Grid layouts, KaTeX, Mermaid and custom fonts — and terrible at native PowerPoint XML. So people generate a gorgeous `deck.html` instead of fighting Keynote.
+"Let the AI write the slides as HTML" is a real workflow now. Cursor / Claude / ChatGPT nail Flex layouts, KaTeX, Mermaid and custom fonts — and still struggle with native PowerPoint XML. So people ship a gorgeous `deck.html` instead of fighting Keynote.
 
-Then three problems show up, every single time:
+Then the same three problems show up:
 
-- **Last-minute edits hurt.** The night before the talk your advisor says "change that one line on slide 16." Now you're back in the AI tool: prompt, wait, diff, save. Once is fine. The tenth time you want to scream.
-- **Projectors want PPT/PDF.** Schools require a `.pptx` upload, clients want a `.pdf`, and raw HTML on a projector loves to drop fonts or stall on the network.
+- **Last-minute edits hurt.** Your advisor says "change that one line on slide 16." You're back in the AI tool: prompt, wait, diff, save. Once is fine; the tenth time you want to scream.
+- **Projectors want PPT/PDF.** Schools require `.pptx`, clients want `.pdf`, and raw HTML on a projector loves to drop fonts or stall on the network.
 - **Privacy anxiety is real.** Thesis defenses, client proposals, internal decks — people don't want to upload any of it to an online editor.
 
-HTML Deck Studio does exactly one thing well: **take HTML you already have, let you point-and-edit it in the browser, and export an industrial-grade PPT/PDF — without your files ever leaving your machine.**
+**NextPPT** does one thing well: take HTML you already have, let you point-and-edit it in the browser, and export high-fidelity PPT/PDF — **without your files ever leaving your machine.**
 
 It is *not* an AI slide generator, not another DSL like reveal.js / Slidev, not a cloud editor. It's a pair of scissors for AI decks.
 
 ## Quick start
 
 ```bash
-# 1. install
 pnpm install
-
-# 2. run web app + stateless export service
 pnpm dev
 # web → http://localhost:5173   api → http://localhost:3000
 ```
 
-Then, in a Chromium browser (Chrome / Edge / Brave / Arc):
+In a Chromium browser (Chrome / Edge / Brave / Arc):
 
-1. **Open** a folder that contains your `deck.html` (with images/assets), or just drag in a single self-contained `.html`.
-2. **Edit** — click any element to tweak font / color / size, double-click text to edit inline, drop a new image to replace one, or flip to **Code** mode for raw HTML.
-3. **Export** — pick PPTX or PDF, choose a resolution (up to 4K), download. Done.
+1. **Open** — pick a folder with your `deck.html` and assets, drag in a single `.html`, or try the built-in sample on the home page.
+2. **Edit** — **Edit** mode: click text, tweak fonts/colors in the panel, double-click to type inline. **Move** mode: drag, resize, stack layers like PowerPoint — no code.
+3. **Export** — PPTX or PDF, up to 5120×2880, page ranges supported. Done.
 
-Your edits are written back to disk automatically (debounced), with timestamped snapshots in `.hds-backup/` so you can never trash the original.
+Edits auto-save to disk (debounced) with timestamped snapshots in `.hds-backup/`.
+
+New here? Open **Guide** from the nav bar — copy a prompt, let AI generate a deck, then come back and open it.
 
 ## How it works
 
-Two pieces: a browser SPA that does all the editing, and a stateless service that only shows up at export time and forgets everything the moment it's done.
+A browser SPA handles all editing; a stateless service only appears at export time and forgets everything when it's done.
 
 ```mermaid
 flowchart LR
-  ai["AI tool outputs deck.html"] --> open["Open folder / single HTML in browser"]
-  open --> edit["Click & double-click to edit text, images"]
-  edit --> save["Auto-write back to local disk + backup"]
+  ai["AI outputs deck.html"] --> open["Open in browser"]
+  open --> edit["Edit / Move modes"]
+  edit --> save["Auto-save local + backup"]
   edit --> export["One-click export"]
-  export --> svc["Stateless export service (Puppeteer)"]
-  svc --> file["PPTX / PDF downloaded"]
-  file --> done["Project · submit · share"]
+  export --> svc["Puppeteer worker"]
+  svc --> file["PPTX / PDF"]
 ```
 
-- **Editing** lives entirely in the browser via the File System Access API — read, edit, write, never upload.
-- **Export** ships the deck to a short-lived Puppeteer worker that screenshots each slide at high DPI, builds the PPTX/PDF, returns it, and wipes the temp files. No database, no object storage.
+- **Editing** uses the File System Access API — read, edit, write, never upload.
+- **Export** screenshots each slide at high DPI, builds PPTX/PDF, wipes temp files. No database, no object storage.
 
 ## Features
 
-- **Point-and-edit, no DSL.** Any `<section class="slide">` deck works. Click to select, double-click to edit text inline, property panel for font / weight / color / align / underline / strikethrough / link.
-- **Mermaid, rendered live.** Write raw Mermaid source; it renders in the editor and stays crisp in the export.
-- **High-fidelity export.** Image-based PPTX / PDF that looks exactly like your HTML. Standard 2560×1440 up to 4K, single page / ranges supported.
-- **Two ways in.** A folder (reads/writes sibling images, keeps backups) or a single self-contained HTML file (saved as a copy, images inlined as base64).
-- **Local-first & private.** Files stay on your disk. The server only touches your content for the seconds it takes to export, then destroys it.
-- **Code mode.** Monaco editor for the current slide when you want raw control, with validation before it commits.
+- **Point-and-edit.** Any `<section class="slide">` deck works. Property panel for font, weight, color, align, decoration, links, images.
+- **Edit / Move modes.** Edit = text only, calm. Move = freeform drag, resize, layer order (bring forward, send back) — like native PPT.
+- **Mermaid, live.** Raw Mermaid source renders in the editor and stays crisp in export.
+- **High-fidelity export.** Image-based PPTX / PDF that matches your HTML. Up to 5120×2880; single page or ranges.
+- **Bilingual UI.** Chinese / English across the site, guide, and editor.
+- **Two ways in.** Folder mode (sibling images + backups) or single self-contained HTML (base64 images).
+- **Local-first.** Files stay on disk; the server only touches content for the seconds it takes to export.
 
 ## Browser support
-
-The editor needs the File System Access API, which today means Chromium-based browsers.
 
 | Browser | Folder mode | Single-file mode |
 | --- | --- | --- |
 | Chrome / Edge / Brave / Arc / Opera | Yes | Yes |
-| Safari / Firefox | Not yet (ZIP fallback planned) | Not yet |
+| Safari / Firefox | Planned (ZIP fallback) | Planned |
 
 ## Privacy
 
-This is the whole point, so it's worth saying plainly: **during editing, your data never leaves your machine.** The only moment a file touches a server is when you click export — it lives in a temp dir for a few dozen seconds and is deleted right after. Nothing is persisted, nothing is trained on.
+**During editing, your data never leaves your machine.** Export sends content to a temp worker for a few dozen seconds, then deletes it. Nothing persisted, nothing trained on.
 
-## Roadmap & growth
+## Docs
 
-- [docs/ROADMAP.md](docs/ROADMAP.md) — what's next and why, prioritized.
-- [docs/GROWTH.md](docs/GROWTH.md) — positioning, channels and how we plan to grow it.
-- [docs/PRD.md](docs/PRD.md) · [docs/TRD.md](docs/TRD.md) — product and technical specs.
+- [docs/ROADMAP.md](docs/ROADMAP.md) — what's next
+- [docs/GROWTH.md](docs/GROWTH.md) — positioning and channels
+- [docs/PRD.md](docs/PRD.md) · [docs/TRD.md](docs/TRD.md) — product & technical specs
 
 ## Contributing
 
-This started as a tool I wanted for myself, and the best version of it will come from people who actually live this workflow. Issues and PRs are the way — async beats chat groups for open source.
-
-Please feel free to use and contribute to the development. If it saves you one painful night before a talk, that's already worth it.
+Built for people who live this workflow. Issues and PRs welcome — if it saves you one painful night before a talk, that's already worth it.
 
 ## License
 

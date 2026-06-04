@@ -10,7 +10,7 @@
  * Communicates with AppHost via postMessage.
  */
 
-import type { HostMessage, RuntimeMessage, PatchOp, StyleSnapshot } from '@hds/protocol';
+import type { HostMessage, RuntimeMessage, PatchOp, StyleSnapshot, LayerInfo, SlideRect } from '@hds/protocol';
 
 const TARGET = window.parent as Window;
 
@@ -166,6 +166,7 @@ function selectElement(el: Element) {
     const v = el.getAttribute(name);
     if (v !== null) attrs[name] = v;
   }
+  const elh = el instanceof HTMLElement ? el : null;
   send({
     type: 'select',
     selector: buildSelector(el),
@@ -177,6 +178,8 @@ function selectElement(el: Element) {
     styleSnapshot: styleSnapshot(el),
     attrs,
     text: el.textContent ?? '',
+    layer: elh ? layerInfo(elh) : undefined,
+    rect: elh ? slideRect(elh) : undefined,
   });
 }
 
@@ -215,14 +218,104 @@ function genId(): string {
   return 'h' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+/**
+ * Stacking base for free shapes. Kept high so detached elements / inserted
+ * images float above ordinary (and most positioned) deck content. Normalised
+ * shapes occupy a contiguous band starting here: Z_BASE, Z_BASE+1, …
+ */
+const Z_BASE = 9990;
+
+/** Every free (positioned, id-carrying) shape on the slide. */
+function freeShapes(): HTMLElement[] {
+  return Array.from(document.querySelectorAll<HTMLElement>('[data-hds-id]'));
+}
+
 /** Next free stacking order above existing free shapes / inserted images. */
 function nextZ(): number {
-  let max = 9998;
-  document.querySelectorAll<HTMLElement>('[data-hds-id]').forEach((n) => {
+  let max = Z_BASE - 1;
+  freeShapes().forEach((n) => {
     const z = parseInt(n.style.zIndex || '0', 10);
     if (!Number.isNaN(z)) max = Math.max(max, z);
   });
   return max + 1;
+}
+
+/**
+ * Reassign every free shape a unique, contiguous z-index (Z_BASE + position),
+ * ordered by current z-index then DOM order. Collapses ties / runaway values
+ * into a clean, gap-free stack and returns the elements in stacking order
+ * (bottom → top), which is the single source of truth for layer operations.
+ */
+function normalizeZ(): HTMLElement[] {
+  const shapes = freeShapes();
+  const domOrder = new Map<HTMLElement, number>();
+  shapes.forEach((el, i) => domOrder.set(el, i));
+  shapes.sort((a, b) => {
+    const za = parseInt(a.style.zIndex || '0', 10) || 0;
+    const zb = parseInt(b.style.zIndex || '0', 10) || 0;
+    if (za !== zb) return za - zb;
+    return (domOrder.get(a) ?? 0) - (domOrder.get(b) ?? 0);
+  });
+  shapes.forEach((el, i) => {
+    el.style.zIndex = String(Z_BASE + i);
+  });
+  return shapes;
+}
+
+/**
+ * Re-stack a free element relative to its peers. A flowing element is detached
+ * first so its z-index actually applies. The order is normalised before and
+ * after the move so values stay contiguous and unambiguous.
+ */
+function zOrder(selector: string, op: 'front' | 'back' | 'forward' | 'backward') {
+  const el = document.querySelector(selector);
+  if (!(el instanceof HTMLElement)) return;
+  if (!isPositioned(el)) detach(el);
+
+  let order = normalizeZ();
+  const i = order.indexOf(el);
+  if (i === -1) return;
+  const last = order.length - 1;
+
+  let target = i;
+  if (op === 'front') target = last;
+  else if (op === 'back') target = 0;
+  else if (op === 'forward') target = Math.min(last, i + 1);
+  else if (op === 'backward') target = Math.max(0, i - 1);
+
+  if (target !== i) {
+    order.splice(i, 1);
+    order.splice(target, 0, el);
+    order.forEach((node, idx) => {
+      node.style.zIndex = String(Z_BASE + idx);
+    });
+  }
+
+  selectElement(el);
+  send({ type: 'patched', html: serializeSection() });
+}
+
+/** Stacking position of a free element among its peers (1-based), else undefined. */
+function layerInfo(el: HTMLElement): LayerInfo | undefined {
+  if (!isPositioned(el)) return undefined;
+  const order = freeShapes().sort((a, b) => {
+    const za = parseInt(a.style.zIndex || '0', 10) || 0;
+    const zb = parseInt(b.style.zIndex || '0', 10) || 0;
+    return za - zb;
+  });
+  const idx = order.indexOf(el);
+  if (idx === -1) return undefined;
+  return { index: idx + 1, count: order.length };
+}
+
+/** Element geometry in slide-native coordinates (offset metrics, unscaled). */
+function slideRect(el: HTMLElement): SlideRect {
+  return {
+    left: Math.round(el.offsetLeft),
+    top: Math.round(el.offsetTop),
+    width: Math.round(el.offsetWidth),
+    height: Math.round(el.offsetHeight),
+  };
 }
 
 const REPLACED_TAGS = new Set(['img', 'svg', 'video', 'canvas', 'figure', 'picture']);
@@ -325,6 +418,176 @@ function detach(el: HTMLElement) {
   el.style.top = `${round2(r.top - pr.top - p.clientTop)}px`;
   el.style.width = `${round2(r.width)}px`;
   if (shapeKind(el) !== 'image') el.style.height = 'auto';
+}
+
+// ─── Auto-detach all content boxes (on entering drag mode) ───────────────────
+// A slide is nested (section → titlebar/body/footer → content), so detaching the
+// section's direct children alone would leave the title, subtitle, etc. fused
+// together. We descend through *layout regions* (large multi-child wrappers) and
+// stop at *content boxes* — the perceivable units a user expects to stack/move:
+// a heading, a paragraph, an image, or a tight cluster like a meta-card row.
+
+/** Fraction of the slide area above which a multi-child node counts as a layout region. */
+const REGION_AREA = 0.22;
+
+/** A rendered, block-level child that participates in layout (not inline/hidden/chrome). */
+function isLayoutBlock(el: Element): el is HTMLElement {
+  if (!(el instanceof HTMLElement)) return false;
+  const tag = el.tagName.toLowerCase();
+  if (tag === 'script' || tag === 'style' || tag === 'template') return false;
+  if (el.hasAttribute('data-hds-placeholder')) return false;
+  const d = getComputedStyle(el).display;
+  if (d === 'none' || d === 'contents' || d.startsWith('inline')) return false;
+  return true;
+}
+
+function collectFrom(node: HTMLElement, boxes: HTMLElement[]) {
+  // Already-free shapes are atomic: never break them apart.
+  if (node.hasAttribute('data-hds-id')) {
+    boxes.push(node);
+    return;
+  }
+  if (REPLACED_TAGS.has(node.tagName.toLowerCase())) {
+    boxes.push(node);
+    return;
+  }
+  const blockKids = Array.from(node.children).filter(isLayoutBlock);
+  if (blockKids.length === 0) {
+    boxes.push(node); // leaf content block (heading / paragraph / inline-only div)
+    return;
+  }
+  if (blockKids.length === 1) {
+    collectFrom(blockKids[0], boxes); // passthrough a single-child wrapper
+    return;
+  }
+  // Multiple block children: a large node is a layout region (recurse); a compact
+  // one is a cohesive component (keep whole, e.g. a meta-card row or titlebar).
+  const area = (node.offsetWidth * node.offsetHeight) / (SLIDE_W * SLIDE_H);
+  if (area >= REGION_AREA) {
+    blockKids.forEach((k) => collectFrom(k, boxes));
+  } else {
+    boxes.push(node);
+  }
+}
+
+/** The perceivable content boxes of the current slide (see header note). */
+function collectContentBoxes(): HTMLElement[] {
+  const boxes: HTMLElement[] = [];
+  collectFrom(sectionEl(), boxes);
+  return boxes;
+}
+
+/** Nearest positioned ancestor (the containing block once `el` goes absolute). */
+function nearestContainingBlock(el: HTMLElement): HTMLElement {
+  let p = el.parentElement;
+  while (p && p !== document.body) {
+    if (getComputedStyle(p).position !== 'static') return p;
+    p = p.parentElement;
+  }
+  return sectionEl();
+}
+
+interface DetachPlan {
+  el: HTMLElement;
+  cb: HTMLElement;
+  rect: DOMRect;
+  cbRect: DOMRect;
+  offsetW: number;
+  offsetH: number;
+  marginTop: string;
+  marginRight: string;
+  marginBottom: string;
+  marginLeft: string;
+  alignSelf: string;
+  inFlow: boolean;
+  isImage: boolean;
+}
+
+/**
+ * Lift every content box out of flow in one pass so the whole slide becomes a
+ * set of freely stackable/movable shapes (PPT-like). Idempotent: already-free
+ * boxes are skipped. Returns whether anything changed.
+ *
+ * Done in three strict phases to stay pixel-faithful:
+ *   1. Measure ALL boxes up-front (no DOM mutation). Detaching one box reflows
+ *      the flow, so measuring first prevents an earlier detach from shifting the
+ *      not-yet-measured ones — the root cause of "everything drifts on entering
+ *      drag mode" (flex `justify-content: center` re-centred siblings mid-loop).
+ *   2. Reserve each in-flow box's footprint with a placeholder, then go absolute.
+ *      Out-of-flow boxes (originally absolute/fixed, e.g. a corner badge) get NO
+ *      placeholder — reserving phantom space would push flex siblings around.
+ *   3. Anchor every box from its phase-1 snapshot (immune to phase-2 reflow).
+ */
+function detachAll(): boolean {
+  const targets = collectContentBoxes().filter((el) => !el.hasAttribute('data-hds-id'));
+  if (!targets.length) return false;
+  const sec = sectionEl();
+  if (getComputedStyle(sec).position === 'static') sec.style.position = 'relative';
+
+  // Phase 1 — measure (no mutation).
+  const plans: DetachPlan[] = targets.map((el) => {
+    const cs = getComputedStyle(el);
+    const cb = nearestContainingBlock(el);
+    const pos = cs.position;
+    return {
+      el,
+      cb,
+      rect: el.getBoundingClientRect(),
+      cbRect: cb.getBoundingClientRect(),
+      offsetW: el.offsetWidth,
+      offsetH: el.offsetHeight,
+      marginTop: cs.marginTop,
+      marginRight: cs.marginRight,
+      marginBottom: cs.marginBottom,
+      marginLeft: cs.marginLeft,
+      alignSelf: cs.alignSelf,
+      inFlow: pos === 'static' || pos === 'relative' || pos === 'sticky',
+      isImage: shapeKind(el) === 'image',
+    };
+  });
+
+  // Phase 2 — reserve footprints (in-flow only) and go absolute.
+  for (const p of plans) {
+    const id = genId();
+    p.el.setAttribute('data-hds-id', id);
+    p.el.setAttribute('data-hds-free', '');
+    if (p.inFlow) {
+      const ph = document.createElement('div');
+      ph.setAttribute('data-hds-placeholder', '');
+      ph.setAttribute('data-hds-ph-for', id);
+      Object.assign(ph.style, {
+        width: `${p.offsetW}px`,
+        height: `${p.offsetH}px`,
+        marginTop: p.marginTop,
+        marginRight: p.marginRight,
+        marginBottom: p.marginBottom,
+        marginLeft: p.marginLeft,
+        alignSelf: p.alignSelf,
+        flex: '0 0 auto',
+        boxSizing: 'border-box',
+        visibility: 'hidden',
+        pointerEvents: 'none',
+      });
+      p.el.parentElement?.insertBefore(ph, p.el);
+    }
+    p.el.style.position = 'absolute';
+    p.el.style.margin = '0';
+  }
+
+  // Phase 3 — anchor from the phase-1 snapshot; preserve size so nothing shifts.
+  for (const p of plans) {
+    p.el.style.left = `${round2(p.rect.left - p.cbRect.left - p.cb.clientLeft)}px`;
+    p.el.style.top = `${round2(p.rect.top - p.cbRect.top - p.cb.clientTop)}px`;
+    p.el.style.right = 'auto';
+    p.el.style.bottom = 'auto';
+    p.el.style.width = `${round2(p.rect.width)}px`;
+    // min-height (not height) keeps fixed-height boxes (e.g. a 32px titlebar)
+    // from collapsing to content height, while still allowing text to grow.
+    if (!p.isImage) p.el.style.minHeight = `${round2(p.rect.height)}px`;
+  }
+
+  normalizeZ();
+  return true;
 }
 
 // ─── Mermaid rendering ───────────────────────────────────────────────────────
@@ -517,7 +780,17 @@ window.addEventListener('message', async (evt) => {
     interactionMode = msg.mode;
     document.body.setAttribute('data-hds-mode', interactionMode);
     if (editingEl) finishInlineEdit(true);
+    // Entering drag mode lifts every content box out of flow so the whole slide
+    // becomes freely stackable/movable — z-order then has an immediate effect.
+    if (interactionMode === 'drag' && detachAll()) {
+      send({ type: 'patched', html: serializeSection() });
+    }
     deselect();
+    return;
+  }
+
+  if (msg.type === 'z-order') {
+    zOrder(msg.selector, msg.op);
     return;
   }
 

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { DeckMeta, SlideEntry } from '@hds/protocol';
-import type { StyleSnapshot } from '@hds/protocol';
+import type { StyleSnapshot, LayerInfo, SlideRect } from '@hds/protocol';
 import { ulid } from '../lib/ulid.js';
 
 export interface SlideState extends SlideEntry {
@@ -17,6 +17,10 @@ export interface SelectionState {
   styleSnapshot: StyleSnapshot;
   attrs?: Record<string, string>;
   text?: string;
+  /** Stacking position among free shapes (1-based); absent for plain flow elements. */
+  layer?: LayerInfo;
+  /** Geometry in slide-native coordinates for an accurate panel readout. */
+  rect?: SlideRect;
 }
 
 /** Undo/redo snapshot of the editable deck content. */

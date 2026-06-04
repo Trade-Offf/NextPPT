@@ -14,7 +14,8 @@ export type HostMessage =
   | InsertImageMessage
   | DeleteElementMessage
   | SelectElementMessage
-  | SetModeMessage;
+  | SetModeMessage
+  | ZOrderMessage;
 
 /** Canvas interaction mode. `edit` = content editing, `drag` = freeform transform. */
 export type InteractionMode = 'edit' | 'drag';
@@ -81,6 +82,22 @@ export interface SelectElementMessage {
   selector: string;
 }
 
+/**
+ * Re-stack a free (positioned) element relative to the other free shapes on the
+ * slide. The runtime owns the ordering logic (it sees every `[data-hds-id]`
+ * element), so the host only names the element and the intent. A flowing element
+ * is detached first so its z-index actually takes effect.
+ *   front    – move above all other free elements
+ *   back     – move below all other free elements
+ *   forward  – swap with the element one layer above
+ *   backward – swap with the element one layer below
+ */
+export interface ZOrderMessage {
+  type: 'z-order';
+  selector: string;
+  op: 'front' | 'back' | 'forward' | 'backward';
+}
+
 export interface RequestHtmlMessage {
   type: 'request-html';
 }
@@ -117,6 +134,29 @@ export interface SelectMessage {
   attrs?: Record<string, string>;
   /** Current text content for back-filling the text editor in the panel */
   text?: string;
+  /**
+   * Stacking position among free (`data-hds-id`) elements, when the selection is
+   * a free shape. `index` is 1-based; `count` is the total number of free shapes.
+   * Absent for plain flowing elements that carry no stacking order yet.
+   */
+  layer?: LayerInfo;
+  /**
+   * Geometry in slide-native (1280×720) coordinates, derived from offset metrics
+   * so the panel readout is resolution-independent (unlike the scaled `bbox`).
+   */
+  rect?: SlideRect;
+}
+
+export interface LayerInfo {
+  index: number;
+  count: number;
+}
+
+export interface SlideRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
 }
 
 export interface ClearSelectMessage {

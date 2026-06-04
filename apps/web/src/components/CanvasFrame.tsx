@@ -115,6 +115,8 @@ export const ScaledCanvas = forwardRef<CanvasHandle, CanvasFrameProps & { contai
           styleSnapshot: msg.styleSnapshot,
           attrs: msg.attrs,
           text: msg.text,
+          layer: msg.layer,
+          rect: msg.rect,
         });
       }
       if (msg.type === 'clear-select') setSelection(null);

@@ -999,14 +999,63 @@ select.hds-input {
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.hds-xform-btn:hover { border-color: var(--system-blue); color: var(--system-blue); }
-.hds-xform-btn:active { background: var(--separator); }
+.hds-xform-btn:hover:not(:disabled) { border-color: var(--system-blue); color: var(--system-blue); }
+.hds-xform-btn:active:not(:disabled) { background: var(--separator); }
 .hds-xform-btn svg { opacity: 0.85; }
+.hds-xform-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
 .hds-xform-btn.is-danger { color: #ff7a7a; }
 .hds-xform-btn.is-danger:hover {
   border-color: #ff7a7a;
   background: color-mix(in srgb, #ff7a7a 14%, transparent);
   color: #ff7a7a;
+}
+
+/* Layer / z-order control group */
+.hds-layer-group {
+  border-radius: 12px;
+  border: 0.5px solid var(--separator);
+  background: color-mix(in srgb, var(--control-bg) 55%, transparent);
+  padding: 9px;
+}
+.hds-layer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 1px 3px 8px;
+}
+.hds-layer-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--secondary-label);
+}
+.hds-layer-readout {
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--system-blue);
+  background: var(--cobalt-lt);
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.hds-layer-hint-inline {
+  font-size: 10px;
+  color: var(--tertiary-label);
+  text-align: right;
+  line-height: 1.25;
+}
+.hds-layer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.hds-layer-grid .hds-xform-btn {
+  justify-content: flex-start;
+  padding: 7px 9px;
 }
 
 .hds-floating-rail {
