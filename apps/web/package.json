@@ -8,7 +8,8 @@
     "build": "tsc -b && vite-react-ssg build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify-deploy": "node scripts/verify-deploy.mjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

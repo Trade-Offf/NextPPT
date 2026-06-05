@@ -94,8 +94,18 @@ flowchart LR
 
 **编辑期间，数据不离开本机。** 只有点导出时，内容在临时目录待几十秒就被删掉。不持久化，不拿去训练。
 
+## 部署与发版校验
+
+前端静态站部署在 Cloudflare Pages，完整说明见 [apps/web/DEPLOY.md](apps/web/DEPLOY.md)。
+
+发版后务必做两件事：
+
+1. **确保 `dist/404.html` 已部署**（Cloudflare Pages 没有 Dashboard 开关；没有根目录 `404.html` 时会自动 SPA 回退，缺失的 `/assets/*.js` 会返回 HTML，用户偶发白屏）
+2. 清缓存并跑校验：`pnpm verify-deploy`
+
 ## 文档
 
+- [apps/web/DEPLOY.md](apps/web/DEPLOY.md) — Cloudflare Pages 部署与排障
 - [docs/ROADMAP.md](docs/ROADMAP.md) — 后续规划
 - [docs/GROWTH.md](docs/GROWTH.md) — 定位与渠道
 - [docs/PRD.md](docs/PRD.md) · [docs/TRD.md](docs/TRD.md) — 产品与技术方案

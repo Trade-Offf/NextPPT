@@ -12,7 +12,8 @@
     "build": "pnpm --filter '@hds/protocol' build && pnpm --parallel --filter './apps/*' build",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "verify-deploy": "pnpm --filter @hds/web verify-deploy"
   },
   "devDependencies": {
     "concurrently": "^10.0.0",
