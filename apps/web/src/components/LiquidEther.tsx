@@ -120,8 +120,6 @@ export default function LiquidEther({
       height = 0;
       aspect = 1;
       pixelRatio = 1;
-      isMobile = false;
-      breakpoint = 768;
       fboWidth: number | null = null;
       fboHeight: number | null = null;
       time = 0;
@@ -997,6 +995,7 @@ export default function LiquidEther({
       autoDriver?: AutoDriver;
       lastUserInteraction = performance.now();
       running = false;
+      inputBound = false;
       winMouseMove?: (e: MouseEvent) => void;
       winTouchStart?: (e: TouchEvent) => void;
       winTouchMove?: (e: TouchEvent) => void;
@@ -1026,10 +1025,8 @@ export default function LiquidEther({
         this.winTouchStart = (e: TouchEvent) => Mouse.onDocumentTouchStart(e);
         this.winTouchMove = (e: TouchEvent) => Mouse.onDocumentTouchMove(e);
         this.winTouchEnd = () => Mouse.onTouchEnd();
-        window.addEventListener('mousemove', this.winMouseMove as any, { passive: true } as any);
-        window.addEventListener('touchstart', this.winTouchStart as any, { passive: true } as any);
-        window.addEventListener('touchmove', this.winTouchMove as any, { passive: true } as any);
-        window.addEventListener('touchend', this.winTouchEnd as any, { passive: true } as any);
+        // Input listeners are bound only while the sim is running (see start/pause),
+        // so a paused/offscreen backdrop does no per-pointer work.
         this._onVisibility = () => {
           const hidden = document.hidden;
           if (hidden) {
@@ -1060,13 +1057,31 @@ export default function LiquidEther({
         this.render();
         rafRef.current = requestAnimationFrame(this._loop);
       }
+      bindInput() {
+        if (this.inputBound) return;
+        this.inputBound = true;
+        window.addEventListener('mousemove', this.winMouseMove as any, { passive: true } as any);
+        window.addEventListener('touchstart', this.winTouchStart as any, { passive: true } as any);
+        window.addEventListener('touchmove', this.winTouchMove as any, { passive: true } as any);
+        window.addEventListener('touchend', this.winTouchEnd as any, { passive: true } as any);
+      }
+      unbindInput() {
+        if (!this.inputBound) return;
+        this.inputBound = false;
+        if (this.winMouseMove) window.removeEventListener('mousemove', this.winMouseMove as any);
+        if (this.winTouchStart) window.removeEventListener('touchstart', this.winTouchStart as any);
+        if (this.winTouchMove) window.removeEventListener('touchmove', this.winTouchMove as any);
+        if (this.winTouchEnd) window.removeEventListener('touchend', this.winTouchEnd as any);
+      }
       start() {
         if (this.running) return;
         this.running = true;
+        this.bindInput();
         this._loop();
       }
       pause() {
         this.running = false;
+        this.unbindInput();
         if (rafRef.current) {
           cancelAnimationFrame(rafRef.current);
           rafRef.current = null;

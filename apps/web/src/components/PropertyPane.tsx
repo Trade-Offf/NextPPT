@@ -409,7 +409,7 @@ export function PropertyPane({ onPatch, onDelete, onZOrder, floating = false, on
             <div className="hds-inspector-block">
               <div className="flex items-center justify-between">
                 <span className="hds-block-label">{t('inspector.opacity')}</span>
-                <span className="text-[11px] text-[var(--tertiary-label)] font-mono tabular-nums">{Math.round(opacity * 100)}%</span>
+                <span className="hds-range-readout">{Math.round(opacity * 100)}%</span>
               </div>
               <input
                 type="range"
@@ -417,7 +417,8 @@ export function PropertyPane({ onPatch, onDelete, onZOrder, floating = false, on
                 max={1}
                 step={0.05}
                 value={opacity}
-                className="w-full"
+                className="hds-range"
+                style={{ ['--val' as string]: `${Math.round(opacity * 100)}%` } as React.CSSProperties}
                 onChange={(e) => {
                   const v = parseFloat(e.target.value);
                   setOpacity(v);

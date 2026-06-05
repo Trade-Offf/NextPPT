@@ -8,13 +8,16 @@ interface ConfirmDialogProps {
   message: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
+  /** 'primary' = neutral solid action, 'danger' = destructive (red). */
+  tone?: 'primary' | 'danger';
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 /**
- * Lightweight confirm sheet reusing the macOS modal chrome. Used for one-off
- * confirmations such as the single-file "save as a copy" explanation.
+ * Minimal Linear-style confirmation dialog: left-aligned title, a quiet corner
+ * close, and a single emphasised action. Reused for both the "discard changes"
+ * (danger) and "save as a copy" (primary) prompts.
  */
 export function ConfirmDialog({
   open,
@@ -22,6 +25,7 @@ export function ConfirmDialog({
   message,
   confirmLabel,
   cancelLabel,
+  tone = 'primary',
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -42,24 +46,23 @@ export function ConfirmDialog({
         role="alertdialog"
         aria-modal="true"
         aria-label={title}
-        style={{ maxWidth: 440 }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="hds-modal-titlebar">
-          <button className="hds-modal-close" onClick={onCancel} aria-label={t('close')} title={t('close')}>
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round">
-              <path d="M2 2l8 8M10 2l-8 8" />
+        <div className="hds-modal-header">
+          <h2 className="hds-modal-heading">{title}</h2>
+          <button className="hds-modal-x" onClick={onCancel} aria-label={t('close')} title={t('close')}>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+              <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
             </svg>
           </button>
-          <span className="hds-modal-title">{title}</span>
         </div>
 
         <div className="hds-modal-body">
-          <div className="text-sm text-[var(--secondary-label)] leading-relaxed">{message}</div>
+          <div className="text-[13.5px] text-[var(--secondary-label)] leading-relaxed">{message}</div>
 
-          <div className="mt-6 flex items-center justify-end gap-2.5">
-            <button onClick={onCancel} className="hds-btn px-4 py-2 text-sm">{cancelLabel ?? t('cancel')}</button>
-            <button onClick={onConfirm} className="hds-btn-primary px-4 py-2 text-sm font-medium">{confirmLabel ?? t('confirm')}</button>
+          <div className="mt-6 flex items-center justify-end gap-2">
+            <button onClick={onCancel} className="hds-dialog-btn">{cancelLabel ?? t('cancel')}</button>
+            <button onClick={onConfirm} className={`hds-dialog-btn is-${tone}`}>{confirmLabel ?? t('confirm')}</button>
           </div>
         </div>
       </div>

@@ -272,7 +272,7 @@ function zOrder(selector: string, op: 'front' | 'back' | 'forward' | 'backward')
   if (!(el instanceof HTMLElement)) return;
   if (!isPositioned(el)) detach(el);
 
-  let order = normalizeZ();
+  const order = normalizeZ();
   const i = order.indexOf(el);
   if (i === -1) return;
   const last = order.length - 1;
@@ -919,12 +919,6 @@ let suppressNextClick = false;
 
 function round2(n: number) {
   return Math.round(n * 100) / 100;
-}
-
-/** Read the uniform scale from an inline `transform: scale(n)` (1 if none). */
-function currentScale(el: HTMLElement): number {
-  const m = /scale\(([-\d.]+)\)/.exec(el.style.transform);
-  return m ? parseFloat(m[1]) : 1;
 }
 
 function beginDrag(mode: 'move' | 'resize', el: HTMLElement, e: PointerEvent, corner?: Corner) {

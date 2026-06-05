@@ -16,10 +16,13 @@ import type { HistoryCtx } from '../fs/history.js';
 import { recordSnapshot, listSnapshots } from '../fs/history.js';
 import { registerBlobPath, getBlobToPathMap, resolveAssetsInHtml, revokeAssetCache } from '../fs/assetResolver.js';
 import { ulid } from '../lib/ulid.js';
+import { captureSlideThumbnails, slideSignature } from '../lib/slideSnapshot.js';
 
 const SLIDE_W = 1280;
 const SLIDE_H = 720;
 const DEFAULT_INSERT_WIDTH_RATIO = 0.36; // newly dropped images span ~36% of the slide width
+/** Base for relative asset URLs inside the canvas/thumbnail iframes. */
+const ASSETS_BASE_URL = '/v1/asset-base/';
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -65,6 +68,7 @@ export function EditorPage() {
   const viewMode = useDeckStore((s) => s.viewMode);
   const setViewMode = useDeckStore((s) => s.setViewMode);
   const updateSlideHtml = useDeckStore((s) => s.updateSlideHtml);
+  const setThumbnail = useDeckStore((s) => s.setThumbnail);
   const setRawHtml = useDeckStore((s) => s.setRawHtml);
   const markDirty = useDeckStore((s) => s.markDirty);
   const markSaving = useDeckStore((s) => s.markSaving);
@@ -76,20 +80,60 @@ export function EditorPage() {
   const canRedo = useDeckStore((s) => s.future.length > 0);
   const closeDirectory = useDeckStore((s) => s.closeDirectory);
 
-  const selection = useDeckStore((s) => s.selection);
-
   const [exportOpen, setExportOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [leaveHomePromptOpen, setLeaveHomePromptOpen] = useState(false);
   const [snapshotCount, setSnapshotCount] = useState(0);
   const [firstSavePromptOpen, setFirstSavePromptOpen] = useState(false);
   const [railOpen, setRailOpen] = useState(true);
-  const [inspectorOpen, setInspectorOpen] = useState(true);
+  // Inspector is a manual, persistent panel: it opens/closes only via its toggle,
+  // never automatically on selection (auto-pop-on-click was disorienting). Starts
+  // closed so the canvas is unobstructed until the user asks for it.
+  const [inspectorOpen, setInspectorOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   // Canvas interaction mode. 'edit' = safe content editing (select + double-click
   // text + property panel). 'drag' = freeform move/resize/delete. Strictly
   // exclusive so users don't accidentally move things while editing.
   const [interactionMode, setInteractionMode] = useState<'edit' | 'drag'>('edit');
+
+  // ── Sidebar thumbnails ───────────────────────────────────────────────────
+  // Rasterise slides into static <img> snapshots (see lib/slideSnapshot). This
+  // key changes only when a slide is added/removed/reordered/edited — NOT when a
+  // thumbnail lands — so writing a thumbnail back doesn't cancel the in-flight
+  // capture pass.
+  const thumbSigRef = useRef<Map<string, string>>(new Map());
+  const slideStructureKey = useMemo(
+    () => slides.map((s) => `${s.id}:${slideSignature(s.html)}`).join('|'),
+    [slides],
+  );
+  useEffect(() => {
+    if (!slides.length) return;
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      const tasks = useDeckStore
+        .getState()
+        .slides.filter((s) => !s.thumbnail || thumbSigRef.current.get(s.id) !== slideSignature(s.html))
+        .map((s) => ({ id: s.id, html: s.html }));
+      if (!tasks.length || cancelled) return;
+      void captureSlideThumbnails(
+        tasks,
+        headHtml,
+        ASSETS_BASE_URL,
+        (id, dataUrl) => {
+          const slide = useDeckStore.getState().slides.find((s) => s.id === id);
+          if (slide) thumbSigRef.current.set(id, slideSignature(slide.html));
+          setThumbnail(id, dataUrl);
+        },
+        () => cancelled,
+      );
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // slideStructureKey intentionally drives this instead of `slides`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideStructureKey, headHtml, setThumbnail]);
 
   // Stable history context for the drawer / snapshot calls.
   const historyCtx = useMemo<HistoryCtx>(
@@ -121,7 +165,7 @@ export function EditorPage() {
   // Fit the 16:9 slide within the measured area by the tighter dimension.
   const fitWidth = Math.max(0, Math.min(containerSize.w, Math.round((containerSize.h * 1280) / 720)));
 
-  const showInspector = viewMode === 'visual' && !!selection && inspectorOpen;
+  const showInspector = viewMode === 'visual' && inspectorOpen;
 
   // Replacing slide HTML reloads the srcdoc iframe, which clears the in-iframe
   // selection overlay/handles. Track the live selector and restore it once the
@@ -478,7 +522,7 @@ export function EditorPage() {
     );
   }
 
-  const assetsBaseUrl = '/v1/asset-base/';
+  const assetsBaseUrl = ASSETS_BASE_URL;
 
   return (
     <div className="relative h-full hds-stage overflow-hidden">
@@ -606,14 +650,16 @@ export function EditorPage() {
         <span className="w-px h-4 bg-white/15 shrink-0" />
         <button
           onClick={() => setInspectorOpen((v) => !v)}
-          className={`hds-bar-icon ${inspectorOpen ? 'is-active' : ''}`}
+          className={`hds-bar-toggle ${inspectorOpen ? 'is-active' : ''}`}
+          aria-pressed={inspectorOpen}
           aria-label={inspectorOpen ? t('page.collapseInspector') : t('page.expandInspector')}
-          title={selection ? (inspectorOpen ? t('page.collapseInspector') : t('page.expandInspector')) : t('page.inspectorDisabled')}
+          title={inspectorOpen ? t('page.collapseInspector') : t('page.expandInspector')}
         >
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <rect x="2.5" y="3.5" width="15" height="13" rx="2.5" />
             <path d="M12.5 3.5v13" />
           </svg>
+          <span className="hds-bar-toggle-label">{t('page.inspectorLabel')}</span>
         </button>
         <button
           onClick={() => setHistoryOpen(true)}
@@ -721,6 +767,7 @@ export function EditorPage() {
         open={leaveHomePromptOpen}
         title={t('leaveHome.title')}
         confirmLabel={t('leaveHome.confirm')}
+        tone="danger"
         onConfirm={doLeaveHome}
         onCancel={() => setLeaveHomePromptOpen(false)}
         message={

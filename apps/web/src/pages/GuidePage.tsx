@@ -150,7 +150,10 @@ export function GuidePage() {
 
           <section id="guide-generate" className="hds-guide-story reveal-section scroll-mt-24">
             <div className="hds-guide-illus">
-              <img src="/guide-step-generate.png" alt="" loading="lazy" />
+              <picture>
+                <source srcSet="/guide-step-generate.webp" type="image/webp" />
+                <img src="/guide-step-generate.png" alt="" loading="lazy" />
+              </picture>
             </div>
             <div className="hds-guide-story-body">
               <span className="hds-guide-step-tag">{t('generate.title')}</span>
@@ -207,7 +210,10 @@ export function GuidePage() {
           <section id="guide-edit" className="hds-guide-story is-reverse reveal-section scroll-mt-24">
             <div className="hds-guide-illus-col">
               <div className="hds-guide-illus">
-                <img src="/guide-step-edit.png" alt="" loading="lazy" />
+                <picture>
+                  <source srcSet="/guide-step-edit.webp" type="image/webp" />
+                  <img src="/guide-step-edit.png" alt="" loading="lazy" />
+                </picture>
               </div>
               {/* Looping micro-demo: a cursor clicking a text line that lights up. */}
               <div className="hds-mini-demo" aria-hidden="true">
@@ -249,7 +255,10 @@ export function GuidePage() {
 
           <section id="guide-export" className="hds-guide-story reveal-section scroll-mt-24">
             <div className="hds-guide-illus">
-              <img src="/guide-step-export.png" alt="" loading="lazy" />
+              <picture>
+                <source srcSet="/guide-step-export.webp" type="image/webp" />
+                <img src="/guide-step-export.png" alt="" loading="lazy" />
+              </picture>
             </div>
             <div className="hds-guide-story-body">
               <span className="hds-guide-step-tag">{t('export.title')}</span>

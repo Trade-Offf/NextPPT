@@ -6,7 +6,7 @@ export default {
     expandRail: '展开页面列表',
     collapseInspector: '收起检查器',
     expandInspector: '展开检查器',
-    inspectorDisabled: '检查器（选中元素后可用）',
+    inspectorLabel: '属性',
     undo: '撤销',
     undoTitle: '撤销 (⌘Z)',
     redo: '重做',

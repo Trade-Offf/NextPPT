@@ -5,51 +5,34 @@ import { cn } from '../lib/cn.js';
 
 const SIDEBAR_W = 200; // px – sidebar total width
 
-/** A scaled-down live iframe preview of one slide.
- *  Fluid: fills its card width and scales the 1280x720 frame via container query
- *  units, so it never overflows regardless of card padding/sidebar width. */
-function SlideThumbnail({ sectionHtml, headHtml }: { sectionHtml: string; headHtml: string }) {
-  const srcdoc = `<!doctype html><html><head>
-<meta charset="UTF-8">
-${headHtml}
-<style>
-  html,body{width:1280px;height:720px;overflow:hidden;margin:0;padding:0;display:block;}
-  section[class~="slide"]{width:1280px!important;min-height:720px!important;max-height:720px!important;}
-</style>
-</head><body>${sectionHtml}</body></html>`;
-
+/** Static <img> preview of one slide, rasterised by lib/slideSnapshot.
+ *  Using a snapshot instead of a live iframe means the sidebar holds zero
+ *  injectable frames, so browser extensions can't flood the console with
+ *  "Blocked script execution" / "MaxListenersExceededWarning", and there's no
+ *  per-slide JS context. While the snapshot is being generated we show a light
+ *  placeholder. */
+function SlideThumbnail({ thumbnail, alt }: { thumbnail: string | null; alt: string }) {
   return (
     <div
       style={{
         width: '100%',
         aspectRatio: '1280 / 720',
-        containerType: 'inline-size',
         overflow: 'hidden',
         position: 'relative',
         borderRadius: 6,
         background: '#1a1a1a',
       }}
     >
-      <div
-        style={{
-          width: 1280,
-          height: 720,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          transform: 'scale(calc(100cqw / 1280px))',
-          transformOrigin: 'top left',
-          pointerEvents: 'none',
-        }}
-      >
-        <iframe
-          srcDoc={srcdoc}
-          sandbox="allow-same-origin allow-scripts"
-          style={{ width: 1280, height: 720, border: 'none', display: 'block' }}
-          title="thumb"
+      {thumbnail ? (
+        <img
+          src={thumbnail}
+          alt={alt}
           loading="lazy"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
-      </div>
+      ) : (
+        <div className="hds-thumb-skeleton" aria-hidden="true" />
+      )}
     </div>
   );
 }
@@ -57,7 +40,6 @@ ${headHtml}
 export function SlideListPane({ floating = false }: { floating?: boolean } = {}) {
   const { t } = useTranslation('editor');
   const slides = useDeckStore((s) => s.slides);
-  const headHtml = useDeckStore((s) => s.headHtml);
   const currentId = useDeckStore((s) => s.currentSlideId);
   const setCurrentSlide = useDeckStore((s) => s.setCurrentSlide);
   const duplicateSlide = useDeckStore((s) => s.duplicateSlide);
@@ -101,7 +83,7 @@ export function SlideListPane({ floating = false }: { floating?: boolean } = {})
             className="block w-full text-left cursor-pointer"
             title={t('slideList.page', { n: idx + 1 })}
           >
-            <SlideThumbnail sectionHtml={slide.html} headHtml={headHtml} />
+            <SlideThumbnail thumbnail={slide.thumbnail} alt={t('slideList.page', { n: idx + 1 })} />
           </button>
 
           {/* Page number */}

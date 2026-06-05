@@ -8,7 +8,7 @@ const editor: typeof zh = {
     expandRail: 'Expand page list',
     collapseInspector: 'Collapse inspector',
     expandInspector: 'Expand inspector',
-    inspectorDisabled: 'Inspector (available after selecting an element)',
+    inspectorLabel: 'Inspector',
     undo: 'Undo',
     undoTitle: 'Undo (⌘Z)',
     redo: 'Redo',

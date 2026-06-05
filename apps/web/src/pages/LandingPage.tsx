@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useOpenDeck, DIR_API_SUPPORTED, FILE_API_SUPPORTED, FS_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
@@ -26,6 +26,17 @@ export function LandingPage() {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const pains = t('value.pains', { returnObjects: true }) as string[];
+
+  // SSG prerenders with no `window`, so FS_API_SUPPORTED is false on the server
+  // but true in Chromium. Rendering the real value on the first client paint
+  // diverges from the prerendered HTML and trips React #418/#419. Render the
+  // optimistic "supported" branch until mounted (matches the prerender + the
+  // vast majority of users), then correct for the rare unsupported browser.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const fsSupported = !mounted || FS_API_SUPPORTED;
+  const dirSupported = !mounted || DIR_API_SUPPORTED;
+  const fileSupported = !mounted || FILE_API_SUPPORTED;
 
   /** Main CTA / drop zone: open HTML file picker (folder via button below or drag). */
   const openPrimary = () => {
@@ -90,7 +101,7 @@ export function LandingPage() {
             />
           )}
           <div className={`hero-cta flex flex-wrap items-center justify-center gap-3 ${error ? 'mt-6' : 'mt-9'}`}>
-            {FS_API_SUPPORTED ? (
+            {fsSupported ? (
               <button onClick={openPrimary} disabled={loading} className="hds-btn-primary px-6 py-3 text-sm disabled:opacity-50">
                 {loading ? t('hero.loading') : t('hero.ctaOpen')}
               </button>
@@ -139,7 +150,7 @@ export function LandingPage() {
 
           <div className="reveal-start w-full max-w-md lg:justify-self-end">
             <div className="hds-glass-card p-7 sm:p-8">
-            {!FS_API_SUPPORTED ? (
+            {!fsSupported ? (
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 text-sm text-[var(--secondary-label)] leading-relaxed">
                 <p className="font-medium text-[var(--label)] mb-1">{t('hub.unsupportedTitle')}</p>
                 <p>
@@ -173,15 +184,15 @@ export function LandingPage() {
                 </div>
 
                 <div className="mt-4 flex items-center justify-center gap-2.5">
-                  {DIR_API_SUPPORTED && (
+                  {dirSupported && (
                     <button onClick={handlePickFolder} disabled={loading} className="hds-btn-primary px-4 py-2 text-xs disabled:opacity-40">{t('hub.openFolder')}</button>
                   )}
-                  {FILE_API_SUPPORTED && (
+                  {fileSupported && (
                     <button onClick={handlePickFile} disabled={loading} className="hds-btn px-4 py-2 text-xs disabled:opacity-40">{t('hub.openSingle')}</button>
                   )}
                 </div>
 
-                {DIR_API_SUPPORTED && (
+                {dirSupported && (
                   <button onClick={handleRecall} disabled={loading} className="mt-3 text-xs text-[var(--system-blue)] hover:underline self-center disabled:opacity-40 block mx-auto">
                     {t('hub.recall')}
                   </button>

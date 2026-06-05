@@ -3,7 +3,6 @@ import { Navigate } from 'react-router-dom';
 import type { RouteRecord } from 'vite-react-ssg';
 import { LocaleLayout } from './components/LocaleLayout.js';
 import { LandingPage } from './pages/LandingPage.js';
-import { GuidePage } from './pages/GuidePage.js';
 import { useDeckStore } from './store/deckStore.js';
 import type { Locale } from './i18n/index.js';
 
@@ -11,6 +10,12 @@ import type { Locale } from './i18n/index.js';
 // store starts empty, so HomeRoute always renders the landing page server-side.
 const EditorPage = lazy(() =>
   import('./pages/EditorPage.js').then((m) => ({ default: m.EditorPage })),
+);
+
+// Lazy too: the guide is a separate route, so keep it out of the landing page's
+// first-load bundle. Still prerendered (vite-react-ssg resolves it via Suspense).
+const GuidePage = lazy(() =>
+  import('./pages/GuidePage.js').then((m) => ({ default: m.GuidePage })),
 );
 
 function HomeRoute() {
@@ -26,7 +31,7 @@ function HomeRoute() {
 function localeChildren(prefix: string) {
   return [
     { index: true, element: <HomeRoute /> },
-    { path: 'guide', element: <GuidePage /> },
+    { path: 'guide', element: <Suspense fallback={null}><GuidePage /></Suspense> },
     // Unknown subpaths fall back to this locale's home instead of a blank shell.
     { path: '*', element: <Navigate to={prefix || '/'} replace /> },
   ];

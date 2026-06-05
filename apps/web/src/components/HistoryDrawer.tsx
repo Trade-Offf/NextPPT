@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { HistoryCtx, SnapshotMeta } from '../fs/history.js';
 import { listSnapshots, readSnapshot, deleteSnapshot } from '../fs/history.js';
+import { sanitizePreviewDoc } from '../lib/previewSanitize.js';
 
 interface HistoryDrawerProps {
   open: boolean;
@@ -36,6 +37,13 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string>('');
   const [busy, setBusy] = useState(false);
+
+  // Strip scripts so the script-disabled preview iframe doesn't log a
+  // "Blocked script execution" error for every inline script / handler.
+  const previewSrcDoc = useMemo(
+    () => (previewHtml ? sanitizePreviewDoc(previewHtml) : ''),
+    [previewHtml],
+  );
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -120,7 +128,7 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
             {previewHtml ? (
               <iframe
                 title={t('historyDrawer.previewAlt')}
-                srcDoc={previewHtml}
+                srcDoc={previewSrcDoc}
                 sandbox=""
                 className="origin-top-left border-0 pointer-events-none"
                 style={{ width: 1280, height: 720, transform: 'scale(0.265)' }}

@@ -47,13 +47,13 @@ pnpm dev
 
 In a Chromium browser (Chrome / Edge / Brave / Arc):
 
-1. **Open** — pick a folder with your `deck.html` and assets, drag in a single `.html`, or try the built-in sample on the home page.
-2. **Edit** — **Edit** mode: click text, tweak fonts/colors in the panel, double-click to type inline. **Move** mode: drag, resize, stack layers like PowerPoint — no code.
+1. **Open** — pick a folder with your `deck.html` and assets, drag in a single `.html`, or try the built-in sample on the home page. Open a file that isn't a valid deck and you get a clear inline hint that links straight to the guide's prompt — no silent failure.
+2. **Edit** — **Edit** mode: click text, tweak fonts/colors in the panel, double-click to type inline. **Move** mode: drag, resize, and reorder layers (bring to front / send to back, forward / backward one step) like PowerPoint — no code. Entering Move mode auto-detects draggable elements, so anything is movable on the first try.
 3. **Export** — PPTX or PDF, up to 5120×2880, page ranges supported. Done.
 
 Edits auto-save to disk (debounced) with timestamped snapshots in `.hds-backup/`.
 
-New here? Open **Guide** from the nav bar — copy a prompt, let AI generate a deck, then come back and open it.
+New here? Open the **Guide** from the nav bar — a three-step generate / edit / export walkthrough with a copy-ready prompt, switchable between English and Chinese.
 
 ## How it works
 
@@ -75,10 +75,11 @@ flowchart LR
 ## Features
 
 - **Point-and-edit.** Any `<section class="slide">` deck works. Property panel for font, weight, color, align, decoration, links, images.
-- **Edit / Move modes.** Edit = text only, calm. Move = freeform drag, resize, layer order (bring forward, send back) — like native PPT.
+- **Edit / Move modes.** Edit = text only, calm. Move = freeform drag, resize, and full layer ordering (to front / to back, forward / backward one step) — like native PPT. Move mode auto-extracts draggable elements, so you never have to "wake up" a layer first.
 - **Mermaid, live.** Raw Mermaid source renders in the editor and stays crisp in export.
 - **High-fidelity export.** Image-based PPTX / PDF that matches your HTML. Up to 5120×2880; single page or ranges.
-- **Bilingual UI.** Chinese / English across the site, guide, and editor.
+- **Guided onboarding.** A built-in guide page walks generate → edit → export with a copy-ready AI prompt; opening a malformed file surfaces an inline hint that points you there instead of failing silently.
+- **Bilingual UI.** Chinese / English across the site, guide, and editor, switchable anywhere.
 - **Two ways in.** Folder mode (sibling images + backups) or single self-contained HTML (base64 images).
 - **Local-first.** Files stay on disk; the server only touches content for the seconds it takes to export.
 
