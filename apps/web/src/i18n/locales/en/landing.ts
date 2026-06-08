@@ -65,6 +65,9 @@ const landing: typeof zh = {
     colAbout: 'About',
     localFirst: 'Local-first',
     noLogin: 'No login',
+    github: 'GitHub',
+    juejin: 'Juejin',
+    email: 'Email',
     copy: '© {{year}} NextPPT',
   },
 };

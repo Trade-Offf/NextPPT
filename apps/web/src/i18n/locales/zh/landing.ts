@@ -63,6 +63,9 @@ export default {
     colAbout: '关于',
     localFirst: '本地优先',
     noLogin: '无需登录',
+    github: 'GitHub',
+    juejin: '掘金',
+    email: '邮箱',
     copy: '© {{year}} NextPPT',
   },
 };
