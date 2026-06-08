@@ -76,7 +76,14 @@ async function settle(iframe: HTMLIFrameElement): Promise<void> {
   const win = iframe.contentWindow;
   if (!doc || !win) return;
   try {
-    await (doc as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready;
+    // Bounded wait: web fonts (esp. multi-MB CJK families) can take seconds to
+    // download. Thumbnails are captured with skipFonts and render in the system
+    // fallback anyway, so never block the whole pass on font readiness.
+    const fontsReady = (doc as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready;
+    await Promise.race([
+      fontsReady ?? Promise.resolve(),
+      new Promise<void>((res) => setTimeout(res, 500)),
+    ]);
   } catch {
     /* fonts API may be unavailable */
   }
@@ -145,6 +152,11 @@ export async function captureSlideThumbnails(
           canvasHeight: THUMB_H,
           backgroundColor: '#ffffff',
           cacheBust: false,
+          // Don't fetch + base64-inline @font-face files (CJK families are
+          // multi-MB and would be re-embedded per slide). At ~400px the system
+          // fallback is indistinguishable and the pass becomes an order of
+          // magnitude faster.
+          skipFonts: true,
         });
         if (!isCancelled() && dataUrl.startsWith('data:image')) onThumb(task.id, dataUrl);
       } catch {

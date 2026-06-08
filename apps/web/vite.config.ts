@@ -52,6 +52,6 @@ export default defineConfig({
   // `nested` → dist/guide/index.html, dist/en/index.html, dist/en/guide/index.html.
   ssgOptions: {
     dirStyle: 'nested',
-    includedRoutes: () => ['/', '/guide', '/en', '/en/guide'],
+    includedRoutes: () => ['/', '/guide', '/templates', '/en', '/en/guide', '/en/templates'],
   },
 });

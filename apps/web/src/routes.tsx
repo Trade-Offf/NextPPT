@@ -18,6 +18,10 @@ const GuidePage = lazy(() =>
   import('./pages/GuidePage.js').then((m) => ({ default: m.GuidePage })),
 );
 
+const TemplatesPage = lazy(() =>
+  import('./pages/TemplatesPage.js').then((m) => ({ default: m.TemplatesPage })),
+);
+
 function HomeRoute() {
   const hasDeck = useDeckStore((s) => s.slides.length > 0);
   if (!hasDeck) return <LandingPage />;
@@ -32,6 +36,7 @@ function localeChildren(prefix: string) {
   return [
     { index: true, element: <HomeRoute /> },
     { path: 'guide', element: <Suspense fallback={null}><GuidePage /></Suspense> },
+    { path: 'templates', element: <Suspense fallback={null}><TemplatesPage /></Suspense> },
     // Unknown subpaths fall back to this locale's home instead of a blank shell.
     { path: '*', element: <Navigate to={prefix || '/'} replace /> },
   ];

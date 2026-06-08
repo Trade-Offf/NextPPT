@@ -4,6 +4,7 @@ import type { ExportOptions } from '../lib/protocol.js';
 import { screenshotSlides } from '../services/screenshotter.js';
 import { buildPptx } from '../services/pptxBuilder.js';
 import { buildPdf } from '../services/pdfBuilder.js';
+import { renderDocument } from '../services/documentRenderer.js';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -57,6 +58,7 @@ export async function exportHandler(req: FastifyRequest, reply: FastifyReply) {
     watermark: (fields['watermark'] ?? 'off') as ExportOptions['watermark'],
     pageRange: fields['pageRange'] ?? 'all',
     meta: JSON.parse(fields['meta'] ?? '{}') as ExportOptions['meta'],
+    mode: (fields['mode'] ?? 'deck') as ExportOptions['mode'],
   };
 
   // Slides are authored at a fixed 1280x720 canvas, so output resolution is
@@ -113,25 +115,45 @@ export async function exportHandler(req: FastifyRequest, reply: FastifyReply) {
 
     const deckHtmlPath = path.join(tmpDir, htmlFiles[0]!.filename);
 
-    const screenshots = await screenshotSlides(deckHtmlPath, {
-      viewportWidth,
-      viewportHeight,
-      deviceScaleFactor,
-      pageRange: opts.pageRange,
-      onProgress: (current, total) => sse('progress', { current, total, phase: 'screenshot' }),
-    });
-
-    sse('progress', { current: screenshots.length, total: screenshots.length, phase: 'assemble' });
-
-    const title = opts.meta.title ?? 'deck';
-    const ordinals = screenshots.map((s) => s.ordinal);
-    const fileName = exportFilename(title, opts.format, ordinals, screenshots.length);
-
     let outPath: string;
-    if (opts.format === 'pptx') {
-      outPath = await buildPptx(screenshots, { title, viewportWidth, viewportHeight, tmpDir });
+    let fileName: string;
+
+    if (opts.mode === 'doc') {
+      // Free-edit: render the whole document with smart pagination.
+      sse('progress', { current: 0, total: 1, phase: 'render' });
+      const docFormat = opts.format === 'png' ? 'png' : 'pdf';
+      const result = await renderDocument(deckHtmlPath, {
+        format: docFormat,
+        viewportWidth,
+        deviceScaleFactor,
+        tmpDir,
+        onProgress: (current, total) => sse('progress', { current, total, phase: 'render' }),
+      });
+      sse('progress', { current: 1, total: 1, phase: 'assemble' });
+      const title = opts.meta.title ?? 'document';
+      const safe = title.replace(/[^\w\u4e00-\u9fa5\- ]/g, '').trim() || 'document';
+      outPath = result.filePath;
+      fileName = `${safe}.${result.ext}`;
     } else {
-      outPath = await buildPdf(screenshots, { title, tmpDir });
+      const screenshots = await screenshotSlides(deckHtmlPath, {
+        viewportWidth,
+        viewportHeight,
+        deviceScaleFactor,
+        pageRange: opts.pageRange,
+        onProgress: (current, total) => sse('progress', { current, total, phase: 'screenshot' }),
+      });
+
+      sse('progress', { current: screenshots.length, total: screenshots.length, phase: 'assemble' });
+
+      const title = opts.meta.title ?? 'deck';
+      const ordinals = screenshots.map((s) => s.ordinal);
+      fileName = exportFilename(title, opts.format, ordinals, screenshots.length);
+
+      if (opts.format === 'pptx') {
+        outPath = await buildPptx(screenshots, { title, viewportWidth, viewportHeight, tmpDir });
+      } else {
+        outPath = await buildPdf(screenshots, { title, tmpDir });
+      }
     }
 
     // Copy output to persistent download dir BEFORE cleaning up tmpDir
@@ -163,16 +185,16 @@ export async function downloadHandler(
     return reply.code(404).send({ error: 'Download link expired or not found' });
   }
   const buffer = await fs.readFile(entry.filePath);
-  const isPptx = entry.fileName.endsWith('.pptx');
+  const name = entry.fileName.toLowerCase();
+  const contentType = name.endsWith('.pptx')
+    ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    : name.endsWith('.png')
+      ? 'image/png'
+      : 'application/pdf';
   reply.header(
     'Content-Disposition',
     `attachment; filename*=UTF-8''${encodeURIComponent(entry.fileName)}`,
   );
-  reply.header(
-    'Content-Type',
-    isPptx
-      ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-      : 'application/pdf',
-  );
+  reply.header('Content-Type', contentType);
   return reply.send(buffer);
 }

@@ -104,6 +104,8 @@ export default {
     progress: '截图进度',
     exporting: '导出中…',
     start: '开始导出 {{format}}',
+    docPdfHint: '按文档打印规则智能分页，输出可选可搜索的矢量 PDF。',
+    docPngHint: '整页截图为单张长图 PNG。',
   },
   historyDrawer: {
     title: '历史版本',
@@ -146,6 +148,7 @@ export default {
       '文件夹里没有可识别的幻灯片 HTML。需要包含至少一个 <section class="slide"> 页面。',
     noSlides:
       '该 HTML 里没有 <section class="slide"> 幻灯片页，无法作为演示稿打开。',
+    noHtml: '文件夹里没有找到任何 HTML 文件。',
     sampleFailed: '示例模板加载失败，请稍后重试',
     dropHtmlOnly: '请拖入 HTML 文件或包含 HTML 的文件夹。',
   },

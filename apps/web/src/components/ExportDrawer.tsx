@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ExportFormat, ExportResolution, ExportPageRange } from '@hds/protocol';
 import { useDeckStore } from '../store/deckStore.js';
-import { rebuildDeckHtmlForExport } from '../fs/adapter.js';
+import { rebuildDeckHtmlForExport, rebuildDocHtmlForExport } from '../fs/adapter.js';
 import { getBlobToPathMap } from '../fs/assetResolver.js';
 
 /**
@@ -45,8 +45,10 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
   const slides = useDeckStore((s) => s.slides);
   const rawHtml = useDeckStore((s) => s.rawHtml);
   const dirHandle = useDeckStore((s) => s.dirHandle);
+  const kind = useDeckStore((s) => s.kind);
+  const docMode = kind === 'doc';
 
-  const [format, setFormat] = useState<ExportFormat>('pptx');
+  const [format, setFormat] = useState<ExportFormat>(docMode ? 'pdf' : 'pptx');
   const [resolution, setResolution] = useState<ExportResolution>('1280x720@2x');
   const [pageRange, setPageRange] = useState<ExportPageRange>('all');
   const [exporting, setExporting] = useState(false);
@@ -66,13 +68,16 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
       formData.append('resolution', resolution);
       formData.append('watermark', 'off'); // TODO: tie to plan
       formData.append('pageRange', pageRange);
+      formData.append('mode', docMode ? 'doc' : 'deck');
       formData.append(
         'meta',
         JSON.stringify({ title: meta?.title ?? 'deck', author: meta?.author ?? '' }),
       );
 
-      // Rebuild HTML from edited slides; restore blob: → relative paths for Puppeteer
-      const exportHtml = rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
+      // Rebuild HTML from edits; restore blob: → relative paths for Puppeteer.
+      const exportHtml = docMode
+        ? rebuildDocHtmlForExport(rawHtml, slides, getBlobToPathMap())
+        : rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
       const deckBlob = new Blob([exportHtml], { type: 'text/html' });
       formData.append('files', deckBlob, 'deck.html');
 
@@ -168,7 +173,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-[var(--secondary-label)]">{t('exportDrawer.format')}</span>
             <div className="hds-segmented w-full">
-              {(['pptx', 'pdf'] as const).map((f) => (
+              {(docMode ? (['pdf', 'png'] as const) : (['pptx', 'pdf'] as const)).map((f) => (
                 <button
                   key={f}
                   onClick={() => setFormat(f)}
@@ -178,9 +183,15 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
                 </button>
               ))}
             </div>
+            {docMode && (
+              <span className="text-[11px] text-[var(--tertiary-label)] mt-1">
+                {format === 'pdf' ? t('exportDrawer.docPdfHint') : t('exportDrawer.docPngHint')}
+              </span>
+            )}
           </label>
 
-          {/* Resolution */}
+          {/* Resolution (vector PDF in doc mode ignores it, so it's hidden there) */}
+          {(!docMode || format === 'png') && (
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-[var(--slate)]">{t('exportDrawer.resolution')}</span>
             <select
@@ -193,8 +204,10 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
               <option value="3840x2160@2x">{t('exportDrawer.resUhd')}</option>
             </select>
           </label>
+          )}
 
-          {/* Page range */}
+          {/* Page range — deck only (a doc is one smart-paginated document) */}
+          {!docMode && (
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-[var(--slate)]">{t('exportDrawer.pageRange')}</span>
             <div className="flex flex-col gap-2">
@@ -234,6 +247,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
               )}
             </div>
           </label>
+          )}
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-600">{error}</div>

@@ -5,7 +5,7 @@ import { useDeckStore } from '../store/deckStore.js';
 import { useOpenDeck, FILE_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
 import { useGuideNav } from '../hooks/useGuideNav.js';
-import { LanguageSwitcher } from '../components/LanguageSwitcher.js';
+import { SiteHeader } from '../components/SiteHeader.js';
 import { OpenDeckErrorAlert } from '../components/OpenDeckErrorAlert.js';
 import type { GuideTab } from '../data/guide.js';
 
@@ -105,28 +105,15 @@ export function GuidePage() {
 
   return (
     <div ref={scrollRef} className="hds-guide-page hds-cinema fixed inset-0 z-[60] overflow-y-auto">
-      {/* Sticky header */}
-      <header className="hds-guide-header sticky top-0 z-10">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-8">
-          <div className="h-14 flex items-center gap-2.5">
-            <button onClick={closeGuide} className="hds-btn px-2 py-1.5 text-sm flex items-center" title={t('header.back')} aria-label={t('header.back')}>
-              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M11.5 5L6.5 10l5 5" /></svg>
-            </button>
-            <button onClick={closeGuide} className="flex items-center gap-2 group transition-opacity hover:opacity-80" title={t('header.backHome')}>
-              <img src="/brand-n.png" alt="" className="hds-emblem w-6 h-6" />
-              <span className="text-sm font-bold tracking-tight text-[var(--label)]">NextPPT</span>
-            </button>
-            <span className="hidden sm:inline text-[var(--tertiary-label)]">·</span>
-            <h1 className="hidden sm:block text-sm font-medium text-[var(--secondary-label)]">{t('header.title')}</h1>
-            <div className="ml-auto flex items-center gap-3 sm:gap-4">
-              <LanguageSwitcher />
-              {hasDeck && (
-                <button onClick={closeGuide} className="hds-btn-primary px-3.5 py-1.5 text-xs">{t('header.backToEdit')}</button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Sticky header — shared SiteHeader (guide variant) */}
+      <SiteHeader
+        alwaysScrolled
+        trailing={
+          hasDeck ? (
+            <button onClick={closeGuide} className="hds-btn-primary px-3.5 py-1.5 text-xs">{t('header.backToEdit')}</button>
+          ) : null
+        }
+      />
 
       <div className="max-w-[1200px] mx-auto px-6 sm:px-8 pb-20">
         {/* ── 3-step rhythm strip ─────────────────────────────── */}

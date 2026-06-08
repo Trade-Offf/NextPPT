@@ -11,7 +11,7 @@ import { ExportDrawer } from '../components/ExportDrawer.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
 import { HistoryDrawer } from '../components/HistoryDrawer.js';
 import type { PatchOp, RuntimeMessage } from '@hds/protocol';
-import { writeDeck, rebuildDeckHtmlForExport, writeAsset, saveAsNewFile, writeFileHandle, parseDeck } from '../fs/adapter.js';
+import { writeDeck, rebuildDeckHtmlForExport, rebuildDocHtmlForExport, writeAsset, saveAsNewFile, writeFileHandle, parseDeck, parseDoc } from '../fs/adapter.js';
 import type { HistoryCtx } from '../fs/history.js';
 import { recordSnapshot, listSnapshots } from '../fs/history.js';
 import { registerBlobPath, getBlobToPathMap, resolveAssetsInHtml, revokeAssetCache } from '../fs/assetResolver.js';
@@ -57,6 +57,8 @@ export function EditorPage() {
   const dirHandle = useDeckStore((s) => s.dirHandle);
   const fileHandle = useDeckStore((s) => s.fileHandle);
   const mode = useDeckStore((s) => s.mode);
+  const kind = useDeckStore((s) => s.kind);
+  const docMode = kind === 'doc';
   const setWorkingFileHandle = useDeckStore((s) => s.setWorkingFileHandle);
   const deckFileName = useDeckStore((s) => s.deckFileName);
   const rawHtml = useDeckStore((s) => s.rawHtml);
@@ -107,6 +109,7 @@ export function EditorPage() {
     [slides],
   );
   useEffect(() => {
+    if (docMode) return; // doc mode has a single page and no thumbnail rail
     if (!slides.length) return;
     let cancelled = false;
     const timer = setTimeout(() => {
@@ -270,7 +273,9 @@ export function EditorPage() {
     markSaving();
     // Restore blob: URLs (inserted/replaced images) back to on-disk relative
     // paths so the saved file reloads correctly in a later session.
-    const rebuilt = rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
+    const rebuilt = docMode
+      ? rebuildDocHtmlForExport(rawHtml, slides, getBlobToPathMap())
+      : rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
     setRawHtml(rebuilt);
     try {
       if (dirHandle) {
@@ -284,14 +289,16 @@ export function EditorPage() {
       if ((err as Error).name !== 'AbortError') console.error('save failed', err);
       markDirty();
     }
-  }, [dirHandle, fileHandle, deckFileName, rawHtml, slides, sourceFileName, markSaving, setRawHtml, markSaved, markDirty]);
+  }, [docMode, dirHandle, fileHandle, deckFileName, rawHtml, slides, sourceFileName, markSaving, setRawHtml, markSaved, markDirty]);
 
   // Single-file first save: confirmed from the explanation dialog. The button
   // click is a fresh user gesture, satisfying showSaveFilePicker's requirement.
   const confirmFirstSave = useCallback(async () => {
     setFirstSavePromptOpen(false);
     markSaving();
-    const rebuilt = rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
+    const rebuilt = docMode
+      ? rebuildDocHtmlForExport(rawHtml, slides, getBlobToPathMap())
+      : rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
     setRawHtml(rebuilt);
     try {
       const fh = await saveAsNewFile(deckFileName, rebuilt);
@@ -302,18 +309,22 @@ export function EditorPage() {
       if ((err as Error).name !== 'AbortError') console.error('save failed', err);
       markDirty();
     }
-  }, [deckFileName, rawHtml, slides, sourceFileName, setWorkingFileHandle, markSaving, setRawHtml, markSaved, markDirty]);
+  }, [docMode, deckFileName, rawHtml, slides, sourceFileName, setWorkingFileHandle, markSaving, setRawHtml, markSaved, markDirty]);
 
   // Restore a snapshot: record current content first (so restore is reversible),
   // then parse + resolve assets and apply. The resulting dirty state auto-saves.
   const handleRestore = useCallback(async (snapshotHtml: string) => {
     try {
-      const current = rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
+      const current = docMode
+        ? rebuildDocHtmlForExport(rawHtml, slides, getBlobToPathMap())
+        : rebuildDeckHtmlForExport(rawHtml, slides, getBlobToPathMap());
       await recordSnapshot(historyCtx, current);
     } catch (err) {
       console.error('snapshot-before-restore failed', err);
     }
-    const { meta, headHtml: rawHead, slides: rawSlides } = parseDeck(snapshotHtml);
+    const { meta, headHtml: rawHead, slides: rawSlides } = docMode
+      ? parseDoc(snapshotHtml)
+      : parseDeck(snapshotHtml);
     let resolvedSlides = rawSlides;
     let resolvedHead = rawHead;
     if (dirHandle) {
@@ -323,7 +334,7 @@ export function EditorPage() {
       resolvedHead = await resolveAssetsInHtml(rawHead, dirHandle);
     }
     applyRestoredDeck(snapshotHtml, resolvedHead, meta, resolvedSlides);
-  }, [rawHtml, slides, dirHandle, historyCtx, applyRestoredDeck]);
+  }, [docMode, rawHtml, slides, dirHandle, historyCtx, applyRestoredDeck]);
 
   // Return to the landing page. Confirm first if there are unsaved changes;
   // closeDirectory() clears slides so HomeRoute falls back to LandingPage.
@@ -479,7 +490,7 @@ export function EditorPage() {
   // would otherwise swallow drag events over the slide). Counter handles nested
   // dragenter/leave firing across child elements.
   useEffect(() => {
-    if (viewMode !== 'visual') return;
+    if (viewMode !== 'visual' || docMode) return;
     let depth = 0;
     const hasFiles = (e: DragEvent) =>
       Array.from(e.dataTransfer?.items ?? []).some((i) => i.kind === 'file');
@@ -512,7 +523,7 @@ export function EditorPage() {
       window.removeEventListener('dragover', onOver);
       window.removeEventListener('drop', onDrop);
     };
-  }, [viewMode]);
+  }, [viewMode, docMode]);
 
   if (!currentSlide) {
     return (
@@ -536,18 +547,22 @@ export function EditorPage() {
         >
           <img src="/icon-192.png" alt="NextPPT" className="w-full h-full" />
         </button>
-        <span className="w-px h-4 bg-white/15 shrink-0" />
-        <button
-          onClick={() => setRailOpen((v) => !v)}
-          className={`hds-bar-icon ${railOpen ? 'is-active' : ''}`}
-          aria-label={railOpen ? t('page.collapseRail') : t('page.expandRail')}
-          title={railOpen ? t('page.collapseRail') : t('page.expandRail')}
-        >
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
-            <rect x="2.5" y="3.5" width="15" height="13" rx="2.5" />
-            <path d="M7.5 3.5v13" />
-          </svg>
-        </button>
+        {!docMode && (
+          <>
+            <span className="w-px h-4 bg-white/15 shrink-0" />
+            <button
+              onClick={() => setRailOpen((v) => !v)}
+              className={`hds-bar-icon ${railOpen ? 'is-active' : ''}`}
+              aria-label={railOpen ? t('page.collapseRail') : t('page.expandRail')}
+              title={railOpen ? t('page.collapseRail') : t('page.expandRail')}
+            >
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <rect x="2.5" y="3.5" width="15" height="13" rx="2.5" />
+                <path d="M7.5 3.5v13" />
+              </svg>
+            </button>
+          </>
+        )}
         <span className="text-[13px] font-semibold truncate max-w-[200px] px-1">{deckFileName}</span>
         <span className="text-[11px] shrink-0 select-none" title={lastSavedAt ? t('status.lastSaved', { time: new Date(lastSavedAt).toLocaleTimeString() }) : sourceFileName}>
           {isSaving ? (
@@ -611,8 +626,8 @@ export function EditorPage() {
         </button>
       </div>
 
-      {/* Top-center: primary interaction-mode pill (edit / drag). Hidden in code mode. */}
-      {viewMode === 'visual' && (
+      {/* Top-center: primary interaction-mode pill (edit / drag). Hidden in code & doc mode. */}
+      {viewMode === 'visual' && !docMode && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 hds-floating-bar">
           <div className="hds-segmented" role="tablist">
             <button
@@ -700,6 +715,36 @@ export function EditorPage() {
         <div className="absolute inset-0 pt-20 px-3 pb-3 flex">
           <CodeEditorPane key={currentSlideId} />
         </div>
+      ) : docMode ? (
+        <>
+          {/* Free-edit: one scrollable document at natural width */}
+          <main
+            ref={canvasContainerRef}
+            className="absolute overflow-y-auto overflow-x-hidden canvas-host transition-[right] duration-200 ease-out"
+            style={{ top: 80, bottom: 16, left: 16, right: showInspector ? 328 : 16 }}
+          >
+            <div className="mx-auto w-full px-4 pb-12" style={{ maxWidth: 1180 }}>
+              <div className="relative rounded-xl overflow-hidden shadow-2xl bg-white">
+                <ScaledCanvas
+                  key={`${currentSlideId}:${canvasKey}`}
+                  ref={canvasRef}
+                  docMode
+                  sectionHtml={currentSlide.html}
+                  headHtml={headHtml}
+                  assetsBaseUrl={assetsBaseUrl}
+                  containerWidth={0}
+                  onMessage={handleMessage}
+                />
+              </div>
+            </div>
+          </main>
+
+          {showInspector && (
+            <div className="absolute right-3 top-20 bottom-3 z-10">
+              <PropertyPane mode={interactionMode} onPatch={handlePatch} onDelete={handleDeleteElement} onZOrder={handleZOrder} floating onClose={() => setInspectorOpen(false)} />
+            </div>
+          )}
+        </>
       ) : (
         <>
           {/* Floating thumbnail rail (collapsible) */}

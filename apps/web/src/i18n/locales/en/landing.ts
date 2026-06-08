@@ -4,6 +4,7 @@ const landing: typeof zh = {
   nav: {
     homeAria: 'NextPPT home',
     guide: 'Guide',
+    templates: 'Templates',
     openFile: 'Open file',
   },
   hero: {
@@ -37,16 +38,12 @@ const landing: typeof zh = {
     unsupportedBody:
       'This relies on the File System Access API, currently supported only by Chromium browsers. Please open this page in <a>Chrome</a> or Edge / Brave / Arc.',
     dropTitle: 'Click to choose, or drag a folder / HTML here',
-    dropHint: 'Folder mode reads/writes paired images; a single HTML suits self-contained decks',
+    dropHint: 'PPT decks or resumes / long docs alike — format auto-detected; folder mode reads/writes paired images',
     choosePrompt: 'What do you want to open?',
     chooseCancel: 'Cancel',
     openFolder: 'Open folder',
     openSingle: 'Open single HTML',
     recall: 'Reopen last folder',
-    noDeck: "Don't have a deck yet?",
-    sample: 'Try the sample',
-    downloadSample: 'Download sample',
-    aiHelp: 'Let AI write it',
     errorRecover:
       'This file may be in the wrong format to open. The easiest fix is to <btn>have an AI remake it</btn> with our prompt.',
   },
@@ -63,6 +60,7 @@ const landing: typeof zh = {
     start: 'Get started',
     colResources: 'Resources',
     guide: 'Guide',
+    templates: 'Templates',
     sample: 'Sample',
     colAbout: 'About',
     localFirst: 'Local-first',

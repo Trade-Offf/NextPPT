@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { DeckMeta, SlideEntry } from '@hds/protocol';
+import type { DeckMeta, SlideEntry, WorkspaceKind } from '@hds/protocol';
 import type { StyleSnapshot, LayerInfo, SlideRect } from '@hds/protocol';
 import { ulid } from '../lib/ulid.js';
 
@@ -37,6 +37,11 @@ export interface DeckStore {
   fileHandle: FileSystemFileHandle | null;
   /** 'folder' = directory picker, 'file' = single self-contained HTML. */
   mode: 'folder' | 'file';
+  /**
+   * Workspace kind. `deck` = classic slide deck (per-section pages). `doc` =
+   * free-edit mode: any HTML as one scrollable, smart-paginated document.
+   */
+  kind: WorkspaceKind;
   /** Immutable source filename (never written to) */
   sourceFileName: string;
   /** Working copy filename (written on save, defaults to source + '-hds') */
@@ -66,8 +71,8 @@ export interface DeckStore {
   redo: () => void;
 
   // ── Actions ──────────────────────────────────────────────
-  openDirectory: (handle: FileSystemDirectoryHandle, fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[]) => void;
-  openFile: (fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[]) => void;
+  openDirectory: (handle: FileSystemDirectoryHandle, fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[], kind?: WorkspaceKind) => void;
+  openFile: (fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[], kind?: WorkspaceKind) => void;
   setWorkingFileHandle: (fh: FileSystemFileHandle) => void;
   closeDirectory: () => void;
 
@@ -125,6 +130,7 @@ export const useDeckStore = create<DeckStore>((set) => ({
   dirHandle: null,
   fileHandle: null,
   mode: 'folder',
+  kind: 'deck',
   sourceFileName: '',
   deckFileName: '',
   rawHtml: '',
@@ -140,17 +146,17 @@ export const useDeckStore = create<DeckStore>((set) => ({
   past: [],
   future: [],
 
-  openDirectory: (handle, fileName, html, headHtml, meta, slides) => {
+  openDirectory: (handle, fileName, html, headHtml, meta, slides, kind = 'deck') => {
     // Derive working-copy filename: foo.html → foo-hds.html
     const copyName = fileName.replace(/\.html$/i, '-hds.html');
     lastEditPush = 0;
-    set({ dirHandle: handle, fileHandle: null, mode: 'folder', sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false, past: [], future: [] });
+    set({ dirHandle: handle, fileHandle: null, mode: 'folder', kind, sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false, past: [], future: [] });
   },
 
-  openFile: (fileName, html, headHtml, meta, slides) => {
+  openFile: (fileName, html, headHtml, meta, slides, kind = 'deck') => {
     const copyName = fileName.replace(/\.html?$/i, '-hds.html');
     lastEditPush = 0;
-    set({ dirHandle: null, fileHandle: null, mode: 'file', sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false, past: [], future: [] });
+    set({ dirHandle: null, fileHandle: null, mode: 'file', kind, sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false, past: [], future: [] });
   },
 
   setWorkingFileHandle: (fh) => set({ fileHandle: fh }),
@@ -161,7 +167,7 @@ export const useDeckStore = create<DeckStore>((set) => ({
   },
 
   closeDirectory: () =>
-    set({ dirHandle: null, fileHandle: null, mode: 'folder', sourceFileName: '', deckFileName: '', rawHtml: '', headHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
+    set({ dirHandle: null, fileHandle: null, mode: 'folder', kind: 'deck', sourceFileName: '', deckFileName: '', rawHtml: '', headHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
 
   setSlides: (slides) => set({ slides }),
 
@@ -184,6 +190,7 @@ export const useDeckStore = create<DeckStore>((set) => ({
 
   duplicateSlide: (id) =>
     set((s) => {
+      if (s.kind === 'doc') return {}; // free-edit doc is a single page
       const idx = s.slides.findIndex((sl) => sl.id === id);
       if (idx < 0) return {};
       const src = s.slides[idx]!;
@@ -201,6 +208,7 @@ export const useDeckStore = create<DeckStore>((set) => ({
 
   deleteSlide: (id) =>
     set((s) => {
+      if (s.kind === 'doc') return {};
       if (s.slides.length <= 1) return {}; // never delete the last slide
       const idx = s.slides.findIndex((sl) => sl.id === id);
       if (idx < 0) return {};
@@ -214,6 +222,7 @@ export const useDeckStore = create<DeckStore>((set) => ({
 
   reorderSlides: (fromIndex, toIndex) =>
     set((s) => {
+      if (s.kind === 'doc') return {};
       if (fromIndex === toIndex) return {};
       const arr = [...s.slides];
       const moved = arr.splice(fromIndex, 1)[0];

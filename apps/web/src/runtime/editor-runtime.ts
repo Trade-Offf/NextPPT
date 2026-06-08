@@ -191,8 +191,14 @@ function deselect() {
 
 // ─── Shape resolution & detach (drag mode) ───────────────────────────────────
 
+/**
+ * The single editable root: a deck slide section OR a free-edit doc container.
+ * Falls back to <body> only when neither is present.
+ */
+const ROOT_SEL = 'section.slide, section[class~="slide"], [data-hds-doc]';
+
 function sectionEl(): HTMLElement {
-  return (document.querySelector('section.slide') as HTMLElement | null) ?? document.body;
+  return (document.querySelector(ROOT_SEL) as HTMLElement | null) ?? document.body;
 }
 
 /** The containing block a free element is positioned against (its offsetParent). */
@@ -679,7 +685,7 @@ function cleanup(root: ParentNode): void {
 }
 
 function serializeSection(): string {
-  const sec = document.querySelector('section.slide') ?? document.body;
+  const sec = document.querySelector(ROOT_SEL) ?? document.body;
   const clone = sec.cloneNode(true) as HTMLElement;
   cleanup(clone);
   clone
@@ -751,7 +757,7 @@ window.addEventListener('message', async (evt) => {
   }
 
   if (msg.type === 'insert-image') {
-    const sec = (document.querySelector('section.slide') as HTMLElement | null) ?? document.body;
+    const sec = (document.querySelector(ROOT_SEL) as HTMLElement | null) ?? document.body;
     // Absolute children need a positioned ancestor; most decks already are.
     if (getComputedStyle(sec).position === 'static') sec.style.position = 'relative';
     const img = document.createElement('img');

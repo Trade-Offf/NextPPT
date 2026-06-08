@@ -4,7 +4,7 @@
  */
 import { ulid } from '../lib/ulid.js';
 import type { DeckMeta } from '@hds/protocol';
-import { SLIDE_SELECTOR } from '@hds/protocol';
+import { SLIDE_SELECTOR, DOC_ROOT_ATTR, DOC_SELECTOR } from '@hds/protocol';
 import type { SlideState } from '../store/deckStore.js';
 
 const IDB_DB = 'hds-v1';
@@ -124,6 +124,61 @@ export async function findDeckFile(
     if (deckSlideCount(html) > 0) return { fileName: name, html };
   }
   return null;
+}
+
+/**
+ * Free-edit (doc) mode: pick the first top-level `.html` file in the folder,
+ * with no `section.slide` requirement. Prefers a non `-hds` source over a
+ * previously-saved working copy when both exist.
+ */
+export async function findAnyHtmlFile(
+  dir: FileSystemDirectoryHandle,
+): Promise<{ fileName: string; html: string } | null> {
+  const htmlNames: string[] = [];
+  for await (const [name, entry] of dir as unknown as AsyncIterable<[string, FileSystemHandle]>) {
+    if (entry.kind === 'file' && name.toLowerCase().endsWith('.html')) htmlNames.push(name);
+  }
+  if (!htmlNames.length) return null;
+  htmlNames.sort((a, b) => {
+    const aHds = /-hds\.html$/i.test(a) ? 1 : 0;
+    const bHds = /-hds\.html$/i.test(b) ? 1 : 0;
+    return aHds - bHds || a.localeCompare(b);
+  });
+  const fileName = htmlNames[0]!;
+  const fh = await dir.getFileHandle(fileName);
+  const html = await (await fh.getFile()).text();
+  return { fileName, html };
+}
+
+/**
+ * Free-edit (doc) mode parse: treat the WHOLE document as one editable,
+ * scrollable page. The `<body>` content is wrapped in a single
+ * `[data-hds-doc]` container (carrying the body's class/style so the editor
+ * preview matches) so the runtime can serialise exactly one root without ever
+ * capturing its own injected `<script>`/overlay chrome.
+ */
+export function parseDoc(html: string): { meta: DeckMeta; headHtml: string; slides: SlideState[] } {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const id = ulid();
+
+  const wrapper = doc.createElement('div');
+  wrapper.setAttribute(DOC_ROOT_ATTR, '');
+  wrapper.setAttribute('data-page-id', id);
+  const bodyClass = doc.body.getAttribute('class');
+  if (bodyClass) wrapper.setAttribute('class', bodyClass);
+  const bodyStyle = doc.body.getAttribute('style');
+  if (bodyStyle) wrapper.setAttribute('style', bodyStyle);
+  wrapper.innerHTML = doc.body.innerHTML;
+
+  const slide: SlideState = { id, ordinal: 1, html: wrapper.outerHTML, thumbnail: null };
+  const headHtml = doc.head.innerHTML;
+  const meta: DeckMeta = {
+    version: 1,
+    title: doc.querySelector('title')?.textContent ?? undefined,
+    slides: [{ id, ordinal: 1 }],
+    assets: [],
+  };
+  return { meta, headHtml, slides: [slide] };
 }
 
 export function parseDeck(html: string): { meta: DeckMeta; headHtml: string; slides: SlideState[] } {
@@ -332,6 +387,46 @@ export function rebuildDeckHtmlForExport(
   // Rebuild with current edits
   let rebuilt = rebuildDeckHtml(originalHtml, slides);
   // Replace any blob: URLs with their original relative paths
+  for (const [blobUrl, relPath] of blobToPath) {
+    rebuilt = rebuilt.split(blobUrl).join(relPath);
+  }
+  return rebuilt;
+}
+
+// ─── Doc-mode rebuild (free edit) ───────────────────────────────────────────
+
+/**
+ * Reassemble the full document from the edited `[data-hds-doc]` container.
+ * The wrapper itself is unwrapped: its inner content goes back into `<body>`,
+ * and any carried-over body class/style is restored — so the saved file keeps
+ * its original `<body>` shape, never the editor's wrapper div.
+ */
+export function rebuildDocHtml(originalHtml: string, docHtml: string): string {
+  const doc = new DOMParser().parseFromString(originalHtml, 'text/html');
+  const tmp = document.createElement('div');
+  tmp.innerHTML = docHtml;
+  const wrapper = (tmp.querySelector(DOC_SELECTOR) ?? tmp.firstElementChild) as HTMLElement | null;
+  if (!wrapper) return `<!doctype html>\n${doc.documentElement.outerHTML}`;
+
+  const cls = wrapper.getAttribute('class');
+  if (cls !== null) doc.body.setAttribute('class', cls);
+  else doc.body.removeAttribute('class');
+  const style = wrapper.getAttribute('style');
+  if (style !== null) doc.body.setAttribute('style', style);
+  else doc.body.removeAttribute('style');
+
+  doc.body.innerHTML = wrapper.innerHTML;
+  return `<!doctype html>\n${doc.documentElement.outerHTML}`;
+}
+
+/** rebuildDocHtml + blob:→relative path restoration for export/save. */
+export function rebuildDocHtmlForExport(
+  originalHtml: string,
+  slides: Pick<SlideState, 'id' | 'html'>[],
+  blobToPath: Map<string, string>,
+): string {
+  const docHtml = slides[0]?.html ?? '';
+  let rebuilt = rebuildDocHtml(originalHtml, docHtml);
   for (const [blobUrl, relPath] of blobToPath) {
     rebuilt = rebuilt.split(blobUrl).join(relPath);
   }

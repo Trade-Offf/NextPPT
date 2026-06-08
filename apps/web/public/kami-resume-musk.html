@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>埃隆·马斯克 · 简历</title>
+    <meta name="author" content="埃隆·马斯克" />
+    <meta name="generator" content="Kami" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
+    <style>
+      /* TsangerJinKai02 — official Kami serif, with Noto Serif SC as the web fallback */
+      @font-face {
+        font-family: "TsangerJinKai02";
+        src: url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W04.ttf") format("truetype");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      @font-face {
+        font-family: "TsangerJinKai02";
+        src: url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W05.ttf") format("truetype");
+        font-weight: 500; font-style: normal; font-display: swap;
+      }
+
+      @page { size: A4; margin: 11mm 13mm; background: #f5f4ed; }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --parchment:#f5f4ed; --ivory:#faf9f5; --border:#e8e6dc; --border-soft:#e5e3d8;
+        --near-black:#141413; --dark-warm:#3d3d3a; --olive:#504e49; --stone:#6b6a64;
+        --brand:#1b365d; --brand-tint:#eef2f7;
+        --serif:"TsangerJinKai02","Noto Serif SC","Source Han Serif SC","Songti SC","STSong",Georgia,serif;
+        --sans:var(--serif);
+        --mono:"JetBrains Mono","SF Mono",Consolas,Monaco,monospace;
+      }
+
+      html, body { background: var(--parchment); }
+
+      @media screen {
+        body { max-width: 210mm; margin: 0 auto; padding: 11mm 13mm; box-shadow: 0 1px 40px rgba(0,0,0,.12); }
+      }
+
+      body {
+        color: var(--near-black); font-family: var(--serif);
+        font-size: 9.4pt; line-height: 1.46; letter-spacing: .2pt;
+        widows: 3; orphans: 3;
+      }
+      .serif { font-family: var(--serif); }
+      a { color: var(--brand); text-decoration: none; }
+
+      /* HEADER */
+      .header {
+        display: flex; align-items: flex-end; justify-content: space-between;
+        margin-bottom: 3mm; border-left: 2.5pt solid var(--brand);
+        border-radius: 1.5pt; padding-left: 8pt;
+      }
+      .header > div:first-child { flex-shrink: 0; }
+      .name {
+        font-family: var(--serif); font-size: 26pt; font-weight: 500;
+        letter-spacing: .5pt; color: var(--near-black); line-height: 1;
+        display: flex; align-items: baseline; gap: 2.8mm; white-space: nowrap;
+      }
+      .alias { font-size: 12.5pt; font-weight: 400; color: var(--stone); letter-spacing: .2pt; }
+      .contact { text-align: right; font-size: 9pt; color: var(--stone); line-height: 1.5; }
+      .contact .role { color: var(--brand); font-size: 10.5pt; font-weight: 500; }
+      .contact .sep { color: var(--border); margin: 0 .4em; }
+      .contact a { color: var(--dark-warm); }
+      .contact .loc { color: var(--olive); font-weight: 500; }
+
+      /* METRICS */
+      .metrics { display: flex; gap: 7mm; margin-bottom: 6mm; }
+      .metric { flex: 1; padding: 1mm 0; display: flex; align-items: baseline; gap: 2mm; break-inside: avoid; }
+      .metric-value {
+        font-family: var(--serif); font-size: 14pt; font-weight: 500;
+        color: var(--brand); line-height: 1; font-variant-numeric: tabular-nums;
+      }
+      .metric-value .unit { font-size: 10.5pt; margin-left: .5mm; font-weight: 500; color: var(--brand); }
+      .metric-label { font-size: 9pt; color: var(--olive); line-height: 1.2; }
+
+      /* SECTION TITLE — brand left bar (official Kami CN signature) */
+      .section-title {
+        font-family: var(--serif); font-size: 13pt; font-weight: 500; color: var(--near-black);
+        border-left: 2.5pt solid var(--brand); border-radius: 1.5pt;
+        padding: 0 0 0 8pt; margin: 6mm 0 2.4mm 0;
+        display: flex; align-items: baseline; gap: 2.5mm;
+      }
+      .section-title .sub {
+        margin-left: auto; font-family: var(--serif); font-weight: 400;
+        font-size: 9pt; color: var(--stone); letter-spacing: .2pt;
+      }
+      section:first-of-type .section-title { margin-top: 0; }
+      .page-break > .section-title { margin-top: 0; }
+
+      /* SUMMARY */
+      .summary { font-size: 9.4pt; line-height: 1.5; color: var(--near-black); }
+      .summary .hl { color: var(--brand); }
+
+      /* TIMELINE */
+      .timeline { display: flex; gap: 7mm; margin-bottom: 6mm; }
+      .tl-step { flex: 1; padding: .8mm 0; break-inside: avoid; }
+      .tl-top { display: flex; align-items: baseline; gap: 2mm; margin-bottom: .6mm; }
+      .tl-year { font-family: var(--serif); font-size: 11pt; font-weight: 500; color: var(--brand); line-height: 1; }
+      .tl-head { font-size: 11pt; font-weight: 500; color: var(--near-black); }
+      .tl-body { font-size: 9pt; color: var(--olive); line-height: 1.45; }
+
+      /* PROJECTS */
+      .project { padding: 2.3mm 0; border-top: .4pt solid var(--border-soft); break-inside: avoid; }
+      .project:first-of-type { border-top: .4pt solid var(--border); padding-top: 2.3mm; }
+      .proj-head { display: flex; align-items: baseline; gap: 2mm; margin-bottom: .9mm; }
+      .proj-name { font-family: var(--serif); font-size: 11pt; font-weight: 500; color: var(--near-black); }
+      .proj-kind { font-size: 11pt; color: var(--olive); }
+      .proj-role {
+        font-size: 9pt; color: var(--brand); font-weight: 500; margin-left: auto;
+        background: var(--brand-tint); padding: .4mm 1.6mm; border-radius: 2pt; letter-spacing: .3pt;
+      }
+      .proj-lines { display: table; width: 100%; }
+      .proj-row { display: table-row; }
+      .proj-label {
+        display: table-cell; width: 13mm; font-size: 9pt; color: var(--brand);
+        font-weight: 500; letter-spacing: .3pt; padding: .4mm 0; vertical-align: top;
+      }
+      .proj-text {
+        display: table-cell; font-size: 9.2pt; color: var(--near-black);
+        line-height: 1.45; padding: 0 0 .4mm 1mm;
+      }
+      .proj-text .hl { color: var(--brand); }
+
+      /* PAGE 2 */
+      .page-break { break-before: page; }
+
+      .os-intro { font-size: 9.4pt; line-height: 1.45; color: var(--near-black); margin: 1.6mm 0 2.4mm 0; break-inside: avoid; }
+      .os-intro .hl { color: var(--brand); }
+      .os-intro .strong { color: var(--near-black); font-weight: 500; }
+
+      .os-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 9mm; row-gap: 1.2mm; }
+      .os-item {
+        display: flex; align-items: baseline; gap: 2.5mm; padding: 1.2mm 0;
+        border-bottom: .3pt dotted var(--border); break-inside: avoid;
+      }
+      .os-item:last-child, .os-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+      .os-name { font-family: var(--serif); font-size: 10.5pt; font-weight: 500; flex-shrink: 0; min-width: 20mm; }
+      .os-name a { color: var(--brand); }
+      .os-desc { font-size: 9pt; color: var(--olive); line-height: 1.4; flex: 1; }
+      .os-star {
+        font-size: 9pt; color: var(--dark-warm); font-weight: 500; white-space: nowrap;
+        flex-shrink: 0; min-width: 12mm; text-align: right; font-variant-numeric: tabular-nums;
+      }
+      .os-star.big { color: var(--brand); font-size: 9.2pt; }
+
+      .os-highlight {
+        margin-top: 2.5mm; padding: 1.8mm 3mm; background: var(--brand-tint);
+        border-left: 1.4pt solid var(--brand); border-radius: 2pt;
+        font-size: 9pt; line-height: 1.45; color: var(--near-black); break-inside: avoid;
+      }
+      .os-highlight .hl { color: var(--brand); }
+      .os-highlight .tag {
+        display: inline-block; background: var(--brand); color: var(--ivory);
+        font-size: 9pt; font-weight: 500; padding: .2mm 1.6mm; border-radius: 2pt;
+        margin-right: 1.5mm; letter-spacing: .3pt; transform: translateY(-.2mm);
+      }
+
+      /* CONVICTIONS */
+      .convictions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3mm; margin-top: 1.4mm; }
+      .conv-card { padding: 0 2mm 0 0; break-inside: avoid; }
+      .conv-head {
+        font-family: var(--serif); font-size: 10pt; font-weight: 500; color: var(--near-black);
+        margin-bottom: 1mm; display: flex; align-items: baseline; gap: 2mm;
+      }
+      .conv-head .year { color: var(--brand); font-weight: 500; font-size: 9pt; font-variant-numeric: tabular-nums; }
+      .conv-body { font-size: 9pt; color: var(--olive); line-height: 1.45; }
+      .conv-body .hl { color: var(--brand); }
+
+      /* IMPACT */
+      .handle-strip { padding: 0; margin: 1.4mm 0 2mm 0; display: flex; align-items: baseline; gap: 3.5mm; break-inside: avoid; }
+      .handle-strip .handle { font-family: var(--serif); font-size: 10pt; font-weight: 500; color: var(--brand); flex-shrink: 0; }
+      .handle-strip .follower { font-size: 9pt; color: var(--stone); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+      .handle-strip .desc { font-size: 9pt; color: var(--olive); line-height: 1.45; flex: 1; }
+
+      .impact-grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: 6mm; }
+      .inf-block-title {
+        margin-top: 2.5mm; font-family: var(--serif); font-size: 10pt; font-weight: 500;
+        color: var(--near-black); margin-bottom: 1.5mm; padding-bottom: .5mm;
+        border-bottom: .3pt dotted var(--border); display: flex; align-items: baseline; gap: 2mm;
+      }
+      .inf-block-title .small { font-family: var(--serif); font-size: 9pt; color: var(--stone); font-weight: 400; }
+      .art-row { padding: 1.8mm 0; border-bottom: .3pt dotted var(--border-soft); }
+      .talk-row {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        gap: 2mm; padding: 1.8mm 0; border-bottom: .3pt dotted var(--border-soft);
+      }
+      .art-row:last-of-type, .talk-row:last-of-type { border-bottom: none; }
+      .art-header { display: flex; align-items: baseline; justify-content: space-between; gap: 2mm; }
+      .art-title, .talk-title { font-size: 9.2pt; color: var(--near-black); font-weight: 500; line-height: 1.4; flex: 1 1 auto; min-width: 0; }
+      .art-stats, .talk-venue { font-size: 9pt; color: var(--stone); line-height: 1.4; margin-top: .6mm; }
+      .art-stats .em-brand { color: var(--brand); }
+      .art-date, .talk-date { font-size: 9pt; color: var(--stone); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+      /* SKILLS */
+      .skill-row { display: flex; gap: 3mm; padding: 1.8mm 0; border-bottom: .3pt dotted var(--border); align-items: baseline; }
+      .skill-row:last-of-type { border-bottom: none; }
+      .skill-label { font-size: 9pt; font-weight: 500; color: var(--brand); letter-spacing: .3pt; width: 26mm; flex-shrink: 0; line-height: 1.35; }
+      .skill-body { font-size: 9.2pt; color: var(--near-black); line-height: 1.45; flex: 1; }
+      .skill-body .em-brand { color: var(--brand); }
+
+      /* EDUCATION */
+      .edu-row { display: flex; justify-content: space-between; align-items: baseline; padding: 1.8mm 0; }
+      .edu-row .school { font-family: var(--serif); font-weight: 500; font-size: 11pt; }
+      .edu-row .major { color: var(--olive); font-size: 9.4pt; }
+      .edu-row .date { color: var(--stone); font-variant-numeric: tabular-nums; font-size: 9pt; }
+    </style>
+  </head>
+  <body>
+
+    <!-- ═══════════ 第 1 页 ═══════════ -->
+
+    <div class="header">
+      <div>
+        <div class="name serif">埃隆·马斯克<span class="alias">Elon Musk</span></div>
+      </div>
+      <div class="contact">
+        <span class="role">创始人 · 总工程师 · 首席执行官</span>
+        <br />
+        <a href="https://x.com/elonmusk">x.com/elonmusk</a>
+        <span class="sep">·</span>
+        <a href="mailto:em@example.com">em@example.com</a>
+        <span class="sep">·</span>
+        <span class="loc">美国得州 · 奥斯汀</span>
+      </div>
+    </div>
+
+    <!-- 4 个最强数字 -->
+    <div class="metrics">
+      <div class="metric"><span class="metric-value serif">31<span class="unit">年</span></span><span class="metric-label">硬科技创业</span></div>
+      <div class="metric"><span class="metric-value serif">6<span class="unit">家</span></span><span class="metric-label">创办 / 联合创办</span></div>
+      <div class="metric"><span class="metric-value serif">500<span class="unit">+</span></span><span class="metric-label">猎鹰发射</span></div>
+      <div class="metric"><span class="metric-value serif">800<span class="unit">万+</span></span><span class="metric-label">特斯拉累计交付</span></div>
+    </div>
+
+    <section>
+      <div class="section-title">个人简介</div>
+      <div class="summary">
+        横跨 SpaceX、特斯拉、xAI、Neuralink、The Boring Company 与 X 的创始人兼工程师。31 年只做一类公司——<span class="hl">产品是硬的、供应链是物理的</span>。长期方向：让文明走向多行星、推动可持续能源、做有益于人类的 AI。核心沉淀在火箭工程、规模化制造、资本运作，以及第一性原理的问题拆解。
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">工作经历<span class="sub">1995 - 至今 · 六家公司、一枚可复用火箭、一辆量产电车</span></div>
+
+      <div class="timeline">
+        <div class="tl-step">
+          <div class="tl-top"><div class="tl-year serif">1995</div><div class="tl-head">互联网时代</div></div>
+          <div class="tl-body">Zip2 → X.com → PayPal，32 岁前卖掉两家互联网公司。</div>
+        </div>
+        <div class="tl-step">
+          <div class="tl-top"><div class="tl-year serif">2002</div><div class="tl-head">航天 + 汽车</div></div>
+          <div class="tl-body">SpaceX、特斯拉、SolarCity，把别人说"不可能"的实体基础设施建出来。</div>
+        </div>
+        <div class="tl-step">
+          <div class="tl-top"><div class="tl-year serif">2023</div><div class="tl-head">AI 时代</div></div>
+          <div class="tl-body">创办 xAI、扩张 Neuralink、收购并整合 X，押注 AGI 与脑机接口。</div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="proj-head">
+          <span class="proj-name serif">SpaceX</span>
+          <span class="proj-kind">· 航天发射 · 可复用火箭</span>
+          <span class="proj-role">创始人</span>
+        </div>
+        <div class="proj-lines">
+          <div class="proj-row"><div class="proj-label">角色</div><div class="proj-text">2002 年创办，自第一天起任 CEO 兼总工程师。首家民营公司实现入轨（2008）、对接空间站（2012）、回收一级火箭（2015）、载人飞行（2020）。</div></div>
+          <div class="proj-row"><div class="proj-label">动作</div><div class="proj-text">从推进剂到航电全链路垂直整合，自研 Merlin 与 Raptor 发动机；可复用一级火箭路线在 12 次回收失败后坚持到底；星舰（Starship）持续完成入轨级试飞与回收捕获。</div></div>
+          <div class="proj-row"><div class="proj-label">结果</div><div class="proj-text">猎鹰 9 号 <span class="hl">累计发射 500+</span>、复用率 95%+、成本降一个数量级；星链在轨卫星 <span class="hl">逾 8,000 颗</span>，史上最大星座；公司估值约 4,000 亿美元（2025）。</div></div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="proj-head">
+          <span class="proj-name serif">特斯拉</span>
+          <span class="proj-kind">· 电动车 · 能源 · 自动驾驶</span>
+          <span class="proj-role">首席执行官</span>
+        </div>
+        <div class="proj-lines">
+          <div class="proj-row"><div class="proj-label">角色</div><div class="proj-text">2004 年领投，2008 濒临破产之际出任 CEO。把一个"两辆车"的项目，做成全球市值最高的车企。</div></div>
+          <div class="proj-row"><div class="proj-label">动作</div><div class="proj-text">"宏图计划"框架：每一代车型为下一代输血；三大洲布局超级工厂；FSD 以持续软件而非固定版本交付；2025 年在奥斯汀上线无人 Robotaxi 服务，Optimus 人形机器人进入试产。</div></div>
+          <div class="proj-row"><div class="proj-label">结果</div><div class="proj-text"><span class="hl">累计交付逾 800 万辆</span>，首家电车毛利率破 20%、首家市值破万亿美元的车企；Model 3 发布五年内，几乎所有主流车厂都宣布电动化转型。</div></div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="proj-head">
+          <span class="proj-name serif">xAI</span>
+          <span class="proj-kind">· 前沿 AI · 基础大模型</span>
+          <span class="proj-role">创始人</span>
+        </div>
+        <div class="proj-lines">
+          <div class="proj-row"><div class="proj-label">角色</div><div class="proj-text">2023 年创办，旨在"理解宇宙的真实本质"。6 个月内交付 Grok，是迄今投产最快的基础模型公司之一；2025 年完成对 X 的收购，数据与分发合一。</div></div>
+          <div class="proj-row"><div class="proj-label">动作</div><div class="proj-text">从立项到训练启动，仅用 <span class="hl">122 天</span> 建成超算 Colossus（首期 10 万张 H100，后扩至 20 万张+）；将 Grok 直接嵌入 X，获取实时数据并瞬时触达数亿用户。</div></div>
+          <div class="proj-row"><div class="proj-label">结果</div><div class="proj-text">Grok 3 / Grok 4 在多项基准追平第一梯队；并入 X 后合并估值约 1,130 亿美元，2025 年融资后整体估值进一步抬升至约 2,000 亿美元（约数）。</div></div>
+        </div>
+      </div>
+
+      <div class="project">
+        <div class="proj-head">
+          <span class="proj-name serif">Neuralink</span>
+          <span class="proj-kind">· 脑机接口 · 植入式器件</span>
+          <span class="proj-role">创始人</span>
+        </div>
+        <div class="proj-lines">
+          <div class="proj-row"><div class="proj-label">角色</div><div class="proj-text">2016 年创办，做高带宽脑机接口。联合主导 N1 植入体、手术机器人与电极阵列设计。</div></div>
+          <div class="proj-row"><div class="proj-label">动作</div><div class="proj-text">交付含 <span class="hl">1,024 个电极</span> 的 N1 芯片与精密手术机器人；经五年灵长类试验后，获 FDA 突破性器械认定与人体试验许可（2023）。</div></div>
+          <div class="proj-row"><div class="proj-label">结果</div><div class="proj-text">2024 年 1 月完成首例人体植入，30 天内实现光标自由控制；至 2025 年 <span class="hl">多名患者</span> 植入，拓展到语言康复方向。长期目标：让人类认知与 AI 高带宽共生。</div></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════ 第 2 页 ═══════════ -->
+
+    <section class="page-break">
+      <div class="section-title">公司版图 &amp; 价值<span class="sub">1995 - 至今 · 六家硬科技公司的创始工程师</span></div>
+
+      <div class="os-intro">
+        <span class="hl">第一性原理的硬科技创业者。</span>方法论：从物理出发，质疑每一条被默认的成本假设，在公众视野里做原型。公开影响力：<span class="strong">X 平台逾 2.2 亿关注者</span>。
+      </div>
+
+      <div class="os-grid">
+        <div class="os-item">
+          <span class="os-name serif"><a href="https://spacex.com">SpaceX</a></span>
+          <span class="os-desc">发射 · 星链 · 星舰</span>
+          <span class="os-star big">≈ $4000亿</span>
+        </div>
+        <div class="os-item">
+          <span class="os-name serif"><a href="https://tesla.com">特斯拉</a></span>
+          <span class="os-desc">电动车 · 能源 · FSD · 机器人</span>
+          <span class="os-star big">≈ $1.4万亿</span>
+        </div>
+        <div class="os-item">
+          <span class="os-name serif"><a href="https://x.ai">xAI · X</a></span>
+          <span class="os-desc">基础大模型 · 实时社交分发</span>
+          <span class="os-star">≈ $2000亿</span>
+        </div>
+        <div class="os-item">
+          <span class="os-name serif"><a href="https://neuralink.com">Neuralink</a></span>
+          <span class="os-desc">脑机接口 · 植入式器件</span>
+          <span class="os-star">≈ $90亿</span>
+        </div>
+      </div>
+
+      <div class="os-highlight">
+        <span class="tag">节奏</span>2015 年 12 月 22 日成功着陆的那枚猎鹰 9 号一级火箭，是史上第一枚完整返回并再次飞行的轨道级火箭。"火箭是一次性的"这一行业共识，在此后 24 个月内彻底消失。
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">判断与行动</div>
+      <div class="convictions">
+        <div class="conv-card">
+          <div class="conv-head"><span class="year">1999</span>押注在线支付</div>
+          <div class="conv-body">在消费级网络银行还很小众时创办 X.com，与 Confinity 合并成 PayPal；以 15 亿美元卖给 eBay，两年内把回款全部投入 SpaceX 与特斯拉。</div>
+        </div>
+        <div class="conv-card">
+          <div class="conv-head"><span class="year">2015</span>坚持可复用火箭</div>
+          <div class="conv-body">在 <span class="hl">连续 12 次回收失败</span>、董事会与行业都说"停"时，仍推进猎鹰 9 号复用；第 13 次成功，可复用从此成为行业基准。</div>
+        </div>
+        <div class="conv-card">
+          <div class="conv-head"><span class="year">2025</span>把 X 并入 xAI</div>
+          <div class="conv-body">将社交平台与前沿模型合并，赌的是 <span class="hl">数据 × 分发</span> 的飞轮；让 Grok 拿到实时语料，同时获得瞬时触达数亿人的渠道。</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">对外影响力</div>
+
+      <div class="handle-strip">
+        <span class="handle serif">X · <a href="https://x.com/elonmusk">@elonmusk</a></span>
+        <span class="follower">2.2 亿关注者</span>
+        <span class="desc">直达 2.2 亿关注者的渠道。每一条工程动态、发射视频或产品暗示，都会在数小时内影响市场。</span>
+      </div>
+
+      <div class="impact-grid">
+        <div>
+          <div class="inf-block-title">代表性文章</div>
+          <div class="art-row">
+            <div class="art-header">
+              <a class="art-title" href="https://tesla.com/blog">《宏图计划 · 第二篇章》</a>
+              <span class="art-date">2016.07</span>
+            </div>
+            <div class="art-stats">特斯拉博客，阅读 <span class="em-brand">4000 万+</span>；重塑了全行业的电动化战略叙事</div>
+          </div>
+          <div class="art-row">
+            <div class="art-header">
+              <a class="art-title" href="https://ted.com">《工程中的第一性原理思维》</a>
+              <span class="art-date">2013.03</span>
+            </div>
+            <div class="art-stats">TED 演讲 · YouTube 播放 560 万</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="inf-block-title">受邀演讲</div>
+          <div class="talk-row">
+            <div>
+              <div class="talk-title">《让人类成为多行星物种》</div>
+              <div class="talk-venue">IAC 国际宇航大会 · 瓜达拉哈拉</div>
+            </div>
+            <div class="talk-date">2016.09</div>
+          </div>
+          <div class="talk-row">
+            <div>
+              <div class="talk-title">《星舰与火星》</div>
+              <div class="talk-venue">星舰基地 · 美国得州</div>
+            </div>
+            <div class="talk-date">2024.04</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">核心能力</div>
+      <div class="skill-row">
+        <div class="skill-label">火箭 · 发动机设计</div>
+        <div class="skill-body">主导 Merlin、Raptor 与星舰架构；交付了 <span class="em-brand">首枚可复用轨道级火箭</span>，此前无任何机构做到。</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-label">制造 · 规模化</div>
+        <div class="skill-body">建成特斯拉弗里蒙特、上海、柏林、奥斯汀工厂；SpaceX 装配从 0 扩到 <span class="em-brand">每年 100+ 次发射</span>。</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-label">资本 · 危机管理</div>
+        <div class="skill-body">在特斯拉 <span class="em-brand">距破产仅数周</span> 时谈成戴姆勒投资；在多家公司挺过五次濒临破产的关口。</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-label">公共沟通</div>
+        <div class="skill-body">X 平台 2.2 亿关注者；一次表态常常直接影响其 <span class="em-brand">旗下上市公司</span> 的股价。</div>
+      </div>
+      <div class="skill-row">
+        <div class="skill-label">第一性原理 · 成本</div>
+        <div class="skill-body">质疑每一条既有成本假设（火箭、电池、隧道），在四个行业里驱动了 <span class="em-brand">10 倍级成本下降</span>。</div>
+      </div>
+    </section>
+
+    <section style="break-inside: avoid;">
+      <div class="section-title">教育背景</div>
+      <div class="edu-row">
+        <div>
+          <span class="school serif">宾夕法尼亚大学</span>
+          <span class="major">　· 沃顿商学院 · 经济学学士 · 物理学学士</span>
+        </div>
+        <div class="date">1992 - 1997</div>
+      </div>
+    </section>
+
+  </body>
+</html>

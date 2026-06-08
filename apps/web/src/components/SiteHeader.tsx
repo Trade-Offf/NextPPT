@@ -1,21 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useGuideNav } from '../hooks/useGuideNav.js';
+import { useNavigate } from 'react-router-dom';
+import { useGuideNav, useLocalePrefix } from '../hooks/useGuideNav.js';
 import { LanguageSwitcher } from './LanguageSwitcher.js';
 
-export function SiteHeader() {
+interface SiteHeaderProps {
+  /** Optional trailing node placed after the nav links (e.g. a "back to edit" CTA). */
+  trailing?: ReactNode;
+  /**
+   * Skip the transparent→frosted hero transition and always render in the
+   * frosted/bordered state. Use on pages without a full-bleed hero section
+   * (Templates, Guide) where starting transparent makes no sense.
+   *
+   * Landing page omits this prop to keep its intentional hero fade-in.
+   */
+  alwaysScrolled?: boolean;
+}
+
+export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps) {
   const { t } = useTranslation('landing');
   const { openGuide } = useGuideNav();
-  const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
+  const prefix = useLocalePrefix();
+  const [scrolled, setScrolled] = useState(alwaysScrolled);
 
   useEffect(() => {
+    // Pages without a hero (alwaysScrolled=true) stay permanently frosted —
+    // no need to track window.scrollY at all.
+    if (alwaysScrolled) return;
     let raf = 0;
     const update = () => {
       raf = 0;
       setScrolled(window.scrollY > 8);
     };
     const onScroll = () => {
-      if (raf) return; // coalesce bursts of scroll events into one rAF tick
+      if (raf) return;
       raf = requestAnimationFrame(update);
     };
     update();
@@ -24,13 +43,13 @@ export function SiteHeader() {
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
     };
-  }, []);
+  }, [alwaysScrolled]);
 
   return (
     <header className={`hds-nav ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="max-w-6xl mx-auto px-5 sm:px-8 h-14 flex items-center gap-6">
         <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={() => navigate(prefix || '/')}
           className="flex items-center gap-2 shrink-0 transition-opacity hover:opacity-80"
           aria-label={t('nav.homeAria')}
         >
@@ -39,8 +58,10 @@ export function SiteHeader() {
         </button>
 
         <div className="ml-auto flex items-center gap-4 sm:gap-5">
+          <button onClick={() => navigate(`${prefix}/templates`)} className="hds-nav-link">{t('nav.templates')}</button>
           <button onClick={() => openGuide('generate')} className="hds-nav-link">{t('nav.guide')}</button>
           <LanguageSwitcher />
+          {trailing}
         </div>
       </div>
     </header>

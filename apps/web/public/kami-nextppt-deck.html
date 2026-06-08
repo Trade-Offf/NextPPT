@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>NextPPT · 站点介绍</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      :root {
+        /* ── Kami canvas ── */
+        --parchment:#f5f4ed; --ivory:#faf9f5; --sand:#e8e6dc;
+        /* ── single accent ── */
+        --brand:#1b365d; --brand-tint:#eef2f7; --tag:#e4ecf5;
+        /* ── warm neutrals ── */
+        --near:#141413; --dark:#3d3d3a; --charcoal:#4d4c48; --olive:#504e49; --stone:#6b6a64;
+        /* ── borders ── */
+        --border:#e8e6dc; --border-soft:#e5e3d8;
+        /* ── one serif per page; sans is an alias ── */
+        --serif:"Noto Serif SC","Charter","Source Han Serif SC","Songti SC","Georgia",serif;
+        --sans:var(--serif);
+        --mono:"JetBrains Mono","SF Mono",Consolas,Monaco,monospace;
+      }
+
+      @page { size:1280px 720px; margin:0; background:#f5f4ed; }
+
+      body {
+        background:#c9c5b8; color:var(--near); font-family:var(--serif);
+        display:flex; flex-direction:column; align-items:center; gap:24px;
+        padding:32px 20px; -webkit-font-smoothing:antialiased;
+        letter-spacing:.2px;
+      }
+
+      .slide {
+        width:1280px; height:720px; background:var(--parchment);
+        padding:64px 84px 60px; position:relative; overflow:hidden; flex-shrink:0;
+        display:flex; flex-direction:column;
+      }
+
+      /* ── editorial chrome ── */
+      .eyebrow {
+        font-family:var(--mono); font-size:12.5px; font-weight:500;
+        letter-spacing:2.4px; text-transform:uppercase; color:var(--stone);
+        margin-bottom:14px;
+      }
+      .pgnum {
+        position:absolute; right:84px; bottom:30px;
+        font-family:var(--mono); font-size:11px; color:var(--stone);
+        letter-spacing:.5px; font-variant-numeric:tabular-nums;
+      }
+      .mark {
+        position:absolute; left:84px; bottom:30px;
+        font-family:var(--mono); font-size:11px; color:var(--stone);
+        letter-spacing:1.6px; text-transform:uppercase;
+      }
+
+      /* ── typography ── */
+      h1.title { font-weight:500; font-size:35px; line-height:1.22; letter-spacing:.3px; color:var(--near); }
+      .lead { font-weight:400; font-size:17px; line-height:1.55; color:var(--olive); margin-top:14px; max-width:60ch; }
+      .body { font-weight:400; font-size:15px; line-height:1.62; color:var(--dark); }
+      .cap { font-size:12.5px; line-height:1.5; color:var(--stone); }
+      .acc { color:var(--brand); }
+      .num { font-variant-numeric:tabular-nums; }
+
+      .grow { flex:1; min-height:0; }
+      .center { justify-content:center; }
+
+      /* ── section title: brand left bar (signature) ── */
+      .sect {
+        font-weight:500; font-size:17px; line-height:1.3; color:var(--near);
+        border-left:2.5px solid var(--brand); border-radius:1.5px; padding-left:10px;
+      }
+
+      /* ── quote: 2px brand bar + olive ── */
+      .quote {
+        border-left:2px solid var(--brand); padding:2px 0 2px 18px;
+        font-weight:500; font-size:21px; line-height:1.5; color:var(--olive);
+        letter-spacing:.2px;
+      }
+      .quote.lg { font-size:26px; line-height:1.45; }
+      .quote .by { display:block; margin-top:12px; font-size:13px; font-weight:400; color:var(--stone); letter-spacing:1px; }
+
+      /* ── dash list ── */
+      .dash { list-style:none; display:flex; flex-direction:column; gap:14px; }
+      .dash li { position:relative; padding-left:20px; font-size:15px; line-height:1.55; color:var(--dark); }
+      .dash li::before { content:"—"; position:absolute; left:0; color:var(--brand); }
+      .dash li b { font-weight:500; color:var(--near); }
+
+      /* ── thin rule ── */
+      .rule { height:.5px; background:var(--border); border:0; }
+
+      /* ── metric ── */
+      .metric { display:flex; flex-direction:column; gap:4px; }
+      .metric .v { font-weight:500; font-size:30px; line-height:1; color:var(--brand); font-variant-numeric:tabular-nums; }
+      .metric .k { font-size:12.5px; color:var(--olive); line-height:1.4; }
+
+      /* ── card (ivory, ring only) ── */
+      .card { background:var(--ivory); border:.5px solid var(--border); border-radius:8px; padding:20px 22px; }
+
+      /* ── step ── */
+      .step .no { font-family:var(--mono); font-size:13px; color:var(--brand); letter-spacing:1px; }
+      .step h3 { font-weight:500; font-size:16px; color:var(--near); margin:8px 0 6px; }
+
+      /* ── tag ── */
+      .tag { display:inline-flex; align-items:center; font-family:var(--mono);
+        font-size:10.5px; font-weight:500; letter-spacing:.6px; text-transform:uppercase;
+        color:var(--brand); background:var(--brand-tint); padding:3px 8px; border-radius:3px; }
+
+      .cols2 { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+      .cols3 { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; }
+
+      svg { display:block; }
+      .s-lab { font-family:var(--serif); font-size:14px; font-weight:500; fill:var(--near); }
+      .s-sub { font-family:var(--serif); font-size:11.5px; fill:var(--stone); }
+      .s-mono { font-family:var(--mono); font-size:11px; fill:var(--stone); letter-spacing:.5px; }
+    </style>
+  </head>
+  <body>
+
+    <!-- ════════════ 01 · 封面 ════════════ -->
+    <section class="slide center" style="align-items:flex-start">
+      <div class="eyebrow">NextPPT · HTML Deck Studio</div>
+      <h1 class="title" style="font-size:54px;line-height:1.12;letter-spacing:.2px;max-width:18ch">
+        AI 写得出好内容，<br />好内容值得被认真对待到<span class="acc">最后一步</span>
+      </h1>
+      <p class="lead" style="font-size:19px;margin-top:22px;max-width:46ch">
+        一把专门修剪 AI 演示稿的剪刀：让 AI 产出的 HTML 在浏览器里点哪改哪，再一键导出视觉一致的 PPTX 与 PDF。你的工作流不变，只补上"修剪与交付"这一步。
+      </p>
+      <div style="margin-top:48px" class="cap">本地优先 · 不注册 · 文件不离开你的电脑　|　v0.1 · 2026</div>
+      <span class="mark">Kami × NextPPT</span><span class="pgnum">01 / 11</span>
+    </section>
+
+    <!-- ════════════ 02 · 背景 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">01 · 背景</div>
+      <h1 class="title">AI 很会写 HTML，却把"改"和"导"留给了你</h1>
+      <p class="lead">用 HTML 做演示，本来是更自由的选择——可一旦要临场改一句话、要交一份 PPT，麻烦就开始了。</p>
+      <div class="cols2 grow" style="margin-top:34px;align-items:center">
+        <ul class="dash">
+          <li><b>写得好，改得累。</b>改个错字，得回到 AI 工具发 prompt、等响应、看 Diff、再保存，一次不爽，十次崩溃。</li>
+          <li><b>看得见，投不出。</b>答辩要交 PPT、客户要 PDF；HTML 在投影仪上常常字体缺失、布局错位。</li>
+          <li><b>想私密，不敢传。</b>论文、方案、内部资料，没人愿意上传到一个在线编辑器去赌它的安全。</li>
+        </ul>
+        <div>
+          <p class="quote lg">麻烦的从来不是把它写出来，<br />而是改一句话，再体面地交出去。</p>
+        </div>
+      </div>
+      <span class="mark">Background</span><span class="pgnum">02 / 11</span>
+    </section>
+
+    <!-- ════════════ 03 · 理念 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">02 · 理念</div>
+      <h1 class="title">我们相信，克制比堆功能更难，也更值钱</h1>
+      <div class="cols2 grow" style="margin-top:36px;align-items:center;gap:56px">
+        <ul class="dash" style="gap:20px">
+          <li><b>窄，是一种诚实。</b>只做"改与导"三件事，任何 HTML 都能进，不锁格式、不绑模板。</li>
+          <li><b>保真，是基本的尊重。</b>导出的每一页，都该和你在屏幕上看到的一模一样。</li>
+          <li><b>本地，是不必解释的安全。</b>编辑全程在你的机器里，后端只在导出那一刻短暂经手，随即抹除。</li>
+          <li><b>长期，才配叫作品。</b>不追风口，把一件小事打磨到对得起每天用它的人。</li>
+        </ul>
+        <div>
+          <p class="quote lg">我们不替你表达，<br />只把你的表达，<br />修到配得上它本身。
+            <span class="by">— 这是这款工具存在的全部理由</span>
+          </p>
+        </div>
+      </div>
+      <span class="mark">Manifesto</span><span class="pgnum">03 / 11</span>
+    </section>
+
+    <!-- ════════════ 04 · 功能总览 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">03 · 功能</div>
+      <h1 class="title">三件事：HTML 进来，点选编辑，一键导出</h1>
+      <p class="lead">没有学习成本的工作流——它不替你生成，也不替你创作，只让"已经有的东西"变得可改、可交付。</p>
+      <div class="grow" style="display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 1040 220" width="1040">
+          <!-- node 1 -->
+          <rect x="20" y="66" width="260" height="88" rx="10" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="150" y="104" text-anchor="middle" class="s-lab">HTML 进来</text>
+          <text x="150" y="128" text-anchor="middle" class="s-sub">拖入文件 · 打开文件夹 · 粘贴代码</text>
+          <!-- node 2 -->
+          <rect x="390" y="66" width="260" height="88" rx="10" fill="var(--brand-tint)" stroke="var(--border)" />
+          <text x="520" y="104" text-anchor="middle" class="s-lab">点选编辑</text>
+          <text x="520" y="128" text-anchor="middle" class="s-sub">点哪改哪 · 所见即所得</text>
+          <!-- node 3 -->
+          <rect x="760" y="66" width="260" height="88" rx="10" fill="var(--brand)" />
+          <text x="890" y="104" text-anchor="middle" class="s-lab" style="fill:var(--ivory)">一键导出</text>
+          <text x="890" y="128" text-anchor="middle" class="s-sub" style="fill:#c9d4e2">高保真 PPTX / PDF</text>
+          <!-- arrows -->
+          <g stroke="var(--stone)" stroke-width="1.4" fill="none">
+            <line x1="280" y1="110" x2="384" y2="110" />
+            <path d="M376 105 L388 110 L376 115 Z" fill="var(--stone)" />
+            <line x1="650" y1="110" x2="754" y2="110" />
+            <path d="M746 105 L758 110 L746 115 Z" fill="var(--stone)" />
+          </g>
+          <text x="332" y="100" text-anchor="middle" class="s-mono">浏览器内</text>
+          <text x="702" y="100" text-anchor="middle" class="s-mono">一次上传</text>
+        </svg>
+      </div>
+      <span class="mark">Overview</span><span class="pgnum">04 / 11</span>
+    </section>
+
+    <!-- ════════════ 05 · 功能·编辑 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">04 · 功能 · 编辑</div>
+      <h1 class="title">点哪改哪，像改一句话那样自然</h1>
+      <div class="cols2 grow" style="margin-top:34px;align-items:center">
+        <ul class="dash">
+          <li><b>所见即所得。</b>在真实渲染的页面上直接点选元素，改文字、换颜色、调样式，画布即时反馈。</li>
+          <li><b>双模式，不卡格式。</b>PPT 模式按页编排；自由模式接受任意 HTML、长文档智能分页。</li>
+          <li><b>放心地试错。</b>多步撤销与本地快照，每次写盘前自动备份，改错了随时退回去。</li>
+          <li><b>代码触手可及。</b>需要精细控制时切到代码视图，所改即所存。</li>
+        </ul>
+        <div class="cols2" style="gap:18px">
+          <div class="card"><div class="metric"><div class="v">2</div><div class="k">编辑模式<br />PPT 与自由文档</div></div></div>
+          <div class="card"><div class="metric"><div class="v">100<span style="font-size:16px">步</span></div><div class="k">撤销栈深度</div></div></div>
+          <div class="card"><div class="metric"><div class="v">&lt;100<span style="font-size:16px">ms</span></div><div class="k">编辑反馈延迟</div></div></div>
+          <div class="card"><div class="metric"><div class="v">0</div><div class="k">需要学习的<br />新语法</div></div></div>
+        </div>
+      </div>
+      <span class="mark">Editing</span><span class="pgnum">05 / 11</span>
+    </section>
+
+    <!-- ════════════ 06 · 功能·导出与隐私 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">05 · 功能 · 导出与隐私</div>
+      <h1 class="title">高保真导出，且文件不离开你的电脑</h1>
+      <p class="lead">导出用真实浏览器渲染后截图成稿，所见即所得；整条链路本地优先，后端只在导出那一刻短暂经手。</p>
+      <div class="grow" style="margin-top:30px;display:flex;flex-direction:column;justify-content:center;gap:34px">
+        <svg viewBox="0 0 1080 130" width="1080">
+          <rect x="0" y="34" width="300" height="62" rx="9" fill="var(--sand)" />
+          <text x="150" y="60" text-anchor="middle" class="s-lab">你的磁盘</text>
+          <text x="150" y="80" text-anchor="middle" class="s-sub">唯一的事实来源</text>
+          <rect x="390" y="34" width="300" height="62" rx="9" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="540" y="60" text-anchor="middle" class="s-lab">浏览器内存</text>
+          <text x="540" y="80" text-anchor="middle" class="s-sub">编辑全程在此发生</text>
+          <rect x="780" y="34" width="300" height="62" rx="9" fill="var(--brand)" />
+          <text x="930" y="60" text-anchor="middle" class="s-lab" style="fill:var(--ivory)">后端 &lt; 60 秒</text>
+          <text x="930" y="80" text-anchor="middle" class="s-sub" style="fill:#c9d4e2">导出完成即抹除</text>
+          <g stroke="var(--stone)" stroke-width="1.4" fill="none">
+            <line x1="300" y1="65" x2="384" y2="65" /><path d="M376 60 L388 65 L376 70 Z" fill="var(--stone)" />
+            <line x1="690" y1="65" x2="774" y2="65" /><path d="M766 60 L778 65 L766 70 Z" fill="var(--brand)" stroke="var(--brand)" />
+          </g>
+          <text x="342" y="52" text-anchor="middle" class="s-mono">授权·回写</text>
+          <text x="732" y="52" text-anchor="middle" class="s-mono">仅导出时</text>
+        </svg>
+        <div class="cols3" style="border-top:.5px solid var(--border);padding-top:28px">
+          <div class="metric"><div class="v">0</div><div class="k">文件上传云端存储</div></div>
+          <div class="metric"><div class="v">2×</div><div class="k">导出分辨率 · 投影清晰</div></div>
+          <div class="metric"><div class="v">PPTX · PDF</div><div class="k">视觉一致的交付格式</div></div>
+        </div>
+      </div>
+      <span class="mark">Export &amp; Privacy</span><span class="pgnum">06 / 11</span>
+    </section>
+
+    <!-- ════════════ 07 · 数据生命周期 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">06b · 隐私承诺</div>
+      <h1 class="title">数据怎么流：始终在你的掌控之内</h1>
+      <p class="lead">编辑全程在浏览器内存，导出时短暂经过后端临时目录，完成后立即销毁。这是技术承诺，不是营销说辞。</p>
+      <div class="grow" style="display:flex;flex-direction:column;justify-content:center;gap:36px">
+        <svg viewBox="0 0 1060 130" width="1060">
+          <!-- 用户磁盘 -->
+          <rect x="20" y="38" width="155" height="54" rx="9" fill="var(--sand)" />
+          <text x="97" y="62" text-anchor="middle" class="s-lab">用户磁盘</text>
+          <text x="97" y="80" text-anchor="middle" class="s-sub">本地文件系统</text>
+          <!-- 浏览器内存 -->
+          <rect x="270" y="38" width="175" height="54" rx="9" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="357" y="62" text-anchor="middle" class="s-lab">浏览器内存</text>
+          <text x="357" y="80" text-anchor="middle" class="s-sub">编辑全程在此发生</text>
+          <!-- 后端临时目录 -->
+          <rect x="545" y="38" width="185" height="54" rx="9" fill="var(--brand-tint)" stroke="var(--border)" />
+          <text x="637" y="62" text-anchor="middle" class="s-lab">后端临时目录</text>
+          <text x="637" y="80" text-anchor="middle" class="s-sub">仅导出时存在 · &lt;60s</text>
+          <!-- 立即销毁 -->
+          <rect x="835" y="38" width="185" height="54" rx="9" fill="var(--brand)" />
+          <text x="927" y="62" text-anchor="middle" class="s-lab" style="fill:var(--ivory)">立即销毁</text>
+          <text x="927" y="80" text-anchor="middle" class="s-sub" style="fill:#c9d4e2">完成或失败后</text>
+          <!-- Arrow 1: 授权 → (top of gap) -->
+          <line x1="175" y1="60" x2="264" y2="60" stroke="var(--stone)" stroke-width="1.3" />
+          <path d="M258 55 L270 60 L258 65 Z" fill="var(--stone)" />
+          <text x="220" y="51" text-anchor="middle" class="s-mono">授权</text>
+          <!-- Arrow 2: ← 回写 (bottom of gap) -->
+          <line x1="264" y1="76" x2="181" y2="76" stroke="var(--stone)" stroke-width="1.3" />
+          <path d="M187 71 L175 76 L187 81 Z" fill="var(--stone)" />
+          <text x="220" y="103" text-anchor="middle" class="s-mono">回写</text>
+          <!-- Arrow 3: 导出请求 → -->
+          <line x1="445" y1="65" x2="539" y2="65" stroke="var(--stone)" stroke-width="1.3" />
+          <path d="M533 60 L545 65 L533 70 Z" fill="var(--stone)" />
+          <text x="492" y="53" text-anchor="middle" class="s-mono">导出请求</text>
+          <!-- Arrow 4: 完成或失败 → brand color -->
+          <line x1="730" y1="65" x2="829" y2="65" stroke="var(--brand)" stroke-width="1.3" />
+          <path d="M823 60 L835 65 L823 70 Z" fill="var(--brand)" />
+          <text x="782" y="53" text-anchor="middle" class="s-mono" style="fill:var(--brand)">完成或失败</text>
+        </svg>
+        <ul class="dash" style="border-top:.5px solid var(--border);padding-top:26px;gap:13px">
+          <li>用户<b>编辑过程数据不离开本机</b>——浏览器内存是唯一的运行时环境</li>
+          <li>导出数据驻留临时目录<b>平均 &lt; 60 秒</b>，进程退出 hook 自动 rm -rf 清理</li>
+          <li>任何阶段<b>不进数据库 / 对象存储</b>——后端无状态，无持久化</li>
+        </ul>
+      </div>
+      <span class="mark">Data Lifecycle</span><span class="pgnum">07 / 11</span>
+    </section>
+
+    <!-- ════════════ 08 · 用法 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">06 · 用法</div>
+      <h1 class="title">三步上手，不到一分钟</h1>
+      <p class="lead">不注册、不安装，打开网页就能用。从一份 HTML 到一份能交出去的演示，只有三步。</p>
+      <div class="cols3 grow" style="margin-top:38px;align-items:stretch">
+        <div class="card step" style="display:flex;flex-direction:column">
+          <div class="no">STEP 01</div>
+          <h3>打开</h3>
+          <p class="body">把 AI 生成的 <span class="acc">deck.html</span> 拖进来，或打开本地文件夹、直接粘贴代码。</p>
+          <div style="margin-top:auto;padding-top:16px"><span class="tag">零迁移</span></div>
+        </div>
+        <div class="card step" style="display:flex;flex-direction:column">
+          <div class="no">STEP 02</div>
+          <h3>点选编辑</h3>
+          <p class="body">在页面上点哪改哪——改字、换色、调版式，改错了随时撤销。</p>
+          <div style="margin-top:auto;padding-top:16px"><span class="tag">所见即所得</span></div>
+        </div>
+        <div class="card step" style="display:flex;flex-direction:column">
+          <div class="no">STEP 03</div>
+          <h3>一键导出</h3>
+          <p class="body">导出视觉一致的 PPTX 或 PDF，文件直接落到你的磁盘。</p>
+          <div style="margin-top:auto;padding-top:16px"><span class="tag">高保真</span></div>
+        </div>
+      </div>
+      <span class="mark">How to Use</span><span class="pgnum">08 / 11</span>
+    </section>
+
+    <!-- ════════════ 08 · 效果 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">07 · 效果</div>
+      <h1 class="title">你交出去的，终于配得上你想说的</h1>
+      <div class="cols2 grow" style="margin-top:34px;align-items:center">
+        <ul class="dash" style="gap:18px">
+          <li><b>视觉一致。</b>屏幕上是什么样，投影、PDF、PPT 里就是什么样，不再为字体和排版提心吊胆。</li>
+          <li><b>临场不慌。</b>客户多问一句、老师改一个意见，五分钟改完重新导出，从容交付。</li>
+          <li><b>表达更专注。</b>把心思花在"想说什么"，而不是"怎么把它弄出去"。</li>
+        </ul>
+        <div>
+          <p class="quote lg">工具最好的归宿，<br />是让你忘记它存在——<br />好到你只记得自己想说的话。</p>
+        </div>
+      </div>
+      <span class="mark">Outcome</span><span class="pgnum">09 / 11</span>
+    </section>
+
+    <!-- ════════════ 10 · 渠道 × 人群映射 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">09 · 增长</div>
+      <h1 class="title">三类用户，各自的渠道与打法</h1>
+      <p class="lead">不同渠道住着不同的人——内容要分别裁剪，而不是一篇通稿到处发。</p>
+      <div class="grow" style="margin-top:20px;display:flex;align-items:center">
+        <svg viewBox="0 0 1060 305" width="1060">
+          <!-- Column headers -->
+          <text x="0" y="18" class="s-mono" style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase">受众</text>
+          <text x="258" y="18" class="s-mono" style="font-size:10px;letter-spacing:1.6px;text-transform:uppercase">首选渠道</text>
+
+          <!-- ── Row 1: 答辩研究生 ── -->
+          <rect x="0" y="28" width="190" height="52" rx="8" fill="var(--sand)" />
+          <text x="95" y="51" text-anchor="middle" class="s-lab">答辩研究生</text>
+          <text x="95" y="69" text-anchor="middle" class="s-sub">痛最尖锐：改一句话</text>
+          <line x1="190" y1="54" x2="248" y2="54" stroke="var(--stone)" stroke-width="1.2" />
+          <path d="M242 49 L254 54 L242 59 Z" fill="var(--stone)" />
+          <rect x="258" y="30" width="118" height="46" rx="6" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="317" y="51" text-anchor="middle" class="s-sub" style="fill:var(--near);font-weight:500">小红书</text>
+          <text x="317" y="66" text-anchor="middle" class="s-sub">研究生/答辩/效率</text>
+          <rect x="386" y="30" width="118" height="46" rx="6" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="445" y="51" text-anchor="middle" class="s-sub" style="fill:var(--near);font-weight:500">Reddit</text>
+          <text x="445" y="66" text-anchor="middle" class="s-sub">r/GradSchool</text>
+
+          <!-- ── Row 2: 技术分享工程师 ── -->
+          <rect x="0" y="126" width="190" height="52" rx="8" fill="var(--sand)" />
+          <text x="95" y="149" text-anchor="middle" class="s-lab">技术分享工程师</text>
+          <text x="95" y="167" text-anchor="middle" class="s-sub">展示技术决策</text>
+          <line x1="190" y1="152" x2="248" y2="152" stroke="var(--stone)" stroke-width="1.2" />
+          <path d="M242 147 L254 152 L242 157 Z" fill="var(--stone)" />
+          <rect x="258" y="128" width="118" height="46" rx="6" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="317" y="149" text-anchor="middle" class="s-sub" style="fill:var(--near);font-weight:500">GitHub</text>
+          <text x="317" y="164" text-anchor="middle" class="s-sub">README / Star</text>
+          <rect x="386" y="128" width="118" height="46" rx="6" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="445" y="149" text-anchor="middle" class="s-sub" style="fill:var(--near);font-weight:500">Hacker News</text>
+          <text x="445" y="164" text-anchor="middle" class="s-sub">Show HN 痛点</text>
+          <rect x="514" y="128" width="118" height="46" rx="6" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="573" y="149" text-anchor="middle" class="s-sub" style="fill:var(--near);font-weight:500">X / Twitter</text>
+          <text x="573" y="164" text-anchor="middle" class="s-sub">build-in-public</text>
+
+          <!-- ── Row 3: 独立咨询师 ── -->
+          <rect x="0" y="224" width="190" height="52" rx="8" fill="var(--sand)" />
+          <text x="95" y="247" text-anchor="middle" class="s-lab">独立咨询师</text>
+          <text x="95" y="265" text-anchor="middle" class="s-sub">高频交付演示稿</text>
+          <line x1="190" y1="250" x2="248" y2="250" stroke="var(--stone)" stroke-width="1.2" />
+          <path d="M242 245 L254 250 L242 255 Z" fill="var(--stone)" />
+          <rect x="258" y="226" width="118" height="46" rx="6" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="317" y="247" text-anchor="middle" class="s-sub" style="fill:var(--near);font-weight:500">X / Twitter</text>
+          <text x="317" y="262" text-anchor="middle" class="s-sub">人设 + 案例</text>
+          <rect x="386" y="226" width="118" height="46" rx="6" fill="var(--ivory)" stroke="var(--border)" />
+          <text x="445" y="247" text-anchor="middle" class="s-sub" style="fill:var(--near);font-weight:500">即刻</text>
+          <text x="445" y="262" text-anchor="middle" class="s-sub">中文独立开发圈</text>
+          <rect x="514" y="226" width="118" height="46" rx="6" fill="var(--brand-tint)" stroke="var(--border)" />
+          <text x="573" y="247" text-anchor="middle" class="s-sub" style="fill:var(--near);font-weight:500">Product Hunt</text>
+          <text x="573" y="262" text-anchor="middle" class="s-sub">首发放大器</text>
+
+          <!-- Vertical divider + key insights -->
+          <line x1="680" y1="28" x2="680" y2="290" stroke="var(--border)" stroke-width=".5" />
+          <text x="700" y="50" class="s-lab" style="font-size:13px">核心策略</text>
+          <text x="700" y="78" class="s-sub">• GitHub 是主场，star = 信任货币</text>
+          <text x="700" y="112" class="s-sub">• 小红书 / Reddit 垂直转化最高</text>
+          <text x="700" y="146" class="s-sub">  答辩人群痛最尖锐</text>
+          <text x="700" y="180" class="s-sub">• X / 即刻 做长期人设</text>
+          <text x="700" y="214" class="s-sub">  持续晒踩坑和迭代</text>
+          <text x="700" y="248" class="s-sub">• HN / PH 是一次性放大器</text>
+          <text x="700" y="282" class="s-sub">  攒足 demo 再发，别浪费首发</text>
+        </svg>
+      </div>
+      <span class="mark">Growth</span><span class="pgnum">10 / 11</span>
+    </section>
+
+    <!-- ════════════ 11 · 结语 ════════════ -->
+    <section class="slide center" style="align-items:flex-start">
+      <div class="eyebrow">尾声 · Get Started</div>
+      <p class="quote lg" style="font-size:34px;line-height:1.34;border-left-width:3px;padding-left:22px;max-width:none;white-space:nowrap">
+        把一件小事做到不丢人，<br />本身就是一种<span class="acc">理想主义</span>。
+      </p>
+      <p class="lead" style="font-size:18px;margin-top:30px;max-width:44ch">
+        打开一份 HTML，点选编辑，一键导出。本地优先，数据不离开你的机器。<br />你的 AI 工作流不变，只多了"修剪与交付"这一步。
+      </p>
+      <div style="margin-top:40px;display:flex;align-items:center;gap:14px">
+        <span class="tag" style="font-size:12px;padding:8px 16px">开始使用</span>
+        <span class="tag" style="font-size:12px;padding:8px 16px;background:var(--sand);color:var(--dark)">GitHub · 开源</span>
+      </div>
+      <span class="mark">Kami × NextPPT</span><span class="pgnum">11 / 11</span>
+    </section>
+
+  </body>
+</html>

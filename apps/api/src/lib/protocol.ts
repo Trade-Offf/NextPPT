@@ -4,9 +4,10 @@
  * Types are still imported from @hds/protocol (erased at runtime).
  */
 
-export type ExportFormat = 'pptx' | 'pdf';
+export type ExportFormat = 'pptx' | 'pdf' | 'png';
 export type ExportResolution = '1280x720@2x' | '1920x1080@2x' | '3840x2160@2x';
 export type ExportWatermark = 'on' | 'off';
+export type ExportMode = 'deck' | 'doc';
 export type ExportPageRange = string;
 
 export interface ExportRequestMeta {
@@ -21,6 +22,7 @@ export interface ExportOptions {
   watermark: ExportWatermark;
   pageRange: ExportPageRange;
   meta: ExportRequestMeta;
+  mode: ExportMode;
 }
 
 /** Parses e.g. "1,3-5,8" into sorted unique ordinals */

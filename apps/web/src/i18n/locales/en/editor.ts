@@ -106,6 +106,8 @@ const editor: typeof zh = {
     progress: 'Screenshot progress',
     exporting: 'Exporting…',
     start: 'Export {{format}}',
+    docPdfHint: 'Smart-paginated by the document print rules into a selectable, searchable vector PDF.',
+    docPngHint: 'Full-page screenshot as a single tall PNG.',
   },
   historyDrawer: {
     title: 'History',
@@ -148,6 +150,7 @@ const editor: typeof zh = {
       'No recognizable slide HTML in this folder. You need at least one <section class="slide"> page.',
     noSlides:
       'This HTML has no <section class="slide"> pages, so it cannot be opened as a deck.',
+    noHtml: 'No HTML file was found in this folder.',
     sampleFailed: 'Failed to load the sample template, please try again later',
     dropHtmlOnly: 'Please drop an HTML file or a folder containing HTML.',
   },

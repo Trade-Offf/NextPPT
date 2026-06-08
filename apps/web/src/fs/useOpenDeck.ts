@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
-import { pickDirectory, pickFile, recallHandle, verifyPermission, findDeckFile, parseDeck } from './adapter.js';
+import { pickDirectory, pickFile, recallHandle, verifyPermission, findDeckFile, findAnyHtmlFile, deckSlideCount, parseDeck, parseDoc } from './adapter.js';
 import { resolveAssetsInHtml, revokeAssetCache } from './assetResolver.js';
 
 export const DIR_API_SUPPORTED = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
@@ -36,69 +36,73 @@ export function useOpenDeck() {
   const [formatError, setFormatError] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  const openDeck = async (handle: FileSystemDirectoryHandle) => {
+  // ── Loaders (workspace kind already decided) ────────────────────────────────
+  // `deck` parses `section.slide` pages; `doc` wraps the whole body as one
+  // free-edit page. Both resolve relative assets against the folder handle.
+
+  const loadDir = async (
+    handle: FileSystemDirectoryHandle,
+    fileName: string,
+    html: string,
+    kind: 'deck' | 'doc',
+  ) => {
+    const { meta, headHtml: rawHead, slides: rawSlides } = kind === 'deck' ? parseDeck(html) : parseDoc(html);
+    revokeAssetCache();
+    const resolvedSlides = await Promise.all(
+      rawSlides.map(async (slide) => ({
+        ...slide,
+        html: await resolveAssetsInHtml(slide.html, handle),
+      })),
+    );
+    const headHtml = await resolveAssetsInHtml(rawHead, handle);
+    openDirectory(handle, fileName, html, headHtml, meta, resolvedSlides, kind);
+  };
+
+  const loadSingle = (fileName: string, html: string, kind: 'deck' | 'doc') => {
+    const { meta, headHtml, slides } = kind === 'deck' ? parseDeck(html) : parseDoc(html);
+    revokeAssetCache();
+    openFile(fileName, html, headHtml, meta, slides, kind);
+  };
+
+  // ── Auto-detecting openers ──────────────────────────────────────────────────
+  // The workspace kind is inferred from the HTML itself: a `section.slide` deck
+  // opens in PPT mode; anything else opens in free-edit (doc) mode. There is no
+  // manual switch — whatever you drop in is recognised automatically.
+
+  const openDir = async (handle: FileSystemDirectoryHandle) => {
     setLoading(true);
     setError(null);
     setFormatError(false);
-    let scrollFormatHint = false;
     try {
       const ok = await verifyPermission(handle);
       if (!ok) throw new Error(t('errors.needPermission'));
 
-      const result = await findDeckFile(handle);
-      if (!result) {
-        setFormatError(true);
-        scrollFormatHint = true;
-        throw new Error(t('errors.notFound'));
+      const deckFile = await findDeckFile(handle);
+      if (deckFile) {
+        await loadDir(handle, deckFile.fileName, deckFile.html, 'deck');
+        return;
       }
-
-      const { fileName, html } = result;
-      const { meta, headHtml: rawHead, slides: rawSlides } = parseDeck(html);
-      if (!rawSlides.length) {
-        setFormatError(true);
-        scrollFormatHint = true;
-        throw new Error(t('errors.noSlides'));
-      }
-
-      revokeAssetCache();
-
-      const resolvedSlides = await Promise.all(
-        rawSlides.map(async (slide) => ({
-          ...slide,
-          html: await resolveAssetsInHtml(slide.html, handle),
-        })),
-      );
-      const headHtml = await resolveAssetsInHtml(rawHead, handle);
-
-      openDirectory(handle, fileName, html, headHtml, meta, resolvedSlides);
+      const anyFile = await findAnyHtmlFile(handle);
+      if (!anyFile) throw new Error(t('errors.noHtml'));
+      await loadDir(handle, anyFile.fileName, anyFile.html, 'doc');
     } catch (err) {
       setError(errMessage(err));
-      if (scrollFormatHint) scrollToOpenError();
+      scrollToOpenError();
     } finally {
       setLoading(false);
     }
   };
 
-  // Single self-contained HTML file (no folder, no relative assets).
   const openSingleFile = (fileName: string, html: string) => {
     setError(null);
     setFormatError(false);
-    const { meta, headHtml, slides } = parseDeck(html);
-    if (!slides.length) {
-      setFormatError(true);
-      setError(t('errors.noSlides'));
-      scrollToOpenError();
-      return;
-    }
-    revokeAssetCache();
-    openFile(fileName, html, headHtml, meta, slides);
+    loadSingle(fileName, html, deckSlideCount(html) > 0 ? 'deck' : 'doc');
   };
 
   const handlePickFolder = async () => {
     if (!DIR_API_SUPPORTED) return;
     try {
-      const handle = await pickDirectory();
-      await openDeck(handle);
+      await openDir(await pickDirectory());
     } catch (err) {
       if ((err as Error).name !== 'AbortError') setError(errMessage(err));
     }
@@ -118,13 +122,18 @@ export function useOpenDeck() {
     }
   };
 
-  const loadSampleTemplate = async () => {
+  /**
+   * Open a ready-made marketplace sample (a public HTML URL) directly in the
+   * editor. The workspace kind is auto-detected from the HTML. Caller navigates
+   * home afterwards.
+   */
+  const openTemplateSample = async (url: string, fileName: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/sample-deck.html');
+      const res = await fetch(url);
       if (!res.ok) throw new Error(t('errors.sampleFailed'));
-      openSingleFile('sample-deck.html', await res.text());
+      openSingleFile(fileName, await res.text());
     } catch (err) {
       setError(errMessage(err));
     } finally {
@@ -136,7 +145,7 @@ export function useOpenDeck() {
     try {
       const handle = await recallHandle();
       if (!handle) return;
-      await openDeck(handle);
+      await openDir(handle);
     } catch (err) {
       setError(errMessage(err));
     }
@@ -152,12 +161,12 @@ export function useOpenDeck() {
     try {
       const handle = await item?.getAsFileSystemHandle?.();
       if (handle?.kind === 'directory') {
-        await openDeck(handle as FileSystemDirectoryHandle);
+        await openDir(handle as FileSystemDirectoryHandle);
         return;
       }
       if (handle?.kind === 'file') {
         const file = await (handle as FileSystemFileHandle).getFile();
-        if (!file.name.toLowerCase().endsWith('.html') && !file.name.toLowerCase().endsWith('.htm')) {
+        if (!/\.html?$/i.test(file.name)) {
           setError(t('errors.dropHtmlOnly'));
           return;
         }
@@ -185,7 +194,7 @@ export function useOpenDeck() {
     handlePickFolder,
     handlePickFile,
     handleRecall,
-    loadSampleTemplate,
+    openTemplateSample,
     handleDrop,
   };
 }

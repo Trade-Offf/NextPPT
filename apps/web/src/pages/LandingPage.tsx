@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useOpenDeck, DIR_API_SUPPORTED, FILE_API_SUPPORTED, FS_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
-import { useGuideNav } from '../hooks/useGuideNav.js';
+import { useGuideNav, useLocalePrefix } from '../hooks/useGuideNav.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { EditorPreview } from '../components/EditorPreview.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
@@ -11,6 +12,8 @@ import { OpenDeckErrorAlert } from '../components/OpenDeckErrorAlert.js';
 export function LandingPage() {
   const { t } = useTranslation('landing');
   const { openGuide } = useGuideNav();
+  const navigate = useNavigate();
+  const prefix = useLocalePrefix();
   const {
     loading,
     error,
@@ -20,7 +23,6 @@ export function LandingPage() {
     handlePickFolder,
     handlePickFile,
     handleRecall,
-    loadSampleTemplate,
     handleDrop,
   } = useOpenDeck();
 
@@ -38,7 +40,8 @@ export function LandingPage() {
   const dirSupported = !mounted || DIR_API_SUPPORTED;
   const fileSupported = !mounted || FILE_API_SUPPORTED;
 
-  /** Main CTA / drop zone: open HTML file picker (folder via button below or drag). */
+  /** Main CTA / drop zone: open the HTML picker (folder via button below or drag).
+   *  The workspace kind (PPT deck vs free-edit doc) is auto-detected on open. */
   const openPrimary = () => {
     if (loading) return;
     if (FILE_API_SUPPORTED) void handlePickFile();
@@ -197,15 +200,6 @@ export function LandingPage() {
                     {t('hub.recall')}
                   </button>
                 )}
-
-                <div className="mt-5 pt-4 border-t border-[var(--separator)]">
-                  <p className="text-xs text-[var(--secondary-label)] text-center mb-3">{t('hub.noDeck')}</p>
-                  <div className="flex items-center justify-center gap-2.5 flex-wrap">
-                    <button onClick={loadSampleTemplate} disabled={loading} className="hds-btn px-3.5 py-1.5 text-xs disabled:opacity-40">{t('hub.sample')}</button>
-                    <a href="/sample-deck.html" download="sample-deck.html" className="hds-btn px-3.5 py-1.5 text-xs inline-block">{t('hub.downloadSample')}</a>
-                    <button onClick={() => openGuide('generate')} className="hds-btn px-3.5 py-1.5 text-xs">{t('hub.aiHelp')}</button>
-                  </div>
-                </div>
               </>
             )}
 
@@ -234,6 +228,7 @@ export function LandingPage() {
             <p className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">{t('footer.colResources')}</p>
             <ul className="space-y-2 text-[var(--secondary-label)]">
               <li><button onClick={() => openGuide('generate')} className="hover:text-[var(--label)]">{t('footer.guide')}</button></li>
+              <li><button onClick={() => navigate(`${prefix}/templates`)} className="hover:text-[var(--label)]">{t('footer.templates')}</button></li>
               <li><a href="/sample-deck.html" download className="hover:text-[var(--label)]">{t('footer.sample')}</a></li>
             </ul>
           </div>
