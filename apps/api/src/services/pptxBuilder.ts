@@ -30,8 +30,10 @@ export async function buildPptx(
     const slide = pptx.addSlide();
     const imgData = await fs.readFile(shot.filePath);
     const b64 = imgData.toString('base64');
+    const ext = path.extname(shot.filePath).toLowerCase();
+    const mime = ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' : 'image/png';
     slide.addImage({
-      data: `image/png;base64,${b64}`,
+      data: `${mime};base64,${b64}`,
       x: 0,
       y: 0,
       w: '100%',

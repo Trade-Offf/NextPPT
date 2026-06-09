@@ -7,6 +7,7 @@ import { buildPdf } from '../services/pdfBuilder.js';
 import { renderDocument } from '../services/documentRenderer.js';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
 import os from 'node:os';
 import crypto from 'node:crypto';
 
@@ -71,6 +72,13 @@ export async function exportHandler(req: FastifyRequest, reply: FastifyReply) {
   const viewportWidth = 1280;
   const viewportHeight = 720;
   const deviceScaleFactor = SCALE_BY_RESOLUTION[opts.resolution] ?? 2;
+
+  // Optional payload shrink: set EXPORT_IMAGE_FORMAT=jpeg to capture slides as
+  // JPEG instead of PNG. At 2x+ supersampling this is visually near-identical
+  // for typical decks but cuts file size ~3-5x, easing bandwidth/failure window.
+  const exportImageType: 'png' | 'jpeg' =
+    process.env['EXPORT_IMAGE_FORMAT']?.toLowerCase() === 'jpeg' ? 'jpeg' : 'png';
+  const exportImageQuality = parseInt(process.env['EXPORT_IMAGE_QUALITY'] ?? '90', 10);
 
   // 2. Now set up SSE
   // @fastify/cors sets CORS headers on the Fastify reply, but this handler writes
@@ -140,6 +148,8 @@ export async function exportHandler(req: FastifyRequest, reply: FastifyReply) {
         viewportHeight,
         deviceScaleFactor,
         pageRange: opts.pageRange,
+        imageType: exportImageType,
+        imageQuality: exportImageQuality,
         onProgress: (current, total) => sse('progress', { current, total, phase: 'screenshot' }),
       });
 
@@ -175,6 +185,15 @@ export async function exportHandler(req: FastifyRequest, reply: FastifyReply) {
 
 // ─── Download handler ────────────────────────────────────────────────────────
 
+function contentTypeForName(fileName: string): string {
+  const name = fileName.toLowerCase();
+  if (name.endsWith('.pptx'))
+    return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+  if (name.endsWith('.png')) return 'image/png';
+  if (name.endsWith('.jpg') || name.endsWith('.jpeg')) return 'image/jpeg';
+  return 'application/pdf';
+}
+
 export async function downloadHandler(
   req: FastifyRequest<{ Params: { token: string } }>,
   reply: FastifyReply,
@@ -184,17 +203,64 @@ export async function downloadHandler(
   if (!entry || entry.expiresAt < Date.now()) {
     return reply.code(404).send({ error: 'Download link expired or not found' });
   }
-  const buffer = await fs.readFile(entry.filePath);
-  const name = entry.fileName.toLowerCase();
-  const contentType = name.endsWith('.pptx')
-    ? 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
-    : name.endsWith('.png')
-      ? 'image/png'
-      : 'application/pdf';
+
+  // Stat the file so we can advertise an exact Content-Length and honor Range
+  // requests. If it has been swept by TTL cleanup, treat as gone.
+  const stat = await fs.stat(entry.filePath).catch(() => null);
+  if (!stat || !stat.isFile()) {
+    downloadCache.delete(token);
+    return reply.code(404).send({ error: 'Download file no longer available' });
+  }
+  const total = stat.size;
+
+  reply.header('Content-Type', contentTypeForName(entry.fileName));
   reply.header(
     'Content-Disposition',
     `attachment; filename*=UTF-8''${encodeURIComponent(entry.fileName)}`,
   );
-  reply.header('Content-Type', contentType);
-  return reply.send(buffer);
+  // Advertise byte-range support so browsers/download managers can resume.
+  reply.header('Accept-Ranges', 'bytes');
+  reply.header('Cache-Control', 'no-store');
+
+  // ── Range request → 206 Partial Content (enables resume without restart) ──
+  const rangeHeader = req.headers.range;
+  if (rangeHeader) {
+    const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim());
+    if (match) {
+      const startRaw = match[1] ?? '';
+      const endRaw = match[2] ?? '';
+      let start: number;
+      let end: number;
+      if (startRaw === '' && endRaw !== '') {
+        // Suffix range: "bytes=-N" → last N bytes.
+        const suffix = parseInt(endRaw, 10);
+        start = Math.max(0, total - suffix);
+        end = total - 1;
+      } else {
+        start = startRaw === '' ? 0 : parseInt(startRaw, 10);
+        end = endRaw === '' ? total - 1 : parseInt(endRaw, 10);
+      }
+
+      if (
+        Number.isNaN(start) ||
+        Number.isNaN(end) ||
+        start > end ||
+        start >= total ||
+        start < 0
+      ) {
+        reply.header('Content-Range', `bytes */${total}`);
+        return reply.code(416).send();
+      }
+
+      end = Math.min(end, total - 1);
+      reply.code(206);
+      reply.header('Content-Range', `bytes ${start}-${end}/${total}`);
+      reply.header('Content-Length', String(end - start + 1));
+      return reply.send(createReadStream(entry.filePath, { start, end }));
+    }
+    // Malformed Range → fall through to a normal full 200 response.
+  }
+
+  reply.header('Content-Length', String(total));
+  return reply.send(createReadStream(entry.filePath));
 }

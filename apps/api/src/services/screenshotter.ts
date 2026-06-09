@@ -15,6 +15,10 @@ interface ScreenshotOptions {
   viewportHeight: number;
   deviceScaleFactor: number;
   pageRange: string;
+  /** Capture format. JPEG yields much smaller files (lighter downloads). Default 'png'. */
+  imageType?: 'png' | 'jpeg';
+  /** JPEG quality 1–100 (ignored for png). Default 90. */
+  imageQuality?: number;
   onProgress: (current: number, total: number) => void;
 }
 
@@ -23,6 +27,9 @@ export async function screenshotSlides(
   opts: ScreenshotOptions,
 ): Promise<ScreenshotResult[]> {
   const { viewportWidth, viewportHeight, deviceScaleFactor, pageRange, onProgress } = opts;
+  const imageType: 'png' | 'jpeg' = opts.imageType === 'jpeg' ? 'jpeg' : 'png';
+  const imageQuality = Math.min(100, Math.max(1, opts.imageQuality ?? 90));
+  const fileExt = imageType === 'jpeg' ? 'jpg' : 'png';
 
   // Prefer system Chrome to avoid puppeteer cache path issues.
   // Falls back to puppeteer's bundled chrome if system Chrome not found.
@@ -137,13 +144,17 @@ export async function screenshotSlides(
     for (let i = 0; i < ordinals.length; i++) {
       const ordinal = ordinals[i]!;
       const el = allSlideHandles[ordinal - 1];
-      const outFile = path.join(outDir, `slide-${String(ordinal).padStart(4, '0')}.png`);
+      const outFile = path.join(outDir, `slide-${String(ordinal).padStart(4, '0')}.${fileExt}`);
+      const shotOpts =
+        imageType === 'jpeg'
+          ? ({ path: outFile, type: 'jpeg' as const, quality: imageQuality })
+          : ({ path: outFile, type: 'png' as const });
 
       if (el) {
         // Scroll element into view to avoid stale positioning, then screenshot the element
         await el.scrollIntoView();
         await new Promise((r) => setTimeout(r, 80)); // brief settle for animations
-        await el.screenshot({ path: outFile, type: 'png' });
+        await el.screenshot(shotOpts);
       } else {
         // Fallback: viewport screenshot
         await page.evaluate((idx: number) => {
@@ -151,7 +162,7 @@ export async function screenshotSlides(
           slides[idx]?.scrollIntoView({ behavior: 'instant' });
         }, ordinal - 1);
         await new Promise((r) => setTimeout(r, 80));
-        await page.screenshot({ path: outFile, type: 'png', clip: { x: 0, y: 0, width: viewportWidth, height: viewportHeight } });
+        await page.screenshot({ ...shotOpts, clip: { x: 0, y: 0, width: viewportWidth, height: viewportHeight } });
       }
 
       results.push({ ordinal, filePath: outFile, width: viewportWidth * deviceScaleFactor, height: viewportHeight * deviceScaleFactor });

@@ -25,7 +25,11 @@ export async function buildPdf(
 
   for (const shot of screenshots) {
     const imgBytes = await fs.readFile(shot.filePath);
-    const img = await pdf.embedPng(imgBytes);
+    const ext = path.extname(shot.filePath).toLowerCase();
+    const img =
+      ext === '.jpg' || ext === '.jpeg'
+        ? await pdf.embedJpg(imgBytes)
+        : await pdf.embedPng(imgBytes);
     const page = pdf.addPage([img.width, img.height]);
     page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
   }
