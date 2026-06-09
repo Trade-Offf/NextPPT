@@ -1417,7 +1417,7 @@ select.hds-input {
 .hds-floating-bar .hds-lang-btn.is-active { color: #fff; font-weight: 600; }
 .hds-floating-bar .hds-lang-sep { color: rgba(255, 255, 255, 0.25); }
 
-.hds-emblem { filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.55)); }
+.hds-emblem { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4)); }
 
 /* Metallic word accent for the wordmark in nav/footer */
 .hds-wordmark {

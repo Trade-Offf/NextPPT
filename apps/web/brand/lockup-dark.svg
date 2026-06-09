@@ -1,0 +1,26 @@
+<svg width="720" height="240" viewBox="0 0 720 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="flowLD" x1="74" y1="80" x2="182" y2="176" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7079E0"/>
+      <stop offset="1" stop-color="#A3A9F2"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="720" height="240" fill="#0B0B0E"/>
+
+  <g transform="translate(46 42) scale(0.609)">
+    <rect x="1" y="1" width="254" height="254" rx="60" fill="#14151A" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+    <path d="M74 80C116 84 140 172 182 176" stroke="url(#flowLD)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M74 176C116 172 140 84 182 80" stroke="url(#flowLD)" stroke-width="22" stroke-linecap="round" opacity="0.3"/>
+    <circle cx="74" cy="80" r="29" fill="#7079E0"/>
+    <circle cx="182" cy="80" r="29" fill="#A3A9F2"/>
+    <circle cx="74" cy="176" r="29" fill="#5E6AD2"/>
+    <circle cx="182" cy="176" r="29" fill="#8B93EC"/>
+    <rect x="97" y="104" width="62" height="49" rx="12" fill="#EEF0FA"/>
+    <rect x="110" y="119" width="36" height="6" rx="3" fill="#1C1F2E"/>
+    <rect x="110" y="131" width="24" height="6" rx="3" fill="#1C1F2E" opacity="0.65"/>
+  </g>
+
+  <text x="245" y="116" font-family="Inter, Geist, Manrope, -apple-system, Arial, sans-serif" font-size="54" font-weight="750" fill="#F8FAFC">NextPPT</text>
+  <text x="248" y="154" font-family="Inter, Geist, Manrope, -apple-system, Arial, sans-serif" font-size="20" font-weight="500" fill="#94A3B8">Turn AI output into presentations</text>
+</svg>

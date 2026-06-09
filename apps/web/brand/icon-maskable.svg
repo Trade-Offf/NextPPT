@@ -1,0 +1,24 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="flowM" x1="74" y1="80" x2="182" y2="176" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5E6AD2"/>
+      <stop offset="1" stop-color="#8B93EC"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="256" height="256" fill="#F8FAFC"/>
+
+  <g transform="translate(128 128) scale(0.78) translate(-128 -128)">
+    <path d="M74 80C116 84 140 172 182 176" stroke="url(#flowM)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M74 176C116 172 140 84 182 80" stroke="url(#flowM)" stroke-width="22" stroke-linecap="round" opacity="0.28"/>
+
+    <circle cx="74" cy="80" r="29" fill="#5E6AD2"/>
+    <circle cx="182" cy="80" r="29" fill="#8B93EC"/>
+    <circle cx="74" cy="176" r="29" fill="#4C57BD"/>
+    <circle cx="182" cy="176" r="29" fill="#6E79DE"/>
+
+    <rect x="97" y="104" width="62" height="49" rx="12" fill="#1C1F2E"/>
+    <rect x="110" y="119" width="36" height="6" rx="3" fill="white"/>
+    <rect x="110" y="131" width="24" height="6" rx="3" fill="white" opacity="0.7"/>
+  </g>
+</svg>
