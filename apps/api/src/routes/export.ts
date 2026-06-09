@@ -400,8 +400,22 @@ export async function downloadHandler(
   reply.header('Accept-Ranges', 'bytes');
   reply.header('Cache-Control', 'no-store');
 
+  // A strong validator (ETag/Last-Modified) is REQUIRED for browsers to resume
+  // an interrupted download: Chrome/Firefox only re-issue a Range request (via
+  // If-Range) when they have one. Without it the browser restarts from 0 even
+  // though the server supports Range. The token's file is immutable, so a
+  // size+mtime ETag is stable across the download's lifetime.
+  const lastModified = stat.mtime.toUTCString();
+  const etag = `"${total.toString(16)}-${Math.floor(stat.mtimeMs).toString(16)}"`;
+  reply.header('ETag', etag);
+  reply.header('Last-Modified', lastModified);
+
   // ── Range request → 206 Partial Content (enables resume without restart) ──
-  const rangeHeader = req.headers.range;
+  // Honor Range unless an If-Range precondition is present and doesn't match
+  // our validator (in which case the client's partial is stale → full 200).
+  const ifRange = req.headers['if-range'];
+  const ifRangeOk = !ifRange || ifRange === etag || ifRange === lastModified;
+  const rangeHeader = ifRangeOk ? req.headers.range : undefined;
   if (rangeHeader) {
     const match = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim());
     if (match) {
