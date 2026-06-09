@@ -59,6 +59,7 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
 
         <div className="ml-auto flex items-center gap-4 sm:gap-5">
           <button onClick={() => navigate(`${prefix}/templates`)} className="hds-nav-link">{t('nav.templates')}</button>
+          <button onClick={() => navigate(`${prefix}/explore`)} className="hds-nav-link">{t('nav.explore')}</button>
           <button onClick={() => openGuide('generate')} className="hds-nav-link">{t('nav.guide')}</button>
           <LanguageSwitcher />
           {trailing}

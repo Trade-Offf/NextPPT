@@ -45,8 +45,8 @@ export default {
       desc: '带章节与图表的长篇排版，智能分页导出。',
     },
     'deck-classic': {
-      title: '经典演示稿',
-      desc: '16:9 多页 PPT，遵循 section.slide 协议。',
+      title: '终端风演示稿',
+      desc: 'GitHub 暗色 / 终端 IDE 风格的多页演示稿范例（开发者视角的 AI 提效分享）：IDE 标签栏、kicker 注释前缀、痛点-方案场景卡、语法高亮代码框、金句条与数据卡，终端橙点睛、JetBrains Mono 撑技术感。可直接在编辑器打开或下载；附带的提示词是通用终端风设计规范，可套用到任意主题。',
     },
   },
 };

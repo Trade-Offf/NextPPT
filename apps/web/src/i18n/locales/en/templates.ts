@@ -47,8 +47,8 @@ const templates: typeof zh = {
       desc: 'Long-form layout with sections and charts, exported with smart pagination.',
     },
     'deck-classic': {
-      title: 'Classic deck',
-      desc: 'A 16:9 multi-page deck following the section.slide protocol.',
+      title: 'Terminal-style deck',
+      desc: 'A multi-page deck in a GitHub-dark / terminal-IDE aesthetic (a developer-view AI productivity talk): IDE titlebars, "//" kicker prefixes, pain/fix scenario cards, syntax-highlighted code panels, golden-quote bands and metric cards, accented by terminal orange and JetBrains Mono. Open it in the editor or download it; the bundled prompt is a reusable terminal-style design spec for any topic.',
     },
   },
 };

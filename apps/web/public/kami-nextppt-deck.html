@@ -6,10 +6,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
       media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
     <style>
+      /* TsangerJinKai02 — Kami 官方中文衬线，W04=400 / W05=500 真实字重 */
+      @font-face {
+        font-family: "TsangerJinKai02";
+        src: url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W04.ttf") format("truetype");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      @font-face {
+        font-family: "TsangerJinKai02";
+        src: url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W05.ttf") format("truetype");
+        font-weight: 500; font-style: normal; font-display: swap;
+      }
+
       * { margin: 0; padding: 0; box-sizing: border-box; }
 
       :root {
@@ -22,7 +34,7 @@
         /* ── borders ── */
         --border:#e8e6dc; --border-soft:#e5e3d8;
         /* ── one serif per page; sans is an alias ── */
-        --serif:"Noto Serif SC","Charter","Source Han Serif SC","Songti SC","Georgia",serif;
+        --serif:"TsangerJinKai02",Charter,"Noto Serif SC","Source Han Serif SC","Songti SC",Georgia,serif;
         --sans:var(--serif);
         --mono:"JetBrains Mono","SF Mono",Consolas,Monaco,monospace;
       }
@@ -33,7 +45,7 @@
         background:#c9c5b8; color:var(--near); font-family:var(--serif);
         display:flex; flex-direction:column; align-items:center; gap:24px;
         padding:32px 20px; -webkit-font-smoothing:antialiased;
-        letter-spacing:.2px;
+        letter-spacing:.2px; font-synthesis:none;
       }
 
       .slide {

@@ -15,6 +15,11 @@ const common: typeof zh = {
       description:
         'NextPPT guide: no deck yet? Generate one with a prompt. Then click to change text and images, move things around, and export a projector-ready PPT / PDF in one click. Fully local.',
     },
+    explore: {
+      title: 'Explore · NextPPT — The next-gen deck, born from HTML',
+      description:
+        'NextPPT Explore: a collection of AI content workflows we have validated — like having AI generate a Draw.io file that becomes element-level editable and collaborative once imported into a Lark whiteboard.',
+    },
   },
   language: {
     label: 'Switch language',

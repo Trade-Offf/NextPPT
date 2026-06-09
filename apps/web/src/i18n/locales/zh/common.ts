@@ -13,6 +13,11 @@ export default {
       description:
         'NextPPT 使用指南：没有演示稿就用提示词让 AI 生成，拿回来点一下就能改字换图、挪位置，再一键导出能投影的 PPT / PDF。全程本地。',
     },
+    explore: {
+      title: '探索 · NextPPT — 下一代 PPT，从 HTML 开始',
+      description:
+        'NextPPT 探索：收录我们验证过的 AI 内容工作流，比如让 AI 生成 Draw.io 文件、导入飞书画板后逐元素可编辑可协作。读完即可上手。',
+    },
   },
   language: {
     label: '切换语言',

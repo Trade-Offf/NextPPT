@@ -8,11 +8,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
       media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
     <style>
-      /* TsangerJinKai02 — official Kami serif, with Noto Serif SC as the web fallback */
+      /* TsangerJinKai02 — Kami 官方中文衬线，W04=400 / W05=500 真实字重 */
       @font-face {
         font-family: "TsangerJinKai02";
         src: url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W04.ttf") format("truetype");
@@ -32,7 +32,7 @@
         --parchment:#f5f4ed; --ivory:#faf9f5; --border:#e8e6dc; --border-soft:#e5e3d8;
         --near-black:#141413; --dark-warm:#3d3d3a; --olive:#504e49; --stone:#6b6a64;
         --brand:#1b365d; --brand-tint:#eef2f7;
-        --serif:"TsangerJinKai02","Noto Serif SC","Source Han Serif SC","Songti SC","STSong",Georgia,serif;
+        --serif:"TsangerJinKai02",Charter,"Noto Serif SC","Source Han Serif SC","Songti SC",Georgia,serif;
         --sans:var(--serif);
         --mono:"JetBrains Mono","SF Mono",Consolas,Monaco,monospace;
       }
@@ -46,7 +46,7 @@
       body {
         color: var(--near-black); font-family: var(--serif);
         font-size: 9.4pt; line-height: 1.46; letter-spacing: .2pt;
-        widows: 3; orphans: 3;
+        widows: 3; orphans: 3; font-synthesis: none;
       }
       .serif { font-family: var(--serif); }
       a { color: var(--brand); text-decoration: none; }

@@ -157,6 +157,20 @@ function clearOverlay() {
   if (handleEls) for (const c of HANDLE_CORNERS) handleEls[c].style.display = 'none';
 }
 
+/**
+ * Read an element's text for the inspector: collapse the whitespace that HTML
+ * source indentation introduces (so the textarea has no leading spaces), while
+ * turning explicit <br> into real "\n" so authored line breaks stay editable.
+ */
+function readEditableText(el: Element): string {
+  let out = '';
+  el.childNodes.forEach((node) => {
+    if (node.nodeName === 'BR') out += '\n';
+    else out += (node.textContent ?? '').replace(/\s+/g, ' ');
+  });
+  return out.trim();
+}
+
 function selectElement(el: Element) {
   selectedEl = el instanceof HTMLElement ? el : null;
   showOverlay(el);
@@ -177,7 +191,7 @@ function selectElement(el: Element) {
     },
     styleSnapshot: styleSnapshot(el),
     attrs,
-    text: el.textContent ?? '',
+    text: readEditableText(el),
     layer: elh ? layerInfo(elh) : undefined,
     rect: elh ? slideRect(elh) : undefined,
   });
@@ -632,12 +646,19 @@ interface MermaidApi {
 
 // ─── Patch application ───────────────────────────────────────────────────────
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function applyPatch(selector: string, ops: PatchOp[]): boolean {
   const el = document.querySelector(selector);
   if (!el) return false;
   for (const op of ops) {
     if (op.kind === 'text') {
-      el.textContent = op.value;
+      // Newlines from the inspector become <br> so authored line breaks render
+      // on the slide (and export) regardless of white-space; symmetric with
+      // readEditableText's <br>→"\n". User text is escaped first.
+      el.innerHTML = escapeHtml(op.value).replace(/\n/g, '<br>');
     } else if (op.kind === 'attr') {
       if (op.value === null) el.removeAttribute(op.name);
       else el.setAttribute(op.name, op.value);

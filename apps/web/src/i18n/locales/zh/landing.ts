@@ -3,6 +3,7 @@ export default {
     homeAria: 'NextPPT 首页',
     guide: '使用指南',
     templates: '模版市场',
+    explore: '探索',
     openFile: '打开文件',
   },
   hero: {

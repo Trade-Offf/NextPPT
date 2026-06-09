@@ -11,8 +11,10 @@ import { TEMPLATES, findTemplate, type TemplateItem } from '../data/templates.js
  * Live, non-interactive preview of a sample template. Measures its own width
  * and scales an iframe to fit.
  *
- * - deck: a 1280×720 slide fit to a 16:9 window (the deck body's 40px top
- *   padding is offset away so only the slide shows).
+ * - deck: a 1280×720 slide scaled to exactly fill the 16:9 box (720×scale ==
+ *   container height). No vertical offset — the deck's own body background shows at
+ *   the edge of its body padding, which always matches its theme and never leaks
+ *   the container's background color.
  * - doc: an A4-portrait page (794px = 210mm wide) shown top-aligned and
  *   width-fitted, so the card becomes a 16:9 top-crop of the masthead.
  */
@@ -47,10 +49,10 @@ function SampleThumb({ url, kind }: { url: string; kind: TemplateItem['kind'] })
         aria-hidden="true"
         style={{
           width: baseWidth,
-          height: isDoc ? 1123 : 720, // A4 full height vs slide; container crops
+          height: isDoc ? 1123 : 720, // A4 full height vs exact slide height; container crops
           border: 0,
           position: 'absolute',
-          top: isDoc ? 0 : -40 * scale,
+          top: 0,
           left: 0,
           transform: `scale(${scale || 0.0001})`,
           transformOrigin: 'top left',

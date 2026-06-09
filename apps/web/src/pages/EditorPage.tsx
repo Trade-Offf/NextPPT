@@ -720,10 +720,10 @@ export function EditorPage() {
           {/* Free-edit: one scrollable document at natural width */}
           <main
             ref={canvasContainerRef}
-            className="absolute overflow-y-auto overflow-x-hidden canvas-host transition-[right] duration-200 ease-out"
+            className="absolute overflow-y-auto overflow-x-auto canvas-host transition-[right] duration-200 ease-out"
             style={{ top: 80, bottom: 16, left: 16, right: showInspector ? 328 : 16 }}
           >
-            <div className="mx-auto w-full px-4 pb-12" style={{ maxWidth: 1180 }}>
+            <div className="mx-auto w-full px-4 pb-12" style={{ minWidth: 640 }}>
               <div className="relative rounded-xl overflow-hidden shadow-2xl bg-white">
                 <ScaledCanvas
                   key={`${currentSlideId}:${canvasKey}`}

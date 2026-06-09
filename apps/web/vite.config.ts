@@ -52,6 +52,9 @@ export default defineConfig({
   // `nested` → dist/guide/index.html, dist/en/index.html, dist/en/guide/index.html.
   ssgOptions: {
     dirStyle: 'nested',
-    includedRoutes: () => ['/', '/guide', '/templates', '/en', '/en/guide', '/en/templates'],
+    includedRoutes: () => [
+      '/', '/guide', '/templates', '/explore', '/explore/feishu-whiteboard',
+      '/en', '/en/guide', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard',
+    ],
   },
 });
