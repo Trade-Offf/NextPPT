@@ -18,9 +18,9 @@
 > 你的 AI 工具已经能写出很漂亮的 `deck.html`，NextPPT 补的是最后一公里：改一个字不用重开一轮对话，像 PPT 一样拖图层，本地导出能投影的幻灯片。
 
 <div align="center">
-  <img src="docs/assets/demo.gif" alt="NextPPT 演示" width="760" />
+  <img src="docs/assets/demo.gif" alt="NextPPT 演示 — 打开、点选编辑、导出" width="820" />
   <br />
-  <sub>演示占位 · 把 <code>demo.gif</code> 放到 <code>docs/assets/</code> 即可</sub>
+  <sub>打开 AI 生成的演示稿，点选编辑，一键导出 PPTX / PDF——全程本地。</sub>
 </div>
 
 ## 为什么做这个

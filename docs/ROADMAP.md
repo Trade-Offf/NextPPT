@@ -52,6 +52,8 @@ quadrantChart
 
 | 项目 | 为什么 | 关联 |
 | --- | --- | --- |
+| **README demo 资产(最高优先)** | README L21–23 仍是 `demo.gif` placeholder;一段 10–15s "打开→改字→导出 PPT" 录屏是所有渠道的共用弹药,缺它等于没发。**这是 star 杠杆而非虚荣项** | GROWTH §4 · STRATEGY §5 |
+| **开源 skill 雏形** | A 飞轮的获客/star 入口:开源一个生成 "NextPPT-ready deck" 的 agent skill,把 star 重新变成"使用入口",并将上游生成流量导进 app。**这是 star 量级的真正杠杆** | STRATEGY §3 |
 | **在线 sample 直达** | "拖个 HTML 试试"前先给一个能玩的样例,降低首次门槛 | GROWTH §6 |
 | **分享卡片 / OG image** | 用户分享链接时有好看的预览图,自带传播力 | GROWTH §3 |
 
@@ -75,13 +77,13 @@ quadrantChart
 ```mermaid
 timeline
   title 优化节奏
-  Now : 离线Mermaid : 示例deck一键体验 : 撤销重做 : 保存/错误显式化
-  Next : 历史快照恢复 : 孤儿资源清理 : e2e与视觉回归 : 在线sample直达
+  Now : README demo资产 : 离线Mermaid : 示例deck一键体验 : 撤销重做 : 保存/错误显式化
+  Next : 开源skill雏形 : 历史快照恢复 : 孤儿资源清理 : e2e与视觉回归 : 在线sample直达
   Later : 匿名额度与license : 分享卡片/OG : 可访问性打磨
 ```
 
-- **Now**:都是低成本高影响,直接咬合"激活漏斗"和"导出可信度",优先清空。
-- **Next**:进入留存与工程护栏,让产品敢被更多人用、敢被频繁改。
+- **Now**:都是低成本高影响,直接咬合"激活漏斗"和"导出可信度",优先清空。**README demo 资产前置到 Now**——它是所有放大动作的弹药前提。
+- **Next**:进入留存与工程护栏,让产品敢被更多人用、敢被频繁改。**开源 skill 雏形落在 Next**——A 飞轮入口,star 量级的真正杠杆(详见 STRATEGY-SKILL-FLYWHEEL.md)。
 - **Later**:商业化与长尾品质,等口碑和数据成熟再上,不提前透支用户信任。
 
 ---

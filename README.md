@@ -18,9 +18,9 @@ English | [简体中文](README.zh-CN.md)
 > Your AI tool already writes beautiful `deck.html`. NextPPT is the missing last mile: click to fix one word, drag to rearrange, ship it as a slide — without another prompt round.
 
 <div align="center">
-  <img src="docs/assets/demo.gif" alt="NextPPT demo" width="760" />
+  <img src="docs/assets/demo.gif" alt="NextPPT demo — open, click-edit, export" width="820" />
   <br />
-  <sub>Demo placeholder · drop a <code>demo.gif</code> into <code>docs/assets/</code></sub>
+  <sub>Open an AI-generated deck, click to edit, export PPTX / PDF — all local.</sub>
 </div>
 
 ## Why this exists

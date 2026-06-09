@@ -21,6 +21,7 @@ quadrantChart
   quadrant-4 桌面老牌
   Gamma: [0.2, 0.75]
   Canva: [0.25, 0.7]
+  frontend-slides: [0.18, 0.55]
   Slidev reveal: [0.45, 0.35]
   PowerPoint Keynote: [0.55, 0.2]
   HTML Deck Studio: [0.82, 0.85]
@@ -31,6 +32,10 @@ quadrantChart
 - 下游死守"高保真导出 + 本地隐私"这块别人懒得做或做不动的脏活。
 
 窄定位的好处是:一句话能说清,用户一看就知道"是不是给我用的"。
+
+**关于 frontend-slides(20K star):它是上游,不是竞品。** 它是 agent skill,负责"生成"`deck.html`;我们是 app,负责"改 + 导"。它生成的漂亮 deck 正是我们的理想供给。star 量级差异来自**形态(skill vs app)**——skill 的 repo 就是使用入口,用即 star;app 用户在浏览器用完即走。详见 [STRATEGY-SKILL-FLYWHEEL.md](STRATEGY-SKILL-FLYWHEEL.md)。
+
+**因此定位升级为"双形态":** skill 当获客/star 入口(生成 NextPPT-ready deck),app 当价值兑现与留存。两者咬合,把结构性的 star 劣势转成上游流量入口。
 
 ---
 
