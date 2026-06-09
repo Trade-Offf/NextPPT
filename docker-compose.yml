@@ -3,10 +3,20 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+    # Run an init (tini) as PID 1 so Chromium child/crashpad processes are reaped.
+    # Without this, every export leaks <defunct> zombies (observed 254 in prod).
+    init: true
     environment:
       - PORT=3000
       - HOST=0.0.0.0
       - CORS_ORIGIN=https://next-ppt.com,https://www.next-ppt.com,https://htmldeckstudio.pages.dev
+      # Capture slides as JPEG (q90) instead of PNG: ~3x smaller files + lower
+      # memory, which shrinks the download/failure window. Code falls back to PNG
+      # if unset. See apps/api/DOWNLOAD-RELIABILITY.md.
+      - EXPORT_IMAGE_FORMAT=jpeg
+      - EXPORT_IMAGE_QUALITY=90
+      # Serialize heavy exports so concurrent 4K renders don't thrash the box.
+      - EXPORT_CONCURRENCY=1
     expose:
       - "3000"
     restart: always

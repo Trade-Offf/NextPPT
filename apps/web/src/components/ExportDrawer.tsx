@@ -86,64 +86,99 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
         await appendDirFiles(dirHandle, '', formData);
       }
 
+      // 1. Kick off the export. The server returns a jobId immediately and runs
+      // the heavy work in the background, so a dropped connection no longer
+      // fails the export.
       const res = await fetch(`${API_BASE}/v1/export`, {
         method: 'POST',
         body: formData,
         headers: { 'X-HDS-Trace-Id': crypto.randomUUID() },
       });
 
-      if (!res.ok || !res.body) {
-        throw new Error(`Export failed: ${res.status} ${res.statusText}`);
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let downloadUrl = '';
-      let downloadFilename = '';
-      let buffer = '';
-      let lastEvent = '';
-
-      const handleSseLine = (line: string) => {
-        if (line.startsWith('event:')) { lastEvent = line.slice(6).trim(); return; }
-        if (!line.startsWith('data:')) return;
+      if (!res.ok) {
+        let detail = `${res.status} ${res.statusText}`;
         try {
-          const data = JSON.parse(line.slice(5).trim()) as Record<string, unknown>;
-          if (lastEvent === 'error' || typeof data['message'] === 'string') {
-            setError(String(data['message'] ?? data['code'] ?? 'Export failed'));
-            lastEvent = '';
-            return;
-          }
-          if (typeof data['current'] === 'number') {
-            setProgress({ current: data['current'] as number, total: data['total'] as number });
-          }
-          if (typeof data['url'] === 'string') {
-            downloadUrl = data['url'] as string;
-            downloadFilename = (data['filename'] as string | undefined) ?? 'export';
-          }
-          lastEvent = '';
-        } catch { /* ignore malformed lines */ }
-      };
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-        lines.forEach(handleSseLine);
+          const body = (await res.json()) as { error?: string };
+          if (body?.error) detail = body.error;
+        } catch { /* non-JSON body */ }
+        throw new Error(`Export failed: ${detail}`);
       }
-      // flush remaining
-      buffer.split('\n').forEach(handleSseLine);
 
-      if (downloadUrl) {
-        const a = document.createElement('a');
-        a.href = downloadUrl.startsWith('http') ? downloadUrl : `${API_BASE}${downloadUrl}`;
-        a.download = downloadFilename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        onClose(); // close only on success
-      }
+      const { jobId } = (await res.json()) as { jobId?: string };
+      if (!jobId) throw new Error('Export failed: no jobId returned');
+
+      // 2. Subscribe to progress over a reconnectable SSE stream. EventSource
+      // auto-reconnects on network blips and picks up the latest job state, so
+      // ERR_NETWORK_CHANGED mid-export no longer loses the work.
+      const { url: downloadUrl, filename: downloadFilename } = await new Promise<{
+        url: string;
+        filename: string;
+      }>((resolve, reject) => {
+        const es = new EventSource(`${API_BASE}/v1/export/${jobId}/events`);
+        // Guard against an endless reconnect loop if the stream never recovers.
+        let consecutiveErrors = 0;
+
+        es.addEventListener('progress', (evt) => {
+          consecutiveErrors = 0;
+          try {
+            const data = JSON.parse((evt as MessageEvent).data) as {
+              current: number;
+              total: number;
+            };
+            if (typeof data.current === 'number') {
+              setProgress({ current: data.current, total: data.total });
+            }
+          } catch { /* ignore malformed lines */ }
+        });
+
+        es.addEventListener('done', (evt) => {
+          try {
+            const data = JSON.parse((evt as MessageEvent).data) as {
+              url?: string;
+              filename?: string;
+            };
+            es.close();
+            if (data.url) resolve({ url: data.url, filename: data.filename ?? 'export' });
+            else reject(new Error('Export finished without a download URL'));
+          } catch (e) {
+            es.close();
+            reject(e instanceof Error ? e : new Error(String(e)));
+          }
+        });
+
+        es.addEventListener('failed', (evt) => {
+          es.close();
+          try {
+            const data = JSON.parse((evt as MessageEvent).data) as {
+              message?: string;
+              code?: string;
+            };
+            reject(new Error(String(data.message ?? data.code ?? 'Export failed')));
+          } catch {
+            reject(new Error('Export failed'));
+          }
+        });
+
+        // Built-in connection-error event (distinct from our 'failed' event).
+        // Let EventSource retry a few times before giving up.
+        es.addEventListener('error', () => {
+          consecutiveErrors += 1;
+          if (consecutiveErrors >= 6) {
+            es.close();
+            reject(new Error('Lost connection to export progress stream'));
+          }
+        });
+      });
+
+      // 3. Download the finished artifact. The download endpoint supports
+      // HTTP Range, so an interrupted download resumes instead of restarting.
+      const a = document.createElement('a');
+      a.href = downloadUrl.startsWith('http') ? downloadUrl : `${API_BASE}${downloadUrl}`;
+      a.download = downloadFilename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      onClose(); // close only on success
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

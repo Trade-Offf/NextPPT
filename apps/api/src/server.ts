@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
-import { exportHandler, downloadHandler } from './routes/export.js';
+import { exportHandler, exportEventsHandler, downloadHandler } from './routes/export.js';
 import { assetRoutes } from './routes/assets.js';
 
 const app = Fastify({ logger: true });
@@ -21,6 +21,7 @@ await app.register(cors, {
 await app.register(multipart, { limits: { fileSize: 200 * 1024 * 1024 } }); // 200 MB
 
 app.post('/v1/export', exportHandler);
+app.get('/v1/export/:jobId/events', exportEventsHandler);
 app.get('/v1/download/:token', downloadHandler);
 await app.register(assetRoutes);
 
