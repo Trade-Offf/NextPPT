@@ -159,7 +159,7 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
   const { t } = useTranslation('templates');
   const navigate = useNavigate();
   const prefix = useLocalePrefix();
-  const { openTemplateSample, loading } = useOpenDeck();
+  const { openTemplateSample, loading, error } = useOpenDeck();
   const [copied, setCopied] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
 
@@ -177,8 +177,8 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
   const openInEditor = async () => {
     if (!item.sampleUrl) return;
     const fileName = item.sampleUrl.split('/').pop() || 'sample.html';
-    await openTemplateSample(item.sampleUrl, fileName);
-    navigate(prefix || '/');
+    const ok = await openTemplateSample(item.sampleUrl, fileName);
+    if (ok) navigate(prefix || '/');
   };
 
   return (
@@ -200,6 +200,10 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
           </button>
           <a href={item.sampleUrl} download className="hds-btn px-4 py-2 text-xs">{t('detail.download')}</a>
         </div>
+      )}
+
+      {error && (
+        <div id="hds-open-error" className="mt-3 text-xs text-[var(--system-red,#ef4444)]">{error}</div>
       )}
 
       <section className="mt-8">

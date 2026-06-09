@@ -127,15 +127,17 @@ export function useOpenDeck() {
    * editor. The workspace kind is auto-detected from the HTML. Caller navigates
    * home afterwards.
    */
-  const openTemplateSample = async (url: string, fileName: string) => {
+  const openTemplateSample = async (url: string, fileName: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(t('errors.sampleFailed'));
       openSingleFile(fileName, await res.text());
+      return true;
     } catch (err) {
       setError(errMessage(err));
+      return false;
     } finally {
       setLoading(false);
     }

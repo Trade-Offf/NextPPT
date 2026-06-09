@@ -21,6 +21,11 @@ const WORK_DIR = path.join(os.tmpdir(), 'hds-jobs');
 const DOWNLOAD_TTL_MS = 30 * 60 * 1000; // 30 min
 const JOB_TTL_MS = 30 * 60 * 1000; // keep job state pollable for 30 min
 
+// Wipe any artifacts/working files left by a previous (possibly crashed) run.
+// Download tokens live only in memory, so a restart already invalidates them;
+// the on-disk files would otherwise leak until their TTL sweep.
+await fs.rm(DOWNLOAD_DIR, { recursive: true, force: true }).catch(() => {});
+await fs.rm(WORK_DIR, { recursive: true, force: true }).catch(() => {});
 await fs.mkdir(DOWNLOAD_DIR, { recursive: true });
 await fs.mkdir(WORK_DIR, { recursive: true });
 
@@ -56,6 +61,7 @@ interface ExportJob {
   url?: string;
   filename?: string;
   error?: string;
+  errorCode?: string;
   expiresAt: number;
 }
 
@@ -100,7 +106,10 @@ const SCALE_BY_RESOLUTION: Record<string, number> = {
 
 const EXPORT_IMAGE_TYPE: 'png' | 'jpeg' =
   process.env['EXPORT_IMAGE_FORMAT']?.toLowerCase() === 'jpeg' ? 'jpeg' : 'png';
-const EXPORT_IMAGE_QUALITY = parseInt(process.env['EXPORT_IMAGE_QUALITY'] ?? '90', 10);
+const EXPORT_IMAGE_QUALITY = (() => {
+  const parsed = parseInt(process.env['EXPORT_IMAGE_QUALITY'] ?? '90', 10);
+  return Number.isFinite(parsed) && parsed > 0 && parsed <= 100 ? parsed : 90;
+})();
 
 const allowedOrigins = (
   process.env['CORS_ORIGIN'] ?? 'http://localhost:5173,http://localhost:4173'
@@ -160,6 +169,14 @@ async function processExportJob(
         },
       });
 
+      // Guard against silently producing an empty artifact (empty deck, or a
+      // custom page range that matched nothing) — surface it as a real error.
+      if (screenshots.length === 0) {
+        const empty = new Error('No slides matched the selected page range');
+        (empty as Error & { code?: string }).code = 'EXPORT_EMPTY';
+        throw empty;
+      }
+
       job.phase = 'assemble';
       job.current = screenshots.length;
       job.total = screenshots.length;
@@ -171,6 +188,7 @@ async function processExportJob(
       if (opts.format === 'pptx') {
         outPath = await buildPptx(screenshots, {
           title,
+          author: opts.meta.author,
           viewportWidth: VIEWPORT_WIDTH,
           viewportHeight: VIEWPORT_HEIGHT,
           tmpDir: workDir,
@@ -197,7 +215,8 @@ async function processExportJob(
   } catch (err) {
     log.error(err, 'export job failed');
     job.status = 'error';
-    job.error = String(err);
+    job.error = err instanceof Error ? err.message : String(err);
+    job.errorCode = (err as { code?: string })?.code ?? 'EXPORT_FAILED';
   } finally {
     job.expiresAt = Date.now() + JOB_TTL_MS;
     await fs.rm(workDir, { recursive: true, force: true }).catch(() => {});
@@ -270,7 +289,9 @@ export async function exportHandler(req: FastifyRequest, reply: FastifyReply) {
   };
   jobs.set(jobId, job);
 
-  req.log.info({ jobId, fileCount: fileBuffers.length, fields }, 'export: job queued');
+  const traceHeader = req.headers['x-hds-trace-id'];
+  const traceId = Array.isArray(traceHeader) ? traceHeader[0] : traceHeader;
+  req.log.info({ jobId, traceId, fileCount: fileBuffers.length, fields }, 'export: job queued');
 
   // Fire-and-forget: the background task drives the job to done/error.
   void processExportJob(job, opts, workDir, htmlFile.filename, req.log);
@@ -321,7 +342,7 @@ export async function exportEventsHandler(
       return true;
     }
     if (job.status === 'error') {
-      sse('failed', { code: 'EXPORT_FAILED', message: job.error ?? 'Export failed' });
+      sse('failed', { code: job.errorCode ?? 'EXPORT_FAILED', message: job.error ?? 'Export failed' });
       return true;
     }
     sse('progress', { current: job.current, total: job.total, phase: job.phase });

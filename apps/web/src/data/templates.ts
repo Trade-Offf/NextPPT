@@ -148,7 +148,6 @@ Anti-Patterns 反面示例（必须规避）
 按内容自然组织页数与每页结构，不要凑页数或留半页空白；图表类型按内容选用。
 每页都要信息密度高、版面布满，标题用 serif、正文用 sans，遵循以上全部规范。`,
   },
-  { id: 'kami-doc', kind: 'doc', tags: ['Kami', 'doc'], prompt: '', credit: KAMI_CREDIT },
   {
     id: 'resume',
     kind: 'doc',
@@ -187,7 +186,6 @@ Tag 用实色（#EEF2F7 / #E4ECF5），禁止 rgba；禁止纯白与冷蓝灰；
 
 每个 section 标题用油墨蓝左竖线；通篇克制留白、衬线撑层级。改完务必核对：严格 2 页、不溢出。`,
   },
-  { id: 'longform', kind: 'doc', tags: ['report', 'long-form'], prompt: '' },
   {
     id: 'deck-classic',
     kind: 'deck',

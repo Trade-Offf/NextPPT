@@ -5,6 +5,7 @@ import type { ScreenshotResult } from './screenshotter.js';
 
 interface BuildPptxOptions {
   title: string;
+  author?: string;
   viewportWidth: number;
   viewportHeight: number;
   tmpDir: string;
@@ -14,11 +15,12 @@ export async function buildPptx(
   screenshots: ScreenshotResult[],
   opts: BuildPptxOptions,
 ): Promise<string> {
-  const { title, viewportWidth, viewportHeight, tmpDir } = opts;
+  const { title, author, viewportWidth, viewportHeight, tmpDir } = opts;
 
   const pptx = new pptxgen();
   pptx.title = title;
   pptx.subject = 'HTML Deck Studio export';
+  if (author) pptx.author = author;
 
   // Slide dimensions in inches (96 dpi assumed; Widescreen 13.33×7.5 in = 1280×720@96dpi)
   const widthIn = (viewportWidth / 96).toFixed(4);

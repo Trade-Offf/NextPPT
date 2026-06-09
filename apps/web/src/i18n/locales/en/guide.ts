@@ -54,10 +54,10 @@ const guide: typeof zh = {
     intro: "Happy with it? Click \"Export\" at the top right to get a file you can project or share.",
     notes: [
       'The export is a set of hi-res images (like a photo of each page). So you cannot edit the text inside PowerPoint — to change text, edit here and export again.',
-      'You can export just some pages: all pages, the current page, or your own page numbers (e.g. 1,3-5,8).',
+      'You can export just some pages: all pages, or your own page numbers (e.g. 1,3-5,8).',
       'Pick a sharpness: Standard is plenty for projecting; higher is sharper but slower and larger.',
       'Complex pages take a little longer — that is just the images and charts finishing rendering, which is normal.',
-      'Everything happens on your own computer; the file is never uploaded anywhere.',
+      'Editing and saving happen entirely on your computer; only when you click Export is the file sent to the rendering server to produce images, then deleted right after.',
     ],
     actionHasDeck: 'A deck is already open.',
     backToExport: 'Back to export',

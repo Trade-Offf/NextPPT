@@ -16,8 +16,6 @@ interface CanvasFrameProps {
   sectionHtml: string;
   /** Full <head> innerHTML from the original document (styles, fonts, etc.) */
   headHtml?: string;
-  /** Base URL so relative assets resolve (file:// or blob:) */
-  assetsBaseUrl: string;
   onMessage?: (msg: RuntimeMessage) => void;
   /** Optional external ref to the iframe element */
   iframeRef?: React.RefObject<HTMLIFrameElement | null>;
@@ -28,7 +26,7 @@ interface CanvasFrameProps {
   docMode?: boolean;
 }
 
-export function CanvasFrame({ sectionHtml, headHtml = '', assetsBaseUrl, onMessage, iframeRef: externalRef, docMode = false }: CanvasFrameProps) {
+export function CanvasFrame({ sectionHtml, headHtml = '', onMessage, iframeRef: externalRef, docMode = false }: CanvasFrameProps) {
   const internalRef = useRef<HTMLIFrameElement>(null);
   const iframeRef = externalRef ?? internalRef;
   const onMessageRef = useRef(onMessage);
@@ -80,7 +78,6 @@ export function CanvasFrame({ sectionHtml, headHtml = '', assetsBaseUrl, onMessa
       : `${headHtml}\n${deckOverride}`; // override last → slide frame wins
     srcDocRef.current = `<!doctype html><html><head>
 <meta charset="UTF-8">
-<base href="${assetsBaseUrl}">
 ${headParts}
 </head><body>${sectionHtml}<script data-hds-runtime>${RUNTIME_SOURCE}${'<'}/script></body></html>`;
   }

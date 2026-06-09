@@ -21,8 +21,6 @@ import { captureSlideThumbnails, slideSignature } from '../lib/slideSnapshot.js'
 const SLIDE_W = 1280;
 const SLIDE_H = 720;
 const DEFAULT_INSERT_WIDTH_RATIO = 0.36; // newly dropped images span ~36% of the slide width
-/** Base for relative asset URLs inside the canvas/thumbnail iframes. */
-const ASSETS_BASE_URL = '/v1/asset-base/';
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -121,7 +119,6 @@ export function EditorPage() {
       void captureSlideThumbnails(
         tasks,
         headHtml,
-        ASSETS_BASE_URL,
         (id, dataUrl) => {
           const slide = useDeckStore.getState().slides.find((s) => s.id === id);
           if (slide) thumbSigRef.current.set(id, slideSignature(slide.html));
@@ -533,8 +530,6 @@ export function EditorPage() {
     );
   }
 
-  const assetsBaseUrl = ASSETS_BASE_URL;
-
   return (
     <div className="relative h-full hds-stage overflow-hidden">
       {/* Top-left: sidebar toggle, filename, save status */}
@@ -652,17 +647,21 @@ export function EditorPage() {
 
       {/* Top-right: code toggle (de-emphasized) + inspector + save + export */}
       <div className="absolute top-4 right-4 z-20 hds-floating-bar">
-        <button
-          onClick={() => setViewMode(viewMode === 'code' ? 'visual' : 'code')}
-          className={`hds-bar-icon ${viewMode === 'code' ? 'is-active' : ''}`}
-          aria-label={t('page.viewCode')}
-          title={t('page.viewCode')}
-        >
-          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7.5 6.5 4 10l3.5 3.5M12.5 6.5 16 10l-3.5 3.5" />
-          </svg>
-        </button>
-        <span className="w-px h-4 bg-white/15 shrink-0" />
+        {!docMode && (
+          <>
+            <button
+              onClick={() => setViewMode(viewMode === 'code' ? 'visual' : 'code')}
+              className={`hds-bar-icon ${viewMode === 'code' ? 'is-active' : ''}`}
+              aria-label={t('page.viewCode')}
+              title={t('page.viewCode')}
+            >
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M7.5 6.5 4 10l3.5 3.5M12.5 6.5 16 10l-3.5 3.5" />
+              </svg>
+            </button>
+            <span className="w-px h-4 bg-white/15 shrink-0" />
+          </>
+        )}
         <button
           onClick={() => setInspectorOpen((v) => !v)}
           className={`hds-bar-toggle ${inspectorOpen ? 'is-active' : ''}`}
@@ -711,7 +710,7 @@ export function EditorPage() {
       </div>
 
       {/* ── Body ────────────────────────────────────────────────── */}
-      {viewMode === 'code' ? (
+      {viewMode === 'code' && !docMode ? (
         <div className="absolute inset-0 pt-20 px-3 pb-3 flex">
           <CodeEditorPane key={currentSlideId} />
         </div>
@@ -731,7 +730,6 @@ export function EditorPage() {
                   docMode
                   sectionHtml={currentSlide.html}
                   headHtml={headHtml}
-                  assetsBaseUrl={assetsBaseUrl}
                   containerWidth={0}
                   onMessage={handleMessage}
                 />
@@ -766,7 +764,6 @@ export function EditorPage() {
                 ref={canvasRef}
                 sectionHtml={currentSlide.html}
                 headHtml={headHtml}
-                assetsBaseUrl={assetsBaseUrl}
                 containerWidth={fitWidth}
                 onMessage={handleMessage}
               />

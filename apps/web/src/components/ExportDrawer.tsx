@@ -246,32 +246,27 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-[var(--slate)]">{t('exportDrawer.pageRange')}</span>
             <div className="flex flex-col gap-2">
-              {[
-                { label: t('exportDrawer.rangeAll'), value: 'all' },
-                { label: t('exportDrawer.rangeCurrent'), value: 'current' },
-              ].map(({ label, value }) => (
-                <label key={value} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="pageRange"
-                    value={value}
-                    checked={pageRange === value}
-                    onChange={() => setPageRange(value as ExportPageRange)}
-                  />
-                  <span className="text-sm text-[var(--slate)]">{label}</span>
-                </label>
-              ))}
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="pageRange"
+                  value="all"
+                  checked={pageRange === 'all'}
+                  onChange={() => setPageRange('all')}
+                />
+                <span className="text-sm text-[var(--slate)]">{t('exportDrawer.rangeAll')}</span>
+              </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="pageRange"
                   value="custom"
-                  checked={pageRange !== 'all' && pageRange !== 'current'}
+                  checked={pageRange !== 'all'}
                   onChange={() => setPageRange('1')}
                 />
                 <span className="text-sm text-[var(--slate)]">{t('exportDrawer.rangeCustom')}</span>
               </label>
-              {pageRange !== 'all' && pageRange !== 'current' && (
+              {pageRange !== 'all' && (
                 <input
                   type="text"
                   value={pageRange}
@@ -297,7 +292,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
               <div className="h-1.5 bg-[var(--rule)] rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[var(--cobalt)] transition-all duration-300"
-                  style={{ width: `${(progress.current / progress.total) * 100}%` }}
+                  style={{ width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%` }}
                 />
               </div>
             </div>

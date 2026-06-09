@@ -41,11 +41,11 @@ export interface ExportOptions {
 export interface ProgressEvent {
   current: number;
   total: number;
-  phase: 'unpack' | 'screenshot' | 'render' | 'assemble' | 'deliver';
+  phase: 'queued' | 'screenshot' | 'render' | 'assemble' | 'done';
 }
 
 export interface DoneEvent {
-  /** Temporary download URL, valid for 5 min */
+  /** Temporary download URL, valid for 30 min */
   url: string;
   filename: string;
 }

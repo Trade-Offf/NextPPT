@@ -16,9 +16,7 @@
     "fastify": "^5.3.2",
     "pdf-lib": "^1.17.1",
     "pptxgenjs": "^3.12.0",
-    "puppeteer": "^24.9.0",
-    "tmp-promise": "^3.0.3",
-    "ulid": "^2.3.0"
+    "puppeteer": "^24.9.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

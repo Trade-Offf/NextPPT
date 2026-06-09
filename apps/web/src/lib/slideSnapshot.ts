@@ -37,12 +37,11 @@ export function slideSignature(html: string): string {
   return `${html.length}:${h}`;
 }
 
-function buildCaptureDoc(sectionHtml: string, headHtml: string, assetsBaseUrl: string): string {
+function buildCaptureDoc(sectionHtml: string, headHtml: string): string {
   // Mirror CanvasFrame's framing so the thumbnail matches the live canvas, then
   // strip the deck's own scripts (static preview) before injecting html-to-image.
   const base = sanitizePreviewDoc(`<!doctype html><html><head>
 <meta charset="UTF-8">
-<base href="${assetsBaseUrl}">
 ${headHtml}
 <style>
   html,body{width:1280px;height:720px;overflow:hidden;margin:0;padding:0;}
@@ -110,7 +109,6 @@ async function settle(iframe: HTMLIFrameElement): Promise<void> {
 export async function captureSlideThumbnails(
   tasks: SnapshotTask[],
   headHtml: string,
-  assetsBaseUrl: string,
   onThumb: (id: string, dataUrl: string) => void,
   isCancelled: () => boolean,
 ): Promise<void> {
@@ -135,7 +133,7 @@ export async function captureSlideThumbnails(
   try {
     for (const task of tasks) {
       if (isCancelled()) break;
-      await loadSrcdoc(iframe, buildCaptureDoc(task.html, headHtml, assetsBaseUrl));
+      await loadSrcdoc(iframe, buildCaptureDoc(task.html, headHtml));
       if (isCancelled()) break;
       await settle(iframe);
       if (isCancelled()) break;

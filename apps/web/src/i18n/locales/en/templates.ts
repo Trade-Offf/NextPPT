@@ -35,17 +35,9 @@ const templates: typeof zh = {
       title: 'Kami-style deck',
       desc: 'A NextPPT site intro typeset in the official Kami design language: background, features, usage and outcome, woven with maxims and design philosophy, restrained whitespace and serif-led hierarchy. Open it in the editor or download it; the bundled prompt is a generic Kami design spec you can reuse for any topic.',
     },
-    'kami-doc': {
-      title: 'Kami-style document',
-      desc: 'Minimal whitespace, carefully typeset long-form / one-pager style.',
-    },
     resume: {
       title: 'Kami-style resume',
       desc: 'A Chinese resume typeset in the official Kami design language (modelled on Musk\'s career, updated to 2026): metric masthead, three-step timeline, role/actions/impact projects, conviction calls and core skills — strict 2-page A4, serif-led hierarchy, ink-blue accents. Open or download it; the bundled prompt is a reusable Kami resume spec — just swap in your own history.',
-    },
-    longform: {
-      title: 'Long-form report',
-      desc: 'Long-form layout with sections and charts, exported with smart pagination.',
     },
     'deck-classic': {
       title: 'Terminal-style deck',
