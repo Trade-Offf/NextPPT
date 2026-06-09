@@ -7,17 +7,6 @@ import { SiteHeader } from '../components/SiteHeader.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
 import { TEMPLATES, findTemplate, type TemplateItem } from '../data/templates.js';
 
-/**
- * Live, non-interactive preview of a sample template. Measures its own width
- * and scales an iframe to fit.
- *
- * - deck: a 1280×720 slide scaled to exactly fill the 16:9 box (720×scale ==
- *   container height). No vertical offset — the deck's own body background shows at
- *   the edge of its body padding, which always matches its theme and never leaks
- *   the container's background color.
- * - doc: an A4-portrait page (794px = 210mm wide) shown top-aligned and
- *   width-fitted, so the card becomes a 16:9 top-crop of the masthead.
- */
 function SampleThumb({ url, kind }: { url: string; kind: TemplateItem['kind'] }) {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -31,9 +20,29 @@ function SampleThumb({ url, kind }: { url: string; kind: TemplateItem['kind'] })
   }, []);
 
   const isDoc = kind === 'doc';
-  // doc previews use the A4 screen width (210mm ≈ 794px); decks are 1280 wide.
   const baseWidth = isDoc ? 794 : 1280;
   const scale = width / baseWidth;
+
+  // Deck bodies use padding + flex-centering, which leaks body background as a
+  // colored strip at the top/left. Inject a reset so the first slide is flush.
+  const flushDeck = (e: { currentTarget: HTMLIFrameElement }) => {
+    if (isDoc) return;
+    try {
+      const doc = e.currentTarget.contentDocument;
+      if (!doc) return;
+      const id = '__hds_preview_reset';
+      let style = doc.getElementById(id) as HTMLStyleElement | null;
+      if (!style) {
+        style = doc.createElement('style');
+        style.id = id;
+        doc.head?.appendChild(style);
+      }
+      style.textContent =
+        'html,body{margin:0!important;padding:0!important;gap:0!important;background:transparent!important;}';
+    } catch {
+      /* cross-origin or no document — leave the preview as-is */
+    }
+  };
 
   return (
     <div
@@ -47,9 +56,10 @@ function SampleThumb({ url, kind }: { url: string; kind: TemplateItem['kind'] })
         tabIndex={-1}
         scrolling="no"
         aria-hidden="true"
+        onLoad={flushDeck}
         style={{
           width: baseWidth,
-          height: isDoc ? 1123 : 720, // A4 full height vs exact slide height; container crops
+          height: isDoc ? 1123 : 720,
           border: 0,
           position: 'absolute',
           top: 0,
@@ -192,7 +202,6 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
         </div>
       )}
 
-      {/* Preview: live when a sample exists, else placeholder */}
       <section className="mt-8">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">{t('detail.previewTitle')}</h2>
         {item.sampleUrl ? (
@@ -204,7 +213,6 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
         )}
       </section>
 
-      {/* Prompt — collapsed by default to keep the long Kami spec out of the way */}
       <section className="mt-8">
         <div className="flex items-center justify-between mb-3 gap-2">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)]">{t('detail.promptTitle')}</h2>
@@ -259,6 +267,20 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
         <h2 className="text-[13px] font-semibold text-[var(--label)] mb-1.5">{t('detail.usageTitle')}</h2>
         <p className="text-[13px] text-[var(--secondary-label)] leading-relaxed">{t('detail.usage')}</p>
       </section>
+
+      {item.credit && (
+        <p className="mt-6 text-xs text-[var(--tertiary-label)]">
+          {t('detail.creditPrefix')}{' '}
+          <a
+            href={item.credit.href}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[var(--system-blue)] hover:underline"
+          >
+            {item.credit.name}
+          </a>
+        </p>
+      )}
     </div>
   );
 }

@@ -1,33 +1,15 @@
-/**
- * Curated templates marketplace data (skeleton).
- *
- * NextPPT does NOT generate — these entries are curated prompts/abilities the
- * user copies into their own AI tool. The generated HTML is then opened back in
- * NextPPT (PPT mode or Free-edit) to edit and export.
- *
- * `prompt` is intentionally left empty for now (placeholder cards). Fill in the
- * actual prompt text per entry later; the detail view shows a "to be added"
- * notice while it is empty. Titles/descriptions live in the `templates` i18n
- * namespace, keyed by `id` under `items.<id>`.
- */
-
 export type TemplateKind = 'deck' | 'doc';
 
 export interface TemplateItem {
-  /** Stable id; also the i18n key under templates.items.<id> */
   id: string;
-  /** Which editor mode the generated HTML is meant to be opened in. */
   kind: TemplateKind;
-  /** Short labels shown on the card (not translated; keep generic/short). */
   tags: string[];
-  /** Prompt body to copy. Empty = placeholder (shows a "to be added" notice). */
   prompt: string;
-  /**
-   * Optional public URL of a ready-made sample HTML. When set, the card shows a
-   * live preview and the detail view offers "open in editor" + "download".
-   */
   sampleUrl?: string;
+  credit?: { name: string; href: string };
 }
+
+const KAMI_CREDIT = { name: 'Kami · Tw93', href: 'https://kami.tw93.fun/index-zh.html' } as const;
 
 export const TEMPLATES: TemplateItem[] = [
   {
@@ -35,6 +17,7 @@ export const TEMPLATES: TemplateItem[] = [
     kind: 'deck',
     tags: ['Kami', 'NextPPT'],
     sampleUrl: '/kami-nextppt-deck.html',
+    credit: KAMI_CREDIT,
     prompt: `用 Kami 设计系统帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
 输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
 以下只规定视觉与排版规范，不限定你写什么内容。
@@ -165,12 +148,13 @@ Anti-Patterns 反面示例（必须规避）
 按内容自然组织页数与每页结构，不要凑页数或留半页空白；图表类型按内容选用。
 每页都要信息密度高、版面布满，标题用 serif、正文用 sans，遵循以上全部规范。`,
   },
-  { id: 'kami-doc', kind: 'doc', tags: ['Kami', 'doc'], prompt: '' },
+  { id: 'kami-doc', kind: 'doc', tags: ['Kami', 'doc'], prompt: '', credit: KAMI_CREDIT },
   {
     id: 'resume',
     kind: 'doc',
     tags: ['Kami', 'resume', 'A4'],
     sampleUrl: '/kami-resume-musk.html',
+    credit: KAMI_CREDIT,
     prompt: `用官方 Kami 设计系统帮我排一份中文个人简历，输出自包含 HTML。
 内容与履历我会另行提供；以下只规定结构与视觉规范，不限定写什么。
 

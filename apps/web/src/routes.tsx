@@ -6,14 +6,12 @@ import { LandingPage } from './pages/LandingPage.js';
 import { useDeckStore } from './store/deckStore.js';
 import type { Locale } from './i18n/index.js';
 
-// Lazy so the editor (and Monaco) is never imported during prerender — the
-// store starts empty, so HomeRoute always renders the landing page server-side.
+// Editor (and Monaco) must never be imported during prerender — store starts
+// empty so HomeRoute always renders the landing page server-side.
 const EditorPage = lazy(() =>
   import('./pages/EditorPage.js').then((m) => ({ default: m.EditorPage })),
 );
 
-// Lazy too: the guide is a separate route, so keep it out of the landing page's
-// first-load bundle. Still prerendered (vite-react-ssg resolves it via Suspense).
 const GuidePage = lazy(() =>
   import('./pages/GuidePage.js').then((m) => ({ default: m.GuidePage })),
 );

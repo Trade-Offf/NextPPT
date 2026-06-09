@@ -61,6 +61,7 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
           <button onClick={() => navigate(`${prefix}/templates`)} className="hds-nav-link">{t('nav.templates')}</button>
           <button onClick={() => navigate(`${prefix}/explore`)} className="hds-nav-link">{t('nav.explore')}</button>
           <button onClick={() => openGuide('generate')} className="hds-nav-link">{t('nav.guide')}</button>
+          <span aria-hidden="true" className="w-px h-4 bg-[var(--separator)]" />
           <LanguageSwitcher />
           {trailing}
         </div>

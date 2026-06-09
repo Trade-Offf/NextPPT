@@ -52,7 +52,6 @@ export function ExploreArticlePage() {
             ← {t('article.back')}
           </button>
 
-          {/* Masthead */}
           <header className="mt-6">
             <p className="hds-fig-label">{t('hero.eyebrow')}</p>
             <h1 className="mt-3 text-3xl lg:text-[2.4rem] font-bold tracking-tight text-[var(--label)] leading-tight">
@@ -63,7 +62,6 @@ export function ExploreArticlePage() {
             </p>
           </header>
 
-          {/* Cover */}
           <figure className="mt-8">
             <div
               className="rounded-2xl overflow-hidden"
@@ -76,7 +74,6 @@ export function ExploreArticlePage() {
             </figcaption>
           </figure>
 
-          {/* How */}
           <section className="mt-12">
             <h2 className="text-xl font-semibold text-[var(--label)]">{t('article.how.title')}</h2>
             <p className="mt-3 text-sm text-[var(--secondary-label)]">{t('article.how.intro')}</p>
@@ -90,7 +87,6 @@ export function ExploreArticlePage() {
             </ol>
           </section>
 
-          {/* Flow diagram */}
           <section className="mt-12">
             <h2 className="text-xl font-semibold text-[var(--label)]">{t('article.flow.title')}</h2>
             <div
@@ -102,7 +98,6 @@ export function ExploreArticlePage() {
             <p className="mt-3 text-xs text-[var(--tertiary-label)] leading-relaxed">{t('article.flow.caption')}</p>
           </section>
 
-          {/* Value */}
           <section className="mt-12">
             <h2 className="text-xl font-semibold text-[var(--label)]">{t('article.value.title')}</h2>
             <p className="mt-3 text-sm text-[var(--secondary-label)]">{t('article.value.intro')}</p>
@@ -116,7 +111,6 @@ export function ExploreArticlePage() {
             </ul>
           </section>
 
-          {/* Scenes */}
           <section className="mt-12">
             <h2 className="text-xl font-semibold text-[var(--label)]">{t('article.scenes.title')}</h2>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -132,7 +126,6 @@ export function ExploreArticlePage() {
             </div>
           </section>
 
-          {/* Future */}
           <section className="mt-12">
             <h2 className="text-xl font-semibold text-[var(--label)]">{t('article.future.title')}</h2>
             <p className="mt-3 text-sm text-[var(--secondary-label)] leading-relaxed">{t('article.future.body')}</p>
@@ -144,7 +137,6 @@ export function ExploreArticlePage() {
             </blockquote>
           </section>
 
-          {/* Prompt */}
           <section className="mt-12">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-xl font-semibold text-[var(--label)]">{t('article.prompt.title')}</h2>
@@ -165,7 +157,6 @@ export function ExploreArticlePage() {
             )}
           </section>
 
-          {/* Download */}
           {article.drawioUrl && (
             <div className="mt-8">
               <a href={article.drawioUrl} download className="hds-btn-primary px-5 py-2 text-xs rounded-full inline-flex items-center gap-2">
@@ -174,7 +165,6 @@ export function ExploreArticlePage() {
             </div>
           )}
 
-          {/* Summary */}
           <section
             className="mt-12 rounded-2xl p-6"
             style={{ background: 'rgba(56,132,255,0.06)', boxShadow: 'inset 0 0 0 1px var(--separator)' }}
@@ -183,11 +173,22 @@ export function ExploreArticlePage() {
             <p className="mt-2 text-[17px] text-[var(--label)] leading-relaxed font-medium">{t('article.summary.body')}</p>
           </section>
 
-          <footer className="mt-10 pt-6 border-t border-[var(--separator)] flex items-center justify-between text-xs text-[var(--tertiary-label)]">
+          <footer className="mt-10 pt-6 border-t border-[var(--separator)] flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--tertiary-label)]">
             <button onClick={() => navigate(`${prefix}/explore`)} className="hover:text-[var(--system-blue)] transition-colors">
               ← {t('article.back')}
             </button>
-            <span>{t('article.source')}</span>
+            <span>
+              {t('article.source.prefix')}{' '}
+              <a
+                href={t('article.source.authorHref')}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[var(--system-blue)] hover:underline"
+              >
+                {t('article.source.author')}
+              </a>
+              {t('article.source.authorSuffix')}
+            </span>
           </footer>
         </article>
       </div>
@@ -195,11 +196,6 @@ export function ExploreArticlePage() {
   );
 }
 
-/**
- * Hand-authored inline SVG flowchart (no mermaid dependency). Node labels are
- * pulled from i18n so it stays bilingual; colors reference the site's CSS vars
- * so it reads cleanly on the dark cinema theme.
- */
 function FlowDiagram() {
   const { t } = useTranslation('explore');
   const n = (k: string) => t(`article.flow.nodes.${k}`);
@@ -223,7 +219,6 @@ function FlowDiagram() {
         </marker>
       </defs>
 
-      {/* pipeline arrows */}
       {[0, 1, 2].map((i) => {
         const x1 = nodes[i].x + W;
         const x2 = nodes[i + 1].x;
@@ -240,7 +235,6 @@ function FlowDiagram() {
         );
       })}
 
-      {/* nodes */}
       {nodes.map((node) => (
         <g key={node.title}>
           <rect
@@ -264,7 +258,6 @@ function FlowDiagram() {
         </g>
       ))}
 
-      {/* connector from board node down to the outcome bar */}
       <line
         x1={nodes[3].x + W / 2}
         y1={Y + H}
@@ -274,7 +267,6 @@ function FlowDiagram() {
         markerEnd="url(#exp-arrow)"
       />
 
-      {/* outcome bar */}
       <rect x={16} y={166} width={928} height={62} rx={14} style={{ fill: 'rgba(56,132,255,0.06)', stroke: 'var(--system-blue)', strokeWidth: 1 }} />
       {outcomes.map((label, i) => {
         const cw = 280;

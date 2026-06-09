@@ -26,6 +26,7 @@ const templates: typeof zh = {
     todo: 'Prompt text to be added.',
     usageTitle: 'How to use',
     usage: 'Copy the prompt into your AI tool to generate the HTML, then open it back here in the matching mode to edit and export.',
+    creditPrefix: 'Design system by',
     openInEditor: 'Open in editor',
     download: 'Download HTML',
   },

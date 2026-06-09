@@ -102,6 +102,11 @@ export default {
       title: '一句话总结',
       body: '这不是让 AI 生成一张图，而是让 AI 生成一个可以在飞书里继续编辑和协作的画板。',
     },
-    source: '本文基于一篇小红书笔记整理与重写。',
+    source: {
+      prefix: '工作流与思路参考自',
+      author: '张咋啦',
+      authorHref: 'https://github.com/zarazhangrui/beautiful-feishu-whiteboard',
+      authorSuffix: '的 beautiful-feishu-whiteboard。',
+    },
   },
 };

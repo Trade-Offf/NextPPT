@@ -104,7 +104,12 @@ Content:
       title: 'In one line',
       body: 'This is not about making AI draw one picture — it is about making AI generate a board you can keep editing and collaborating on inside Lark.',
     },
-    source: 'This article is adapted and rewritten from a Xiaohongshu (RED) note.',
+    source: {
+      prefix: 'Workflow and idea credit:',
+      author: 'Zara Zhang Rui',
+      authorHref: 'https://github.com/zarazhangrui/beautiful-feishu-whiteboard',
+      authorSuffix: "'s beautiful-feishu-whiteboard.",
+    },
   },
 };
 

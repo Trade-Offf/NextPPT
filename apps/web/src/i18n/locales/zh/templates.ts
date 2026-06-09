@@ -24,6 +24,7 @@ export default {
     todo: '提示词正文待补充。',
     usageTitle: '怎么用',
     usage: '复制提示词到你的 AI 工具生成 HTML，再回首页用对应模式打开，即可编辑并导出。',
+    creditPrefix: '设计规范来自',
     openInEditor: '在编辑器打开',
     download: '下载 HTML',
   },
