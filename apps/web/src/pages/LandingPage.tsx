@@ -6,6 +6,7 @@ import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
 import { useGuideNav, useLocalePrefix } from '../hooks/useGuideNav.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { EditorPreview } from '../components/EditorPreview.js';
+import { ParallelBackstage } from '../components/ParallelBackstage.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
 import { OpenDeckErrorAlert } from '../components/OpenDeckErrorAlert.js';
 
@@ -61,10 +62,11 @@ export function LandingPage() {
 
         revealOnScroll('.reveal-pain', { trigger: '.value-section', stagger: 0.12, y: 26 });
         revealOnScroll('.reveal-start', { trigger: '.value-section', y: 26 });
+        revealOnScroll('.reveal-pass', { trigger: '#parallel', stagger: 0.1, y: 26 });
       });
       mm.add('(prefers-reduced-motion: reduce)', () => {
         gsap.set(['.hero-h1', '.hero-sub', '.hero-cta', '.hero-support', '.hero-preview',
-          '.reveal-pain', '.reveal-start'], { autoAlpha: 1, y: 0 });
+          '.reveal-pain', '.reveal-start', '.reveal-pass'], { autoAlpha: 1, y: 0 });
       });
     },
     { scope: rootRef },
@@ -207,6 +209,8 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      <ParallelBackstage />
 
       <footer className="border-t border-[var(--separator)] px-6 py-12">
         <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">

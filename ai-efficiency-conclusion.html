@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI 提效 · 阶段结论</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap"
+      media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" /></noscript>
+    <style>
+      /* TsangerJinKai02 — Kami 官方中文衬线，W04=400 / W05=500 真实字重 */
+      @font-face {
+        font-family: "TsangerJinKai02";
+        src: url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W04.ttf") format("truetype");
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      @font-face {
+        font-family: "TsangerJinKai02";
+        src: url("https://cdn.jsdelivr.net/gh/tw93/Kami@main/assets/fonts/TsangerJinKai02-W05.ttf") format("truetype");
+        font-weight: 500; font-style: normal; font-display: swap;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      :root {
+        --parchment:#f5f4ed; --ivory:#faf9f5; --sand:#e8e6dc;
+        --brand:#1b365d; --brand-tint:#eef2f7; --tag:#e4ecf5;
+        --near:#141413; --dark:#3d3d3a; --charcoal:#4d4c48; --olive:#504e49; --stone:#6b6a64;
+        --border:#e8e6dc; --border-soft:#e5e3d8; --line:#ddd9cc;
+        --serif:"TsangerJinKai02",Charter,"Noto Serif SC","Source Han Serif SC","Songti SC",Georgia,serif;
+        --sans:var(--serif);
+        --mono:"JetBrains Mono","SF Mono",Consolas,Monaco,monospace;
+      }
+
+      @page { size:1280px 720px; margin:0; background:#f5f4ed; }
+
+      body {
+        background:#c9c5b8; color:var(--near); font-family:var(--serif);
+        display:flex; flex-direction:column; align-items:center; gap:24px;
+        padding:32px 20px; -webkit-font-smoothing:antialiased;
+        letter-spacing:.2px; font-synthesis:none;
+      }
+
+      .slide {
+        width:1280px; height:720px; background:var(--parchment);
+        padding:64px 84px 60px; position:relative; overflow:hidden; flex-shrink:0;
+        display:flex; flex-direction:column;
+      }
+
+      /* ── editorial chrome ── */
+      .eyebrow {
+        font-family:var(--mono); font-size:12.5px; font-weight:500;
+        letter-spacing:2.4px; text-transform:uppercase; color:var(--stone);
+        margin-bottom:14px;
+      }
+      .pgnum {
+        position:absolute; right:84px; bottom:30px;
+        font-family:var(--mono); font-size:11px; color:var(--stone);
+        letter-spacing:.5px; font-variant-numeric:tabular-nums;
+      }
+      .mark {
+        position:absolute; left:84px; bottom:30px;
+        font-family:var(--mono); font-size:11px; color:var(--stone);
+        letter-spacing:1.6px; text-transform:uppercase;
+      }
+
+      /* ── typography ── */
+      h1.title { font-weight:500; font-size:35px; line-height:1.22; letter-spacing:.3px; color:var(--near); }
+      .lead { font-weight:400; font-size:17px; line-height:1.55; color:var(--olive); margin-top:14px; max-width:60ch; }
+      .body { font-weight:400; font-size:15px; line-height:1.62; color:var(--dark); }
+      .cap { font-size:12.5px; line-height:1.5; color:var(--stone); }
+      .acc { color:var(--brand); }
+      .num { font-variant-numeric:tabular-nums; }
+
+      .grow { flex:1; min-height:0; }
+      .center { justify-content:center; }
+
+      /* ── section title: brand left bar ── */
+      .sect {
+        font-weight:500; font-size:17px; line-height:1.3; color:var(--near);
+        border-left:2.5px solid var(--brand); border-radius:1.5px; padding-left:10px;
+      }
+
+      /* ── quote: brand bar + olive ── */
+      .quote {
+        border-left:2px solid var(--brand); padding:2px 0 2px 18px;
+        font-weight:500; font-size:21px; line-height:1.5; color:var(--olive);
+        letter-spacing:.2px;
+      }
+      .quote.lg { font-size:26px; line-height:1.45; }
+      .quote .by { display:block; margin-top:12px; font-size:13px; font-weight:400; color:var(--stone); letter-spacing:1px; }
+
+      /* ── dash list ── */
+      .dash { list-style:none; display:flex; flex-direction:column; gap:14px; }
+      .dash li { position:relative; padding-left:20px; font-size:15px; line-height:1.55; color:var(--dark); }
+      .dash li::before { content:"—"; position:absolute; left:0; color:var(--brand); }
+      .dash li b { font-weight:500; color:var(--near); }
+
+      .rule { height:.5px; background:var(--border); border:0; }
+
+      /* ── metric ── */
+      .metric { display:flex; flex-direction:column; gap:4px; }
+      .metric .v { font-weight:500; font-size:46px; line-height:1; color:var(--brand); font-variant-numeric:tabular-nums; }
+      .metric .k { font-size:13px; color:var(--olive); line-height:1.45; }
+
+      /* ── card (ivory, ring only) ── */
+      .card { background:var(--ivory); border:.5px solid var(--border); border-radius:8px; padding:24px 24px 26px; display:flex; flex-direction:column; }
+
+      /* ── step ── */
+      .step .no { font-family:var(--mono); font-size:13px; color:var(--brand); letter-spacing:1px; }
+      .step h3 { font-weight:500; font-size:17px; color:var(--near); margin:10px 0 8px; line-height:1.3; }
+      .step p { font-size:13.5px; line-height:1.6; color:var(--dark); }
+
+      /* ── tag ── */
+      .tag { display:inline-flex; align-items:center; font-family:var(--mono);
+        font-size:11px; font-weight:500; letter-spacing:.6px; text-transform:uppercase;
+        color:var(--brand); background:var(--brand-tint); padding:5px 11px; border-radius:3px; }
+      .tag .dot { width:5px; height:5px; border-radius:50%; background:var(--brand); margin-right:7px; opacity:.55; }
+      .tag.live .dot { opacity:1; }
+
+      .cols2 { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+      .cols3 { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+
+      svg { display:block; }
+      .s-lab { font-family:var(--serif); font-size:15px; font-weight:500; fill:var(--near); }
+      .s-sub { font-family:var(--serif); font-size:11.5px; fill:var(--stone); }
+      .s-mono { font-family:var(--mono); font-size:11px; fill:var(--stone); letter-spacing:.5px; }
+      .s-flag { font-family:var(--mono); font-size:11px; font-weight:500; fill:var(--brand); letter-spacing:.5px; }
+    </style>
+  </head>
+  <body>
+
+    <!-- ════════════ 01 · 一句话结论 ════════════ -->
+    <section class="slide center" style="align-items:flex-start">
+      <div class="eyebrow">AI 提效 · 阶段结论</div>
+      <h1 class="title" style="font-size:56px;line-height:1.14;letter-spacing:.2px;max-width:20ch">
+        单点提效 <span class="acc">&ne;</span> 交付提效
+      </h1>
+      <p class="lead" style="font-size:20px;margin-top:24px;max-width:42ch">
+        下一步的红利，不在"个人更快"，而在<span class="acc">流程与协作</span>。
+      </p>
+      <p class="body" style="margin-top:16px;max-width:52ch">
+        我们已经拿到原子层（单体）的提效红利；要把它兑现成业务结果，必须升级到协议层与工作流编排。
+      </p>
+      <div style="margin-top:44px;display:flex;gap:12px">
+        <span class="tag live"><span class="dot"></span>原子层 · 已动</span>
+        <span class="tag"><span class="dot"></span>协议层 · 待统一</span>
+        <span class="tag"><span class="dot"></span>工作流 · 未编排</span>
+      </div>
+      <span class="mark">AI-Efficiency</span><span class="pgnum">01 / 03</span>
+    </section>
+
+    <!-- ════════════ 02 · 为什么 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">01 · 为什么</div>
+      <h1 class="title">为什么"更快"没有变成"更快交付"</h1>
+      <p class="lead">交付周期由最慢的环节（瓶颈）决定。只加速非瓶颈，产物只会堆在瓶颈前面。</p>
+
+      <div class="grow" style="display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 1060 250" width="1020">
+          <!-- 瓶颈标记（位于瓶颈节点正上方） -->
+          <text x="779" y="40" text-anchor="middle" class="s-flag">▲ 瓶颈 BOTTLENECK</text>
+
+          <!-- WIP 堆积（瓶颈前的在制品） -->
+          <g>
+            <rect x="636" y="120" width="40" height="20" rx="3" fill="var(--brand-tint)" stroke="var(--line)" />
+            <rect x="640" y="102" width="40" height="20" rx="3" fill="var(--brand-tint)" stroke="var(--line)" />
+            <rect x="644" y="84"  width="40" height="20" rx="3" fill="var(--brand-tint)" stroke="var(--line)" />
+            <text x="664" y="166" text-anchor="middle" class="s-mono">WIP 堆积</text>
+          </g>
+
+          <!-- 节点 -->
+          <g>
+            <rect x="20"  y="150" width="150" height="64" rx="9" fill="var(--ivory)" stroke="var(--border)" />
+            <text x="95"  y="180" text-anchor="middle" class="s-lab">产品</text>
+            <text x="95"  y="201" text-anchor="middle" class="s-sub">AI 已提效</text>
+
+            <rect x="248" y="150" width="150" height="64" rx="9" fill="var(--ivory)" stroke="var(--border)" />
+            <text x="323" y="180" text-anchor="middle" class="s-lab">设计</text>
+            <text x="323" y="201" text-anchor="middle" class="s-sub">AI 已提效</text>
+
+            <rect x="476" y="150" width="150" height="64" rx="9" fill="var(--ivory)" stroke="var(--border)" />
+            <text x="551" y="180" text-anchor="middle" class="s-lab">技术</text>
+            <text x="551" y="201" text-anchor="middle" class="s-sub">AI 已提效</text>
+
+            <!-- 瓶颈节点：测试/联调/评审 -->
+            <rect x="704" y="142" width="150" height="80" rx="9" fill="var(--brand-tint)" stroke="var(--brand)" stroke-width="2" />
+            <text x="779" y="176" text-anchor="middle" class="s-lab acc" style="fill:var(--brand)">测试 / 联调</text>
+            <text x="779" y="198" text-anchor="middle" class="s-sub" style="fill:var(--brand)">未动 · 等待最多</text>
+
+            <rect x="932" y="150" width="108" height="64" rx="9" fill="var(--brand)" />
+            <text x="986" y="180" text-anchor="middle" class="s-lab" style="fill:var(--ivory)">发布</text>
+            <text x="986" y="201" text-anchor="middle" class="s-sub" style="fill:#c9d4e2">交付</text>
+          </g>
+
+          <!-- 箭头 -->
+          <g stroke="var(--line)" stroke-width="1.6" fill="none">
+            <line x1="170" y1="182" x2="242" y2="182" /><path d="M236 177 L246 182 L236 187 Z" fill="var(--line)" />
+            <line x1="398" y1="182" x2="470" y2="182" /><path d="M464 177 L474 182 L464 187 Z" fill="var(--line)" />
+            <line x1="626" y1="182" x2="698" y2="182" /><path d="M692 177 L702 182 L692 187 Z" fill="var(--line)" />
+            <line x1="854" y1="182" x2="926" y2="182" /><path d="M920 177 L930 182 L920 187 Z" fill="var(--line)" />
+          </g>
+        </svg>
+      </div>
+
+      <hr class="rule" />
+      <div class="cols2" style="margin-top:24px;align-items:center;gap:48px">
+        <div class="metric">
+          <span class="v">15<span style="font-size:28px">–</span>25%</span>
+          <span class="k">典型流动效率（增值时间占比）<br />意味着 75%+ 的时间花在等待与交接——这正是单点提效碰不到的部分</span>
+        </div>
+        <ul class="dash">
+          <li><b>加速非瓶颈 = 局部最优。</b>端到端周期几乎不变，半成品（WIP）反而越堆越多。</li>
+          <li><b>别再看虚荣指标。</b>"写得多快"无意义，要看 lead time、流动效率、返工率。</li>
+        </ul>
+      </div>
+      <span class="mark">Why</span><span class="pgnum">02 / 03</span>
+    </section>
+
+    <!-- ════════════ 03 · 下一步 ════════════ -->
+    <section class="slide">
+      <div class="eyebrow">02 · 下一步</div>
+      <h1 class="title">把战场从"单点"挪到"流程"</h1>
+      <p class="lead">认同"先稳原子、再统一协议、最后编排工作流"的顺序；但不必等原子层 100% 成熟，现在就该起步。</p>
+
+      <div class="cols3 grow" style="margin-top:34px;align-items:stretch">
+        <div class="card step">
+          <span class="no">01</span>
+          <h3>选一条端到端价值流试点</h3>
+          <p>别全流程铺开。挑一条最痛的业务线，从需求到上线打通，做出可复制的样板再横向推。</p>
+        </div>
+        <div class="card step">
+          <span class="no">02</span>
+          <h3>先把基线量起来</h3>
+          <p>没有基线，任何"提效"都无法证明。先量 lead time、流动效率、WIP、返工率、交接等待。</p>
+        </div>
+        <div class="card step">
+          <span class="no">03</span>
+          <h3>打在瓶颈 + 协议接口</h3>
+          <p>把 AI 化与流程重构集中在瓶颈环节，并统一上下游协议（口径、数据结构、契约），让产物无损流动。</p>
+        </div>
+      </div>
+
+      <hr class="rule" />
+      <p class="cap" style="margin-top:18px;font-size:14px;color:var(--olive)">
+        <span class="acc">先有基线，再谈提效。</span>用数据说话，而不是继续在单点上卷速度。
+      </p>
+      <span class="mark">Next Step</span><span class="pgnum">03 / 03</span>
+    </section>
+
+  </body>
+</html>

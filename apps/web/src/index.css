@@ -1470,3 +1470,125 @@ select.hds-input {
   text-transform: uppercase;
   color: var(--tertiary-label);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Parallel Backstage Pass — homepage celebrity testimonial (fictional)
+   Glassy "backstage pass" cards with a violet halo that ties to the avatars.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.hds-pass-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  border: 0.5px solid var(--separator);
+  background: linear-gradient(180deg, rgba(168, 85, 255, 0.05), rgba(255, 255, 255, 0.015));
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  backdrop-filter: saturate(160%) blur(18px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 18px 50px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+}
+.hds-pass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(420px 170px at 50% -28%, rgba(168, 85, 255, 0.20), transparent 70%);
+  opacity: 0.85;
+}
+.hds-pass-card > * { position: relative; z-index: 1; }
+.hds-pass-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(168, 85, 255, 0.5);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 26px 72px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(168, 85, 255, 0.25),
+    0 0 38px rgba(168, 85, 255, 0.22);
+}
+
+/* Avatar frame with halo ring + hover scan-light sweep */
+.hds-pass-avatar {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  isolation: isolate;
+  background: #14101e;
+}
+.hds-pass-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hds-pass-avatar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  z-index: 3;
+  pointer-events: none;
+  transition: box-shadow 0.35s ease;
+}
+.hds-pass-avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(199, 203, 255, 0.30) 47%, rgba(168, 85, 255, 0.10) 53%, transparent 70%);
+  transform: translateX(-130%);
+  transition: transform 0.85s ease;
+}
+.hds-pass-card:hover .hds-pass-avatar::before {
+  box-shadow: inset 0 0 0 1px rgba(168, 85, 255, 0.45), inset 0 0 24px rgba(168, 85, 255, 0.25);
+}
+.hds-pass-card:hover .hds-pass-avatar::after { transform: translateX(130%); }
+
+/* "平行世界 / Parallel World" badge */
+.hds-pass-tag {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #d9c2ff;
+  background: rgba(168, 85, 255, 0.12);
+  border: 0.5px solid rgba(168, 85, 255, 0.35);
+}
+.hds-pass-tag::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #c084fc;
+  box-shadow: 0 0 0 3px rgba(168, 85, 255, 0.2);
+}
+
+/* Small monospace "PASS" code text */
+.hds-pass-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--tertiary-label);
+}
+
+/* Selling-point pill */
+.hds-pass-pill {
+  font-size: 11px;
+  line-height: 1.5;
+  padding: 3px 8px;
+  border-radius: 8px;
+  color: var(--secondary-label);
+  background: rgba(255, 255, 255, 0.04);
+  border: 0.5px solid var(--separator);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hds-pass-card { transition: none; }
+  .hds-pass-card:hover { transform: none; }
+  .hds-pass-avatar::after { display: none; }
+}

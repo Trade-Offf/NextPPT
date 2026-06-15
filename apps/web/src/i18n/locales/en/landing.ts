@@ -54,6 +54,66 @@ const landing: typeof zh = {
     inspectorText: 'Text',
     inspectorLayout: 'Layout',
   },
+  parallel: {
+    pass: 'PARALLEL BACKSTAGE PASS',
+    tag: 'Parallel World',
+    eyebrow: 'PARALLEL UNIVERSE · FOR FUN',
+    titleA: 'In a parallel world,',
+    titleAccent: 'they all use NextPPT',
+    subtitle: 'Six familiar faces share how NextPPT feels in their parallel universe.',
+    disclaimer:
+      'Disclaimer: This section is fictional. The portraits are AI-generated and every quote is AI-imagined — they do not represent the views of any real person, and are purely for entertainment.',
+    people: [
+      {
+        name: 'Hu Yanbin',
+        role: 'Music Producer · Parallel-Universe CXO',
+        quote:
+          'Making a deck is like writing a song — the hook needs endless polish. I used to spin up a whole AI round for one edit; now a single click changes text and colors. The inspiration never drops.',
+        scene: 'Late night in the studio, he drags his tour keynote into NextPPT and nails the titles while humming the melody.',
+        tags: ['Click to edit', 'Stay in flow', 'One-click export'],
+      },
+      {
+        name: 'Steve Jobs',
+        role: 'Product Philosopher',
+        quote:
+          'True simplicity is handing the last millimeter of polish back to people. NextPPT deletes every extra step and leaves just one — the click.',
+        scene: 'At the garage whiteboard he stares at the projection and says only: make that bigger — then clicks it himself.',
+        tags: ['Minimal interaction', 'Pixel control', 'WYSIWYG'],
+      },
+      {
+        name: 'Lei Jun',
+        role: 'Value-for-Money Evangelist',
+        quote:
+          'No pipelines, no burning tokens, edit right on your machine — the deck tool built for fans. Are you OK? I am very OK.',
+        scene: 'The night before launch he drags in 100 HTML pages, checks every spec page by page, and finishes editing in three minutes.',
+        tags: ['Peak efficiency', 'No token burn', 'Local-first'],
+      },
+      {
+        name: 'Elon Musk',
+        role: 'First-Principles Maniac',
+        quote:
+          'A deck should not be the bottleneck. Decouple generation from editing and you iterate an order of magnitude faster — that is first principles.',
+        scene: 'Late at the factory, between two launch windows, he drags the mission brief in and reworks it in five minutes before going on stage.',
+        tags: ['Rapid iteration', 'Decoupled gen', 'Straight to stage'],
+      },
+      {
+        name: 'Jensen Huang',
+        role: 'Compute Evangelist',
+        quote:
+          'The more you edit, the more you save — every AI recompute you skip is compute saved.',
+        scene: 'In his leather jacket backstage at GTC, he drags the keynote into NextPPT and swaps the palette to the next-gen recipe on the spot.',
+        tags: ['Saves compute', 'Live editing', 'One-click export'],
+      },
+      {
+        name: 'Allen Zhang',
+        role: 'Aesthete of Restraint',
+        quote:
+          'A good tool should let you finish and leave. Drag the HTML in, edit, export — no distraction. That is my kind of taste.',
+        scene: 'At a quiet desk he opens no dialog at all, just a few clicks to tune the deck until it is exactly right.',
+        tags: ['Finish and leave', 'Calm & clean', 'WYSIWYG'],
+      },
+    ],
+  },
   footer: {
     tagline: 'The next-gen deck, born from HTML. Local-first — your data never leaves your machine.',
     colProduct: 'Product',
