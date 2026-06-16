@@ -43,6 +43,10 @@ const templates: typeof zh = {
       title: 'Terminal-style deck',
       desc: 'A multi-page deck in a GitHub-dark / terminal-IDE aesthetic (a developer-view AI productivity talk): IDE titlebars, "//" kicker prefixes, pain/fix scenario cards, syntax-highlighted code panels, golden-quote bands and metric cards, accented by terminal orange and JetBrains Mono. Open it in the editor or download it; the bundled prompt is a reusable terminal-style design spec for any topic.',
     },
+    'deck-report': {
+      title: 'Business report deck',
+      desc: 'A light, business-style multi-page report deck (project-management analysis view): a health donut, a risk-priority pyramid, a resource heat matrix, a capacity line chart and a main-line relay flow — five inline SVG charts — plus health-status lights, P0/P1/P2 level pills, color-topped cards and an action table, accented in ink navy with a single sans-serif for projector readability. Open it in the editor or download it; the bundled prompt is a reusable business-report design spec for any topic.',
+    },
   },
 };
 

@@ -300,6 +300,112 @@ Anti-Patterns 反面示例（必须规避）
 按内容自然组织页数与每页结构，不要凑页数或留半页空白。
 每页都是 titlebar + body + footer 三段式，固定 1280×720，信息密度高、版面布满，遵循以上全部规范。`,
   },
+  {
+    id: 'deck-report',
+    kind: 'deck',
+    tags: ['Business', 'PMO', '16:9'],
+    sampleUrl: '/biz-report-deck.html',
+    prompt: `用「浅色商务汇报」视觉风格帮我把内容排成一份面向管理层的多页汇报演示稿（主题与内容我会另行提供）。
+输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高、版面布满，适合投屏与打印导出。
+以下只规定视觉与排版规范，不限定你写什么内容。
+
+────────────────────────────────────────
+01 · Canvas 画布（暖浅色）
+────────────────────────────────────────
+幻灯片底：warm-paper #f6f5f0（同时设 @page { size:1280px 720px; margin:0 }，避免打印白边）
+卡片 / 面板：纯白 #ffffff，次级面板 #fbfaf6
+描边线：line #e4e2d8、line-soft #eceae1
+每页顶部一条 6px 品牌色实线（.slide::after），作为统一视觉锚点
+body（投屏外底）可用更深的 #cfccc0 衬托幻灯片浮起；禁止冷蓝灰 #f3f4f6 当背景
+
+────────────────────────────────────────
+02 · Accent 品牌色 + 语义色
+────────────────────────────────────────
+唯一品牌强调：Ink Navy #14457a（eyebrow、左竖线、页内关键词 .acc、品牌色顶边、品牌色卡片、SVG 主色块）
+品牌色占比克制（≈10% 以内），靠它点睛而非铺面。
+语义色仅用于「健康度 / 风险等级」语义，不作装饰：
+  green #2e7d52（健康 / 已上线 / 绿灯）  tint #e6f1ea
+  amber #a9781b（需跟进 / P1 / 黄灯）    tint #f5ecd8
+  red   #bb3a2b（高风险 / P0 / 红灯）     tint #f6e6e2
+禁止：再引入第四种装饰彩色；禁止彩色渐变铺底。
+
+────────────────────────────────────────
+03 · Neutrals 文本灰阶
+────────────────────────────────────────
+ink #16181d（标题 / 主数值）· ink2 #3c3f47（正文）
+muted #6a6e77（说明 / 表头）· faint #9aa0a8（页码 / 轴线 / 装饰）
+层级靠字号与灰阶拉开，而非滥用加粗。
+
+────────────────────────────────────────
+04 · Typography 字体层级（全篇单一无衬线）
+────────────────────────────────────────
+字体栈统一：--sans: "Inter", "Noto Sans SC", "PingFang SC", -apple-system, "Microsoft YaHei", sans-serif
+（用 Google Fonts 引入 Inter + Noto Sans SC；CDN: https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap）
+全篇只用这一套无衬线，标题正文不混排不同字族。数字加 font-variant-numeric: tabular-nums。
+
+字号体系（投屏可读，刻意放大）：
+  封面大标题  64px  weight 800  line-height 1.14
+  页面标题    46px  weight 800  line-height 1.18  letter-spacing -.5px
+  Lead 导语   22–24px weight 400 line-height 1.5（关键词用 <b> 700 + ink 或 .acc 品牌色）
+  正文        19px  weight 400  line-height 1.6
+  注释 cap    16.5px weight 400 line-height 1.55  color muted
+  eyebrow     15px  weight 700  letter-spacing 3px  uppercase  品牌色
+字重只用 400 / 700 / 800；强调改用字号升档 / .acc 品牌色 / 左侧 4px 竖线，不要合成 bold 当唯一强调手段。
+
+────────────────────────────────────────
+05 · Slide 骨架（每页统一）
+────────────────────────────────────────
+顶部 6px 品牌色条（::after）→ eyebrow（"NN · 章节名"，品牌色 uppercase）→ page-title（46px）→ lead（导语，一句话给判断）
+中部 .grow（flex:1）：放主体（卡片网格 / 表格 / 图表 / 列表），居中或撑满
+底部固定两角：左 .mark（英文区块标签，uppercase faint）· 右 .pgnum（NN / 总页数，tabular-nums faint）
+
+────────────────────────────────────────
+06 · Components 原子组件
+────────────────────────────────────────
+Eyebrow：品牌色 + letter-spacing 3px + uppercase，作章节定位
+Section 标题 .sect / 金句 .quote：左侧 4px 品牌色竖线 + padding-left
+Tag（四色胶囊）：圆点 + 文字，品牌/green/amber/red 四种，背景用对应实色 tint（禁止 rgba 透明叠色）
+等级 pill .lv（P0/P1/P2）：实色填充白字，P0 红 / P1 琥珀 / P2 品牌蓝
+Dash 列表：方块短点（11px 圆角小方块，品牌色）代替圆点，position:absolute left:0
+Card 卡片：白底 + 1px 描边 + 12px 圆角；顶部 5px 语义色边（b-red / b-amber / b-green / b-brand）标注状态
+健康度行 .hrow：项目名 + 状态 pill（圆点 + 红/黄/绿）+ 一句状态说明
+Heat matrix 资源热力矩阵：成员 × 项目网格，实心格=核心承担（品牌色）、浅色描边格=参与支援、空格=不涉及
+Table：表头 muted + 2px 底线，行用 1px soft 分隔，无竖线
+Rule 分隔线：1px line 色水平线
+
+────────────────────────────────────────
+07 · Inline SVG Charts 内联图表（至少 5 处）
+────────────────────────────────────────
+SVG 内 font-family 与页面同步（var(--sans)），用 .s-lab(ink 700) / .s-sub(muted) / .s-axis(faint 600) 三档文字，text-anchor / dominant-baseline 精确对齐。
+推荐 5 类（按内容选用，要求复杂、信息密集）：
+  健康度环形图（Donut）：用 stroke-dasharray 分段，绿/黄/红比例，中心放总数
+  风险分层金字塔（Pyramid / Funnel）：P0/P1/P2 三层递减矩形，各层用语义 tint 填充 + 语义色描边
+  资源热力矩阵（Heat matrix）：成员 × 项目，实心/浅色/空格三态（也可用上面的 .mtx 组件实现）
+  产能折线 / 面积图（Line + Area）：含饱和参考虚线、面积填充品牌 tint、关键点用红色高亮 + 文字标注
+  主线接力流程图（Flow）：圆角节点 + 箭头 marker，当前态节点用品牌 tint 边框、风险态用红 tint 边框
+
+SVG 配色规则：
+  轴线 / 辅助线：line #e4e2d8 或 faint，参考线用 stroke-dasharray
+  焦点 / 主色块：品牌 #14457a；语义状态用 green/amber/red
+  文字：ink #16181d（数值）/ muted #6a6e77（说明）
+
+────────────────────────────────────────
+Anti-Patterns 反面示例（必须规避）
+────────────────────────────────────────
+✗ 背景用冷蓝灰 #f3f4f6 或语义色大面积铺底
+✗ Tag 用 rgba() 透明色叠色（应使用实色 tint）
+✗ 混排多种字族（应全篇单一无衬线）
+✗ 滥用 font-weight 当唯一强调（应优先字号 / .acc 品牌色 / 左竖线）
+✗ 引入第四种装饰彩色或彩色渐变铺底
+✗ 品牌色占比过高沦为堆砌；✗ 内容溢出 720px 不做收敛
+
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+按内容自然组织页数（约 10–12 页）与每页结构，不要凑页数或留半页空白；图表类型按内容选用，至少 5 处内联 SVG。
+每页都是 eyebrow + title + body + 角标 的统一骨架，固定 1280×720，信息密度高、版面布满，遵循以上全部规范。
+适合的内容：项目管理分析、健康度评估、风险分层、资源瓶颈、历史趋势、行动计划、管理层摘要等向上汇报场景。`,
+  },
 ];
 
 export function findTemplate(id: string): TemplateItem | undefined {
