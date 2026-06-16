@@ -22,6 +22,29 @@ const editor: typeof zh = {
     save: 'Save',
     export: 'Export',
     guide: 'Guide',
+    kindDeck: 'Per page',
+    kindDoc: 'One page',
+    kindDeckTip: 'Edit and export per page (PPTX)',
+    kindDocTip: 'Edit as one document, smart-paginated export',
+    kindUnavailable: 'Not suited for per-page — click to learn how',
+  },
+  switchKind: {
+    title: 'Switch editing mode?',
+    toDeck: 'Switch to per-page',
+    toDoc: 'Switch to one-page',
+    keepEditing: 'Cancel',
+    msg: 'Switching re-derives pages from the original file; unsaved changes will be lost. Save first if you want to keep them.',
+  },
+  deckUnsuitable: {
+    title: "This HTML isn't suited for per-page",
+    body: "It isn't structured as 16:9 slides (it reads more like a single document), so forcing per-page clips content and breaks the layout. Edit it as one page for now; for per-page editing and a clean PPTX export, ask the AI to rebuild it as slides.",
+    viewGuide: 'View guide',
+    dismiss: 'Got it',
+    promptHint: 'Copy this and send it to your AI to regenerate with pagination:',
+    promptText:
+      'Convert this HTML into slide format: wrap each page in a <section class="slide" style="width:1280px;height:720px"> … </section>, with pages independent and not sharing an outer container.',
+    copyPrompt: 'Copy prompt',
+    copied: 'Copied',
   },
   status: {
     saving: 'Saving…',
@@ -140,16 +163,8 @@ const editor: typeof zh = {
     apply: 'Apply changes',
     invalid: 'Invalid: the current page must contain a <section class="slide"> root element',
   },
-  open: {
-    formatBrief:
-      'Not a deck (needs <code>section.slide</code>). Copy the prompt from the <link>guide</link> and have AI generate the file.',
-  },
   errors: {
     needPermission: 'Folder access permission is required',
-    notFound:
-      'No recognizable slide HTML in this folder. You need at least one <section class="slide"> page.',
-    noSlides:
-      'This HTML has no <section class="slide"> pages, so it cannot be opened as a deck.',
     noHtml: 'No HTML file was found in this folder.',
     sampleFailed: 'Failed to load the sample template, please try again later',
     dropHtmlOnly: 'Please drop an HTML file or a folder containing HTML.',

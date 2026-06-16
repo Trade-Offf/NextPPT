@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -39,7 +40,10 @@ export function ConfirmDialog({
 
   if (!open) return null;
 
-  return (
+  // Portal to <body> so the fixed-position backdrop is relative to the viewport
+  // even when an ancestor establishes a containing block (e.g. a floating bar
+  // with `backdrop-filter`), which would otherwise clip/mis-place the modal.
+  return createPortal(
     <div className="hds-modal-backdrop" onClick={onCancel}>
       <div
         className="hds-modal"
@@ -66,6 +70,7 @@ export function ConfirmDialog({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

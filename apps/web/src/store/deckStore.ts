@@ -10,7 +10,7 @@ export interface SlideState extends SlideEntry {
   thumbnail: string | null;
 }
 
-export interface SelectionState {
+interface SelectionState {
   selector: string;
   tagName: string;
   bbox: DOMRect;
@@ -47,6 +47,10 @@ export interface DeckStore {
   /** Working copy filename (written on save, defaults to source + '-hds') */
   deckFileName: string;
   rawHtml: string; // full deck HTML string
+  /** The original opened HTML, untouched — basis for switching deck/doc kind. */
+  sourceHtml: string;
+  /** Pages detected in the source (0 = no pagination → deck switch unavailable). */
+  detectedSlideCount: number;
 
   // ── Parsed deck ──────────────────────────────────────────
   /** Serialised <head> content from the original document (styles, fonts) */
@@ -71,8 +75,10 @@ export interface DeckStore {
   redo: () => void;
 
   // ── Actions ──────────────────────────────────────────────
-  openDirectory: (handle: FileSystemDirectoryHandle, fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[], kind?: WorkspaceKind) => void;
-  openFile: (fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[], kind?: WorkspaceKind) => void;
+  openDirectory: (handle: FileSystemDirectoryHandle, fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[], kind: WorkspaceKind, sourceHtml: string, detectedSlideCount: number) => void;
+  openFile: (fileName: string, html: string, headHtml: string, meta: DeckMeta, slides: SlideState[], kind: WorkspaceKind, sourceHtml: string, detectedSlideCount: number) => void;
+  /** Switch deck/doc kind in place (keeps file handles); slides are re-derived from source. */
+  switchKind: (kind: WorkspaceKind, rawHtml: string, headHtml: string, meta: DeckMeta, slides: SlideState[]) => void;
   setWorkingFileHandle: (fh: FileSystemFileHandle) => void;
   closeDirectory: () => void;
 
@@ -134,6 +140,8 @@ export const useDeckStore = create<DeckStore>((set) => ({
   sourceFileName: '',
   deckFileName: '',
   rawHtml: '',
+  sourceHtml: '',
+  detectedSlideCount: 0,
   headHtml: '',
   meta: null,
   slides: [],
@@ -146,17 +154,22 @@ export const useDeckStore = create<DeckStore>((set) => ({
   past: [],
   future: [],
 
-  openDirectory: (handle, fileName, html, headHtml, meta, slides, kind = 'deck') => {
+  openDirectory: (handle, fileName, html, headHtml, meta, slides, kind, sourceHtml, detectedSlideCount) => {
     // Derive working-copy filename: foo.html → foo-hds.html
     const copyName = fileName.replace(/\.html$/i, '-hds.html');
     lastEditPush = 0;
-    set({ dirHandle: handle, fileHandle: null, mode: 'folder', kind, sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false, past: [], future: [] });
+    set({ dirHandle: handle, fileHandle: null, mode: 'folder', kind, sourceFileName: fileName, deckFileName: copyName, rawHtml: html, sourceHtml, detectedSlideCount, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, selection: null, isDirty: false, past: [], future: [] });
   },
 
-  openFile: (fileName, html, headHtml, meta, slides, kind = 'deck') => {
+  openFile: (fileName, html, headHtml, meta, slides, kind, sourceHtml, detectedSlideCount) => {
     const copyName = fileName.replace(/\.html?$/i, '-hds.html');
     lastEditPush = 0;
-    set({ dirHandle: null, fileHandle: null, mode: 'file', kind, sourceFileName: fileName, deckFileName: copyName, rawHtml: html, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, isDirty: false, past: [], future: [] });
+    set({ dirHandle: null, fileHandle: null, mode: 'file', kind, sourceFileName: fileName, deckFileName: copyName, rawHtml: html, sourceHtml, detectedSlideCount, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, selection: null, isDirty: false, past: [], future: [] });
+  },
+
+  switchKind: (kind, rawHtml, headHtml, meta, slides) => {
+    lastEditPush = 0;
+    set({ kind, rawHtml, headHtml, meta, slides, currentSlideId: slides[0]?.id ?? null, selection: null, viewMode: 'visual', isDirty: false, past: [], future: [] });
   },
 
   setWorkingFileHandle: (fh) => set({ fileHandle: fh }),
@@ -167,7 +180,7 @@ export const useDeckStore = create<DeckStore>((set) => ({
   },
 
   closeDirectory: () =>
-    set({ dirHandle: null, fileHandle: null, mode: 'folder', kind: 'deck', sourceFileName: '', deckFileName: '', rawHtml: '', headHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
+    set({ dirHandle: null, fileHandle: null, mode: 'folder', kind: 'deck', sourceFileName: '', deckFileName: '', rawHtml: '', sourceHtml: '', detectedSlideCount: 0, headHtml: '', meta: null, slides: [], currentSlideId: null, selection: null, isDirty: false }),
 
   setSlides: (slides) => set({ slides }),
 

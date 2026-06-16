@@ -10,6 +10,7 @@ import { CodeEditorPane } from '../components/CodeEditorPane.js';
 import { ExportDrawer } from '../components/ExportDrawer.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
 import { HistoryDrawer } from '../components/HistoryDrawer.js';
+import { WorkspaceKindToggle } from '../components/WorkspaceKindToggle.js';
 import type { PatchOp, RuntimeMessage } from '@hds/protocol';
 import { writeDeck, rebuildDeckHtmlForExport, rebuildDocHtmlForExport, writeAsset, saveAsNewFile, writeFileHandle, parseDeck, parseDoc } from '../fs/adapter.js';
 import type { HistoryCtx } from '../fs/history.js';
@@ -152,15 +153,24 @@ export function EditorPage() {
   // Measure the available canvas area (width AND height) so the slide fits the
   // full-bleed stage completely. The observer re-fires automatically when the
   // floating inspector toggles (it changes <main>'s right inset → resize).
+  // `docMode` is a dep because deck/doc render different <main> elements that
+  // share `canvasContainerRef`; switching kind must re-attach the observer to
+  // the new element, otherwise it keeps measuring the detached old one (0×0).
   useEffect(() => {
     if (viewMode !== 'visual' || !canvasContainerRef.current) return;
     const el = canvasContainerRef.current;
-    const measure = () => setContainerSize({ w: Math.floor(el.clientWidth), h: Math.floor(el.clientHeight) });
+    const measure = () => {
+      const w = Math.floor(el.clientWidth);
+      const h = Math.floor(el.clientHeight);
+      // Ignore 0×0 reads (e.g. a transiently detached element) so a stale zero
+      // never collapses the canvas via fitWidth=0.
+      if (w > 0 && h > 0) setContainerSize({ w, h });
+    };
     measure();
     const ro = new ResizeObserver(() => measure());
     ro.observe(el);
     return () => ro.disconnect();
-  }, [viewMode]);
+  }, [viewMode, docMode]);
 
   // Fit the 16:9 slide within the measured area by the tighter dimension.
   const fitWidth = Math.max(0, Math.min(containerSize.w, Math.round((containerSize.h * 1280) / 720)));
@@ -593,6 +603,9 @@ export function EditorPage() {
             <p className="mt-1 text-emerald-300 font-mono break-all">{deckFileName}</p>
           </div>
         </div>
+
+        <span className="w-px h-4 bg-white/15 shrink-0" />
+        <WorkspaceKindToggle />
 
         <span className="w-px h-4 bg-white/15 shrink-0" />
         <button

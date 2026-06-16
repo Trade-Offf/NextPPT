@@ -5,7 +5,6 @@ import { en } from './locales/en/index.js';
 
 export type Locale = 'zh' | 'en';
 
-export const LOCALES: readonly Locale[] = ['zh', 'en'];
 export const DEFAULT_LOCALE: Locale = 'zh';
 export const NAMESPACES = ['common', 'landing', 'guide', 'editor', 'prompt', 'templates', 'explore'] as const;
 

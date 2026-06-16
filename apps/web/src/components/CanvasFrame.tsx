@@ -26,7 +26,7 @@ interface CanvasFrameProps {
   docMode?: boolean;
 }
 
-export function CanvasFrame({ sectionHtml, headHtml = '', onMessage, iframeRef: externalRef, docMode = false }: CanvasFrameProps) {
+function CanvasFrame({ sectionHtml, headHtml = '', onMessage, iframeRef: externalRef, docMode = false }: CanvasFrameProps) {
   const internalRef = useRef<HTMLIFrameElement>(null);
   const iframeRef = externalRef ?? internalRef;
   const onMessageRef = useRef(onMessage);

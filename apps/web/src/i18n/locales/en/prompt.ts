@@ -15,7 +15,7 @@ const prompt: typeof zh = {
    - <title>a one-line summary of the topic</title> (this becomes the deck title)
    - one <style> tag holding all styles (do not link external CSS files).
 3. Every slide is a <section class="slide"> … </section>, placed directly as children of <body> in order.
-   - The class must contain exactly slide (the parser only recognizes section.slide).
+   - A class containing slide is preferred; other common pagination shapes (div.slide, top-level <section>, .page) are auto-detected on import too.
 
 [Size and styling (must follow strictly)]
 - Each .slide is strictly 16:9: width: 1280px; height: 720px; box-sizing: border-box; overflow: hidden; position: relative.

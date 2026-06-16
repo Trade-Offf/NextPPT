@@ -36,7 +36,7 @@ export function openIdb(): Promise<IDBDatabase> {
   });
 }
 
-export async function persistHandle(handle: FileSystemDirectoryHandle): Promise<void> {
+async function persistHandle(handle: FileSystemDirectoryHandle): Promise<void> {
   const db = await openIdb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(IDB_STORE, 'readwrite');
@@ -401,7 +401,7 @@ export function rebuildDeckHtmlForExport(
  * and any carried-over body class/style is restored — so the saved file keeps
  * its original `<body>` shape, never the editor's wrapper div.
  */
-export function rebuildDocHtml(originalHtml: string, docHtml: string): string {
+function rebuildDocHtml(originalHtml: string, docHtml: string): string {
   const doc = new DOMParser().parseFromString(originalHtml, 'text/html');
   const tmp = document.createElement('div');
   tmp.innerHTML = docHtml;

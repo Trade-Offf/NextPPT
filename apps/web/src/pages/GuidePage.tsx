@@ -26,7 +26,7 @@ export function GuidePage() {
   const hashAnchor = anchorFromHash(hash);
 
   const hasDeck = useDeckStore((s) => s.slides.length > 0);
-  const { error, formatError, handlePickFile, handlePickFolder } = useOpenDeck();
+  const { error, handlePickFile, handlePickFolder } = useOpenDeck();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
@@ -277,15 +277,7 @@ export function GuidePage() {
         </div>
 
         {error && (
-          <OpenDeckErrorAlert
-            className="mt-8 text-xs"
-            error={error}
-            formatError={formatError}
-            onGoToGuide={() => {
-              document.getElementById('guide-generate')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              setPromptOpen(true);
-            }}
-          />
+          <OpenDeckErrorAlert className="mt-8 text-xs" error={error} />
         )}
 
         {/* Footer */}

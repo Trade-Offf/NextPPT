@@ -1,4 +1,4 @@
-export type TemplateKind = 'deck' | 'doc';
+type TemplateKind = 'deck' | 'doc';
 
 export interface TemplateItem {
   id: string;

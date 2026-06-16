@@ -18,7 +18,6 @@ export function LandingPage() {
   const {
     loading,
     error,
-    formatError,
     dragOver,
     setDragOver,
     handlePickFolder,
@@ -101,8 +100,6 @@ export function LandingPage() {
             <OpenDeckErrorAlert
               className="mt-6 max-w-md mx-auto text-left"
               error={error}
-              formatError={formatError}
-              onGoToGuide={() => openGuide('generate')}
             />
           )}
           <div className={`hero-cta flex flex-wrap items-center justify-center gap-3 ${error ? 'mt-6' : 'mt-9'}`}>

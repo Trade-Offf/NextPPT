@@ -20,6 +20,29 @@ export default {
     save: '保存',
     export: '导出',
     guide: '使用指南',
+    kindDeck: '逐页',
+    kindDoc: '整页',
+    kindDeckTip: '逐页编辑，逐页导出 PPTX',
+    kindDocTip: '整页文档编辑与智能分页导出',
+    kindUnavailable: '不适合逐页，点此了解如何改',
+  },
+  switchKind: {
+    title: '切换编辑方式？',
+    toDeck: '切换为逐页',
+    toDoc: '切换为整页',
+    keepEditing: '取消',
+    msg: '切换会按原始文件重新整理页面，当前未保存的修改会丢失。如需保留，请先「保存」再切换。',
+  },
+  deckUnsuitable: {
+    title: '这个 HTML 不适合逐页',
+    body: '它不是按 16:9 幻灯片组织的（更像一篇整页文档），强行逐页会出现内容被裁切、排版错乱。建议先用整页编辑；想要逐页编辑、整齐的 PPTX 导出，请让 AI 按幻灯片格式重做。',
+    viewGuide: '查看指南',
+    dismiss: '知道了',
+    promptHint: '复制下面这句发给 AI，它就会按分页格式重做：',
+    promptText:
+      '请把这份 HTML 改成幻灯片格式：每一页用一个 <section class="slide" style="width:1280px;height:720px"> … </section> 包裹，页与页之间相互独立、不要共用外层容器。',
+    copyPrompt: '复制提示词',
+    copied: '已复制',
   },
   status: {
     saving: '保存中…',
@@ -138,16 +161,8 @@ export default {
     apply: '应用更改',
     invalid: '无效：当前页必须包含 <section class="slide"> 根元素',
   },
-  open: {
-    formatBrief:
-      '无法识别为幻灯片（需 <code>section.slide</code>）。到<link>使用指南</link>复制提示词，让 AI 按格式生成。',
-  },
   errors: {
     needPermission: '需要文件夹访问权限',
-    notFound:
-      '文件夹里没有可识别的幻灯片 HTML。需要包含至少一个 <section class="slide"> 页面。',
-    noSlides:
-      '该 HTML 里没有 <section class="slide"> 幻灯片页，无法作为演示稿打开。',
     noHtml: '文件夹里没有找到任何 HTML 文件。',
     sampleFailed: '示例模板加载失败，请稍后重试',
     dropHtmlOnly: '请拖入 HTML 文件或包含 HTML 的文件夹。',

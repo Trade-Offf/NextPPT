@@ -17,7 +17,7 @@ const guide: typeof zh = {
   },
   generate: {
     title: 'Step 1 · Let AI make one for you',
-    intro: "Can't build it yourself? No problem. Copy the prompt below into any AI and it hands you a ready-made deck file you can come back and edit.",
+    intro: "Can't build it yourself? No problem. Copy the prompt below into any AI and it hands you a ready-made deck file you can come back and edit. Already have AI-made HTML? Just open it — common pagination (div.slide, top-level <section>, .page) is auto-detected, and unpaginated HTML still opens as one page.",
     promptWhat: 'A prompt is just a sentence that tells the AI what to make for you.',
     steps: [
       { title: 'Copy this prompt', desc: 'Click "Copy prompt" below — the whole thing is copied, nothing to write yourself.' },
