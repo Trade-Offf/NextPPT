@@ -65,6 +65,14 @@ const landing: typeof zh = {
       'Disclaimer: This section is fictional. The portraits are AI-generated and every quote is AI-imagined — they do not represent the views of any real person, and are purely for entertainment.',
     people: [
       {
+        name: 'Luo Yonghao',
+        role: 'Idealist · Keynote-Aesthetics Evangelist',
+        quote:
+          'A keynote deck is a craft. I used to stay up till dawn fixing one slide; now a click changes text and images — let me use it first, and make a friend.',
+        scene: 'The moment the livestream lights go on, he drags his launch keynote into NextPPT and, cracking jokes, bumps the font up so even the back row can read it.',
+        tags: ['Craft-grade layout', 'One-click edit', 'One-click export'],
+      },
+      {
         name: 'Hu Yanbin',
         role: 'Music Producer · Parallel-Universe CXO',
         quote:
@@ -79,14 +87,6 @@ const landing: typeof zh = {
           'True simplicity is handing the last millimeter of polish back to people. NextPPT deletes every extra step and leaves just one — the click.',
         scene: 'At the garage whiteboard he stares at the projection and says only: make that bigger — then clicks it himself.',
         tags: ['Minimal interaction', 'Pixel control', 'WYSIWYG'],
-      },
-      {
-        name: 'Lei Jun',
-        role: 'Value-for-Money Evangelist',
-        quote:
-          'No pipelines, no burning tokens, edit right on your machine — the deck tool built for fans. Are you OK? I am very OK.',
-        scene: 'The night before launch he drags in 100 HTML pages, checks every spec page by page, and finishes editing in three minutes.',
-        tags: ['Peak efficiency', 'No token burn', 'Local-first'],
       },
       {
         name: 'Elon Musk',

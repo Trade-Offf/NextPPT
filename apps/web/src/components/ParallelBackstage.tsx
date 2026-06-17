@@ -12,9 +12,9 @@ type Person = {
 /** Avatars are AI-generated anime portraits, kept in the same order as the
  *  i18n `parallel.people` array. */
 const AVATARS = [
+  '/parallel/luoyonghao.png',
   '/parallel/huyanbin.png',
   '/parallel/jobs.png',
-  '/parallel/leijun.png',
   '/parallel/musk.png',
   '/parallel/jensen.png',
   '/parallel/allenzhang.png',
