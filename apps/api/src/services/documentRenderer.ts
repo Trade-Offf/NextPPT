@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import path from 'node:path';
+import fs from 'node:fs/promises';
 
 export interface DocRenderResult {
   filePath: string;
@@ -7,11 +8,11 @@ export interface DocRenderResult {
 }
 
 interface DocRenderOptions {
-  /** 'pdf' = vector, smart-paginated; 'png' = single full-page raster. */
+  /** 'pdf' = screenshot embedded in PDF; 'png' = full-page raster. */
   format: 'pdf' | 'png';
   /** Layout width for the document (CSS px). */
   viewportWidth: number;
-  /** Supersampling factor for PNG crispness (ignored for vector PDF). */
+  /** Supersampling factor for PNG/PDF crispness. */
   deviceScaleFactor: number;
   tmpDir: string;
   onProgress: (current: number, total: number) => void;
@@ -20,21 +21,14 @@ interface DocRenderOptions {
 /**
  * Free-edit (doc) mode rendering.
  *
- * Unlike the deck pipeline (one screenshot per `section.slide`), a document is
- * rendered as a whole and paginated by the browser itself:
- *  - PDF: `page.pdf({ preferCSSPageSize: true })` produces a selectable, vector,
- *    multi-page PDF that honours the document's own `@page` size / page-break
- *    rules — true smart pagination, no rasterisation.
- *  - PNG: `page.screenshot({ fullPage: true })` captures the entire document as
- *    one tall image.
+ * Both PNG and PDF use screenshot-based capture for full WYSIWYG fidelity:
+ *  - PNG: `page.screenshot({ fullPage: true })` captures the full document as one
+ *    tall raster image.
+ *  - PDF: screenshot + pdf-lib embed (replaces the former `page.pdf()` call, which
+ *    lost emoji glyphs in headless Chromium's PDF compositor). Emoji and web fonts
+ *    render correctly via the browser's screen compositor before capture.
  *
- * Media emulation differs by format:
- *  - PDF uses `print` media — a PDF is a print artifact, so the document's own
- *    `@page` margins and `@media print` rules must drive pagination. Emulating
- *    `screen` here double-counts spacing for print-designed docs (e.g. a Kami A4
- *    resume that puts page padding under `@media screen` AND margins under
- *    `@page`), which silently pushes content onto an extra page.
- *  - PNG uses `screen` media — it is a WYSIWYG raster of the edited screen view.
+ * Media emulation is always 'screen' since both outputs are raster screenshots.
  */
 export async function renderDocument(
   htmlPath: string,
@@ -66,8 +60,9 @@ export async function renderDocument(
     const page = await browser.newPage();
     await page.evaluateOnNewDocument('globalThis.__name = globalThis.__name || ((fn) => fn);');
     await page.setViewport({ width: viewportWidth, height: 900, deviceScaleFactor });
-    // PDF → print media (honours @page / @media print); PNG → screen (WYSIWYG raster).
-    await page.emulateMediaType(format === 'pdf' ? 'print' : 'screen');
+    // Both PNG and PDF now use screenshot (PDF no longer uses page.pdf()), so
+    // always emulate 'screen' media so the document renders as designed.
+    await page.emulateMediaType('screen');
 
     const fileUrl = `file://${htmlPath}`;
     await page.goto(fileUrl, { waitUntil: 'networkidle0', timeout: 60_000 });
@@ -136,18 +131,27 @@ export async function renderDocument(
       await page.screenshot({ path: outFile, type: 'png', fullPage: true });
       onProgress(1, 1);
       return { filePath: outFile, ext: 'png' };
-    }
+    } else {
+      // PDF: screenshot the full page and embed into a PDF via pdf-lib.
+      // page.pdf() relies on the browser's native PDF vector renderer, which does
+      // NOT include emoji fonts in headless Chromium — emojis would render as
+      // tofu (missing-glyph boxes). Screenshot-based PDF preserves emoji rendering
+      // from the browser's screen compositor at full fidelity.
+      const outFile = path.join(tmpDir, 'output.png');
+      await page.screenshot({ path: outFile, type: 'png', fullPage: true });
+      onProgress(1, 1);
 
-    const outFile = path.join(tmpDir, 'output.pdf');
-    await page.pdf({
-      path: outFile,
-      printBackground: true,
-      preferCSSPageSize: true,
-      format: 'A4',
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-    });
-    onProgress(1, 1);
-    return { filePath: outFile, ext: 'pdf' };
+      const { PDFDocument } = await import('pdf-lib');
+      const pdf = await PDFDocument.create();
+      const imgBytes = await fs.readFile(outFile);
+      const img = await pdf.embedPng(imgBytes);
+      const pdfPage = pdf.addPage([img.width, img.height]);
+      pdfPage.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+      const pdfBytes = await pdf.save();
+      const pdfOutFile = path.join(tmpDir, 'output.pdf');
+      await fs.writeFile(pdfOutFile, pdfBytes);
+      return { filePath: pdfOutFile, ext: 'pdf' };
+    }
   } finally {
     await browser.close();
   }
