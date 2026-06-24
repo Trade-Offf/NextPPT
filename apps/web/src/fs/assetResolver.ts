@@ -69,6 +69,112 @@ export async function resolveAssetsInHtml(
 }
 
 /**
+ * Inline-data placeholder SVG for missing images. Keeps layout stable and
+ * signals to the user that the asset wasn't found, without triggering 404
+ * network errors or broken-image icons that can cascade into runtime failures.
+ */
+const BROKEN_IMG_PLACEHOLDER =
+  'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150">' +
+      '<rect width="200" height="150" fill="#f0f0f0" stroke="#ccc" stroke-width="1" stroke-dasharray="4 4"/>' +
+      '<text x="100" y="80" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#999">' +
+      'Image not found' +
+      '</text></svg>',
+  );
+
+/**
+ * When opening a single HTML file (no folder), relative asset URLs cannot be
+ * resolved — srcdoc iframes resolve them against the parent origin, producing
+ * 404s. This rewrites relative image/video `src`, `srcset`, `poster` and CSS
+ * `url()` references to a placeholder so the deck still renders and the editor
+ * stays responsive.
+ *
+ * **What is NOT touched**: `href` on `<link>`/`<a>`/`<use>` is left alone —
+ * stylesheet 404s don't crash the runtime, but removing `href` would silently
+ * drop all CSS and leave the deck invisible. `<script src>` is also left alone
+ * (the runtime disables scripts separately).
+ *
+ * Implementation: DOMParser is used only to *discover* which relative URLs
+ * need replacing; the actual substitution happens on the original HTML string
+ * via split/join. This preserves the exact HTML structure — re-serialising the
+ * whole document (outerHTML) would reorder attributes, normalise self-closing
+ * tags, and potentially break `normalizeDeck`'s slide detection.
+ *
+ * Absolute URLs (http, data:, blob:, //, #) are left untouched.
+ */
+export function neutralizeRelativeAssets(html: string): string {
+  const isRelative = (p: string) =>
+    !p.startsWith('data:') &&
+    !p.startsWith('http') &&
+    !p.startsWith('//') &&
+    !p.startsWith('#') &&
+    !p.startsWith('blob:') &&
+    !p.startsWith('mailto:') &&
+    !p.startsWith('tel:');
+
+  // Collect every relative asset URL that needs to be replaced. We then
+  // substitute these exact strings in the original HTML — never reserialise.
+  const toReplace: string[] = [];
+
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+
+  // 1. img / source / video / input[type=image] — src
+  doc.querySelectorAll('img[src], source[src], video[src], input[type="image"][src]').forEach((el) => {
+    const val = el.getAttribute('src');
+    if (val && isRelative(val.trim())) toReplace.push(val);
+  });
+
+  // 2. video — poster
+  doc.querySelectorAll('video[poster]').forEach((el) => {
+    const val = el.getAttribute('poster');
+    if (val && isRelative(val.trim())) toReplace.push(val);
+  });
+
+  // 3. img / source — srcset (each candidate URL)
+  doc.querySelectorAll('img[srcset], source[srcset]').forEach((el) => {
+    const val = el.getAttribute('srcset');
+    if (!val) return;
+    for (const candidate of val.split(',')) {
+      const url = candidate.trim().split(/\s+/)[0];
+      if (url && isRelative(url.trim())) toReplace.push(url);
+    }
+  });
+
+  // Substitute collected URLs in the original string. split/join avoids any
+  // regex-escaping pitfalls with file paths.
+  let result = html;
+  for (const url of toReplace) {
+    if (!url) continue;
+    result = result.split(url).join(BROKEN_IMG_PLACEHOLDER);
+  }
+
+  // NOTE: CSS url() is intentionally NOT rewritten here. url() is used for
+  // background-image AND for @import url("style.css") — rewriting blindly
+  // would corrupt CSS imports and silently drop all styles, leaving the deck
+  // invisible. Background-image 404s are non-fatal (no onerror cascade), so
+  // leaving them is the safer trade-off.
+
+  // Neutralize JS-driven pagination CSS that hides slides when scripts are
+  // disabled. Many decks use `.slide{display:none}` + `.slide.active{display:flex}`
+  // toggled by a script; with scripts disabled, only the .active slide would
+  // show (or none, if the script sets active). Force every slide visible.
+  // Also neutralize `position:absolute;inset:0` which relies on a `.deck`
+  // container that parseDeck doesn't extract — the slide would collapse to 0×0.
+  result = result
+    // .slide{display:none} → display:block (keep visible without scripts)
+    .replace(/\.slide\s*\{[^}]*display\s*:\s*none[^}]*\}/g, (m) =>
+      m.replace(/display\s*:\s*none/g, 'display:block'))
+    // .slide.active{display:flex} → keep (already visible), no change needed
+    // position:absolute on .slide rules → position:relative so it flows
+    .replace(/(\.slide[^{]*\{[^}]*?)position\s*:\s*absolute/g, '$1position:relative')
+    // inset:0 on .slide rules → remove (meaningless without .deck container)
+    .replace(/(\.slide[^{]*\{[^}]*?)inset\s*:\s*0/g, '$1inset:auto');
+
+  return result;
+}
+
+/**
  * Register a freshly written asset so that exports can map its blob: URL back to
  * the on-disk relative path. Used after replacing an image (F-08).
  */

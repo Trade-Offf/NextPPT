@@ -47,6 +47,10 @@ ${headHtml}
   html,body{width:1280px;height:720px;overflow:hidden;margin:0;padding:0;}
   body{display:block!important;gap:0!important;padding:0!important;}
   section.slide,section[class~="slide"]{width:1280px!important;min-height:720px!important;max-height:720px!important;flex-shrink:0!important;}
+  /* Disable entrance animations: html-to-image clones nodes into a fresh
+     context where animations restart from their initial frame. Decks with
+     fade-in keyframes (opacity 0 -> 1) would be captured transparent. */
+  *{animation:none!important;transition:none!important;}
 </style>
 </head><body>${sectionHtml}</body></html>`);
   // Inject the capturer after sanitising (sanitize would otherwise remove it).

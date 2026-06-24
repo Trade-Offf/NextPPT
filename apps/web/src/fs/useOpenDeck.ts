@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
 import { pickDirectory, pickFile, recallHandle, verifyPermission, findDeckFile, findAnyHtmlFile, parseDeck, parseDoc } from './adapter.js';
 import { normalizeDeck } from './normalizeDeck.js';
-import { resolveAssetsInHtml, revokeAssetCache } from './assetResolver.js';
+import { resolveAssetsInHtml, revokeAssetCache, neutralizeRelativeAssets } from './assetResolver.js';
 import type { WorkspaceKind } from '@hds/protocol';
 
 /**
@@ -102,9 +102,13 @@ export function useOpenDeck() {
     const norm = normalizeDeck(sourceHtml);
     const detected = norm.confidence === 'high' ? norm.slideCount : 0;
     const kind: WorkspaceKind = detected >= 1 ? 'deck' : 'doc';
-    const d = deriveForKind(sourceHtml, kind);
+    // Single-file mode has no folder handle, so relative asset URLs (./images/x.png)
+    // would 404 inside the srcdoc iframe and could cascade into runtime failures.
+    // Neutralize them upfront: images get a placeholder, <link> hrefs are stripped.
+    const safeHtml = neutralizeRelativeAssets(sourceHtml);
+    const d = deriveForKind(safeHtml, kind);
     revokeAssetCache();
-    openFile(fileName, d.rawHtml, d.headHtml, d.meta, d.slides, kind, sourceHtml, detected);
+    openFile(fileName, d.rawHtml, d.headHtml, d.meta, d.slides, kind, safeHtml, detected);
   };
 
   /**

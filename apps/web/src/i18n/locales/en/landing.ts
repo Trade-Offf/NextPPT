@@ -17,6 +17,7 @@ const landing: typeof zh = {
       'Drop in an AI-generated deck, then click to change text, swap images and move things around — and export a projector-ready PPT / PDF in one click.',
     ctaOpen: 'Open a file / drop it here',
     loading: 'Loading…',
+    ctaTrySample: 'Try a sample',
     ctaGuide: 'Watch the 30-second guide',
     unsupported: 'Please open in Chrome / Edge or another Chromium browser',
     support: 'Works with a folder (read/write paired images) or a single self-contained HTML · Chromium browser required',
@@ -40,6 +41,7 @@ const landing: typeof zh = {
       'This relies on the File System Access API, currently supported only by Chromium browsers. Please open this page in <a>Chrome</a> or Edge / Brave / Arc.',
     dropTitle: 'Click to choose, or drag a folder / HTML here',
     dropHint: 'PPT decks or resumes / long docs alike — format auto-detected; folder mode reads/writes paired images',
+    dragHint: 'Or drag a folder / HTML file anywhere onto the page',
     choosePrompt: 'What do you want to open?',
     chooseCancel: 'Cancel',
     openFolder: 'Open folder',
@@ -47,6 +49,40 @@ const landing: typeof zh = {
     recall: 'Reopen last folder',
     errorRecover:
       'This file may be in the wrong format to open. The easiest fix is to <btn>have an AI remake it</btn> with our prompt.',
+  },
+  sampleShowcase: {
+    eyebrow: 'Built-in samples',
+    title: 'Open 4 ready-made decks in one click',
+    subtitle:
+      'No files to prepare, no folder to pick — jump straight into the editor and start editing, swapping images, and exporting.',
+    noFsNote:
+      'Your browser cannot read or write local files yet, but you can still open the built-in sample and try editing and exporting.',
+    loading: 'Loading sample…',
+    openError: 'The sample failed to load. Please try again later or open an HTML file manually.',
+    open: 'Open',
+    openInEditor: 'Open in editor',
+    cards: [
+      {
+        title: 'Product Launch',
+        subtitle: 'Keynote / product launch',
+        desc: 'Multi-page titles with image & copy pairs — perfect for product launches and quarterly updates.',
+      },
+      {
+        title: 'Quarterly Roadmap',
+        subtitle: 'Roadmap / strategy',
+        desc: 'Layered structure with highlight sections — great for internal reviews and team syncs.',
+      },
+      {
+        title: 'Portfolio Deck',
+        subtitle: 'Portfolio / resume deck',
+        desc: 'Image-first showcase pages — ideal for turning a resume or portfolio into a projector-ready deck.',
+      },
+      {
+        title: 'Tech Talk',
+        subtitle: 'Tech talk / conference',
+        desc: 'Code blocks and diagram pages — built for conferences, internal sharing, and teaching.',
+      },
+    ],
   },
   preview: {
     eyebrow: 'Q3 Roadmap',

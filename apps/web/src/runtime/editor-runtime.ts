@@ -756,6 +756,10 @@ window.addEventListener('message', async (evt) => {
   const msg = evt.data as HostMessage;
   if (!msg?.type) return;
 
+  // Wrap every branch in try/catch: an uncaught rejection here would leave the
+  // host waiting for a `patched`/`ready` reply that never comes, freezing the
+  // editor. Report the error so the host can surface it and stay responsive.
+  try {
   if (msg.type === 'init') {
     document.body.innerHTML = msg.sectionHtml;
     disableScripts();
@@ -849,6 +853,14 @@ window.addEventListener('message', async (evt) => {
     if (msg.disabled) disableScripts();
     else restoreScripts();
     return;
+  }
+  } catch (err) {
+    console.warn('[hds-runtime] message handler error:', err);
+    send({
+      type: 'error',
+      code: 'RUNTIME_HANDLER',
+      message: err instanceof Error ? err.message : String(err),
+    });
   }
 });
 
@@ -1193,7 +1205,17 @@ document.addEventListener(
   document.head.appendChild(style);
   document.body.setAttribute('data-hds-mode', interactionMode);
 
-  disableScripts();
-  await renderMermaid();
+  // Wrap setup in try/catch so the host always receives `ready` — even if
+  // disableScripts or renderMermaid throws (e.g. due to broken assets).
+  // Without this, a runtime exception leaves the editor permanently stuck
+  // waiting for a `ready` message that never arrives.
+  try {
+    disableScripts();
+    await renderMermaid();
+  } catch (err) {
+    // Non-fatal: the editor can still function without scripts disabled or
+    // mermaid rendered. Log but don't block the ready handshake.
+    console.warn('[hds-runtime] startup partial failure:', err);
+  }
   send({ type: 'ready' });
 })();

@@ -89,8 +89,9 @@ export function EditorPage() {
   const [railOpen, setRailOpen] = useState(true);
   // Inspector is a manual, persistent panel: it opens/closes only via its toggle,
   // never automatically on selection (auto-pop-on-click was disorienting). Starts
-  // closed so the canvas is unobstructed until the user asks for it.
-  const [inspectorOpen, setInspectorOpen] = useState(false);
+  // open so first-time users can discover it; they can close it if they want
+  // more canvas space.
+  const [inspectorOpen, setInspectorOpen] = useState(true);
   const [dragActive, setDragActive] = useState(false);
   // Canvas interaction mode. 'edit' = safe content editing (select + double-click
   // text + property panel). 'drag' = freeform move/resize/delete. Strictly

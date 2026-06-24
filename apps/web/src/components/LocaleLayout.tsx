@@ -1,3 +1,4 @@
+import { Component, type ReactNode } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { Head } from 'vite-react-ssg';
 import { I18nextProvider } from 'react-i18next';
@@ -18,6 +19,90 @@ function urlFor(locale: Locale, page: Page): string {
   if (page === 'guide') return `${SITE}${prefix}/guide`;
   if (page === 'explore') return `${SITE}${prefix}/explore`;
   return `${SITE}${prefix || '/'}`;
+}
+
+/**
+ * Global error boundary — the last line of defence against a white screen.
+ * Any uncaught render error (e.g. a malformed deck triggering an exception
+ * deep in the editor tree) is caught here and replaced with a calm, actionable
+ * fallback instead of an empty page. The user can retry (reset state) or
+ * reload; the original error is logged for debugging.
+ */
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state: { error: Error | null } = { error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, info: unknown) {
+    console.error('[hds] Uncaught render error:', error, info);
+  }
+
+  reset = () => this.setState({ error: null });
+
+  render() {
+    if (!this.state.error) return this.props.children;
+    const isZh = document.documentElement.lang?.startsWith('zh');
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#fafafa',
+        padding: '24px',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+      }}>
+        <div style={{
+          maxWidth: '420px',
+          textAlign: 'center',
+        }}>
+          <div style={{ fontSize: '40px', marginBottom: '16px' }}>⚠️</div>
+          <h1 style={{ fontSize: '18px', fontWeight: 600, color: '#1a1a1a', margin: '0 0 8px' }}>
+            {isZh ? '出了点问题' : 'Something went wrong'}
+          </h1>
+          <p style={{ fontSize: '14px', color: '#666', margin: '0 0 24px', lineHeight: 1.6 }}>
+            {isZh
+              ? '页面渲染时遇到意外错误。你可以重试，或刷新页面重新开始。'
+              : 'An unexpected error occurred while rendering. You can retry, or reload the page to start fresh.'}
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button
+              onClick={this.reset}
+              style={{
+                padding: '8px 20px',
+                fontSize: '14px',
+                fontWeight: 500,
+                border: '1px solid #d0d0d0',
+                borderRadius: '6px',
+                background: '#fff',
+                color: '#1a1a1a',
+                cursor: 'pointer',
+              }}
+            >
+              {isZh ? '重试' : 'Retry'}
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                padding: '8px 20px',
+                fontSize: '14px',
+                fontWeight: 500,
+                border: 'none',
+                borderRadius: '6px',
+                background: '#1a1a1a',
+                color: '#fff',
+                cursor: 'pointer',
+              }}
+            >
+              {isZh ? '刷新页面' : 'Reload'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
 /**
@@ -64,7 +149,9 @@ export function LocaleLayout({ locale }: { locale: Locale }) {
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={ogImage} />
       </Head>
-      <Outlet />
+      <ErrorBoundary>
+        <Outlet />
+      </ErrorBoundary>
     </I18nextProvider>
   );
 }

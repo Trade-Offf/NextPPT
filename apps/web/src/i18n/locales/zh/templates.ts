@@ -28,6 +28,9 @@ export default {
     openInEditor: '在编辑器打开',
     download: '下载 HTML',
   },
+  carousel: {
+    open: '在编辑器打开',
+  },
   items: {
     'nextppt-kami': {
       title: 'Kami 风格演示稿',

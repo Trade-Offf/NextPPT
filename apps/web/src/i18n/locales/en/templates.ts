@@ -30,6 +30,9 @@ const templates: typeof zh = {
     openInEditor: 'Open in editor',
     download: 'Download HTML',
   },
+  carousel: {
+    open: 'Open in Editor',
+  },
   items: {
     'nextppt-kami': {
       title: 'Kami-style deck',

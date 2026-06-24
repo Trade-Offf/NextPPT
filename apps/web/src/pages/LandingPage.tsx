@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useOpenDeck, DIR_API_SUPPORTED, FILE_API_SUPPORTED, FS_API_SUPPORTED } from '../fs/useOpenDeck.js';
+import { useOpenDeck, FS_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
-import { useGuideNav, useLocalePrefix } from '../hooks/useGuideNav.js';
+import { useLocalePrefix, useGuideNav } from '../hooks/useGuideNav.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { EditorPreview } from '../components/EditorPreview.js';
+import { TemplateCarousel } from '../components/TemplateCarousel.js';
 import { ParallelBackstage } from '../components/ParallelBackstage.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
 import { OpenDeckErrorAlert } from '../components/OpenDeckErrorAlert.js';
@@ -20,32 +21,23 @@ export function LandingPage() {
     error,
     dragOver,
     setDragOver,
-    handlePickFolder,
-    handlePickFile,
-    handleRecall,
     handleDrop,
+    openTemplateSample,
   } = useOpenDeck();
+
+  // SSG prerender has no `window`, so FS_API_SUPPORTED is false on the server
+  // but true in Chromium. Render the optimistic "supported" branch until
+  // mounted, then correct for unsupported browsers.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const fsSupported = !mounted || FS_API_SUPPORTED;
 
   const rootRef = useRef<HTMLDivElement>(null);
   const pains = t('value.pains', { returnObjects: true }) as string[];
 
-  // SSG prerenders with no `window`, so FS_API_SUPPORTED is false on the server
-  // but true in Chromium. Rendering the real value on the first client paint
-  // diverges from the prerendered HTML and trips React #418/#419. Render the
-  // optimistic "supported" branch until mounted (matches the prerender + the
-  // vast majority of users), then correct for the rare unsupported browser.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const fsSupported = !mounted || FS_API_SUPPORTED;
-  const dirSupported = !mounted || DIR_API_SUPPORTED;
-  const fileSupported = !mounted || FILE_API_SUPPORTED;
-
-  /** Main CTA / drop zone: open the HTML picker (folder via button below or drag).
-   *  The workspace kind (PPT deck vs free-edit doc) is auto-detected on open. */
-  const openPrimary = () => {
+  const openSample = () => {
     if (loading) return;
-    if (FILE_API_SUPPORTED) void handlePickFile();
-    else if (DIR_API_SUPPORTED) void handlePickFolder();
+    void openTemplateSample('/sample-deck.html', 'sample-deck.html');
   };
 
   useGSAP(
@@ -79,8 +71,17 @@ export function LandingPage() {
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
     >
+      {/* Page-level drag overlay */}
       {dragOver && (
-        <div className="fixed inset-3 z-[60] pointer-events-none rounded-3xl border-2 border-dashed border-[var(--system-blue)] bg-[var(--cobalt-lt)]" aria-hidden="true" />
+        <div className="fixed inset-3 z-[60] pointer-events-none rounded-3xl border-2 border-dashed border-[var(--system-blue)] bg-[var(--cobalt-lt)]/80 backdrop-blur-sm grid place-items-center">
+          <div className="text-center">
+            <svg className="mx-auto w-12 h-12 text-[var(--system-blue)] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <p className="text-base font-medium text-[var(--label)]">{t('hub.dropTitle')}</p>
+            <p className="mt-1 text-xs text-[var(--secondary-label)]">{t('hub.dropHint')}</p>
+          </div>
+        </div>
       )}
 
       <SiteFluidBackdrop />
@@ -103,16 +104,20 @@ export function LandingPage() {
             />
           )}
           <div className={`hero-cta flex flex-wrap items-center justify-center gap-3 ${error ? 'mt-6' : 'mt-9'}`}>
-            {fsSupported ? (
-              <button onClick={openPrimary} disabled={loading} className="hds-btn-primary px-6 py-3 text-sm disabled:opacity-50">
-                {loading ? t('hero.loading') : t('hero.ctaOpen')}
-              </button>
-            ) : (
-              <span className="text-sm text-[var(--secondary-label)]">{t('hero.unsupported')}</span>
-            )}
-            <button onClick={() => openGuide('generate')} className="hds-btn px-5 py-3 text-sm">{t('hero.ctaGuide')}</button>
+            <button onClick={openSample} disabled={loading} className="hds-btn-primary px-6 py-3 text-sm disabled:opacity-50">
+              {loading ? t('hero.loading') : t('hero.ctaTrySample')}
+            </button>
+            <button onClick={() => navigate(`${prefix}/templates`)} className="hds-btn px-5 py-3 text-sm">{t('hero.ctaGuide')}</button>
           </div>
           <p className="hero-support mt-4 text-xs text-[var(--tertiary-label)]">{t('hero.support')}</p>
+          {fsSupported && (
+            <p className="hero-support mt-2 text-xs text-[var(--tertiary-label)] flex items-center justify-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+              </svg>
+              {t('hub.dragHint')}
+            </p>
+          )}
         </div>
 
         <div id="preview" className="hero-preview relative z-10 mt-14 sm:mt-16 scroll-mt-20">
@@ -150,59 +155,13 @@ export function LandingPage() {
             </div>
           </div>
 
-          <div className="reveal-start w-full max-w-md lg:justify-self-end">
-            <div className="hds-glass-card p-7 sm:p-8">
-            {!fsSupported ? (
-              <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 text-sm text-[var(--secondary-label)] leading-relaxed">
-                <p className="font-medium text-[var(--label)] mb-1">{t('hub.unsupportedTitle')}</p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey="hub.unsupportedBody"
-                    components={{
-                      a: <a className="underline" href="https://www.google.com/chrome/" target="_blank" rel="noreferrer" />,
-                    }}
-                  />
-                </p>
-              </div>
-            ) : (
-              <>
-                <div
-                  onClick={openPrimary}
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                  className={`relative w-full rounded-2xl px-6 py-14 flex flex-col items-center gap-3 text-center transition-all duration-200 group border-2 border-dashed cursor-pointer ${
-                    dragOver ? 'border-[var(--system-blue)] bg-[var(--cobalt-lt)] scale-[1.01]' : 'border-[var(--rule)] hover:border-[var(--system-blue)] hover:bg-[var(--cobalt-lt)]'
-                  } ${loading ? 'opacity-60 pointer-events-none' : ''}`}
-                >
-                  <svg className="w-12 h-12 text-[var(--tertiary-label)] group-hover:text-[var(--system-blue)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-                  </svg>
-                  <span className="text-sm font-medium text-[var(--label)] group-hover:text-[var(--system-blue)]">
-                    {loading ? t('hero.loading') : t('hub.dropTitle')}
-                  </span>
-                  <span className="text-xs text-[var(--tertiary-label)] leading-relaxed">{t('hub.dropHint')}</span>
-                </div>
-
-                <div className="mt-4 flex items-center justify-center gap-2.5">
-                  {dirSupported && (
-                    <button onClick={handlePickFolder} disabled={loading} className="hds-btn-primary px-4 py-2 text-xs disabled:opacity-40">{t('hub.openFolder')}</button>
-                  )}
-                  {fileSupported && (
-                    <button onClick={handlePickFile} disabled={loading} className="hds-btn px-4 py-2 text-xs disabled:opacity-40">{t('hub.openSingle')}</button>
-                  )}
-                </div>
-
-                {dirSupported && (
-                  <button onClick={handleRecall} disabled={loading} className="mt-3 text-xs text-[var(--system-blue)] hover:underline self-center disabled:opacity-40 block mx-auto">
-                    {t('hub.recall')}
-                  </button>
-                )}
-              </>
-            )}
-
-            </div>
+          <div className="reveal-start">
+            <TemplateCarousel
+              loading={loading}
+              onOpenSample={(url: string, fileName: string) => {
+                void openTemplateSample(url, fileName);
+              }}
+            />
           </div>
         </div>
       </section>

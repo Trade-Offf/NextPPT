@@ -15,6 +15,7 @@ export default {
       '把 AI 生成的演示稿拖进来，点一下就能改字、换图、挪位置，再一键导出能投影的 PPT / PDF。',
     ctaOpen: '打开文件 / 拖到此处',
     loading: '加载中…',
+    ctaTrySample: '试用样例',
     ctaGuide: '看 30 秒使用指南',
     unsupported: '请用 Chrome / Edge 等 Chromium 浏览器打开',
     support: '支持文件夹（可读写配套图片）或单个自包含 HTML · 需 Chromium 内核浏览器',
@@ -38,6 +39,7 @@ export default {
       '本功能依赖 File System Access API，目前仅 Chromium 内核浏览器支持。请使用 <a>Chrome</a> 或 Edge / Brave / Arc 打开本页面。',
     dropTitle: '点击选择，或拖拽文件夹 / HTML 到此处',
     dropHint: 'PPT 演示稿或简历 / 长文都行——自动识别格式；文件夹模式可读写配套图片',
+    dragHint: '或将文件夹 / HTML 文件直接拖到页面任意位置',
     choosePrompt: '要打开哪种？',
     chooseCancel: '取消',
     openFolder: '打开文件夹',
@@ -45,6 +47,39 @@ export default {
     recall: '重新打开上次的文件夹',
     errorRecover:
       '这份文件可能格式不对、打不开。最省事的办法，是用我们的提示词 <btn>让 AI 重做一份</btn>。',
+  },
+  sampleShowcase: {
+    eyebrow: '内置示例',
+    title: '一键打开 4 份预制演示稿',
+    subtitle: '不用准备文件，不用选文件夹——点击即进入编辑器，直接改字、换图、导出。',
+    noFsNote:
+      '当前浏览器暂不支持本地文件读写，但你仍然可以打开内置示例直接体验编辑与导出。',
+    loading: '正在加载示例…',
+    openError: '示例加载失败，请稍后再试或手动打开一个 HTML 文件。',
+    open: '打开',
+    openInEditor: '在编辑器中打开',
+    cards: [
+      {
+        title: '产品发布会',
+        subtitle: 'Keynote / 产品发布',
+        desc: '多页标题 + 图文对照，适合产品发布、季度汇报。',
+      },
+      {
+        title: '季度路线图',
+        subtitle: 'Roadmap / 路线图',
+        desc: '分层结构 + 重点区块，适合内部评审、团队同步。',
+      },
+      {
+        title: '作品集演示',
+        subtitle: 'Portfolio / 作品集',
+        desc: '图片为中心的展示页，适合把简历或作品改成可投影的演示。',
+      },
+      {
+        title: '技术分享',
+        subtitle: 'Tech Talk / 技术分享',
+        desc: '代码块 + 图表页，适合 conference、内部分享与教学。',
+      },
+    ],
   },
   preview: {
     eyebrow: 'Q3 Roadmap',
