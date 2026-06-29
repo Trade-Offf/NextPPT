@@ -50,6 +50,22 @@ const templates: typeof zh = {
       title: 'Business report deck',
       desc: 'A light, business-style multi-page report deck (project-management analysis view): a health donut, a risk-priority pyramid, a resource heat matrix, a capacity line chart and a main-line relay flow — five inline SVG charts — plus health-status lights, P0/P1/P2 level pills, color-topped cards and an action table, accented in ink navy with a single sans-serif for projector readability. Open it in the editor or download it; the bundled prompt is a reusable business-report design spec for any topic.',
     },
+    'sakura-chroma': {
+      title: 'Sakura Chroma',
+      desc: 'A multi-page deck on cream paper with brown ink and a restrained six-color rainbow ribbon: petal-cluster covers, diagonal rainbow chapter ribbons, 12-point starburst seals, halftone paper texture, Big Shoulders Display for titles. Open it in the editor or download it; the bundled prompt is a reusable Sakura Chroma design spec for any topic.',
+    },
+    'cobalt-grid': {
+      title: 'Cobalt Grid',
+      desc: 'A multi-page deck on ivory paper with electric cobalt blue and a faint-blue graph-paper grid: pixel-staircase SVGs, QR blocks, hairline dividers, Newsreader italic for pull quotes, DM Mono for data. Open it in the editor or download it; the bundled prompt is a reusable Cobalt Grid design spec for any topic.',
+    },
+    'peoples-platform': {
+      title: "People's Platform · Block & Bold",
+      desc: 'A multi-page deck on cream paper with bold blue/orange/red color blocks: Alfa Slab One mega-titles with layered text-shadow stamp effect, grain noise overlay, heavy black borders — high visual impact. Open it in the editor or download it; the bundled prompt is a reusable Block & Bold design spec for any topic.',
+    },
+    'long-table': {
+      title: 'Long Table',
+      desc: 'A multi-page deck on warm cream with a single restrained rust-red accent: outlined pill buttons, circular edition badges, rect tags and seats pills, Bricolage Grotesque all-caps titles + Fraunces italic for pull quotes, tabular menu layouts. Open it in the editor or download it; the bundled prompt is a reusable Long Table design spec for any topic.',
+    },
   },
 };
 

@@ -7,6 +7,8 @@ export interface TemplateItem {
   prompt: string;
   sampleUrl?: string;
   credit?: { name: string; href: string };
+  /** Hidden by default; only visible after the easter-egg unlock. */
+  easterEgg?: boolean;
 }
 
 const KAMI_CREDIT = { name: 'Kami · Tw93', href: 'https://kami.tw93.fun/index-zh.html' } as const;
@@ -191,6 +193,7 @@ Tag 用实色（#EEF2F7 / #E4ECF5），禁止 rgba；禁止纯白与冷蓝灰；
     kind: 'deck',
     tags: ['Terminal', 'Dev', '16:9'],
     sampleUrl: '/dev-share-deck.html',
+    easterEgg: true,
     prompt: `用「GitHub 暗色 / 终端 IDE」视觉风格帮我把内容排成一份演示稿（主题与内容我会另行提供）。
 输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高、版面布满。
 以下只规定视觉与排版规范，不限定你写什么内容。
@@ -405,6 +408,144 @@ Anti-Patterns 反面示例（必须规避）
 按内容自然组织页数（约 10–12 页）与每页结构，不要凑页数或留半页空白；图表类型按内容选用，至少 5 处内联 SVG。
 每页都是 eyebrow + title + body + 角标 的统一骨架，固定 1280×720，信息密度高、版面布满，遵循以上全部规范。
 适合的内容：项目管理分析、健康度评估、风险分层、资源瓶颈、历史趋势、行动计划、管理层摘要等向上汇报场景。`,
+  },
+  {
+    id: 'sakura-chroma',
+    kind: 'deck',
+    tags: ['Sakura', 'Chroma', '16:9'],
+    sampleUrl: '/template-sakura-chroma.html',
+    prompt: `用 Sakura Chroma 设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
+
+────────────────────────────────────────
+01 · Canvas 画布
+────────────────────────────────────────
+页面底色：奶油纸 #F1E6CB
+墨色文字：棕墨 #3A2516
+6 色彩虹强调（红粉橙绿蓝黄），仅在装饰缎带、印章、数据条上克制使用，占比不超过 8%
+
+────────────────────────────────────────
+02 · Typography 字体
+────────────────────────────────────────
+标题：Big Shoulders Display（粗壮无衬线，大写）
+正文：Albert Sans
+代码/数据：JetBrains Mono
+日文/中文：Noto Sans JP / Noto Sans SC
+字号梯度：hero 120px / h2 72px / h3 44px / body 18px / caption 13px
+
+────────────────────────────────────────
+03 · 视觉签名
+────────────────────────────────────────
+花瓣簇装饰（封面/封底）、对角彩虹缎带（章节过渡）、12 角星芒印章、半色调纸纹纹理（opacity 0.16）
+数据页用 6 色条带 + 等宽数字；引用页用大引号 + 斜体衬线
+
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+约 8 页：cover / manifesto / catalogue / stripe-data / quote / schedule / colophon，每页固定 1280×720，信息密度高、版面布满。`,
+  },
+  {
+    id: 'cobalt-grid',
+    kind: 'deck',
+    tags: ['Cobalt', 'Grid', '16:9'],
+    sampleUrl: '/template-cobalt-grid.html',
+    prompt: `用 Cobalt Grid 设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
+
+────────────────────────────────────────
+01 · Canvas 画布
+────────────────────────────────────────
+页面底色：象牙纸 #F0EBDE
+主强调色：电光钴蓝 #1F2BE0（占比不超过 10%）
+极淡蓝网格背景：rgba(31,43,224,0.10)，1px 细线，24px 间距
+上下发丝线分隔每页
+
+────────────────────────────────────────
+02 · Typography 字体
+────────────────────────────────────────
+衬线（斜体）：Newsreader（用于引言、章节名）
+无衬线：Hanken Grotesk（正文、UI）
+等宽：DM Mono（数据、标签、页码）
+字号梯度：hero 96px / h2 56px / h3 36px / body 16px / mono 13px
+
+────────────────────────────────────────
+03 · 视觉签名
+────────────────────────────────────────
+graph-paper 方格纸背景、像素阶梯 SVG 装饰、QR 块、钴蓝实心方块作为项目符号
+数据页用 mono 数字 + 钴蓝条形图；引用页用 Newsreader 斜体大字号
+
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+约 8 页：cover / manifesto / index / chapter / data / quote / table / colophon，每页固定 1280×720，信息密度高、版面布满。`,
+  },
+  {
+    id: 'peoples-platform',
+    kind: 'deck',
+    tags: ['Block', 'Bold', '16:9'],
+    sampleUrl: '/template-peoples-platform.html',
+    prompt: `用 People's Platform (Block & Bold) 设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
+
+────────────────────────────────────────
+01 · Canvas 画布
+────────────────────────────────────────
+页面底色：奶油纸 #F5EFE0
+三色强调：蓝 #2C2CDC（主）/ 橙 #F2A03A / 红 #E83A2A，块状大面积使用
+grain 噪点纹理叠层
+
+────────────────────────────────────────
+02 · Typography 字体
+────────────────────────────────────────
+超粗 slab：Alfa Slab One（巨型标题，带厚重 text-shadow 印章感）
+窄体无衬线：Archivo Narrow（正文）
+手写体：Caveat Brush（强调、批注）
+等宽：DM Mono（数据、标签）
+字号梯度：cover 160px / h2 90px / h3 48px / body 18px / mono 13px
+
+────────────────────────────────────────
+03 · 视觉签名
+────────────────────────────────────────
+色块大面积平涂、超粗 slab 标题 + 多层 text-shadow 立体印章感、grain 噪点、粗黑边框分隔
+数据页用超大数字 + 色块；对比页用左右分屏色块对照
+
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+约 10 页：cover / toc / manifesto / pillars / stat / platform / quote / timeline / compare / close，每页固定 1280×720，信息密度高、版面布满。`,
+  },
+  {
+    id: 'long-table',
+    kind: 'deck',
+    tags: ['Long', 'Table', '16:9'],
+    sampleUrl: '/template-long-table.html',
+    prompt: `用 Long Table 设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
+
+────────────────────────────────────────
+01 · Canvas 画布
+────────────────────────────────────────
+页面底色：暖奶油 #FAF1E2
+唯一强调色：单一锈红 #B53D2A（占比不超过 8%，克制使用）
+禁止引入第二种彩色
+
+────────────────────────────────────────
+02 · Typography 字体
+────────────────────────────────────────
+大写无衬线：Bricolage Grotesque（标题，全大写）
+斜体衬线：Fraunces（引言、强调词，italic）
+字号梯度：hero 110px / h2 64px / h3 40px / body 17px / caption 13px
+
+────────────────────────────────────────
+03 · 视觉签名
+────────────────────────────────────────
+描边胶囊按钮（border + 透明底）、圆形版次徽章、rect-tag 矩形标签、seats-pill 座位胶囊
+清单/菜单页用表格化排版 + 锈红圆点项目符号；引用页用 Fraunces 斜体大字
+
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+约 8 页：cover / manifesto / index / featured / menu / quote / schedule / closing，每页固定 1280×720，信息密度高、版面布满。`,
   },
 ];
 

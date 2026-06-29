@@ -2,7 +2,7 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>AI 提效场景分享 · 开发者视角</title>
+    <title>致每一个愿意点 7 次的人 · NextPPT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -981,614 +981,456 @@
     </style>
   </head>
   <body>
-    <!-- ============ P1 封面 ============ -->
+    <!-- ============ P1 相遇 ============ -->
     <section class="slide p1">
       <div class="titlebar">
         <div class="tb-dots"><span></span><span></span><span></span></div>
         <div class="tb-path">
-          <span class="dim">~/share/2026-q2/</span>ai-practice.md
+          <span class="dim">~/nextppt/</span>easter-egg.md
         </div>
-        <div class="tb-right">10 min · live demo</div>
+        <div class="tb-right">hidden · vol.42</div>
       </div>
       <div class="body">
         <div class="p1-deco">
-          INTERNAL SHARING<br />
+          EASTER EGG<br />
           <span class="bar"></span><br />
-          2026.04 · VOL.01
+          ONLY FOR THE CURIOUS
         </div>
 
         <div class="p1-prompt">
-          <span class="user">$ dev</span>
-          <span style="color: var(--text-2)">./start-sharing</span>
-          <span style="color: var(--yellow)">--topic</span>
-          <span style="color: var(--accent)">"ai-practice"</span
+          <span class="user">$ whoami</span>
+          <span style="color: var(--text-2)">--check</span>
+          <span style="color: var(--yellow)">--curiosity</span>
+          <span style="color: var(--accent)">"high"</span
           ><span class="cursor"></span>
         </div>
 
         <h1 class="p1-title">
-          把 AI 塞进<br />
-          <span class="hl">每天的工作流</span>里<span class="dim">。</span>
+          嘿，你找到这里了<span class="dim">。</span>
         </h1>
         <p class="p1-sub">
-          一个开发者视角的 AI 提效实践 —— 从<b style="color: var(--accent)"
-            >自身痛点</b
-          >出发，<br />
-          聊三个已经在用的场景，以及我对 AI 与生产关系的理解。
+          能点 7 次 logo 的人，和我们是一类人 ——<br />
+          <b style="color: var(--accent)">好奇</b>、<b style="color: var(--accent)"
+            >执着</b
+          >，不愿意接受表面的答案。
         </p>
 
         <div class="p1-meta">
-          <div><b>SPEAKER</b><span>Rico · AI Dev</span></div>
-          <div><b>FOLLOW-UP</b><span>@xxx</span></div>
-          <div><b>SCOPE</b><span>3 × Atomic Scenarios</span></div>
+          <div><b>YOU</b><span>The Curious One</span></div>
+          <div><b>SIGNAL</b><span>7 × logo clicks</span></div>
+          <div><b>ANSWER</b><span>42</span></div>
         </div>
       </div>
       <div class="footer">
-        <div>AI · EVERYDAY PRACTICE</div>
-        <div class="mid">"Ship small, ship often."</div>
+        <div>NEXTPPT · EASTER EGG</div>
+        <div class="mid">"For the curious ones."</div>
         <div><span class="accent">01</span> / 08</div>
       </div>
     </section>
 
-    <!-- ============ P2 肯定上一位的方向 ============ -->
+    <!-- ============ P2 缘起 ============ -->
     <section class="slide">
       <div class="titlebar">
         <div class="tb-dots"><span></span><span></span><span></span></div>
         <div class="tb-path">
-          <span class="dim">chapter-01/</span>previous-talk.md
+          <span class="dim">chapter-01/</span>why-nextppt.md
         </div>
-        <div class="tb-right">承接</div>
+        <div class="tb-right">缘起</div>
       </div>
       <div class="body">
-        <div class="kicker">CHAPTER 01 · 承接上一位同事的方向</div>
+        <div class="kicker">CHAPTER 01 · 为什么做 NextPPT</div>
         <h2 class="page-title">
-          <span class="hl">"单点 × 工作流"</span> 是正确的骨架。
+          AI 写的 HTML 很美，<br />
+          但<span class="hl">最后 1 公里</span>得自己走。
         </h2>
         <p class="page-lead">
-          上一位同事已经给出了非常清晰的<b style="color: var(--text)"
-            >自顶向下</b
-          >路径：从整体工作生产关系出发，<br />
-          在产/设/技/测各环节做单点提效，同时统一上下游信息标识与口径。
+          AI 生成演示稿的能力已经很强，但每一次"再改一点点"都是一次拉锯。
         </p>
 
         <div class="quote-block">
-          <b>// 我完全认同这条路径：</b><br />
-          单点提效是<b>原子能力</b>，工作流是<b>组合模式</b>。<br />
-          没有原子能力的稳定，任何"全流程 AI"都会在复杂度里失控。
+          <b>// 我们受够了：</b><br />
+          改一个字 → 回对话框 → 上下文丢失 → 重新描述 → <b>三轮还没改对</b>。<br />
+          明明只是一行 CSS，却要花 20 分钟跟 AI 解释"为什么是这个颜色"。
         </div>
 
         <div class="arch-diagram">
           <div class="arch-layer">
-            <div class="arch-label">Layer 3 · 整合</div>
+            <div class="arch-label">PAIN · 链路</div>
             <div class="arch-nodes">
-              <div class="arch-node" style="flex: 3">
-                统一工作流编排 · Workflow Orchestration
-              </div>
-            </div>
-          </div>
-          <div class="arch-flow">▲ &nbsp; 成熟后收束 &nbsp; ▲</div>
-          <div class="arch-layer">
-            <div class="arch-label">Layer 2 · 协议</div>
-            <div class="arch-nodes">
-              <div class="arch-node">信息标识</div>
-              <div class="arch-node">输出口径</div>
-              <div class="arch-node">数据结构</div>
-              <div class="arch-node">上下游契约</div>
-            </div>
-          </div>
-          <div class="arch-flow">▲ &nbsp; 统一标准 &nbsp; ▲</div>
-          <div class="arch-layer">
-            <div class="arch-label">Layer 1 · 原子</div>
-            <div class="arch-nodes">
-              <div class="arch-node accent">
-                产品<span class="tiny">PRD 结构化</span>
-              </div>
-              <div class="arch-node accent">
-                设计<span class="tiny">组件规范</span>
-              </div>
-              <div class="arch-node accent">
-                技术<span class="tiny">接口文档</span>
-              </div>
-              <div class="arch-node accent">
-                测试<span class="tiny">用例生成</span>
-              </div>
+              <div class="arch-node">AI 生成<span class="tiny">v1 满意</span></div>
+              <div class="arch-node accent">想微调<span class="tiny">"改一点点"</span></div>
+              <div class="arch-node">回对话框<span class="tiny">重新描述</span></div>
+              <div class="arch-node">上下文丢失<span class="tiny">答非所问</span></div>
+              <div class="arch-node">反复拉扯<span class="tiny">20 min</span></div>
             </div>
           </div>
           <div class="arch-caption">
-            <b>共识：</b
-            >先保证原子层的"可用、稳定、有效"，再谈协议层的统一，最终才是整合层的工作流编排。
+            <b>洞察：</b>最后 1 公里不是 AI 的问题，是<b>没有工具</b>让开发者直接接管 HTML。
           </div>
         </div>
       </div>
       <div class="footer">
-        <div>CH.01 · ACKNOWLEDGE</div>
-        <div class="mid">Atomic → Protocol → Orchestration</div>
+        <div>CH.01 · ORIGIN</div>
+        <div class="mid">The last mile is ours.</div>
         <div><span class="accent">02</span> / 08</div>
       </div>
     </section>
 
-    <!-- ============ P3 我的补充视角 ============ -->
+    <!-- ============ P3 承诺 ============ -->
     <section class="slide">
       <div class="titlebar">
         <div class="tb-dots"><span></span><span></span><span></span></div>
         <div class="tb-path">
-          <span class="dim">chapter-02/</span>my-perspective.md
+          <span class="dim">chapter-02/</span>our-promise.md
         </div>
-        <div class="tb-right">补充视角</div>
+        <div class="tb-right">承诺</div>
       </div>
       <div class="body">
-        <div class="kicker">CHAPTER 02 · 我想补充的另一半视角</div>
+        <div class="kicker">CHAPTER 02 · 一个承诺</div>
         <h2 class="page-title">
-          <span class="hl">自顶向下</span> 之外，<br />
-          还需要 <span class="hl">自下而上</span> 的视角。
+          <span class="hl">文件永远是你的。</span>
         </h2>
         <p class="page-lead">
-          顶层设计告诉我们"工作流该长什么样"；开发者视角告诉我们"**今天哪件事最烦**"。<br />
-          两条路径交汇的地方，才是真正能落地的 AI 应用场景。
+          不上传一个字节，不锁数据，不订阅绑架。一个 HTML 就是一份完整演示稿。
         </p>
 
         <div class="vs-wrap">
           <div class="vs-col">
-            <div class="vs-tag">// APPROACH A</div>
+            <div class="vs-tag">// TRADITIONAL SAAS</div>
             <div class="vs-title">
-              自顶向下
+              云端编辑器
               <span
                 style="color: var(--muted); font-weight: 400; font-size: 16px"
-                >Top-Down</span
+                >Cloud-locked</span
               >
             </div>
             <div class="vs-desc">
-              从完整工作流反推需要哪些 AI 能力，强调架构完整性与协作标准化。
+              数据上云、订阅续费、导出受限。停付即停用，迁移成本高。
             </div>
             <ul class="vs-list">
-              <li>视角：组织 / 工作流</li>
-              <li>起点：应该有什么</li>
-              <li>优势：体系化、可规划</li>
-              <li>风险：离真实痛点较远</li>
+              <li>存储：厂商服务器</li>
+              <li>访问：依赖账号 &amp; 网络</li>
+              <li>迁移：导出格式受限</li>
+              <li>停服：数据拿不回来</li>
             </ul>
           </div>
 
-          <div class="vs-plus">&</div>
+          <div class="vs-plus">vs</div>
 
           <div class="vs-col mine">
-            <div class="vs-tag">// APPROACH B · MINE</div>
+            <div class="vs-tag">// NEXTPPT · MINE</div>
             <div class="vs-title">
-              自下而上
+              本地优先
               <span
                 style="color: var(--muted); font-weight: 400; font-size: 16px"
-                >Bottom-Up</span
+                >Local-first</span
               >
             </div>
             <div class="vs-desc">
-              从开发者每天真实遇到的高频低价值工作出发，先解决"我自己被哪件小事卡住"。
+              文件在你硬盘上。单 HTML 即一份完整演示稿，离线可开、随时可改。
             </div>
             <ul class="vs-list">
-              <li>视角：个体 / 工作现场</li>
-              <li>起点：当下最烦什么</li>
-              <li>优势：落地快、信号真实</li>
-              <li>输出：3 个已落地的提效场景 ↓</li>
+              <li>存储：你的文件系统</li>
+              <li>访问：双击即可打开</li>
+              <li>迁移：复制粘贴即可</li>
+              <li>永久：HTML 不会过期</li>
             </ul>
           </div>
         </div>
       </div>
       <div class="footer">
-        <div>CH.02 · MY ANGLE</div>
-        <div class="mid">
-          Technology in service of the person doing the work.
-        </div>
+        <div>CH.02 · PROMISE</div>
+        <div class="mid">Your file, your rules.</div>
         <div><span class="accent">03</span> / 08</div>
       </div>
     </section>
 
-    <!-- ============ P4 场景 ① 接口文档 ============ -->
+    <!-- ============ P4 哲思 ============ -->
     <section class="slide">
       <div class="titlebar">
         <div class="tb-dots"><span></span><span></span><span></span></div>
         <div class="tb-path">
-          <span class="dim">scenarios/01_</span>api-doc-auto.md
+          <span class="dim">chapter-03/</span>code-cheap.md
         </div>
-        <div class="tb-right">scene 1 / 3</div>
+        <div class="tb-right">哲思</div>
       </div>
       <div class="body">
-        <div class="kicker">SCENARIO 01 · ENGINEERING</div>
+        <div class="kicker">CHAPTER 03 · 代码廉价，注意力昂贵</div>
+        <h2 class="page-title">
+          AI 让 <span class="hl">building</span> 更容易，<br />
+          却让 <span class="hl">分发</span> 更难。
+        </h2>
+        <p class="page-lead">
+          当每个人都能在 10 分钟内做出一个产品，瓶颈不再是"能不能造"，而是"有没有人看"。
+        </p>
 
-        <div class="scene-layout">
-          <div class="scene-left">
-            <div class="scene-badge">
-              <span class="num">No.01</span> &nbsp;//&nbsp; 前后端联调场景
-            </div>
-            <div class="scene-title">自动化接口文档</div>
-            <div class="scene-sub">
-              lark-cli + 约束 schema &rarr; 开发完成即文档完成
-            </div>
+        <div class="quote-block">
+          <b>// Guillermo Rauch：</b><br />
+          "Code is cheap. <b>Attention is expensive.</b>"<br />
+          代码的生产成本趋近于零，但让人愿意停下来看一眼的成本，正在指数级上升。
+        </div>
 
-            <div class="scene-block">
-              <h4>PAIN · 这件小事每天都烦我</h4>
-              <div class="scene-pain">
-                接口改了 → <b>手动改文档</b> → 前端不知道字段变了 →
-                <b>拉群对齐</b> → 联调卡住。<br />
-                每周花在这条链路上的隐性成本，远超想象。
-              </div>
-            </div>
-
-            <div class="scene-block">
-              <h4>FIX · 用约束替代描述</h4>
-              <div class="scene-solution">
-                让 AI 从代码中按<b>固定 schema</b>
-                生成文档，而不是让人"写得更勤快"。<br />
-                核心思路：<b>约束先于生成</b>，保证输出可预测、可 diff、可复用。
-              </div>
-            </div>
-
-            <div class="scene-metrics">
-              <div class="scene-metric">
-                <div class="v">+20<span class="u">%</span></div>
-                <div class="l">JOINT DEBUG EFFICIENCY</div>
-              </div>
-              <div class="scene-metric">
-                <div class="v">&darr;<span class="u"> query</span></div>
-                <div class="l">FIELD INQUIRY FREQ.</div>
-              </div>
-            </div>
+        <div class="scene-metrics" style="margin-top: 4px">
+          <div class="scene-metric">
+            <div class="v">&darr;<span class="u"> ~0</span></div>
+            <div class="l">COST OF BUILDING</div>
           </div>
-
-          <div class="scene-right">
-            <div class="scene-right-head">
-              <span>$ lark-cli gen:doc</span>
-              <span>● live</span>
-            </div>
-            <div class="scene-right-body">
-              <span class="cm"># 输入：已变更的后端接口</span><br />
-              <span class="kw">POST</span>
-              <span class="str">/api/strategy/list</span><br />
-              <br />
-              <span class="cm"># 约束 schema</span><br />
-              <span class="fn">@DocField</span>(name=<span class="str"
-                >"page"</span
-              >, type=<span class="num">int</span>)<br />
-              <span class="fn">@DocField</span>(name=<span class="str"
-                >"size"</span
-              >, type=<span class="num">int</span>)<br />
-              <br />
-              <span class="cm"># 输出：规范化文档</span><br />
-              <span class="hi">→ strategy-list.md</span><br />
-              &nbsp;&nbsp;✓ 字段说明<br />
-              &nbsp;&nbsp;✓ 返回结构<br />
-              &nbsp;&nbsp;✓ 调用示例<br />
-              &nbsp;&nbsp;✓ 变更 diff<br />
-              <br />
-              <span class="cm"># 关键：开发完成 = 文档完成</span>
-            </div>
+          <div class="scene-metric">
+            <div class="v">&uarr;<span class="u"> ×N</span></div>
+            <div class="l">COST OF DISTRIBUTION</div>
           </div>
+        </div>
+
+        <div class="golden" style="margin-top: 12px">
+          廉价的是<span class="hl">代码</span>，昂贵的是<span class="hl">信任</span>。
+          <span class="tag">// ATTENTION IS THE NEW BOTTLENECK</span>
         </div>
       </div>
       <div class="footer">
-        <div>SCENE 01 · API DOC</div>
-        <div class="mid">Constraint before generation.</div>
+        <div>CH.03 · INSIGHT</div>
+        <div class="mid">Code is cheap. Attention is expensive.</div>
         <div><span class="accent">04</span> / 08</div>
       </div>
     </section>
 
-    <!-- ============ P5 场景 ② 日报 ============ -->
+    <!-- ============ P5 Build in Public ============ -->
     <section class="slide">
       <div class="titlebar">
         <div class="tb-dots"><span></span><span></span><span></span></div>
         <div class="tb-path">
-          <span class="dim">scenarios/02_</span>daily-report.md
+          <span class="dim">chapter-04/</span>build-in-public.md
         </div>
-        <div class="tb-right">scene 2 / 3</div>
+        <div class="tb-right">哲思</div>
       </div>
       <div class="body">
-        <div class="kicker">SCENARIO 02 · TEAM SYNC</div>
-
-        <div class="scene-layout">
-          <div class="scene-left">
-            <div class="scene-badge">
-              <span class="num">No.02</span> &nbsp;//&nbsp; 每日同步场景
-            </div>
-            <div class="scene-title">日报结构化工具 · Peter</div>
-            <div class="scene-sub">
-              口语化输入 &rarr; Summary / Plan / Blocker 三段式
-            </div>
-
-            <div class="scene-block">
-              <h4>PAIN · 写日报比干活还累</h4>
-              <div class="scene-pain">
-                工作记忆是<b>碎片化</b>的，但日报要求是<b>结构化</b>的。<br />
-                每天花 15–20 分钟组织措辞，而 leader 扫一眼 30 秒就过了。
-              </div>
-            </div>
-
-            <div class="scene-block">
-              <h4>FIX · 把格式交给模板，把判断留给人</h4>
-              <div class="scene-solution">
-                让 AI 做<b>信息抽取 + 结构化填充</b
-                >，开发者只需"想到啥说啥"。<br />
-                本质是<b>降低写作负担</b>，而不是替代思考。
-              </div>
-            </div>
-
-            <div class="scene-metrics">
-              <div class="scene-metric">
-                <div class="v">&darr;<span class="u"> min</span></div>
-                <div class="l">AVG. WRITING TIME</div>
-              </div>
-              <div class="scene-metric">
-                <div class="v">100<span class="u">%</span></div>
-                <div class="l">TEMPLATE CONSISTENCY</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="scene-right">
-            <div class="scene-right-head">
-              <span>peter.compose()</span>
-              <span>● parsing</span>
-            </div>
-            <div class="scene-right-body">
-              <span class="cm">// INPUT · 碎片化语音/文字</span><br />
-              <span class="str"
-                >"今天改了登录接口，<br />
-                &nbsp;明天要联调，<br />
-                &nbsp;服务端还没给 token..."</span
-              ><br />
-              <br />
-              <span class="kw">extract</span>(input) <span class="cm">→ {</span
-              ><br />
-              &nbsp;&nbsp;<span class="fn">project</span>:
-              <span class="str">"auth-service"</span>,<br />
-              &nbsp;&nbsp;<span class="fn">action</span>:
-              <span class="str">"接口改造"</span>,<br />
-              &nbsp;&nbsp;<span class="fn">blocker</span>:
-              <span class="str">"token 待提供"</span><br />
-              <span class="cm">}</span><br />
-              <br />
-              <span class="cm">// OUTPUT · 结构化日报</span><br />
-              <span class="hi">📋 Summary of today</span><br />
-              <span class="hi">📅 Plan for tomorrow</span><br />
-              <span class="hi">🚧 Blocker / Risk</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="footer">
-        <div>SCENE 02 · DAILY REPORT</div>
-        <div class="mid">Format to the machine, judgment to the human.</div>
-        <div><span class="accent">05</span> / 08</div>
-      </div>
-    </section>
-
-    <!-- ============ P6 场景 ③ 面试 ============ -->
-    <section class="slide">
-      <div class="titlebar">
-        <div class="tb-dots"><span></span><span></span><span></span></div>
-        <div class="tb-path">
-          <span class="dim">scenarios/03_</span>hiring-toolkit.md
-        </div>
-        <div class="tb-right">scene 3 / 3</div>
-      </div>
-      <div class="body">
-        <div class="kicker">SCENARIO 03 · HIRING</div>
-
-        <div class="scene-layout">
-          <div class="scene-left">
-            <div class="scene-badge">
-              <span class="num">No.03</span> &nbsp;//&nbsp; 面试前后场景
-            </div>
-            <div class="scene-title">招聘面试提效工具</div>
-            <div class="scene-sub">
-              面前 · 题单生成 &nbsp;|&nbsp; 面后 · 证据导向面评卡片
-            </div>
-
-            <div class="scene-block">
-              <h4>PAIN · 面试质量不该靠状态</h4>
-              <div class="scene-pain">
-                题单临时准备 → 问题停在<b>泛问</b>层面；<br />
-                面评写作依赖记忆 → 结论缺<b>证据支撑</b>，流转效率低。
-              </div>
-            </div>
-
-            <div class="scene-block">
-              <h4>FIX · 把"准备"和"沉淀"自动化</h4>
-              <div class="scene-solution">
-                面前：简历 + JD → <b>45 min 高密度题单</b>（基础盘点 / 项目验真
-                / 深度追问）<br />
-                面后：录屏转写 + 结论倾向 → <b>结构化面评卡片</b>（证据 → 判断 →
-                风险）
-              </div>
-            </div>
-
-            <div class="scene-metrics">
-              <div class="scene-metric">
-                <div class="v">&darr;<span class="u"> min</span></div>
-                <div class="l">PREP &amp; REVIEW TIME</div>
-              </div>
-              <div class="scene-metric">
-                <div class="v">&uarr;<span class="u"> %</span></div>
-                <div class="l">EVIDENCE-BACKED RATE</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="scene-right">
-            <div class="scene-right-head">
-              <span>interview.pipeline</span>
-              <span>● running</span>
-            </div>
-            <div class="scene-right-body">
-              <span class="cm">// BEFORE · 面前</span><br />
-              <span class="kw">input</span>: resume.pdf + jd.md<br />
-              <span class="kw">output</span>:
-              <span class="hi">question-sheet</span><br />
-              &nbsp;&nbsp;├─ 基础盘点 (10 min)<br />
-              &nbsp;&nbsp;├─ 项目验真 (15 min)<br />
-              &nbsp;&nbsp;├─ 深度追问 (15 min)<br />
-              &nbsp;&nbsp;└─ 开放交流 (5 min)<br />
-              <br />
-              <span class="cm">// AFTER · 面后</span><br />
-              <span class="kw">input</span>: transcript + verdict<br />
-              <span class="kw">output</span>: <span class="hi">review-card</span
-              ><br />
-              &nbsp;&nbsp;├─ 证据片段<br />
-              &nbsp;&nbsp;├─ 能力判断<br />
-              &nbsp;&nbsp;└─ 风险提示<br />
-              <br />
-              <span class="cm">// 核心：结论要可追溯</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="footer">
-        <div>SCENE 03 · HIRING</div>
-        <div class="mid">Evidence-driven, not memory-driven.</div>
-        <div><span class="accent">06</span> / 08</div>
-      </div>
-    </section>
-
-    <!-- ============ P7 观点：AI 与生产关系 ============ -->
-    <section class="slide">
-      <div class="titlebar">
-        <div class="tb-dots"><span></span><span></span><span></span></div>
-        <div class="tb-path">
-          <span class="dim">chapter-03/</span>ai-and-labor.md
-        </div>
-        <div class="tb-right">观点</div>
-      </div>
-      <div class="body">
-        <div class="kicker">CHAPTER 03 · 我对 AI 与生产关系的理解</div>
+        <div class="kicker">CHAPTER 04 · BUILD IN PUBLIC</div>
         <h2 class="page-title">
-          AI 不淘汰人 —— <br />
-          它只是<span class="hl">改写了"熟练"的定义</span>。
+          在 AI 内容泛滥的时代，<br />
+          <span class="hl">真实</span>本身就是护城河。
         </h2>
         <p class="page-lead">
-          每一次生产力跃迁，都不是让"人"消失，而是让"不使用新工具的人"被使用新工具的人替代。
+          Build in Public 不是营销技巧，是一种"敢于暴露未完成"的姿态。但有三个常见误区。
         </p>
 
         <div class="hist-grid">
           <div class="hist-card">
-            <div class="hist-era">18TH · INDUSTRIAL</div>
+            <div class="hist-era">MYTH 01 · 误区</div>
             <div class="hist-main">
-              电力 <span class="x">→</span> <span class="obj">蒸汽机</span>
+              不是 <span class="obj">"每天发进度"</span>
             </div>
             <div class="hist-desc">
-              动力源更替，工厂形态被重塑，但"使用动力的人"从未消失。
+              每天发进度只是形式。真正的 Public 是<b>暴露思考过程</b>，包括犹豫、推翻、自我怀疑。
             </div>
           </div>
           <div class="hist-card">
-            <div class="hist-era">19TH · TEXTILE</div>
+            <div class="hist-era">MYTH 02 · 误区</div>
             <div class="hist-main">
-              纺织机 <span class="x">→</span> <span class="obj">纺织女工</span>
+              不是 <span class="obj">"炫耀成就"</span>
             </div>
             <div class="hist-desc">
-              机器重新定义了"熟练"的标准，懂操作新机器的人成为新一代熟练工。
+              只发成功故事会变成另一种广告。Build in Public 的核心是<b>也发失败</b> —— 那才是稀缺内容。
             </div>
           </div>
           <div class="hist-card now">
-            <div class="hist-era">21ST · INTELLIGENCE · 我们</div>
+            <div class="hist-era">MYTH 03 · 误区</div>
             <div class="hist-main">
-              AI <span class="x">→</span> <span class="obj">开发者</span>
+              不是 <span class="obj">"免费营销"</span>
             </div>
             <div class="hist-desc">
-              AI 只是工具。早接触、多接触的人，会成为下一代"熟练工人"。
+              把它当营销工具的人，很快就会被反噬。它是<b>姿态</b>，不是策略 —— 装不出来的。
             </div>
           </div>
         </div>
 
         <div class="golden">
-          AI 不淘汰人，<span class="hl"
-            >只有熟练使用更高生产力的人，才会淘汰使用落后生产力的人。</span
-          >
-          <span class="tag">// MY TAKE</span>
+          在满是 AI 生成内容的信息流里，<span class="hl">做一个真实的人</span>，本身就是稀缺品。
+          <span class="tag">// AUTHENTICITY IS THE MOAT</span>
         </div>
       </div>
       <div class="footer">
-        <div>CH.03 · PERSPECTIVE</div>
-        <div class="mid">Be the one who adapts first.</div>
-        <div><span class="accent">07</span> / 08</div>
+        <div>CH.04 · BUILD IN PUBLIC</div>
+        <div class="mid">Be real, not perfect.</div>
+        <div><span class="accent">05</span> / 08</div>
       </div>
     </section>
 
-    <!-- ============ P8 方法论 · 收束 ============ -->
+    <!-- ============ P6 彩蛋 ============ -->
     <section class="slide">
       <div class="titlebar">
         <div class="tb-dots"><span></span><span></span><span></span></div>
         <div class="tb-path">
-          <span class="dim">chapter-04/</span>engineering-principles.md
+          <span class="dim">easter-egg/</span>about-this.md
         </div>
-        <div class="tb-right">收束</div>
+        <div class="tb-right">meta</div>
       </div>
       <div class="body">
-        <div class="kicker">CHAPTER 04 · 工程方法论 · 落地前的三条戒律</div>
+        <div class="kicker">EASTER EGG · 关于这个彩蛋</div>
+
+        <div class="scene-layout">
+          <div class="scene-left">
+            <div class="scene-badge">
+              <span class="num">No.42</span> &nbsp;//&nbsp; hidden feature
+            </div>
+            <div class="scene-title">好工具应该有性格。</div>
+            <div class="scene-sub">
+              有温度 · 有秘密 · 有<b>不为效率服务的浪漫</b>
+            </div>
+
+            <div class="scene-block">
+              <h4>WHY · 为什么埋彩蛋</h4>
+              <div class="scene-solution">
+                一个工具如果只有功能，那它只是<b>工具</b>。<br />
+                但如果它藏着一个只有<b>愿意探索的人</b>才能发现的秘密，它就有了性格。
+              </div>
+            </div>
+
+            <div class="scene-block">
+              <h4>FOR WHOM · 给谁</h4>
+              <div class="scene-solution">
+                给那些愿意点 7 次 logo 的人。<br />
+                给那些在终端里输入 <b>42</b> 的人。<br />
+                给那些相信"好东西值得被藏起来"的人。
+              </div>
+            </div>
+          </div>
+
+          <div class="scene-right">
+            <div class="scene-right-head">
+              <span>$ cat trigger.logic</span>
+              <span>● hidden</span>
+            </div>
+            <div class="scene-right-body">
+              <span class="cm">// 触发逻辑 · 双重入口</span><br />
+              <br />
+              <span class="kw">const</span> <span class="fn">TRIGGER</span> = {<br />
+              &nbsp;&nbsp;<span class="fn">logo</span>: <span class="num">7</span>, <span class="cm">// 点击 logo 7 次</span><br />
+              &nbsp;&nbsp;<span class="fn">window</span>: <span class="num">1500</span>, <span class="cm">// 1.5s 滑动窗口</span><br />
+              &nbsp;&nbsp;<span class="fn">code</span>: <span class="str">"42"</span>, <span class="cm">// 银河系漫游指南</span><br />
+              };<br />
+              <br />
+              <span class="cm">// 入口 A：点 logo 7 次</span><br />
+              <span class="fn">onLogoClick</span>(() =&gt; {<br />
+              &nbsp;&nbsp;<span class="kw">if</span> (count &gt;= <span class="num">7</span>) <span class="fn">openModal</span>();<br />
+              });<br />
+              <br />
+              <span class="cm">// 入口 B：输入暗号 42</span><br />
+              <span class="kw">if</span> (input === <span class="str">"42"</span>) {<br />
+              &nbsp;&nbsp;<span class="hi">→ load dev-share-deck.html</span><br />
+              &nbsp;&nbsp;<span class="hi">→ 你现在正在看的这页</span><br />
+              }<br />
+              <br />
+              <span class="cm">// 这不是 bug，是 feature。</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">
+        <div>EASTER EGG · META</div>
+        <div class="mid">Tools should have personality.</div>
+        <div><span class="accent">06</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P7 如果你愿意 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">chapter-05/</span>if-you-want.md
+        </div>
+        <div class="tb-right">邀请</div>
+      </div>
+      <div class="body">
+        <div class="kicker">CHAPTER 05 · 如果你愿意</div>
 
         <h2 class="method-title">
-          <span class="hl">边界</span><span class="arrow">&gt;</span>能力
-          &nbsp;·&nbsp; <span class="hl">约束</span
-          ><span class="arrow">&gt;</span>扩展 &nbsp;·&nbsp;
-          <span class="hl">复用</span><span class="arrow">&gt;</span>炫技
+          大声地、真实地 <span class="arrow">·</span>
+          <span class="hl">做你自己。</span>
         </h2>
         <div class="method-sub">
-          // 三条排序优先级，决定一套 AI 实践能不能在团队里活下去
+          // 在 AI 时代，这是最稀缺、也最有效的内容策略
         </div>
 
         <div class="m-formula">
-          <span class="cm"
-            ># 原子提效的算术题 —— 为什么先别想着"全流程 AI"</span
-          >
-          <span class="v">3%</span> <span class="eq">×</span>
-          <span class="v">10 scenes</span> <span class="eq">≈</span>
-          <span class="g">30% total gain</span> &nbsp;&nbsp;<span class="cm"
-            >// 每个场景只做 3% 的改善，10 个就是 30%</span
-          ><br />
-          <span class="v">∞ complexity</span> <span class="eq">×</span>
-          <span class="v">1 mega-system</span> <span class="eq">=</span>
-          <span style="color: var(--red); font-weight: 700"
-            >out of control</span
-          >
-          &nbsp;&nbsp;<span class="cm"
-            >// 一次性接入全流程，大概率在复杂度里失控</span
-          >
+          <span class="cm"># Build in Public 的底层公式</span>
+          <span class="v">真实</span> <span class="eq">+</span>
+          <span class="v">持续</span> <span class="eq">+</span>
+          <span class="v">不完美</span> <span class="eq">=</span>
+          <span class="g">信任</span> &nbsp;&nbsp;<span class="cm">// 信任是最贵的资产</span><br />
+          <span class="v">完美</span> <span class="eq">+</span>
+          <span class="v">偶尔</span> <span class="eq">+</span>
+          <span class="v">包装</span> <span class="eq">=</span>
+          <span style="color: var(--red); font-weight: 700">噪音</span>
+          &nbsp;&nbsp;<span class="cm">// AI 时代最不缺的就是噪音</span>
         </div>
 
         <div class="m-bottom">
           <div class="m-item">
             <div class="n">// RULE 01</div>
-            <div class="t">先做减法，<span class="dim">再谈系统。</span></div>
+            <div class="t">写你<span class="dim">真正想说的</span>。</div>
           </div>
           <div class="m-item">
             <div class="n">// RULE 02</div>
-            <div class="t">
-              先做局部闭环，<span class="dim">再谈全局整合。</span>
-            </div>
+            <div class="t">发你<span class="dim">还在犹豫的</span>。</div>
           </div>
           <div class="m-item">
             <div class="n">// RULE 03</div>
-            <div class="t">
-              先让用户拿到结果，<span class="dim">再谈理念完整性。</span>
-            </div>
+            <div class="t">承认你<span class="dim">不知道的</span>。</div>
           </div>
         </div>
 
-        <div class="golden" style="margin-top: 28px">
-          一套工具如果不能在 <span class="hl">10 分钟内被看懂</span>、在<span
-            class="hl"
-            >一次使用中被感知到价值</span
-          >，<br />
-          它就会沦为少数人的技术自娱。
-          <span class="tag"
-            >// THE REAL CHALLENGE IS ADOPTION, NOT CAPABILITY</span
-          >
-        </div>
-
-        <div class="thx">
-          <span class="prompt">$ dev</span> ./end-of-talk &nbsp;·&nbsp; Thanks
-          &amp; Q&amp;A &nbsp;·&nbsp; 欢迎吐槽<span class="cursor"></span>
+        <div class="golden" style="margin-top: 20px">
+          这个工具依然<span class="hl">完全免费</span>。<br />
+          因为它不是为了钱，是为了<span class="hl">证明一件事</span>：
+          好工具可以既有原则，又有温度。
+          <span class="tag">// FREE · LOCAL-FIRST · OPINIONATED</span>
         </div>
       </div>
       <div class="footer">
-        <div>CH.04 · CLOSING</div>
-        <div class="mid accent">
-          Boundary &gt; Capability · Constraint &gt; Expansion · Reuse &gt;
-          Show-off
+        <div>CH.05 · INVITATION</div>
+        <div class="mid">Be loud. Be real. Be yourself.</div>
+        <div><span class="accent">07</span> / 08</div>
+      </div>
+    </section>
+
+    <!-- ============ P8 感谢 ============ -->
+    <section class="slide">
+      <div class="titlebar">
+        <div class="tb-dots"><span></span><span></span><span></span></div>
+        <div class="tb-path">
+          <span class="dim">chapter-06/</span>thank-you.md
         </div>
+        <div class="tb-right">end</div>
+      </div>
+      <div class="body">
+        <div class="kicker">CHAPTER 06 · 谢谢你</div>
+        <h2 class="page-title">
+          谢谢你愿意 <span class="hl">点 7 次</span>。
+        </h2>
+        <p class="page-lead">
+          这比任何五星好评都珍贵。<br />
+          因为这说明你不只是路过 —— 你是真的在<b style="color: var(--text)">探索</b>。
+        </p>
+
+        <div class="quote-block">
+          <b>// 我们不奢望你推荐 NextPPT。</b><br />
+          但如果你愿意，把这份"愿意探索"的劲头，<br />
+          用在你正在做的<b>那件真正重要的事</b>上 —— 那就足够了。
+        </div>
+
+        <div class="golden" style="margin-top: 16px">
+          世界需要更多<span class="hl">愿意点第 7 次</span>的人。
+          <span class="tag">// FOR THE CURIOUS ONES</span>
+        </div>
+
+        <div class="thx" style="margin-top: 20px">
+          <span class="prompt">$ dev</span> ./end-of-easter-egg &nbsp;·&nbsp;
+          Thanks for being curious &nbsp;·&nbsp; 42<span class="cursor"></span>
+        </div>
+      </div>
+      <div class="footer">
+        <div>CH.06 · CLOSING</div>
+        <div class="mid accent">Curiosity &gt; Compliance · Real &gt; Perfect</div>
         <div><span class="accent">08</span> / 08</div>
       </div>
     </section>

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useGuideNav, useLocalePrefix } from '../hooks/useGuideNav.js';
 import { LanguageSwitcher } from './LanguageSwitcher.js';
+import { useLogoEasterEgg, EasterEggModal } from './EasterEggRobot.js';
 
 interface SiteHeaderProps {
   /** Optional trailing node placed after the nav links (e.g. a "back to edit" CTA). */
@@ -23,6 +24,7 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
   const navigate = useNavigate();
   const prefix = useLocalePrefix();
   const [scrolled, setScrolled] = useState(alwaysScrolled);
+  const easter = useLogoEasterEgg();
 
   useEffect(() => {
     // Pages without a hero (alwaysScrolled=true) stay permanently frosted —
@@ -49,7 +51,10 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
     <header className={`hds-nav ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="max-w-6xl mx-auto px-5 sm:px-8 h-14 flex items-center gap-6">
         <button
-          onClick={() => navigate(prefix || '/')}
+          onClick={(e) => {
+            easter.handleLogoClick(e);
+            navigate(prefix || '/');
+          }}
           className="flex items-center gap-2 shrink-0 transition-opacity hover:opacity-80"
           aria-label={t('nav.homeAria')}
         >
@@ -66,6 +71,21 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
           {trailing}
         </div>
       </div>
+
+      {/* +1s floating indicators on rapid logo clicks */}
+      {easter.plusOnes.map((p) => (
+        <span
+          key={p.id}
+          className="easter-plus-one"
+          style={{ left: p.x, top: p.y }}
+          aria-hidden="true"
+        >
+          +1s
+        </span>
+      ))}
+
+      {/* Secret code modal after 7-click unlock */}
+      <EasterEggModal open={easter.modalOpen} onClose={() => easter.setModalOpen(false)} />
     </header>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TEMPLATES, type TemplateItem } from '../data/templates.js';
 
-const CAROUSEL_IDS: string[] = ['nextppt-kami', 'deck-report', 'deck-classic', 'resume'];
+const CAROUSEL_IDS: string[] = ['sakura-chroma', 'cobalt-grid', 'peoples-platform', 'long-table', 'nextppt-kami'];
 const AUTOPLAY_MS = 5200;
 
 interface SlidePreviewProps {

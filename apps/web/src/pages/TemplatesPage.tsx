@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useLocalePrefix } from '../hooks/useGuideNav.js';
@@ -6,6 +6,7 @@ import { useOpenDeck } from '../fs/useOpenDeck.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
 import { TEMPLATES, findTemplate, type TemplateItem } from '../data/templates.js';
+import { useEasterEggs } from '../hooks/useEasterEggs.js';
 
 function SampleThumb({ url, kind }: { url: string; kind: TemplateItem['kind'] }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -78,7 +79,12 @@ export function TemplatesPage() {
   const navigate = useNavigate();
   const prefix = useLocalePrefix();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { state: easterState } = useEasterEggs();
 
+  const visibleTemplates = useMemo(
+    () => TEMPLATES.filter((item) => !item.easterEgg || easterState.terminalUnlocked),
+    [easterState.terminalUnlocked],
+  );
   const selected = selectedId ? findTemplate(selectedId) : undefined;
 
   return (
@@ -107,7 +113,7 @@ export function TemplatesPage() {
               </header>
 
               <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {TEMPLATES.map((item) => (
+                {visibleTemplates.map((item) => (
                   <TemplateCard key={item.id} item={item} onOpen={() => setSelectedId(item.id)} />
                 ))}
               </div>

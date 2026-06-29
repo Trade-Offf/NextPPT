@@ -200,6 +200,15 @@ const editor: typeof zh = {
     dragHint: 'Drag to move · drag a corner to resize · elements snap into alignment automatically',
     codeHint: 'Edit the HTML source directly — switch back to visual mode to see it live',
   },
+  easter: {
+    modalAria: 'Enter secret code',
+    title: 'Oh, you found me',
+    subtitle: 'So, what is the ultimate answer to life, the universe, and everything?',
+    placeholder: 'Enter answer',
+    wrong: 'Not quite — try again?',
+    hint: 'Hint: Douglas Adams knew',
+    close: 'Close',
+  },
 };
 
 export default editor;

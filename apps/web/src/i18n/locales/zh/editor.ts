@@ -198,4 +198,13 @@ export default {
     dragHint: '拖动元素移动 · 拖角缩放 · 靠近其他元素会自动对齐',
     codeHint: '直接编辑 HTML 源码，切换回视觉模式即时生效',
   },
+  easter: {
+    modalAria: '输入暗号',
+    title: '哎呀，被你发现了呢',
+    subtitle: '那么，生命、宇宙以及一切的终极答案是什么？',
+    placeholder: '输入答案',
+    wrong: '不对哦，再想想？',
+    hint: '提示：道格拉斯·亚当斯知道',
+    close: '关闭',
+  },
 };

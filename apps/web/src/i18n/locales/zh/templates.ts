@@ -48,5 +48,21 @@ export default {
       title: '商务汇报演示稿',
       desc: '浅色商务风的多页向上汇报 deck 范例（项目管理分析视角）：健康度环形图、风险分层金字塔、资源热力矩阵、产能折线图与主线接力流程图共 5 类内联 SVG，配健康度灯、P0/P1/P2 等级胶囊、彩色顶边卡片与行动表，藏蓝点睛、单一无衬线撑投屏可读性。可直接在编辑器打开或下载；附带的提示词是通用商务汇报设计规范，可套用到任意主题。',
     },
+    'sakura-chroma': {
+      title: '樱彩 Sakura Chroma',
+      desc: '奶油纸底 + 棕墨文字 + 6 色彩虹缎带克制点缀的多页 deck：花瓣簇封面、对角彩虹缎带章节过渡、12 角星芒印章、半色调纸纹纹理，Big Shoulders Display 撑标题。可直接在编辑器打开或下载；附带的提示词是通用 Sakura Chroma 设计规范，可套用到任意主题。',
+    },
+    'cobalt-grid': {
+      title: '钴蓝网格 Cobalt Grid',
+      desc: '象牙纸 + 电光钴蓝 + 极淡蓝方格纸背景的多页 deck：graph-paper 网格、像素阶梯 SVG、QR 块、上下发丝线分隔，Newsreader 斜体衬线撑引言、DM Mono 撑数据。可直接在编辑器打开或下载；附带的提示词是通用 Cobalt Grid 设计规范，可套用到任意主题。',
+    },
+    'peoples-platform': {
+      title: '人民舞台 Block & Bold',
+      desc: '奶油纸 + 蓝橙红三色块状大面积平涂的多页 deck：Alfa Slab One 超粗 slab 标题带多层 text-shadow 立体印章感、grain 噪点叠层、粗黑边框分隔，视觉冲击强。可直接在编辑器打开或下载；附带的提示词是通用 Block & Bold 设计规范，可套用到任意主题。',
+    },
+    'long-table': {
+      title: '长桌 Long Table',
+      desc: '暖奶油 + 单一锈红克制点缀的多页 deck：描边胶囊按钮、圆形版次徽章、矩形标签与座位胶囊，Bricolage Grotesque 全大写标题 + Fraunces 斜体衬线撑引言，菜单/清单页表格化排版。可直接在编辑器打开或下载；附带的提示词是通用 Long Table 设计规范，可套用到任意主题。',
+    },
   },
 };
