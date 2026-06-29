@@ -12,6 +12,7 @@ export interface TemplateItem {
 }
 
 const KAMI_CREDIT = { name: 'Kami · Tw93', href: 'https://kami.tw93.fun/index-zh.html' } as const;
+const FRONTEND_SLIDES_CREDIT = { name: 'zarazhangrui/frontend-slides', href: 'https://github.com/zarazhangrui/frontend-slides' } as const;
 
 export const TEMPLATES: TemplateItem[] = [
   {
@@ -414,6 +415,7 @@ Anti-Patterns 反面示例（必须规避）
     kind: 'deck',
     tags: ['Sakura', 'Chroma', '16:9'],
     sampleUrl: '/template-sakura-chroma.html',
+    credit: FRONTEND_SLIDES_CREDIT,
     prompt: `用 Sakura Chroma 设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
 输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
 
@@ -449,6 +451,7 @@ Anti-Patterns 反面示例（必须规避）
     kind: 'deck',
     tags: ['Cobalt', 'Grid', '16:9'],
     sampleUrl: '/template-cobalt-grid.html',
+    credit: FRONTEND_SLIDES_CREDIT,
     prompt: `用 Cobalt Grid 设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
 输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
 
@@ -484,6 +487,7 @@ graph-paper 方格纸背景、像素阶梯 SVG 装饰、QR 块、钴蓝实心方
     kind: 'deck',
     tags: ['Block', 'Bold', '16:9'],
     sampleUrl: '/template-peoples-platform.html',
+    credit: FRONTEND_SLIDES_CREDIT,
     prompt: `用 People's Platform (Block & Bold) 设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
 输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
 
@@ -519,6 +523,7 @@ grain 噪点纹理叠层
     kind: 'deck',
     tags: ['Long', 'Table', '16:9'],
     sampleUrl: '/template-long-table.html',
+    credit: FRONTEND_SLIDES_CREDIT,
     prompt: `用 Long Table 设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
 输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
 
