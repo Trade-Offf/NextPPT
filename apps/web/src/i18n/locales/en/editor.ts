@@ -22,6 +22,8 @@ const editor: typeof zh = {
     save: 'Save',
     export: 'Export',
     guide: 'Guide',
+    replayTour: 'How to use',
+    replayTourTitle: 'Replay the editor tour',
     kindDeck: 'Per page',
     kindDoc: 'One page',
     kindDeckTip: 'Edit and export per page (PPTX)',
@@ -168,6 +170,35 @@ const editor: typeof zh = {
     noHtml: 'No HTML file was found in this folder.',
     sampleFailed: 'Failed to load the sample template, please try again later',
     dropHtmlOnly: 'Please drop an HTML file or a folder containing HTML.',
+  },
+  onboarding: {
+    ariaLabel: 'Editor tour',
+    step1: {
+      title: 'Welcome to NextPPT',
+      body: 'Your deck is ready. Click any element on the canvas to edit text or tweak styles.',
+    },
+    step2: {
+      title: 'Two editing modes',
+      body: 'Edit mode: select text, change fonts and colors. Drag mode: move, resize and align elements freely.',
+    },
+    step3: {
+      title: 'Live properties panel',
+      body: 'Once you select an element, every adjustable property lives here — font size, color, alignment, layer order.',
+    },
+    step4: {
+      title: 'Stuck? Hand it to AI',
+      body: "Edit this page's HTML directly. For tricks beyond the tool's reach, export it, let AI fix it, paste it back — fully supported.",
+    },
+    step5: {
+      title: 'One-click export',
+      body: 'When you’re done, export to PPT or PDF here. The question-mark icon opens the full guide anytime.',
+    },
+    skip: 'Skip',
+    prev: 'Back',
+    next: 'Next',
+    done: 'Get started',
+    dragHint: 'Drag to move · drag a corner to resize · elements snap into alignment automatically',
+    codeHint: 'Edit the HTML source directly — switch back to visual mode to see it live',
   },
 };
 

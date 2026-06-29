@@ -22,6 +22,7 @@ export function LandingPage() {
     dragOver,
     setDragOver,
     handleDrop,
+    handlePickFile,
     openTemplateSample,
   } = useOpenDeck();
 
@@ -35,9 +36,9 @@ export function LandingPage() {
   const rootRef = useRef<HTMLDivElement>(null);
   const pains = t('value.pains', { returnObjects: true }) as string[];
 
-  const openSample = () => {
+  const handleUpload = () => {
     if (loading) return;
-    void openTemplateSample('/sample-deck.html', 'sample-deck.html');
+    void handlePickFile();
   };
 
   useGSAP(
@@ -104,8 +105,8 @@ export function LandingPage() {
             />
           )}
           <div className={`hero-cta flex flex-wrap items-center justify-center gap-3 ${error ? 'mt-6' : 'mt-9'}`}>
-            <button onClick={openSample} disabled={loading} className="hds-btn-primary px-6 py-3 text-sm disabled:opacity-50">
-              {loading ? t('hero.loading') : t('hero.ctaTrySample')}
+            <button onClick={handleUpload} disabled={loading} className="hds-btn-primary px-6 py-3 text-sm disabled:opacity-50">
+              {loading ? t('hero.loading') : t('hero.ctaUpload')}
             </button>
             <button onClick={() => navigate(`${prefix}/templates`)} className="hds-btn px-5 py-3 text-sm">{t('hero.ctaGuide')}</button>
           </div>

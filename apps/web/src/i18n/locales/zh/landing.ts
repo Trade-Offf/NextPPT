@@ -15,7 +15,7 @@ export default {
       '把 AI 生成的演示稿拖进来，点一下就能改字、换图、挪位置，再一键导出能投影的 PPT / PDF。',
     ctaOpen: '打开文件 / 拖到此处',
     loading: '加载中…',
-    ctaTrySample: '试用样例',
+    ctaUpload: '点击上传',
     ctaGuide: '看 30 秒使用指南',
     unsupported: '请用 Chrome / Edge 等 Chromium 浏览器打开',
     support: '支持文件夹（可读写配套图片）或单个自包含 HTML · 需 Chromium 内核浏览器',

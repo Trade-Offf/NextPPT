@@ -20,6 +20,8 @@ export default {
     save: '保存',
     export: '导出',
     guide: '使用指南',
+    replayTour: '如何使用',
+    replayTourTitle: '重新查看编辑器引导',
     kindDeck: '逐页',
     kindDoc: '整页',
     kindDeckTip: '逐页编辑，逐页导出 PPTX',
@@ -166,5 +168,34 @@ export default {
     noHtml: '文件夹里没有找到任何 HTML 文件。',
     sampleFailed: '示例模板加载失败，请稍后重试',
     dropHtmlOnly: '请拖入 HTML 文件或包含 HTML 的文件夹。',
+  },
+  onboarding: {
+    ariaLabel: '编辑器引导',
+    step1: {
+      title: '欢迎使用 NextPPT',
+      body: '你的演示稿已就绪。直接点选画布上的任何元素来编辑文字、调整样式。',
+    },
+    step2: {
+      title: '两种编辑模式',
+      body: '编辑模式：点选文字、改字体配色。拖动模式：自由移动、缩放、对齐元素。',
+    },
+    step3: {
+      title: '实时属性面板',
+      body: '选中元素后，这里展示所有可调属性——字号、颜色、对齐、层级，所见即所得。',
+    },
+    step4: {
+      title: '改不动？交给 AI',
+      body: '直接编辑这页 HTML。工具搞不定的极限操作，导出去让 AI 改完再放回来，全程支持。',
+    },
+    step5: {
+      title: '一键导出',
+      body: '编辑完成后点这里导出 PPT 或 PDF。随时点右上角问号查看完整指南。',
+    },
+    skip: '跳过',
+    prev: '上一步',
+    next: '下一步',
+    done: '开始使用',
+    dragHint: '拖动元素移动 · 拖角缩放 · 靠近其他元素会自动对齐',
+    codeHint: '直接编辑 HTML 源码，切换回视觉模式即时生效',
   },
 };

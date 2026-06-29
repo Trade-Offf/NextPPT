@@ -72,6 +72,65 @@ let overlay: HTMLElement | null = null;
 let handleEls: Record<Corner, HTMLElement> | null = null;
 let selectedEl: HTMLElement | null = null;
 
+// ─── Alignment guides ───────────────────────────────────────────────────────
+// Two full-canvas lines (vertical + horizontal) shown during drag when the
+// moving element snaps to a target. position:fixed so they ride the iframe's
+// 1280×720 native coords (no scale maths); pointer-events:none so they never
+// steal pointer from the element being dragged. data-hds-guide marks them so
+// serializeSection()/cleanup() can strip them before export.
+let guideV: HTMLElement | null = null;
+let guideH: HTMLElement | null = null;
+
+function ensureGuides() {
+  if (guideV && guideH) return;
+  const make = () => {
+    const el = document.createElement('div');
+    el.setAttribute('data-hds-guide', '');
+    Object.assign(el.style, {
+      position: 'fixed',
+      background: '#ff3d8b',
+      pointerEvents: 'none',
+      zIndex: '99998', // below handles (100000), above overlay (99999)? no — below overlay too
+      display: 'none',
+    } as Partial<CSSStyleDeclaration>);
+    document.body.appendChild(el);
+    return el;
+  };
+  guideV = make();
+  guideV.style.width = '1px';
+  guideV.style.transform = 'translateX(-0.5px)';
+  guideH = make();
+  guideH.style.height = '1px';
+  guideH.style.transform = 'translateY(-0.5px)';
+}
+
+/** Show guides at the given canvas-native x/y (null hides that axis). */
+function showGuides(g: { x: number | null; y: number | null }) {
+  ensureGuides();
+  const sr = sectionEl().getBoundingClientRect();
+  if (g.x !== null && guideV) {
+    guideV.style.left = `${sr.left + g.x}px`;
+    guideV.style.top = `${sr.top}px`;
+    guideV.style.height = `${sr.height}px`;
+    guideV.style.display = 'block';
+  } else if (guideV) {
+    guideV.style.display = 'none';
+  }
+  if (g.y !== null && guideH) {
+    guideH.style.top = `${sr.top + g.y}px`;
+    guideH.style.left = `${sr.left}px`;
+    guideH.style.width = `${sr.width}px`;
+    guideH.style.display = 'block';
+  } else if (guideH) {
+    guideH.style.display = 'none';
+  }
+}
+
+function hideGuides() {
+  if (guideV) guideV.style.display = 'none';
+  if (guideH) guideH.style.display = 'none';
+}
+
 // Canvas interaction mode (synced from the host via `set-mode`). Strictly
 // exclusive: 'edit' = click-select + double-click inline editing (no handles,
 // no dragging); 'drag' = freeform move/resize/delete (handles, no inline edit).
@@ -155,6 +214,7 @@ function showOverlay(el: Element) {
 function clearOverlay() {
   if (overlay) overlay.style.display = 'none';
   if (handleEls) for (const c of HANDLE_CORNERS) handleEls[c].style.display = 'none';
+  hideGuides();
 }
 
 /**
@@ -422,6 +482,10 @@ function detach(el: HTMLElement) {
   if (getComputedStyle(sec).position === 'static') sec.style.position = 'relative';
   // Capture the on-screen box while the element is still in normal flow.
   const r = el.getBoundingClientRect();
+  const cs = getComputedStyle(el);
+  const scrolls =
+    cs.overflowY === 'auto' || cs.overflowY === 'scroll' ||
+    cs.overflowX === 'auto' || cs.overflowX === 'scroll';
   const id = genId();
   el.setAttribute('data-hds-id', id);
   el.setAttribute('data-hds-free', '');
@@ -437,7 +501,16 @@ function detach(el: HTMLElement) {
   el.style.left = `${round2(r.left - pr.left - p.clientLeft)}px`;
   el.style.top = `${round2(r.top - pr.top - p.clientTop)}px`;
   el.style.width = `${round2(r.width)}px`;
-  if (shapeKind(el) !== 'image') el.style.height = 'auto';
+  // If this element has children that are also free shapes (or will become so),
+  // pin height so the wrapper doesn't collapse when children go absolute.
+  // Scroll containers always need a fixed height to preserve scrolling.
+  // Others: height:auto so text blocks can reflow naturally.
+  const hasDetachedChild = el.querySelector(':scope > [data-hds-id]') !== null;
+  if (scrolls || hasDetachedChild) {
+    el.style.height = `${round2(r.height)}px`;
+  } else if (shapeKind(el) !== 'image') {
+    el.style.height = 'auto';
+  }
 }
 
 // ─── Auto-detach all content boxes (on entering drag mode) ───────────────────
@@ -521,6 +594,13 @@ interface DetachPlan {
   alignSelf: string;
   inFlow: boolean;
   isImage: boolean;
+  /** True when the element scrolls (overflow:auto/scroll on either axis). */
+  scrolls: boolean;
+  /** CSS-computed height value — preserved for scroll containers so they don't
+   *  get stretched by their content when taken out of flow. */
+  computedHeight: string;
+  /** CSS-computed max-height value (the constraint that makes it scroll). */
+  computedMaxHeight: string;
 }
 
 /**
@@ -549,6 +629,9 @@ function detachAll(): boolean {
     const cs = getComputedStyle(el);
     const cb = nearestContainingBlock(el);
     const pos = cs.position;
+    const scrolls =
+      cs.overflowY === 'auto' || cs.overflowY === 'scroll' ||
+      cs.overflowX === 'auto' || cs.overflowX === 'scroll';
     return {
       el,
       cb,
@@ -563,6 +646,9 @@ function detachAll(): boolean {
       alignSelf: cs.alignSelf,
       inFlow: pos === 'static' || pos === 'relative' || pos === 'sticky',
       isImage: shapeKind(el) === 'image',
+      scrolls,
+      computedHeight: cs.height,
+      computedMaxHeight: cs.maxHeight,
     };
   });
 
@@ -595,15 +681,28 @@ function detachAll(): boolean {
   }
 
   // Phase 3 — anchor from the phase-1 snapshot; preserve size so nothing shifts.
+  // IMPORTANT: re-read the containing block here, not the phase-1 snapshot. By
+  // now Phase 2 has flipped ancestors to position:absolute, which changes the
+  // offsetParent chain. Using the stale cb would place children relative to the
+  // old (slide-level) containing block — they'd land far outside their parent.
   for (const p of plans) {
-    p.el.style.left = `${round2(p.rect.left - p.cbRect.left - p.cb.clientLeft)}px`;
-    p.el.style.top = `${round2(p.rect.top - p.cbRect.top - p.cb.clientTop)}px`;
+    const cb = freeParent(p.el);
+    const cbRect = cb.getBoundingClientRect();
+    p.el.style.left = `${round2(p.rect.left - cbRect.left - cb.clientLeft)}px`;
+    p.el.style.top = `${round2(p.rect.top - cbRect.top - cb.clientTop)}px`;
     p.el.style.right = 'auto';
     p.el.style.bottom = 'auto';
     p.el.style.width = `${round2(p.rect.width)}px`;
-    // min-height (not height) keeps fixed-height boxes (e.g. a 32px titlebar)
-    // from collapsing to content height, while still allowing text to grow.
-    if (!p.isImage) p.el.style.minHeight = `${round2(p.rect.height)}px`;
+    // A container whose children were also detached (now position:absolute)
+    // collapses to zero height because absolute children don't contribute to
+    // the parent's content height. Pin height so the wrapper keeps its box.
+    // Scroll containers always need a fixed height to preserve scrolling.
+    const hasDetachedChild = p.el.querySelector(':scope > [data-hds-id]') !== null;
+    if (p.scrolls || hasDetachedChild) {
+      p.el.style.height = `${round2(p.rect.height)}px`;
+    } else if (!p.isImage) {
+      p.el.style.minHeight = `${round2(p.rect.height)}px`;
+    }
   }
 
   normalizeZ();
@@ -703,6 +802,7 @@ function restoreScripts() {
 
 function cleanup(root: ParentNode): void {
   root.querySelectorAll('[data-hds-overlay]').forEach((n) => n.remove());
+  root.querySelectorAll('[data-hds-guide]').forEach((n) => n.remove());
 }
 
 function serializeSection(): string {
@@ -930,6 +1030,130 @@ document.addEventListener(
 const SLIDE_W = 1280;
 const SLIDE_H = 720;
 const MIN_SIZE = 24; // px in slide space
+/** Snap distance in canvas-native px. Within this radius, bias decides winner. */
+const SNAP_THRESHOLD = 5;
+
+// ─── Snap targets & alignment scoring ────────────────────────────────────────
+// A snap candidate on one axis. `bias` shifts the effective score (lower wins):
+// canvas centre is most attractive (-8), edges next (-6), other elements neutral.
+interface SnapTarget {
+  value: number;
+  bias: number;
+}
+interface SnapTargets {
+  x: SnapTarget[];
+  y: SnapTarget[];
+}
+interface SnapGuides {
+  x: number | null;
+  y: number | null;
+}
+interface BoxXY {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** Bias for a candidate snap target element. Nested/inline leaves are weaker so
+ *  we don't snap to every tiny inner node. */
+function snapTargetBias(el: HTMLElement): number {
+  // Inserted images / detached free shapes are first-class snap peers.
+  if (el.hasAttribute('data-hds-id')) return 0;
+  // Block-level authored content (div/section/picture wrappers): neutral.
+  return 1;
+}
+
+/** Build the full snap target set for the current slide, excluding `exclude`.
+ *  Called once per drag start (cached on DragState) — not per pointermove. */
+function buildSnapTargets(exclude: HTMLElement): SnapTargets {
+  const sec = sectionEl();
+  const sw = sec.clientWidth || SLIDE_W;
+  const sh = sec.clientHeight || SLIDE_H;
+  const x: SnapTarget[] = [
+    { value: 0, bias: -6 },
+    { value: sw / 2, bias: -8 },
+    { value: sw, bias: -6 },
+  ];
+  const y: SnapTarget[] = [
+    { value: 0, bias: -6 },
+    { value: sh / 2, bias: -8 },
+    { value: sh, bias: -6 },
+  ];
+  for (const el of freeShapes()) {
+    if (el === exclude) continue;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) continue;
+    const b = snapTargetBias(el);
+    x.push(
+      { value: r.left, bias: b },
+      { value: r.left + r.width / 2, bias: b },
+      { value: r.right, bias: b },
+    );
+    y.push(
+      { value: r.top, bias: b },
+      { value: r.top + r.height / 2, bias: b },
+      { value: r.bottom, bias: b },
+    );
+  }
+  return { x, y };
+}
+
+/**
+ * Score-based snap. For each axis, test the moving element's source edges
+ * (left/centre/right for move; only the dragged edge for resize) against every
+ * target. Score = distance + bias; lowest wins. Returns adjusted box + guides.
+ *
+ * Anti-jitter: only snap when distance ≤ SNAP_THRESHOLD, and the bias-weighted
+ * score must strictly beat the current best — so a far target never yanks the
+ * element, and ties don't flicker between candidates.
+ */
+function snapBox(
+  box: BoxXY,
+  mode: 'move' | 'resize',
+  corner: Corner | undefined,
+  targets: SnapTargets,
+): { box: BoxXY; guides: SnapGuides } {
+  const guides: SnapGuides = { x: null, y: null };
+  const next = { ...box };
+
+  const testAxis = (axis: 'x' | 'y', sources: number[]) => {
+    let best: { delta: number; guide: number; score: number } | null = null;
+    for (const target of targets[axis]) {
+      for (const source of sources) {
+        const distance = Math.abs(source - target.value);
+        if (distance > SNAP_THRESHOLD) continue;
+        const score = distance + target.bias;
+        if (!best || score < best.score) {
+          best = { delta: target.value - source, guide: target.value, score };
+        }
+      }
+    }
+    if (!best) return;
+    if (axis === 'x') {
+      if (mode === 'move') next.x += best.delta;
+      else next.width = Math.max(MIN_SIZE, next.width + best.delta);
+      guides.x = best.guide;
+    } else {
+      if (mode === 'move') next.y += best.delta;
+      else next.height = Math.max(MIN_SIZE, next.height + best.delta);
+      guides.y = best.guide;
+    }
+  };
+
+  if (mode === 'move') {
+    testAxis('x', [next.x, next.x + next.width / 2, next.x + next.width]);
+    testAxis('y', [next.y, next.y + next.height / 2, next.y + next.height]);
+  } else if (corner) {
+    // Resize: only the dragged edge participates, anchored opposite corner stays.
+    const west = corner === 'nw' || corner === 'sw';
+    const north = corner === 'nw' || corner === 'ne';
+    testAxis('x', [west ? next.x : next.x + next.width]);
+    testAxis('y', [north ? next.y : next.y + next.height]);
+  }
+
+  return { box: next, guides };
+}
 
 interface DragState {
   mode: 'move' | 'resize';
@@ -951,6 +1175,11 @@ interface DragState {
   secLeft: number;
   secTop: number;
   moved: boolean;
+  // Cached snap targets (built once at drag start, reused every pointermove).
+  snapTargets: SnapTargets | null;
+  // Saved base transform (non-scale) so move preview's translate can compose
+  // with any pre-existing transform without clobbering block-resize scale.
+  baseTransform: string;
 }
 
 let drag: DragState | null = null;
@@ -961,6 +1190,13 @@ function round2(n: number) {
 }
 
 function beginDrag(mode: 'move' | 'resize', el: HTMLElement, e: PointerEvent, corner?: Corner) {
+  // Cache snap targets ONCE per drag. Building them every pointermove would
+  // call getBoundingClientRect() on every free shape each frame (forced layout).
+  const snapTargets = mode === 'move' || mode === 'resize' ? buildSnapTargets(el) : null;
+  // Snapshot the element's current inline transform so the move-preview
+  // translate can compose with it (e.g. a block previously scaled via resize)
+  // instead of overwriting it. We restore / merge at endDrag.
+  const baseTransform = el.style.transform || '';
   drag = {
     mode,
     el,
@@ -979,6 +1215,8 @@ function beginDrag(mode: 'move' | 'resize', el: HTMLElement, e: PointerEvent, co
     secLeft: 0,
     secTop: 0,
     moved: false,
+    snapTargets,
+    baseTransform,
   };
 }
 
@@ -1049,15 +1287,43 @@ function applyDrag(e: PointerEvent) {
   const el = drag.el;
 
   if (drag.mode === 'move') {
+    // Snap first (in canvas-native coords), then clamp. We compute the intended
+    // position from the baseline + pointer delta, run snapBox against cached
+    // targets, and apply the snapped result.
     let nl = drag.left + dx;
     let nt = drag.top + dy;
+    const box: BoxXY = { x: nl, y: nt, width: drag.visW, height: drag.visH };
+    const snapped = drag.snapTargets
+      ? snapBox(box, 'move', undefined, drag.snapTargets)
+      : { box, guides: { x: null, y: null } as SnapGuides };
+    nl = snapped.box.x;
+    nt = snapped.box.y;
     // Keep at least MIN_SIZE of the element on-canvas (small bleed allowed).
     nl = Math.max(MIN_SIZE - drag.visW, Math.min(SLIDE_W - MIN_SIZE, nl));
     nt = Math.max(MIN_SIZE - drag.visH, Math.min(SLIDE_H - MIN_SIZE, nt));
-    el.style.left = `${nl}px`;
-    el.style.top = `${nt}px`;
+    // Transform preview: translate visually without touching left/top (zero
+    // reflow). endDrag will fold the delta back into left/top percentages and
+    // clear the transform. We compose with any pre-existing base transform
+    // (e.g. a block previously scaled via resize) so it isn't lost.
+    const base = drag.baseTransform;
+    el.style.transform = `translate(${nl - drag.left}px, ${nt - drag.top}px)${base ? ' ' + base : ''}`;
+    el.style.willChange = 'transform';
+    showGuides(snapped.guides);
   } else {
     resizeShape(e);
+    // Resize snap: show guides for the dragged edge alignment.
+    if (drag.snapTargets && drag.corner) {
+      const r = el.getBoundingClientRect();
+      const snapped = snapBox(
+        { x: r.left, y: r.top, width: r.width, height: r.height },
+        'resize',
+        drag.corner,
+        drag.snapTargets,
+      );
+      showGuides(snapped.guides);
+    } else {
+      hideGuides();
+    }
   }
   showOverlay(el);
 }
@@ -1066,19 +1332,41 @@ function endDrag() {
   if (!drag) return;
   const el = drag.el;
   if (drag.moved) {
-    // Persist as percentages of the real containing block: resolution-independent
-    // and pixel-exact, so the element stays precisely where it was released.
     const p = freeParent(el);
     const pw = p.clientWidth || SLIDE_W;
-    commitPercentPosition(el);
-    if (drag.mode === 'resize' && drag.kind !== 'block') {
-      el.style.width = `${round2((el.offsetWidth / pw) * 100)}%`;
-      if (drag.kind === 'image') el.style.height = 'auto';
+    const ph = p.clientHeight || SLIDE_H;
+    if (drag.mode === 'move') {
+      // Fold the transform-preview translate back into left/top percentages,
+      // then clear the preview transform (restore any pre-existing base transform
+      // such as a block's resize scale — which is itself persisted below).
+      const cs = getComputedStyle(el);
+      const matrix = new DOMMatrixReadOnly(cs.transform);
+      const dx = matrix.m41;
+      const dy = matrix.m42;
+      const newLeft = drag.left + dx;
+      const newTop = drag.top + dy;
+      // Restore base transform (e.g. block resize scale) — move preview's
+      // translate is consumed into left/top below.
+      el.style.transform = drag.baseTransform;
+      el.style.willChange = '';
+      el.style.left = `${round2((newLeft / pw) * 100)}%`;
+      el.style.top = `${round2((newTop / ph) * 100)}%`;
+    } else {
+      // resize: existing behaviour — image/text persist width as %, block keeps
+      // its transform: scale() inline (intentionally not converted to %).
+      commitPercentPosition(el);
+      if (drag.kind !== 'block') {
+        el.style.width = `${round2((el.offsetWidth / pw) * 100)}%`;
+        if (drag.kind === 'image') el.style.height = 'auto';
+      }
     }
+    hideGuides();
     showOverlay(el);
     suppressNextClick = true;
     send({ type: 'patched', html: serializeSection() });
   }
+  // Always clear guides + release cache even if the drag was a no-op click.
+  hideGuides();
   drag = null;
 }
 

@@ -17,7 +17,7 @@ const landing: typeof zh = {
       'Drop in an AI-generated deck, then click to change text, swap images and move things around — and export a projector-ready PPT / PDF in one click.',
     ctaOpen: 'Open a file / drop it here',
     loading: 'Loading…',
-    ctaTrySample: 'Try a sample',
+    ctaUpload: 'Upload file',
     ctaGuide: 'Watch the 30-second guide',
     unsupported: 'Please open in Chrome / Edge or another Chromium browser',
     support: 'Works with a folder (read/write paired images) or a single self-contained HTML · Chromium browser required',

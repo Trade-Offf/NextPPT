@@ -40,7 +40,6 @@ function SlidePreview({ url, kind, active }: SlidePreviewProps) {
   const scaleH = size.h / baseH;
   const scale = Math.max(scaleW, scaleH) || 0.0001;
   const scaledW = baseW * scale;
-  const scaledH = baseH * scale;
   // Center horizontally; anchor to top vertically (top content matters most)
   const offsetX = (size.w - scaledW) / 2;
   const offsetY = 0;

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
 import { useGuideNav } from '../hooks/useGuideNav.js';
+import { useOnboarding } from '../hooks/useOnboarding.js';
 import { LanguageSwitcher } from '../components/LanguageSwitcher.js';
 import { ScaledCanvas, type CanvasHandle } from '../components/CanvasFrame.js';
 import { SlideListPane } from '../components/SlideListPane.js';
@@ -11,6 +12,7 @@ import { ExportDrawer } from '../components/ExportDrawer.js';
 import { ConfirmDialog } from '../components/ConfirmDialog.js';
 import { HistoryDrawer } from '../components/HistoryDrawer.js';
 import { WorkspaceKindToggle } from '../components/WorkspaceKindToggle.js';
+import { OnboardingTour } from '../components/OnboardingTour.js';
 import type { PatchOp, RuntimeMessage } from '@hds/protocol';
 import { writeDeck, rebuildDeckHtmlForExport, rebuildDocHtmlForExport, writeAsset, saveAsNewFile, writeFileHandle, parseDeck, parseDoc } from '../fs/adapter.js';
 import type { HistoryCtx } from '../fs/history.js';
@@ -97,6 +99,39 @@ export function EditorPage() {
   // text + property panel). 'drag' = freeform move/resize/delete. Strictly
   // exclusive so users don't accidentally move things while editing.
   const [interactionMode, setInteractionMode] = useState<'edit' | 'drag'>('edit');
+
+  // ── Onboarding ────────────────────────────────────────────────────────────
+  // One-time coach-mark tour + contextual hints. Tour triggers after the deck
+  // is ready and only in deck (non-doc) mode; contextual hints fire once when
+  // the user first switches to drag / code mode.
+  const { state: onboardingState, markTourDone, markDragHintShown, markCodeHintShown } = useOnboarding();
+  const [tourActive, setTourActive] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(0);
+  const showToastOnce = useCallback((msg: string, markShown: () => void) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(msg);
+    markShown();
+    toastTimer.current = setTimeout(() => setToast(null), 3600);
+  }, []);
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current); }, []);
+
+  // Mirror onboarding flags into refs so the stable `handleMessage` callback can
+  // read them without joining its dependency array.
+  const tourDoneRef = useRef(onboardingState.tourDone);
+  tourDoneRef.current = onboardingState.tourDone;
+  const triggerTourRef = useRef<() => void>(() => {});
+  triggerTourRef.current = () => {
+    if (!tourDoneRef.current && !docMode) setTourActive(true);
+  };
+
+  // Manual re-trigger from the toolbar "如何使用" button. Bypasses the tourDone
+  // guard so users can replay the tour anytime — but still respects doc mode,
+  // where the mode-toggle step has no anchor.
+  const replayTour = useCallback(() => {
+    if (docMode) return;
+    setTourActive(true);
+  }, [docMode]);
 
   // ── Sidebar thumbnails ───────────────────────────────────────────────────
   // Rasterise slides into static <img> snapshots (see lib/slideSnapshot). This
@@ -220,12 +255,30 @@ export function EditorPage() {
       if (pending && pending.slideId === currentSlideId) {
         canvasRef.current?.sendMessage({ type: 'select-element', selector: pending.selector });
       }
+      // Kick off the first-time tour once the canvas is interactive.
+      triggerTourRef.current();
     }
   }, [currentSlideId, updateSlideHtml]);
 
   useEffect(() => {
     canvasRef.current?.sendMessage({ type: 'set-mode', mode: interactionMode });
   }, [interactionMode]);
+
+  // Contextual hint: the first time a user switches to drag mode, show a toast
+  // explaining the freeform affordances. Fires only once per browser.
+  useEffect(() => {
+    if (interactionMode === 'drag' && !onboardingState.dragHintShown && !docMode) {
+      showToastOnce(t('onboarding.dragHint'), markDragHintShown);
+    }
+  }, [interactionMode, onboardingState.dragHintShown, docMode, t, showToastOnce, markDragHintShown]);
+
+  // Contextual hint: the first time a user opens the code view, show a toast
+  // reminding them changes apply on switch-back. Fires only once per browser.
+  useEffect(() => {
+    if (viewMode === 'code' && !onboardingState.codeHintShown && !docMode) {
+      showToastOnce(t('onboarding.codeHint'), markCodeHintShown);
+    }
+  }, [viewMode, onboardingState.codeHintShown, docMode, t, showToastOnce, markCodeHintShown]);
 
   // Remount the iframe only on external, same-slide HTML changes (undo/redo,
   // restore). Slide switches are handled by `currentSlideId` in the key; our own
@@ -633,12 +686,28 @@ export function EditorPage() {
             <path d="M16.5 9.5H8a4.5 4.5 0 0 0 0 9h2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
+
+        <span className="w-px h-4 bg-white/15 shrink-0" />
+        {/* Replay the coach-mark tour anytime. A discoverable, persistent entry
+            point so users can re-learn the editor flow without leaving the page. */}
+        <button
+          onClick={replayTour}
+          disabled={docMode}
+          className="hds-bar-toggle"
+          aria-label={t('page.replayTour')}
+          title={t('page.replayTourTitle')}
+        >
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 2.5l1.6 3.4 3.7.5-2.7 2.6.7 3.7L10 11l-3.3 1.7.7-3.7L4.7 6.4l3.7-.5L10 2.5z" />
+          </svg>
+          <span className="hds-bar-toggle-label">{t('page.replayTour')}</span>
+        </button>
       </div>
 
       {/* Top-center: primary interaction-mode pill (edit / drag). Hidden in code & doc mode. */}
       {viewMode === 'visual' && !docMode && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 hds-floating-bar">
-          <div className="hds-segmented" role="tablist">
+          <div className="hds-segmented" role="tablist" data-onboarding-anchor="mode-toggle">
             <button
               role="tab"
               aria-selected={interactionMode === 'edit'}
@@ -665,6 +734,7 @@ export function EditorPage() {
           <>
             <button
               onClick={() => setViewMode(viewMode === 'code' ? 'visual' : 'code')}
+              data-onboarding-anchor="code"
               className={`hds-bar-icon ${viewMode === 'code' ? 'is-active' : ''}`}
               aria-label={t('page.viewCode')}
               title={t('page.viewCode')}
@@ -704,7 +774,7 @@ export function EditorPage() {
         <button onClick={() => void handleSave()} disabled={!isDirty} className="hds-bar-btn">
           {t('page.save')}
         </button>
-        <button onClick={() => setExportOpen(true)} className="hds-btn-primary px-4 py-1.5 text-xs rounded-full">
+        <button onClick={() => setExportOpen(true)} data-onboarding-anchor="export" className="hds-btn-primary px-4 py-1.5 text-xs rounded-full">
           {t('page.export')}
         </button>
         <button
@@ -772,7 +842,7 @@ export function EditorPage() {
             className="absolute flex items-center justify-center canvas-host transition-[left,right] duration-200 ease-out"
             style={{ top: 80, bottom: 16, left: railOpen ? 224 : 16, right: showInspector ? 328 : 16 }}
           >
-            <div ref={canvasCardRef} className="hds-canvas-card overflow-hidden relative">
+            <div ref={canvasCardRef} data-onboarding-anchor="canvas" className="hds-canvas-card overflow-hidden relative">
               <ScaledCanvas
                 key={`${currentSlideId}:${canvasKey}`}
                 ref={canvasRef}
@@ -803,7 +873,7 @@ export function EditorPage() {
 
           {/* On-demand floating inspector — mounts only when selected and opened */}
           {showInspector && (
-            <div className="absolute right-3 top-20 bottom-3 z-10">
+            <div className="absolute right-3 top-20 bottom-3 z-10" data-onboarding-anchor="inspector">
               <PropertyPane mode={interactionMode} onPatch={handlePatch} onDelete={handleDeleteElement} onZOrder={handleZOrder} floating onClose={() => setInspectorOpen(false)} />
             </div>
           )}
@@ -849,6 +919,20 @@ export function EditorPage() {
           </>
         }
       />
+
+      {/* First-time coach-mark tour. Mounts only while active; self-contained
+          overlay, closes itself on skip/done and persists the flag. */}
+      {tourActive && (
+        <OnboardingTour
+          onClose={() => {
+            setTourActive(false);
+            markTourDone();
+          }}
+        />
+      )}
+
+      {/* Contextual one-shot hint (drag mode / code view). */}
+      {toast && <div className="hds-onboarding-toast">{toast}</div>}
     </div>
   );
 }
