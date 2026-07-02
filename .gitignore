@@ -55,3 +55,7 @@ __snapshots__/
 *.pdf
 !docs/**/*.pptx
 !docs/**/*.pdf
+
+# Local design skills (per-user, not shared)
+.agents/
+skills-lock.json
