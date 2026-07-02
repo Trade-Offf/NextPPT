@@ -77,7 +77,7 @@ export function LiveFrame({ sourceHtml, onMessage, iframeRef, remountKey }: Live
  */
 function injectRuntime(html: string, runtimeSource: string): string {
   const base = `<base data-hds-shim href="${location.origin}${location.pathname}">`;
-  const shim = `<script data-hds-shim>(function(){var H=window.history;var w=function(fn){return function(state,title,url){if(typeof url==='string'){try{var u=new URL(url,location.href);if(u.origin!==location.origin){url=u.hash||undefined}}catch(e){url=undefined}}return fn.call(H,state,title,url)}};H.replaceState=w(H.replaceState);H.pushState=w(H.pushState)})()</script>`;
+  const shim = `<script data-hds-shim>(function(){var P=History.prototype;var wrap=function(fn){return function(state,title,url){return fn.call(this,state,title)}};P.replaceState=wrap(P.replaceState);P.pushState=wrap(P.pushState)})()</script>`;
   const runtime = `<script data-hds-runtime>${runtimeSource}${'<'}/script>`;
 
   // Inject <base> + shim as the first children of <head> so they take effect
