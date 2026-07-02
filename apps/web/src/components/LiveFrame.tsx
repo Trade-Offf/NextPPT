@@ -59,14 +59,41 @@ export function LiveFrame({ sourceHtml, onMessage, iframeRef, remountKey }: Live
   );
 }
 
-/** Append the live-runtime as an inlined <script data-hds-runtime> right before
- *  </body>. We avoid touching <head> so the user's stylesheets and meta tags
- *  remain byte-identical. */
+/** Inject the live-runtime + a head shim right before </body>.
+ *
+ *  The head shim runs BEFORE the user's scripts and patches two cross-origin
+ *  problems caused by loading via srcdoc (iframe origin is `about:srcdoc`,
+ *  which differs from the host site):
+ *
+ *    1. `history.replaceState/pushState` with a URL argument throws a
+ *       SecurityError because the URL's origin differs from `about:srcdoc`.
+ *       Many deck scripts (reveal.js-style) call these on every page flip to
+ *       sync the URL hash. We strip the URL argument so only the hash is
+ *       applied, which is same-origin safe.
+ *
+ *    2. Relative asset URLs (images, fonts) resolve against `about:srcdoc`
+ *       and 404. A <base> tag re-targets them to the host site so local
+ *       assets with paths like `assets/x.png` resolve correctly.
+ */
 function injectRuntime(html: string, runtimeSource: string): string {
+  const base = `<base data-hds-shim href="${location.origin}${location.pathname}">`;
+  const shim = `<script data-hds-shim>(function(){var H=window.history;var w=function(fn){return function(state,title,url){if(typeof url==='string'){try{var u=new URL(url,location.href);if(u.origin!==location.origin){url=u.hash||undefined}}catch(e){url=undefined}}return fn.call(H,state,title,url)}};H.replaceState=w(H.replaceState);H.pushState=w(H.pushState)})()</script>`;
+  const runtime = `<script data-hds-runtime>${runtimeSource}${'<'}/script>`;
+
+  // Inject <base> + shim as the first children of <head> so they take effect
+  // before any user stylesheet or script. Runtime goes before </body> as usual.
+  const headOpen = /<head[^>]*>/i;
   const closing = /<\/body>\s*<\/html>\s*$/i;
-  const script = `<script data-hds-runtime>${runtimeSource}${'<'}/script>`;
-  if (closing.test(html)) {
-    return html.replace(closing, `${script}</body></html>`);
+  let out = html;
+  if (headOpen.test(out)) {
+    out = out.replace(headOpen, (m) => `${m}${base}${shim}`);
+  } else {
+    out = `${base}${shim}${out}`;
   }
-  return html + script;
+  if (closing.test(out)) {
+    out = out.replace(closing, `${runtime}</body></html>`);
+  } else {
+    out = out + runtime;
+  }
+  return out;
 }

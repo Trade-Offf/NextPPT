@@ -955,6 +955,7 @@ function serializeForExport(): string {
   const clone = document.documentElement.cloneNode(true) as HTMLElement;
   clone.querySelectorAll(`[${CHROME_ATTR}]`).forEach((n) => n.remove());
   clone.querySelectorAll(`[${TWEAK_ATTR}]`).forEach((el) => el.removeAttribute(TWEAK_ATTR));
+  clone.querySelectorAll('[data-hds-shim]').forEach((n) => n.remove());
   clone.querySelectorAll('script[data-hds-runtime]').forEach((n) => n.remove());
   const docType = document.doctype ? '<!doctype html>\n' : '';
   return docType + clone.outerHTML;
