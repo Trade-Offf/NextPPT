@@ -227,6 +227,7 @@ export function useOpenDeck() {
   return {
     loading,
     error,
+    setError,
     dragOver,
     setDragOver,
     switchWorkspaceKind,

@@ -9,6 +9,13 @@ export default {
     errorNoHtml: 'Please pick a .html file',
     errorFailed: 'Failed to load, please retry',
     loading: 'Loading…',
+    chips: ['Animations kept', 'Click to edit', 'Export HTML'],
+    abilities: [
+      { title: 'Animations and interactions kept', desc: 'JS, transitions and scroll effects run as-is — what you see is the final output' },
+      { title: 'Click text to edit, drag to move', desc: 'Enter edit mode to change any text, move or scale any element' },
+      { title: 'Exports clean HTML', desc: 'Tweaks are baked in as inline styles; original scripts and structure stay intact' },
+    ],
+    footnote: 'Requires a Chromium-based browser',
   },
   toolbar: {
     export: 'Export HTML',

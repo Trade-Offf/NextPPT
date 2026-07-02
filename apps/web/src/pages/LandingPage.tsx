@@ -21,6 +21,7 @@ export function LandingPage() {
   const {
     loading,
     error,
+    setError,
     dragOver,
     setDragOver,
     handleDrop,
@@ -40,9 +41,10 @@ export function LandingPage() {
 
   // Click "点击上传" → pop a choice modal. HTML 演示台 is the new main path
   // (keeps animations/interactions), PPT 编辑器 is the legacy deck editor
-  // (paginated, exports PPTX/PDF). Drag-and-drop still routes to the PPT
-  // editor for backward compatibility.
+  // (paginated, exports PPTX/PDF). Drag-and-drop shows a split overlay:
+  // drop left → HTML 演示台, drop right → PPT 编辑器.
   const [showUploadChoice, setShowUploadChoice] = useState(false);
+  const [dropZone, setDropZone] = useState<'left' | 'right' | null>(null);
   const uploadModalRef = useRef<HTMLDivElement>(null);
   useFocusTrap(uploadModalRef, showUploadChoice);
   const handleUpload = () => {
@@ -64,6 +66,61 @@ export function LandingPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [showUploadChoice]);
+
+  // Split drop: while dragging a file over the page, track which half the
+  // cursor is in so we can highlight it and route the drop accordingly.
+  const onDragOverSplit = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+    const half = e.clientX < window.innerWidth / 2 ? 'left' : 'right';
+    setDropZone((prev) => (prev === half ? prev : half));
+  };
+  const onDragLeaveSplit = (e: React.DragEvent) => {
+    // Only clear when leaving the window entirely (relatedTarget === null).
+    if (e.relatedTarget === null) {
+      setDragOver(false);
+      setDropZone(null);
+    }
+  };
+  const onDropSplit = async (e: React.DragEvent) => {
+    e.preventDefault();
+    const zone = dropZone;
+    setDragOver(false);
+    setDropZone(null);
+    if (zone === 'left') {
+      // HTML 演示台 — only .html files are accepted there.
+      const item = e.dataTransfer.items?.[0] as
+        | (DataTransferItem & { getAsFileSystemHandle?: () => Promise<FileSystemHandle> })
+        | undefined;
+      try {
+        const handle = await item?.getAsFileSystemHandle?.();
+        let name = '';
+        let text = '';
+        if (handle?.kind === 'file') {
+          const file = await (handle as FileSystemFileHandle).getFile();
+          name = file.name;
+          text = await file.text();
+        } else {
+          const plain = e.dataTransfer.files?.[0];
+          if (!plain) return;
+          name = plain.name;
+          text = await plain.text();
+        }
+        if (!/\.html?$/i.test(name)) {
+          setError(t('hub.dropHtmlOnly'));
+          return;
+        }
+        // Stash for HtmlWorkbenchPage to pick up on mount.
+        sessionStorage.setItem('hds_pending_html', JSON.stringify({ name, text }));
+        navigate(`${prefix}/html`);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      }
+      return;
+    }
+    // Right half (or undetermined) → legacy PPT editor drop.
+    void handleDrop(e);
+  };
 
   useGSAP(
     () => {
@@ -92,19 +149,41 @@ export function LandingPage() {
     <div
       ref={rootRef}
       className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden"
-      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={handleDrop}
+      onDragOver={onDragOverSplit}
+      onDragLeave={onDragLeaveSplit}
+      onDrop={onDropSplit}
     >
-      {/* Page-level drag overlay */}
+      {/* Split drop overlay — left: HTML 演示台, right: PPT 编辑器. */}
       {dragOver && (
-        <div className="fixed inset-3 z-[60] pointer-events-none rounded-3xl border-2 border-dashed border-[var(--system-blue)] bg-[var(--cobalt-lt)]/80 backdrop-blur-sm grid place-items-center">
-          <div className="text-center">
-            <svg className="mx-auto w-12 h-12 text-[var(--system-blue)] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-            </svg>
-            <p className="text-base font-medium text-[var(--label)]">{t('hub.dropTitle')}</p>
-            <p className="mt-1 text-xs text-[var(--secondary-label)]">{t('hub.dropHint')}</p>
+        <div className="hds-drop-split" role="region" aria-label={t('hub.dropSplitHint')}>
+          <div className={`hds-drop-zone hds-drop-zone-left ${dropZone === 'left' ? 'is-active' : ''}`}>
+            <div className="hds-drop-zone-inner">
+              <span className="hds-drop-icon" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="16 18 22 12 16 6" />
+                  <polyline points="8 6 2 12 8 18" />
+                </svg>
+              </span>
+              <p className="hds-drop-zone-title">{t('hub.dropLeftTitle')}</p>
+              <p className="hds-drop-zone-hint">{t('hub.dropLeftHint')}</p>
+              <p className="hds-drop-zone-cta">{t('hub.dropLeftCta')}</p>
+            </div>
+          </div>
+          <div className={`hds-drop-zone hds-drop-zone-right ${dropZone === 'right' ? 'is-active' : ''}`}>
+            <div className="hds-drop-zone-inner">
+              <span className="hds-drop-icon hds-drop-icon-muted" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="14" rx="2" />
+                  <line x1="3" y1="9" x2="21" y2="9" />
+                </svg>
+              </span>
+              <p className="hds-drop-zone-title">{t('hub.dropRightTitle')}</p>
+              <p className="hds-drop-zone-hint">{t('hub.dropRightHint')}</p>
+              <p className="hds-drop-zone-cta">{t('hub.dropRightCta')}</p>
+            </div>
+          </div>
+          <div className="hds-drop-divider" aria-hidden="true">
+            <span>{t('hub.dropDivider')}</span>
           </div>
         </div>
       )}
@@ -266,58 +345,82 @@ export function LandingPage() {
       </div>
 
       {showUploadChoice && createPortal(
-        <div className="hds-modal-backdrop" onClick={() => setShowUploadChoice(false)}>
+        <div className="hds-modal-backdrop hds-upload-backdrop" onClick={() => setShowUploadChoice(false)}>
           <div
             ref={uploadModalRef}
-            className="hds-modal"
+            className="hds-modal hds-upload-modal"
             role="dialog"
             aria-modal="true"
             aria-label={t('hub.modePrompt')}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="hds-modal-header">
-              <h2 className="hds-modal-heading">{t('hub.modePrompt')}</h2>
+            <div className="hds-upload-glow" aria-hidden="true" />
+            <div className="hds-modal-header hds-upload-header">
+              <div className="hds-upload-heading-wrap">
+                <h2 className="hds-modal-heading">{t('hub.modePrompt')}</h2>
+                <p className="hds-upload-subtitle">{t('hub.modeSubtitle')}</p>
+              </div>
               <button className="hds-modal-x" onClick={() => setShowUploadChoice(false)} aria-label={t('hub.modeCancel')} title={t('hub.modeCancel')}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
                   <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
                 </svg>
               </button>
             </div>
-            <div className="hds-modal-body">
-              <div className="flex flex-col gap-2">
+            <div className="hds-modal-body hds-upload-body">
+              <div className="hds-upload-cards">
                 <button
                   onClick={chooseHtmlDeck}
                   className="hds-mode-card hds-mode-card-primary group"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <span className="hds-mode-icon" aria-hidden="true">
+                  <div className="hds-mode-card-row">
+                    <span className="hds-mode-icon hds-mode-icon-accent" aria-hidden="true">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="16 18 22 12 16 6" />
                         <polyline points="8 6 2 12 8 18" />
                       </svg>
                     </span>
-                    <span className="text-[14px] font-semibold text-[var(--label)]">{t('hub.modeHtml')}</span>
-                    <span className="hds-mode-pill">main</span>
+                    <div className="hds-mode-card-titles">
+                      <div className="hds-mode-card-name-row">
+                        <span className="hds-mode-card-name">{t('hub.modeHtml')}</span>
+                        <span className="hds-mode-pill">main</span>
+                      </div>
+                      <p className="hds-mode-card-desc">{t('hub.modeHtmlDesc')}</p>
+                    </div>
+                    <span className="hds-mode-card-enter" aria-hidden="true">
+                      {t('hub.modeHtmlEnter')}
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M13 5l7 7-7 7" />
+                      </svg>
+                    </span>
                   </div>
-                  <p className="mt-1.5 text-[12.5px] text-[var(--secondary-label)] leading-relaxed">{t('hub.modeHtmlDesc')}</p>
                 </button>
                 <button
                   onClick={choosePptEditor}
                   className="hds-mode-card group"
                 >
-                  <div className="flex items-center gap-2.5">
+                  <div className="hds-mode-card-row">
                     <span className="hds-mode-icon hds-mode-icon-muted" aria-hidden="true">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
                         <rect x="3" y="4" width="18" height="14" rx="2" />
                         <line x1="3" y1="9" x2="21" y2="9" />
                       </svg>
                     </span>
-                    <span className="text-[14px] font-semibold text-[var(--label)]">{t('hub.modePpt')}</span>
+                    <div className="hds-mode-card-titles">
+                      <div className="hds-mode-card-name-row">
+                        <span className="hds-mode-card-name">{t('hub.modePpt')}</span>
+                      </div>
+                      <p className="hds-mode-card-desc">{t('hub.modePptDesc')}</p>
+                    </div>
+                    <span className="hds-mode-card-enter hds-mode-card-enter-muted" aria-hidden="true">
+                      {t('hub.modePptEnter')}
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M13 5l7 7-7 7" />
+                      </svg>
+                    </span>
                   </div>
-                  <p className="mt-1.5 text-[12.5px] text-[var(--secondary-label)] leading-relaxed">{t('hub.modePptDesc')}</p>
                 </button>
               </div>
-              <div className="mt-5 flex items-center justify-end">
+              <div className="hds-upload-footer">
                 <button onClick={() => setShowUploadChoice(false)} className="hds-dialog-btn">{t('hub.modeCancel')}</button>
               </div>
             </div>

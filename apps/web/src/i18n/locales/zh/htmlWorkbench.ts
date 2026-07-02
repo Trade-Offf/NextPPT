@@ -9,6 +9,13 @@ export default {
     errorNoHtml: '请选择 .html 文件',
     errorFailed: '加载失败，请重试',
     loading: '加载中…',
+    chips: ['动画保留', '点改', '导出 HTML'],
+    abilities: [
+      { title: '动画 / 交互完整保留', desc: 'JS、过渡、滚动效果照常运行，你看到的就是最终效果' },
+      { title: '点一下改文字，拖一下挪位置', desc: '进入编辑模式后，任意文字可改，任意元素可移动 / 缩放' },
+      { title: '导出还是干净的 HTML', desc: '修改以 inline style 烘焙进文件，原脚本和结构不变' },
+    ],
+    footnote: '需要 Chromium 内核浏览器',
   },
   toolbar: {
     export: '导出 HTML',

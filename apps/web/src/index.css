@@ -761,47 +761,361 @@ select.hds-input {
 }
 .hds-dialog-btn.is-danger:hover { background: #d6383d; }
 
-/* Upload-mode choice cards in the landing modal. The primary card (HTML deck)
-   carries the steel-blue accent ring + icon to signal it is the main path;
-   the secondary card (PPT editor) stays quiet. */
+/* ── Upload choice modal — Linear dark metallic ─────────────────────────── */
+/* Backdrop: deeper black + stronger blur for a focused, premium feel. */
+.hds-upload-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  backdrop-filter: blur(12px) saturate(120%);
+}
+/* Modal container: dark metallic gradient + layered shadows + hairline border.
+   The 1px top highlight simulates light catching a brushed-metal edge. */
+.hds-upload-modal {
+  position: relative;
+  max-width: 440px;
+  background:
+    linear-gradient(180deg, rgba(28, 30, 36, 0.96) 0%, rgba(20, 22, 27, 0.96) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+    0 24px 64px -12px rgba(0, 0, 0, 0.6),
+    0 8px 24px -8px rgba(0, 0, 0, 0.4);
+}
+/* Subtle accent glow at the top — signals the primary path without a loud
+   brand color. Sits behind content via z-index. */
+.hds-upload-glow {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(139, 147, 232, 0.5),
+    transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+.hds-upload-modal > * { position: relative; z-index: 1; }
+
+.hds-upload-header {
+  padding: 22px 22px 0;
+  align-items: flex-start;
+}
+.hds-upload-heading-wrap { display: flex; flex-direction: column; gap: 4px; }
+.hds-upload-modal .hds-modal-heading {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #f5f6f8;
+}
+.hds-upload-subtitle {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.01em;
+}
+.hds-upload-body { padding: 14px 22px 20px; }
+
+/* Cards container: tight gap, the cards themselves carry the visual weight. */
+.hds-upload-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Each card: dark glass with hairline border. Hover lifts and brightens. */
 .hds-mode-card {
   display: block;
   width: 100%;
   text-align: left;
-  border-radius: 12px;
-  border: 0.5px solid var(--separator);
-  background: rgba(255, 255, 255, 0.02);
-  padding: 14px 16px;
-  transition: border-color var(--dur) var(--ease-out), background var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 14px 14px 14px 12px;
+  transition: border-color var(--dur) var(--ease-out),
+              background var(--dur) var(--ease-out),
+              transform var(--dur) var(--ease-out),
+              box-shadow var(--dur) var(--ease-out);
 }
 .hds-mode-card:hover {
-  border-color: var(--rule);
+  border-color: rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.04);
-}
-.hds-mode-card-primary {
-  border-color: rgba(139, 147, 232, 0.4);
-  background: rgba(139, 147, 232, 0.06);
-}
-.hds-mode-card-primary:hover {
-  border-color: var(--system-blue);
-  background: rgba(139, 147, 232, 0.1);
   transform: translateY(-1px);
 }
+/* Primary card: accent ring + faint inner glow. */
+.hds-mode-card-primary {
+  border-color: rgba(139, 147, 232, 0.35);
+  background: linear-gradient(180deg,
+    rgba(139, 147, 232, 0.08) 0%,
+    rgba(139, 147, 232, 0.03) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.hds-mode-card-primary:hover {
+  border-color: rgba(139, 147, 232, 0.6);
+  background: linear-gradient(180deg,
+    rgba(139, 147, 232, 0.12) 0%,
+    rgba(139, 147, 232, 0.05) 100%);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 24px -4px rgba(139, 147, 232, 0.25);
+}
+
+/* Card row: icon | titles | enter — single line, balanced. */
+.hds-mode-card-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+.hds-mode-card-titles { min-width: 0; }
+.hds-mode-card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.hds-mode-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0f1f4;
+  letter-spacing: -0.005em;
+}
+.hds-mode-card-desc {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+/* Icons: metallic containers with inner highlight. */
 .hds-mode-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: var(--system-blue);
-  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   flex-shrink: 0;
+  transition: transform var(--dur) var(--ease-out);
+}
+.hds-mode-card:hover .hds-mode-icon { transform: scale(1.06); }
+/* Accent icon: deep teal blue, signals the main path. */
+.hds-mode-icon-accent {
+  background: linear-gradient(180deg,
+    rgba(139, 147, 232, 0.25) 0%,
+    rgba(94, 106, 210, 0.18) 100%);
+  color: #c8cdef;
+  border-color: rgba(139, 147, 232, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 12px -2px rgba(139, 147, 232, 0.3);
 }
 .hds-mode-icon-muted {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Enter label: appears on hover, arrow nudges right. */
+.hds-mode-card-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(139, 147, 232, 0.9);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--dur) var(--ease-out),
+              transform var(--dur) var(--ease-out);
+  flex-shrink: 0;
+}
+.hds-mode-card-enter svg { transition: transform var(--dur) var(--ease-out); }
+.hds-mode-card:hover .hds-mode-card-enter {
+  opacity: 1;
+  transform: translateX(0);
+}
+.hds-mode-card:hover .hds-mode-card-enter svg { transform: translateX(2px); }
+.hds-mode-card-enter-muted { color: rgba(255, 255, 255, 0.4); }
+
+.hds-mode-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(139, 147, 232, 0.18);
+  color: rgba(139, 147, 232, 1);
+  border: 1px solid rgba(139, 147, 232, 0.3);
+}
+
+.hds-upload-footer {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+/* Override dialog btn for dark modal context. */
+.hds-upload-modal .hds-dialog-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+}
+.hds-upload-modal .hds-dialog-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+}
+.hds-upload-modal .hds-modal-x {
+  color: rgba(255, 255, 255, 0.4);
+}
+.hds-upload-modal .hds-modal-x:hover {
   background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hds-mode-card,
+  .hds-mode-icon,
+  .hds-mode-card-enter,
+  .hds-mode-card-enter svg { transition: none; }
+}
+
+/* ── Split drop overlay — left: HTML 演示台, right: PPT 编辑器 ──────────── */
+.hds-drop-split {
+  position: fixed;
+  inset: 12px;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgba(13, 14, 16, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: hds-drop-in 0.18s var(--ease-out) both;
+}
+@keyframes hds-drop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-drop-split { animation: none; }
+}
+
+.hds-drop-zone {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  border: 2px dashed rgba(139, 147, 232, 0.25);
+  transition: background var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.hds-drop-zone-left { border-right: none; border-radius: 20px 0 0 20px; }
+.hds-drop-zone-right { border-left: none; border-radius: 0 20px 20px 0; }
+
+.hds-drop-zone.is-active {
+  background: rgba(139, 147, 232, 0.08);
+}
+.hds-drop-zone-left.is-active {
+  border-color: rgba(139, 147, 232, 0.7);
+  box-shadow: inset 0 0 60px rgba(139, 147, 232, 0.1);
+}
+.hds-drop-zone-right.is-active {
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 0 60px rgba(255, 255, 255, 0.04);
+}
+
+.hds-drop-zone-inner {
+  text-align: center;
+  max-width: 280px;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.hds-drop-zone.is-active .hds-drop-zone-inner {
+  transform: translateY(-2px);
+}
+
+.hds-drop-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 14px;
+  border-radius: 14px;
+  background: rgba(139, 147, 232, 0.12);
+  border: 1px solid rgba(139, 147, 232, 0.3);
+  color: var(--system-blue);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.hds-drop-icon-muted {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--separator);
   color: var(--secondary-label);
-  border: 0.5px solid var(--separator);
+}
+.hds-drop-zone.is-active .hds-drop-icon {
+  transform: scale(1.08);
+}
+
+.hds-drop-zone-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--label);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.hds-drop-zone-hint {
+  font-size: 12.5px;
+  color: var(--secondary-label);
+  margin-bottom: 12px;
+}
+.hds-drop-zone-cta {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--tertiary-label);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.hds-drop-zone.is-active .hds-drop-zone-cta {
+  opacity: 1;
+  color: var(--system-blue);
+}
+
+.hds-drop-divider {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--cobalt-lt, #16181c);
+  border: 1px solid var(--separator);
+  font-size: 11px;
+  color: var(--tertiary-label);
+  z-index: 1;
+}
+
+@media (max-width: 640px) {
+  .hds-drop-split {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .hds-drop-zone-left { border-right: none; border-bottom: none; border-radius: 20px 20px 0 0; }
+  .hds-drop-zone-right { border-left: none; border-top: none; border-radius: 0 0 20px 20px; }
+  .hds-drop-divider { top: 50%; left: 50%; }
 }
 .hds-mode-pill {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -1930,19 +2244,212 @@ select.hds-input {
   .hds-pass-avatar::after { display: none; }
 }
 
-/* ── HTML deck empty state — Linear-style centered card ─────────────────── */
+/* ── HTML deck empty state — Linear dark metallic split panel ───────────── */
+.hds-empty-wrap {
+  position: relative;
+}
+
+/* Large metallic card wrapping the split — mirrors the upload modal language:
+   dark gradient, hairline border, layered shadows, top accent glow. */
+.hds-empty-panel {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  padding: 60px 44px 48px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(28, 30, 36, 0.96) 0%, rgba(20, 22, 27, 0.96) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+    0 24px 64px -12px rgba(0, 0, 0, 0.6),
+    0 8px 24px -8px rgba(0, 0, 0, 0.4);
+  animation: hds-empty-in 0.5s var(--ease-out) both;
+  overflow: hidden;
+}
+.hds-empty-panel-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(139, 147, 232, 0.5),
+    transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+/* Exclude the glow — it keeps position:absolute + z-index:0 to sit behind content. */
+.hds-empty-panel > *:not(.hds-empty-panel-glow) { position: relative; z-index: 1; }
+
+@media (max-width: 880px) {
+  .hds-empty-panel { padding: 44px 24px 32px; }
+}
+@media (max-width: 640px) {
+  .hds-empty-panel { padding: 36px 20px 28px; border-radius: 14px; }
+}
+
+.hds-empty-split {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  width: 100%;
+}
+@media (max-width: 880px) {
+  .hds-empty-split {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* Left — value / capability communication. */
+.hds-empty-value {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.hds-empty-value-head { display: flex; flex-direction: column; gap: 8px; }
+.hds-empty-pill {
+  align-self: flex-start;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(139, 147, 232, 1);
+  background: rgba(139, 147, 232, 0.18);
+  border: 1px solid rgba(139, 147, 232, 0.3);
+  border-radius: 999px;
+  padding: 2px 7px;
+  margin-bottom: 4px;
+  animation: hds-empty-stagger 0.5s var(--ease-out) both;
+  animation-delay: 0.1s;
+}
+.hds-empty-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #f5f6f8;
+  margin-bottom: 6px;
+  animation: hds-empty-stagger 0.5s var(--ease-out) both;
+  animation-delay: 0.16s;
+}
+.hds-empty-subtitle {
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0;
+  animation: hds-empty-stagger 0.5s var(--ease-out) both;
+  animation-delay: 0.22s;
+}
+.hds-empty-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  animation: hds-empty-stagger 0.5s var(--ease-out) both;
+  animation-delay: 0.28s;
+}
+.hds-empty-chip {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.hds-empty-abilities {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.hds-empty-ability {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  animation: hds-empty-stagger 0.5s var(--ease-out) both;
+}
+.hds-empty-ability:nth-child(1) { animation-delay: 0.36s; }
+.hds-empty-ability:nth-child(2) { animation-delay: 0.44s; }
+.hds-empty-ability:nth-child(3) { animation-delay: 0.52s; }
+.hds-empty-ability-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(180deg,
+    rgba(139, 147, 232, 0.18) 0%,
+    rgba(94, 106, 210, 0.12) 100%);
+  border: 1px solid rgba(139, 147, 232, 0.3);
+  color: #c8cdef;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.hds-empty-ability-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f0f1f4;
+  letter-spacing: -0.005em;
+  margin-bottom: 3px;
+}
+.hds-empty-ability-desc {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.5);
+}
+.hds-empty-footnote {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  padding-top: 4px;
+  animation: hds-empty-stagger 0.5s var(--ease-out) both;
+  animation-delay: 0.6s;
+}
+
+/* Right — upload card (sits inside the metallic panel as a sub-card). */
 .hds-empty-card {
   width: 100%;
-  max-width: 420px;
-  /* Staggered entrance: card fades up, inner elements cascade in. */
+  max-width: 380px;
+  justify-self: center;
+  text-align: center;
+  padding: 32px 24px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
   animation: hds-empty-in 0.6s var(--ease-out) both;
+  animation-delay: 0.2s;
 }
 @keyframes hds-empty-in {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes hds-empty-stagger {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 @media (prefers-reduced-motion: reduce) {
-  .hds-empty-card { animation: none; }
+  .hds-empty-card,
+  .hds-empty-panel,
+  .hds-empty-pill,
+  .hds-empty-title,
+  .hds-empty-subtitle,
+  .hds-empty-chips,
+  .hds-empty-ability,
+  .hds-empty-footnote,
+  .hds-empty-card-title,
+  .hds-empty-dropzone,
+  .hds-empty-sample { animation: none; }
 }
 
 .hds-empty-icon-wrap {
@@ -1967,18 +2474,13 @@ select.hds-input {
   .hds-empty-icon-wrap { animation: none; }
 }
 
-.hds-empty-title {
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--label);
-  margin-bottom: 8px;
-}
-.hds-empty-subtitle {
+.hds-empty-card-title {
   font-size: 14px;
-  line-height: 1.55;
-  color: var(--secondary-label);
-  margin-bottom: 24px;
+  font-weight: 500;
+  color: #f0f1f4;
+  margin-bottom: 16px;
+  animation: hds-empty-stagger 0.5s var(--ease-out) both;
+  animation-delay: 0.32s;
 }
 .hds-empty-error {
   font-size: 12px;
@@ -2005,6 +2507,8 @@ select.hds-input {
     border-color var(--dur) var(--ease-out),
     background var(--dur) var(--ease-out),
     transform var(--dur) var(--ease-out);
+  animation: hds-empty-stagger 0.5s var(--ease-out) both;
+  animation-delay: 0.4s;
 }
 .hds-empty-dropzone:hover {
   border-color: var(--system-blue);
@@ -2040,7 +2544,7 @@ select.hds-input {
   gap: 6px;
   margin-top: 20px;
   font-size: 12px;
-  color: var(--secondary-label);
+  color: rgba(255, 255, 255, 0.5);
   background: transparent;
   border: 0;
   cursor: pointer;

@@ -109,6 +109,22 @@ export function HtmlWorkbenchPage() {
     }
   }, [t, resetWorkbench]);
 
+  // Pick up a file stashed by the homepage split-drop (left half → HTML 演示台).
+  useEffect(() => {
+    const pending = sessionStorage.getItem('hds_pending_html');
+    if (!pending) return;
+    sessionStorage.removeItem('hds_pending_html');
+    try {
+      const { name, text } = JSON.parse(pending) as { name: string; text: string };
+      setSourceHtml(text);
+      setFileName(name);
+      setRemountKey((k) => k + 1);
+      resetWorkbench();
+    } catch {
+      setError(t('page.errorFailed'));
+    }
+  }, [t, resetWorkbench]);
+
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
@@ -534,100 +550,149 @@ function EmptyState({
   error: string | null;
   t: TFunction<'htmlWorkbench'>;
 }) {
+  const chips = t('page.chips', { returnObjects: true }) as string[];
+  const abilities = t('page.abilities', { returnObjects: true }) as { title: string; desc: string }[];
+
+  // Three SVG glyphs, one per ability — kept inline to avoid a new icon dep.
+  const abilityIcons = [
+    // 0: animations kept — a pulse / heartbeat glyph
+    <svg key="0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 12h4l2-6 4 12 2-6h8" />
+    </svg>,
+    // 1: click to edit / drag to move — cursor on a frame
+    <svg key="1" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" />
+      <path d="M12 8v8M8 12h8" />
+    </svg>,
+    // 2: clean HTML export — </>
+    <svg key="2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="8 7 3 12 8 17" />
+      <polyline points="16 7 21 12 16 17" />
+      <line x1="13" y1="5" x2="11" y2="19" />
+    </svg>,
+  ];
+
   return (
     <div
-      className="flex-1 flex items-center justify-center p-8 hds-cinema"
+      className="flex-1 flex items-center justify-center p-6 sm:p-10 hds-cinema hds-empty-wrap"
       onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('is-drag-active'); }}
       onDragLeave={(e) => { e.currentTarget.classList.remove('is-drag-active'); }}
       onDrop={(e) => { e.currentTarget.classList.remove('is-drag-active'); }}
     >
-      <div className="hds-empty-card text-center">
-        {/* Icon — gentle breathing draws the eye without being noisy. */}
-        <div className="hds-empty-icon-wrap">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <path d="M9 13l2 2 4-4" />
-          </svg>
+      <div className="hds-empty-panel">
+        <div className="hds-empty-panel-glow" aria-hidden="true" />
+        <div className="hds-empty-split">
+        {/* Left — value / capability communication. */}
+        <div className="hds-empty-value">
+          <div className="hds-empty-value-head">
+            <span className="hds-empty-pill">main</span>
+            <h2 className="hds-empty-title">{t('page.title')}</h2>
+            <p className="hds-empty-subtitle">{t('page.subtitle')}</p>
+            <div className="hds-empty-chips">
+              {chips.map((c) => <span key={c} className="hds-empty-chip">{c}</span>)}
+            </div>
+          </div>
+
+          <ul className="hds-empty-abilities">
+            {abilities.map((a, i) => (
+              <li key={i} className="hds-empty-ability">
+                <span className="hds-empty-ability-icon" aria-hidden="true">{abilityIcons[i]}</span>
+                <div>
+                  <p className="hds-empty-ability-title">{a.title}</p>
+                  <p className="hds-empty-ability-desc">{a.desc}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <p className="hds-empty-footnote">{t('page.footnote')}</p>
         </div>
 
-        <h2 className="hds-empty-title">
-          {t('page.title')}
-        </h2>
-        <p className="hds-empty-subtitle">
-          {t('page.empty')}
-        </p>
+        {/* Right — upload card (dropzone + sample). */}
+        <div className="hds-empty-card">
+          {/* Icon — gentle breathing draws the eye without being noisy. */}
+          <div className="hds-empty-icon-wrap">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <path d="M9 13l2 2 4-4" />
+            </svg>
+          </div>
 
-        {error && (
-          <p className="hds-empty-error">{error}</p>
-        )}
+          <p className="hds-empty-card-title">{t('page.empty')}</p>
 
-        {/* Primary CTA + drag hint merged into one dropzone. */}
-        <div
-          className="hds-empty-dropzone"
-          onClick={() => { if (!loading) onPick(); }}
-          role="button"
-          tabIndex={0}
-          aria-disabled={loading}
-        >
-          <svg
-            className="hds-empty-drop-icon"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+          {error && (
+            <p className="hds-empty-error">{error}</p>
+          )}
+
+          {/* Primary CTA + drag hint merged into one dropzone. */}
+          <div
+            className="hds-empty-dropzone"
+            onClick={() => { if (!loading) onPick(); }}
+            role="button"
+            tabIndex={0}
+            aria-disabled={loading}
           >
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-          </svg>
+            <svg
+              className="hds-empty-drop-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+            </svg>
+            <button
+              type="button"
+              disabled={loading}
+              tabIndex={-1}
+              aria-hidden="true"
+              className="hds-btn-primary px-6 py-2.5 text-sm disabled:opacity-50"
+            >
+              {loading ? t('page.loading') : t('page.pickFile')}
+            </button>
+            <p className="hds-empty-drag-hint">{t('page.dragHint')}</p>
+          </div>
+
+          {/* Secondary action on the same visual level, not orphaned. */}
           <button
-            onClick={onPick}
+            onClick={onTrySample}
             disabled={loading}
-            className="hds-btn-primary px-6 py-2.5 text-sm disabled:opacity-50"
+            className="hds-empty-sample"
           >
-            {loading ? t('page.loading') : t('page.pickFile')}
+            {t('page.trySample')}
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="hds-empty-sample-arrow"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14M13 5l7 7-7 7" />
+            </svg>
           </button>
-          <p className="hds-empty-drag-hint">
-            {t('page.dragHint')}
-          </p>
         </div>
-
-        {/* Secondary action on the same visual level, not orphaned. */}
-        <button
-          onClick={onTrySample}
-          disabled={loading}
-          className="hds-empty-sample"
-        >
-          {t('page.trySample')}
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="hds-empty-sample-arrow"
-            aria-hidden="true"
-          >
-            <path d="M5 12h14M13 5l7 7-7 7" />
-          </svg>
-        </button>
+        </div>
       </div>
     </div>
   );
