@@ -1,8 +1,8 @@
 import { lazy, Suspense } from 'react';
-import { Navigate } from 'react-router-dom';
 import type { RouteRecord } from 'vite-react-ssg';
 import { LocaleLayout } from './components/LocaleLayout.js';
 import { LandingPage } from './pages/LandingPage.js';
+import { NotFoundPage } from './pages/NotFoundPage.js';
 import { useDeckStore } from './store/deckStore.js';
 import type { Locale } from './i18n/index.js';
 
@@ -42,7 +42,7 @@ function HomeRoute() {
   );
 }
 
-function localeChildren(prefix: string) {
+function localeChildren() {
   return [
     { index: true, element: <HomeRoute /> },
     { path: 'guide', element: <Suspense fallback={null}><GuidePage /></Suspense> },
@@ -50,12 +50,12 @@ function localeChildren(prefix: string) {
     { path: 'explore', element: <Suspense fallback={null}><ExplorePage /></Suspense> },
     { path: 'explore/:slug', element: <Suspense fallback={null}><ExploreArticlePage /></Suspense> },
     { path: 'html', element: <Suspense fallback={null}><HtmlWorkbenchPage /></Suspense> },
-    // Unknown subpaths fall back to this locale's home instead of a blank shell.
-    { path: '*', element: <Navigate to={prefix || '/'} replace /> },
+    // Unknown paths get a branded 404 with noindex instead of a silent redirect.
+    { path: '*', element: <NotFoundPage /> },
   ];
 }
 
 export const routes: RouteRecord[] = [
-  { path: '/', element: <LocaleLayout locale={'zh' as Locale} />, children: localeChildren('') },
-  { path: '/en', element: <LocaleLayout locale={'en' as Locale} />, children: localeChildren('/en') },
+  { path: '/', element: <LocaleLayout locale={'zh' as Locale} />, children: localeChildren() },
+  { path: '/en', element: <LocaleLayout locale={'en' as Locale} />, children: localeChildren() },
 ];

@@ -148,6 +148,15 @@ export function LocaleLayout({ locale }: { locale: Locale }) {
         <meta name="twitter:title" content={title} />
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={ogImage} />
+        {page === 'home' && (
+          <script type="application/ld+json">{JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'NextPPT',
+            url: SITE,
+            description: t('seo.home.description'),
+          })}</script>
+        )}
       </Head>
       <ErrorBoundary>
         <Outlet />

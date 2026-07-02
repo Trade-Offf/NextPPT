@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /html
+Disallow: /en/html
+
+Sitemap: https://next-ppt.com/sitemap.xml

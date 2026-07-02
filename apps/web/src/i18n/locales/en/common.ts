@@ -6,19 +6,19 @@ const common: typeof zh = {
   seo: {
     ogSiteName: 'NextPPT',
     home: {
-      title: 'NextPPT — The next-gen deck, born from HTML',
+      title: 'NextPPT - The next-gen deck, born from HTML',
       description:
         'NextPPT turns AI-written HTML slides into a click-to-edit deck you can export to PPTX / PDF in one click. No login, fully local.',
     },
     guide: {
-      title: 'Guide · NextPPT — The next-gen deck, born from HTML',
+      title: 'Guide · NextPPT - The next-gen deck, born from HTML',
       description:
         'NextPPT guide: no deck yet? Generate one with a prompt. Then click to change text and images, move things around, and export a projector-ready PPT / PDF in one click. Fully local.',
     },
     explore: {
-      title: 'Explore · NextPPT — The next-gen deck, born from HTML',
+      title: 'Explore · NextPPT - The next-gen deck, born from HTML',
       description:
-        'NextPPT Explore: a collection of AI content workflows we have validated — like having AI generate a Draw.io file that becomes element-level editable and collaborative once imported into a Lark whiteboard.',
+        'NextPPT Explore: a collection of AI content workflows we have validated, like having AI generate a Draw.io file that becomes element-level editable and collaborative once imported into a Lark whiteboard.',
     },
   },
   language: {
@@ -29,6 +29,12 @@ const common: typeof zh = {
   confirm: 'OK',
   cancel: 'Cancel',
   close: 'Close',
+  notFound: {
+    title: 'Page not found · NextPPT',
+    code: '404',
+    message: 'This page does not exist, or it has been moved.',
+    cta: 'Back to home',
+  },
 };
 
 export default common;

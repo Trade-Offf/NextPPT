@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Head } from 'vite-react-ssg';
 import { useLocalePrefix } from '../hooks/useGuideNav.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
@@ -17,6 +18,22 @@ export function ExploreArticlePage() {
   const [promptOpen, setPromptOpen] = useState(false);
 
   if (!article) return <Navigate to={`${prefix}/explore`} replace />;
+
+  const articleTitle = t(`items.${article.slug}.title`);
+  const articleDesc = t(`items.${article.slug}.desc`);
+  const seoTitle = `${articleTitle} · NextPPT`;
+  const canonical = `https://next-ppt.com${prefix}/explore/${article.slug}`;
+  const ogImage = `https://next-ppt.com${article.cover}`;
+  const articleJsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: articleTitle,
+    description: articleDesc,
+    image: ogImage,
+    author: { '@type': 'Organization', name: 'NextPPT' },
+    publisher: { '@type': 'Organization', name: 'NextPPT' },
+    mainEntityOfPage: canonical,
+  });
 
   const howSteps = t('article.how.steps', { returnObjects: true }) as string[];
   const valueItems = t('article.value.items', { returnObjects: true }) as string[];
@@ -39,7 +56,21 @@ export function ExploreArticlePage() {
   };
 
   return (
-    <div className="hds-cinema relative w-full min-h-screen overflow-x-hidden">
+    <div className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden">
+      <Head>
+        <title>{seoTitle}</title>
+        <meta name="description" content={articleDesc} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={articleDesc} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:image" content={ogImage} />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={articleDesc} />
+        <meta name="twitter:image" content={ogImage} />
+        <script type="application/ld+json">{articleJsonLd}</script>
+      </Head>
       <SiteFluidBackdrop />
       <div className="relative z-10">
         <SiteHeader alwaysScrolled />
@@ -67,7 +98,7 @@ export function ExploreArticlePage() {
               className="rounded-2xl overflow-hidden"
               style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.06)' }}
             >
-              <img src={article.cover} alt="" className="block w-full" />
+              <img src={article.cover} alt="" width={1200} height={675} className="block w-full" loading="lazy" />
             </div>
             <figcaption className="mt-3 text-xs text-[var(--tertiary-label)] leading-relaxed">
               {t('article.cover')}

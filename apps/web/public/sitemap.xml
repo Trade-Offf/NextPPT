@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://next-ppt.com/</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/guide</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/guide"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/guide"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/guide"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/templates</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/templates"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/templates"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/templates"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/explore</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/explore"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/explore"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/explore"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/explore/feishu-whiteboard</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/explore/feishu-whiteboard"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/explore/feishu-whiteboard"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/explore/feishu-whiteboard"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/en/</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/en/guide</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/guide"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/guide"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/guide"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/en/templates</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/templates"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/templates"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/templates"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/en/explore</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/explore"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/explore"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/explore"/>
+  </url>
+  <url>
+    <loc>https://next-ppt.com/en/explore/feishu-whiteboard</loc>
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/explore/feishu-whiteboard"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/explore/feishu-whiteboard"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/explore/feishu-whiteboard"/>
+  </url>
+</urlset>
