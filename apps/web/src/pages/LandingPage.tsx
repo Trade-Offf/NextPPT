@@ -111,6 +111,12 @@ export function LandingPage() {
             <button onClick={() => navigate(`${prefix}/templates`)} className="hds-btn px-5 py-3 text-sm">{t('hero.ctaGuide')}</button>
           </div>
           <p className="hero-support mt-4 text-xs text-[var(--tertiary-label)]">{t('hero.support')}</p>
+          <button
+            onClick={() => navigate(`${prefix}/html`)}
+            className="mt-2 text-xs text-[var(--tertiary-label)] underline-offset-2 hover:text-[var(--secondary-label)] hover:underline transition-colors"
+          >
+            {t('hero.htmlWorkbenchHint')}
+          </button>
           {fsSupported && (
             <p className="hero-support mt-2 text-xs text-[var(--tertiary-label)] flex items-center justify-center gap-1.5">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">

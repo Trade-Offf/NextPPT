@@ -8,24 +8,29 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 /**
- * Compiles src/runtime/editor-runtime.ts to JS and exposes it as a string via
- * the virtual module `virtual:editor-runtime`, so CanvasFrame can inline it as
- * a <script> inside the sandboxed srcdoc iframe (no cross-origin / CORS issues).
+ * Compiles a runtime .ts source to JS and exposes it as a string via a virtual
+ * module, so the host can inline it as a <script> inside the sandboxed srcdoc
+ * iframe (no cross-origin / CORS issues).
+ *
+ * Each entry maps `virtual:<id>` → a source file under src/runtime/.
  */
-function inlineRuntime(): Plugin {
-  const virtualId = 'virtual:editor-runtime';
-  const resolvedId = '\0' + virtualId;
-  const runtimePath = path.resolve(__dirname, 'src/runtime/editor-runtime.ts');
+function inlineRuntime(entries: { id: string; file: string }[]): Plugin {
+  const resolved = entries.map((e) => ({
+    virtualId: `virtual:${e.id}`,
+    resolvedId: `\0virtual:${e.id}`,
+    runtimePath: path.resolve(__dirname, e.file),
+  }));
   return {
     name: 'hds-inline-runtime',
     resolveId(id) {
-      if (id === virtualId) return resolvedId;
+      return resolved.find((r) => r.virtualId === id)?.resolvedId;
     },
     async load(id) {
-      if (id !== resolvedId) return;
-      this.addWatchFile(runtimePath);
-      const source = fs.readFileSync(runtimePath, 'utf8');
-      const { code } = await transformWithEsbuild(source, runtimePath, {
+      const entry = resolved.find((r) => r.resolvedId === id);
+      if (!entry) return;
+      this.addWatchFile(entry.runtimePath);
+      const source = fs.readFileSync(entry.runtimePath, 'utf8');
+      const { code } = await transformWithEsbuild(source, entry.runtimePath, {
         loader: 'ts',
         format: 'esm',
         target: 'es2020',
@@ -36,7 +41,10 @@ function inlineRuntime(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), inlineRuntime()],
+  plugins: [react(), tailwindcss(), inlineRuntime([
+    { id: 'editor-runtime', file: 'src/runtime/editor-runtime.ts' },
+    { id: 'live-runtime', file: 'src/runtime/live-runtime.ts' },
+  ])],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -53,8 +61,8 @@ export default defineConfig({
   ssgOptions: {
     dirStyle: 'nested',
     includedRoutes: () => [
-      '/', '/guide', '/templates', '/explore', '/explore/feishu-whiteboard',
-      '/en', '/en/guide', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard',
+      '/', '/guide', '/templates', '/explore', '/explore/feishu-whiteboard', '/html',
+      '/en', '/en/guide', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard', '/en/html',
     ],
   },
 });

@@ -58,6 +58,13 @@
     --vibrancy-panel: rgba(38, 38, 41, 0.76);
     color-scheme: dark;
   }
+  /* HTML workbench uses a cool metallic steel-blue accent instead of the global
+     violet, in both light and dark modes. */
+  .hds-html-workbench {
+    --system-blue: #8b9bb8;
+    --system-blue-press: #6b7b98;
+    --cobalt-lt: rgba(139, 155, 184, 0.14);
+  }
 }
 
 html, body, #root {
@@ -1343,10 +1350,10 @@ select.hds-input {
   transition: background 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
 }
 .hds-nav.is-scrolled {
-  background: rgba(8, 9, 10, 0.72);
+  background: var(--vibrancy-toolbar);
   border-bottom-color: var(--separator);
-  -webkit-backdrop-filter: saturate(160%) blur(14px);
-  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
 }
 .hds-nav-link {
   font-size: 13px;

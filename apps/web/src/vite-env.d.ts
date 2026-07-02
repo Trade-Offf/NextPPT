@@ -14,3 +14,9 @@ declare module 'virtual:editor-runtime' {
   const runtimeSource: string;
   export default runtimeSource;
 }
+
+declare module 'virtual:live-runtime' {
+  /** Compiled live-runtime.ts source, injected into the HTML workbench iframe. */
+  const runtimeSource: string;
+  export default runtimeSource;
+}

@@ -6,7 +6,7 @@ import { en } from './locales/en/index.js';
 export type Locale = 'zh' | 'en';
 
 export const DEFAULT_LOCALE: Locale = 'zh';
-export const NAMESPACES = ['common', 'landing', 'guide', 'editor', 'prompt', 'templates', 'explore'] as const;
+export const NAMESPACES = ['common', 'landing', 'guide', 'editor', 'prompt', 'templates', 'explore', 'htmlWorkbench'] as const;
 
 export const resources = { zh, en } as const;
 

@@ -28,6 +28,10 @@ const ExploreArticlePage = lazy(() =>
   import('./pages/ExploreArticlePage.js').then((m) => ({ default: m.ExploreArticlePage })),
 );
 
+const HtmlWorkbenchPage = lazy(() =>
+  import('./pages/HtmlWorkbenchPage.js').then((m) => ({ default: m.HtmlWorkbenchPage })),
+);
+
 function HomeRoute() {
   const hasDeck = useDeckStore((s) => s.slides.length > 0);
   if (!hasDeck) return <LandingPage />;
@@ -45,6 +49,7 @@ function localeChildren(prefix: string) {
     { path: 'templates', element: <Suspense fallback={null}><TemplatesPage /></Suspense> },
     { path: 'explore', element: <Suspense fallback={null}><ExplorePage /></Suspense> },
     { path: 'explore/:slug', element: <Suspense fallback={null}><ExploreArticlePage /></Suspense> },
+    { path: 'html', element: <Suspense fallback={null}><HtmlWorkbenchPage /></Suspense> },
     // Unknown subpaths fall back to this locale's home instead of a blank shell.
     { path: '*', element: <Navigate to={prefix || '/'} replace /> },
   ];

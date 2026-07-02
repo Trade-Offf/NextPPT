@@ -5,5 +5,6 @@ import editor from './editor.js';
 import prompt from './prompt.js';
 import templates from './templates.js';
 import explore from './explore.js';
+import htmlWorkbench from './htmlWorkbench.js';
 
-export const zh = { common, landing, guide, editor, prompt, templates, explore } as const;
+export const zh = { common, landing, guide, editor, prompt, templates, explore, htmlWorkbench } as const;

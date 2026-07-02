@@ -5,6 +5,7 @@ export default {
     templates: '模版市场',
     explore: '探索',
     openFile: '打开文件',
+    htmlWorkbench: 'HTML',
   },
   hero: {
     titleA: 'AI 写的 HTML，',
@@ -19,6 +20,7 @@ export default {
     ctaGuide: '看 30 秒使用指南',
     unsupported: '请用 Chrome / Edge 等 Chromium 浏览器打开',
     support: '支持文件夹（可读写配套图片）或单个自包含 HTML · 需 Chromium 内核浏览器',
+    htmlWorkbenchHint: '文件带交互脚本？试试 HTML 工作台 →',
   },
   value: {
     eyebrow: '为什么需要 NextPPT',

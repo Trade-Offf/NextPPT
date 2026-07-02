@@ -7,6 +7,7 @@ const landing: typeof zh = {
     templates: 'Templates',
     explore: 'Explore',
     openFile: 'Open file',
+    htmlWorkbench: 'HTML',
   },
   hero: {
     titleA: 'Turn AI-written HTML',
@@ -21,6 +22,7 @@ const landing: typeof zh = {
     ctaGuide: 'Watch the 30-second guide',
     unsupported: 'Please open in Chrome / Edge or another Chromium browser',
     support: 'Works with a folder (read/write paired images) or a single self-contained HTML · Chromium browser required',
+    htmlWorkbenchHint: 'File has interactive scripts? Try the HTML Workbench →',
   },
   value: {
     eyebrow: 'Why NextPPT',
