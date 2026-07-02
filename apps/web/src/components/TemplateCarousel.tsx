@@ -245,6 +245,9 @@ export function TemplateCarousel({ onOpenSample, loading }: TemplateCarouselProp
           from { opacity: 0; transform: translateY(8px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @media (prefers-reduced-motion: reduce) {
+          [style*="carouselSlideUp"] { animation: none !important; }
+        }
       `}</style>
     </div>
   );

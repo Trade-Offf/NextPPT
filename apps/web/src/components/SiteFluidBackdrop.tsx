@@ -3,7 +3,8 @@ import { Suspense, lazy, useEffect, useState } from 'react';
 const LiquidEther = lazy(() => import('./LiquidEther.js'));
 
 // Stable identity: a new array each render would re-init the whole WebGL sim.
-const FLUID_COLORS = ['#3a31a8', '#8b8ef0', '#c9cbff'];
+// Linear deep indigo-blue family — cool, intellectual, reads as blue not violet.
+const FLUID_COLORS = ['#2a2d52', '#5e6ad2', '#8b93e8'];
 
 /**
  * Full-page interactive fluid backdrop for the landing page. Lazy-loaded and

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useEasterEggs } from '../hooks/useEasterEggs.js';
 import { useOpenDeck } from '../fs/useOpenDeck.js';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
 
 const SECRET_CODE = '42';
 const MAX_PARTICLES = 600;
@@ -112,6 +113,8 @@ export function EasterEggModal({ open, onClose }: { open: boolean; onClose: () =
   const [error, setError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const particleLayerRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef, open, inputRef);
 
   useEffect(() => {
     if (open) {
@@ -194,7 +197,7 @@ export function EasterEggModal({ open, onClose }: { open: boolean; onClose: () =
         className="easter-modal-overlay"
         onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
-        <div className="easter-modal" role="dialog" aria-modal="true" aria-label={t('easter.modalAria')}>
+        <div ref={modalRef} className="easter-modal" role="dialog" aria-modal="true" aria-label={t('easter.modalAria')}>
           <div className="easter-modal-emoji" aria-hidden="true">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
               <rect x="4" y="8" width="16" height="12" rx="3" />

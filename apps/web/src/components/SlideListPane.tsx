@@ -28,6 +28,8 @@ function SlideThumbnail({ thumbnail, alt }: { thumbnail: string | null; alt: str
           src={thumbnail}
           alt={alt}
           loading="lazy"
+          width={160}
+          height={90}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (

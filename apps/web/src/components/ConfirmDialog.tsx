@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -31,6 +32,8 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const { t } = useTranslation('common');
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel(); };
@@ -46,6 +49,7 @@ export function ConfirmDialog({
   return createPortal(
     <div className="hds-modal-backdrop" onClick={onCancel}>
       <div
+        ref={dialogRef}
         className="hds-modal"
         role="alertdialog"
         aria-modal="true"

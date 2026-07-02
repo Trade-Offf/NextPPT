@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ExportFormat, ExportResolution, ExportPageRange } from '@hds/protocol';
 import { useDeckStore } from '../store/deckStore.js';
 import { rebuildDeckHtmlForExport, rebuildDocHtmlForExport } from '../fs/adapter.js';
 import { getBlobToPathMap } from '../fs/assetResolver.js';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
 
 /**
  * Base URL of the export API. Empty in dev (Vite proxies /v1 to localhost:3000);
@@ -54,6 +55,15 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const drawerRef = useRef<HTMLElement>(null);
+  useFocusTrap(drawerRef, open);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 
   const handleExport = async () => {
     if (!rawHtml) return;
@@ -197,7 +207,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
       <div className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
 
       {/* Drawer */}
-      <aside className="hds-panel hds-drawer fixed right-0 top-0 h-full w-80 z-50 flex flex-col">
+      <aside ref={drawerRef} role="dialog" aria-modal="true" aria-label={t('exportDrawer.title')} className="hds-panel hds-drawer fixed right-0 top-0 h-full w-80 z-50 flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--separator)]">
           <h2 className="text-base font-semibold text-[var(--label)]">{t('exportDrawer.title')}</h2>
           <button onClick={onClose} className="text-[var(--tertiary-label)] hover:text-[var(--label)]">✕</button>

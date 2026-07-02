@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import type { HistoryCtx, SnapshotMeta } from '../fs/history.js';
 import { listSnapshots, readSnapshot, deleteSnapshot } from '../fs/history.js';
 import { sanitizePreviewDoc } from '../lib/previewSanitize.js';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
 
 interface HistoryDrawerProps {
   open: boolean;
@@ -37,6 +38,15 @@ export function HistoryDrawer({ open, ctx, onClose, onRestore }: HistoryDrawerPr
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [previewHtml, setPreviewHtml] = useState<string>('');
   const [busy, setBusy] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  useFocusTrap(drawerRef, open);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 
   // Strip scripts so the script-disabled preview iframe doesn't log a
   // "Blocked script execution" error for every inline script / handler.

@@ -21,15 +21,15 @@ const prompt: typeof zh = {
 - Each .slide is strictly 16:9: width: 1280px; height: 720px; box-sizing: border-box; overflow: hidden; position: relative.
 - Lay out content within this fixed 1280×720 canvas using flex/grid; nothing should overflow.
 - Define colors, fonts and spacing in the <style> in head; you may @import Google Fonts or use a system font stack.
-- Carry all text in semantic tags: h1/h2/h3 for headings, p for body, ul>li for bullets, span/strong for emphasis — so the user can click to edit text in the editor.
+- Carry all text in semantic tags: h1/h2/h3 for headings, p for body, ul>li for bullets, span/strong for emphasis, so the user can click to edit text in the editor.
 
 [Asset constraints (must follow strictly)]
-- Do not use any relative-path assets (e.g. ./img.png, assets/x.svg) — the file must open standalone outside any folder.
+- Do not use any relative-path assets (e.g. ./img.png, assets/x.svg), the file must open standalone outside any folder.
 - For graphics, use only: inline <svg>, data: URIs (base64-embedded images), or absolute publicly reachable CDN links (https://…).
 
 [Content requirements]
 - Produce 6–10 pages, suggested structure: cover → agenda/overview → 3–6 core pages (one idea each, with bullets or a diagram) → closing page (summary / call to action).
-- Write in English, professional, concise and substantive — avoid filler.
+- Write in English, professional, concise and substantive, avoid filler.
 - Keep the visual style modern and restrained, with consistent colors and typographic rhythm; use gradients, cards and icons in moderation to add hierarchy.
 
 Now output the full .html file directly.`,

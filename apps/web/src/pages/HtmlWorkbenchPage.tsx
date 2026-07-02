@@ -8,12 +8,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { useNavigate } from 'react-router-dom';
 import type { ChangeSummary, LiveHostMessage, LiveRuntimeMessage } from '@hds/protocol';
+import { Head } from 'vite-react-ssg';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { LiveFrame } from '../components/LiveFrame.js';
 import { pickFile } from '../fs/adapter.js';
-import { useLocalePrefix } from '../hooks/useGuideNav.js';
 
 interface Selection {
   tweakId: string;
@@ -25,8 +24,6 @@ interface Selection {
 
 export function HtmlWorkbenchPage() {
   const { t } = useTranslation('htmlWorkbench');
-  const navigate = useNavigate();
-  const prefix = useLocalePrefix();
   const [sourceHtml, setSourceHtml] = useState<string>('');
   const [fileName, setFileName] = useState<string>('');
   const [remountKey, setRemountKey] = useState(0);
@@ -87,6 +84,26 @@ export function HtmlWorkbenchPage() {
       if ((err as Error).name !== 'AbortError') {
         setError(t('page.errorFailed'));
       }
+    } finally {
+      setLoading(false);
+    }
+  }, [t, resetWorkbench]);
+
+  // Care-first: let users try the workbench without preparing a file.
+  // Loads the bundled sample deck so the empty state never feels like a dead end.
+  const loadSample = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/sample-deck.html');
+      if (!res.ok) throw new Error('fetch failed');
+      const html = await res.text();
+      setSourceHtml(html);
+      setFileName('sample-deck.html');
+      setRemountKey((k) => k + 1);
+      resetWorkbench();
+    } catch {
+      setError(t('page.errorFailed'));
     } finally {
       setLoading(false);
     }
@@ -287,30 +304,18 @@ export function HtmlWorkbenchPage() {
 
   return (
     <div
-      className="min-h-screen flex flex-col hds-html-workbench"
-      style={{
-        // Linear-style metallic steel-blue accent for the HTML workbench only.
-        // Overrides the global --system-blue (violet) in this subtree so the
-        // page reads as cool/metallic instead of "AI purple".
-        ['--system-blue' as string]: '#5b6b8c',
-        ['--system-blue-press' as string]: '#4a5874',
-        ['--cobalt-lt' as string]: 'rgba(91, 107, 140, 0.12)',
-      }}
+      className="min-h-[100dvh] flex flex-col hds-html-workbench"
       onDrop={handleDrop}
       onDragOver={(e) => e.preventDefault()}
     >
-      <SiteHeader alwaysScrolled trailing={
-        <button
-          onClick={() => navigate(prefix || '/')}
-          className="hds-btn px-3 py-1.5 text-xs"
-        >
-          {t('page.backHome')}
-        </button>
-      } />
+      <Head>
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
+      <SiteHeader alwaysScrolled />
 
       <main className="flex-1 flex flex-col">
         {!sourceHtml ? (
-          <EmptyState onPick={loadFile} loading={loading} error={error} t={t} />
+          <EmptyState onPick={loadFile} onTrySample={loadSample} loading={loading} error={error} t={t} />
         ) : (
           <div className="flex-1 flex flex-col">
             {/* Toolbar */}
@@ -518,47 +523,111 @@ export function HtmlWorkbenchPage() {
 
 function EmptyState({
   onPick,
+  onTrySample,
   loading,
   error,
   t,
 }: {
   onPick: () => void;
+  onTrySample: () => void;
   loading: boolean;
   error: string | null;
   t: TFunction<'htmlWorkbench'>;
 }) {
   return (
-    <div className="flex-1 flex items-center justify-center p-8">
-      <div className="text-center max-w-md">
-        <div className="mx-auto w-16 h-16 rounded-2xl bg-[var(--control-bg)] grid place-items-center mb-5">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--secondary-label)]">
+    <div
+      className="flex-1 flex items-center justify-center p-8 hds-cinema"
+      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('is-drag-active'); }}
+      onDragLeave={(e) => { e.currentTarget.classList.remove('is-drag-active'); }}
+      onDrop={(e) => { e.currentTarget.classList.remove('is-drag-active'); }}
+    >
+      <div className="hds-empty-card text-center">
+        {/* Icon — gentle breathing draws the eye without being noisy. */}
+        <div className="hds-empty-icon-wrap">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
             <polyline points="14 2 14 8 20 8" />
             <path d="M9 13l2 2 4-4" />
           </svg>
         </div>
-        <h2 className="text-xl font-semibold text-[var(--label)] mb-2">
+
+        <h2 className="hds-empty-title">
           {t('page.title')}
         </h2>
-        <p className="text-sm text-[var(--secondary-label)] mb-1">
+        <p className="hds-empty-subtitle">
           {t('page.empty')}
         </p>
-        <p className="text-xs text-[var(--tertiary-label)] mb-6">
-          {t('page.emptyHint')}
-        </p>
+
         {error && (
-          <p className="text-xs text-red-500 mb-4">{error}</p>
+          <p className="hds-empty-error">{error}</p>
         )}
-        <button
-          onClick={onPick}
-          disabled={loading}
-          className="hds-btn-primary px-6 py-2.5 text-sm disabled:opacity-50"
+
+        {/* Primary CTA + drag hint merged into one dropzone. */}
+        <div
+          className="hds-empty-dropzone"
+          onClick={() => { if (!loading) onPick(); }}
+          role="button"
+          tabIndex={0}
+          aria-disabled={loading}
         >
-          {loading ? t('page.loading') : t('page.pickFile')}
+          <svg
+            className="hds-empty-drop-icon"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
+          </svg>
+          <button
+            onClick={onPick}
+            disabled={loading}
+            className="hds-btn-primary px-6 py-2.5 text-sm disabled:opacity-50"
+          >
+            {loading ? t('page.loading') : t('page.pickFile')}
+          </button>
+          <p className="hds-empty-drag-hint">
+            {t('page.dragHint')}
+          </p>
+        </div>
+
+        {/* Secondary action on the same visual level, not orphaned. */}
+        <button
+          onClick={onTrySample}
+          disabled={loading}
+          className="hds-empty-sample"
+        >
+          {t('page.trySample')}
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="hds-empty-sample-arrow"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14M13 5l7 7-7 7" />
+          </svg>
         </button>
-        <p className="text-xs text-[var(--tertiary-label)] mt-3">
-          {t('page.dragHint')}
-        </p>
       </div>
     </div>
   );

@@ -150,10 +150,12 @@ interface OnboardingTourProps {
 export function OnboardingTour({ onClose }: OnboardingTourProps) {
   const { t } = useTranslation('editor');
   const [index, setIndex] = useState(0);
-  const [rect, setRect] = useState<Rect | null>(null);
-  const [pos, setPos] = useState<{ left: number; top: number; placement: Placement }>({
-    left: 0, top: 0, placement: 'bottom',
-  });
+  // rect/pos are geometry snapshots recomputed on step change / resize / scroll.
+  // Taste Skill §5.D: rAF must not touch React state for continuous geometry.
+  // We keep them in refs and write DOM directly; React only re-renders on step
+  // change (discrete), which legitimately requires content updates.
+  const spotlightRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
 
   const step = STEPS[index];
@@ -162,11 +164,27 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
     const el = findAnchor(step.anchor);
     const measured = measureAnchor(el);
     if (measured) {
-      setRect(measured);
-      setPos(placeTooltip(measured, step.placement));
+      const pos = placeTooltip(measured, step.placement);
+      // Direct DOM writes — no React state for high-frequency geometry.
+      if (spotlightRef.current) {
+        spotlightRef.current.style.left = `${measured.left - PADDING}px`;
+        spotlightRef.current.style.top = `${measured.top - PADDING}px`;
+        spotlightRef.current.style.width = `${measured.width + PADDING * 2}px`;
+        spotlightRef.current.style.height = `${measured.height + PADDING * 2}px`;
+      }
+      if (tooltipRef.current) {
+        tooltipRef.current.style.left = `${pos.left}px`;
+        tooltipRef.current.style.top = `${pos.top}px`;
+        tooltipRef.current.className = `hds-onboarding-tooltip is-${pos.placement}`;
+      }
     } else {
       // Anchor not visible (e.g. wrong mode) → skip to next step.
-      setRect(null);
+      if (spotlightRef.current) {
+        spotlightRef.current.style.left = '-9999px';
+        spotlightRef.current.style.top = '-9999px';
+        spotlightRef.current.style.width = '0px';
+        spotlightRef.current.style.height = '0px';
+      }
       setIndex((i) => Math.min(STEPS.length - 1, i + 1));
     }
   }, [step]);
@@ -178,7 +196,7 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
       rafRef.current = requestAnimationFrame(reposition);
     };
     window.addEventListener('resize', onResize);
-    window.addEventListener('scroll', onResize, true);
+    window.addEventListener('scroll', onResize, { passive: true, capture: true });
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', onResize);
@@ -203,30 +221,21 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
   };
   const prev = () => setIndex((i) => Math.max(0, i - 1));
 
-  const spotlightStyle = rect
-    ? {
-        left: rect.left - PADDING,
-        top: rect.top - PADDING,
-        width: rect.width + PADDING * 2,
-        height: rect.height + PADDING * 2,
-      }
-    : { left: -9999, top: -9999, width: 0, height: 0 };
-
   return (
     <div className="hds-onboarding-overlay" role="dialog" aria-label={t('onboarding.ariaLabel')}>
-      {/* Full-screen dim mask with a transparent hole cut by box-shadow */}
+      {/* Full-screen dim mask with a transparent hole cut by box-shadow.
+          Geometry written directly by reposition() (ref), not React state. */}
       <div
+        ref={spotlightRef}
         className="hds-onboarding-spotlight"
-        style={{
-          ...spotlightStyle,
-          boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)',
-        }}
+        style={{ left: -9999, top: -9999, width: 0, height: 0, boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)' }}
       />
 
-      {/* Tooltip card */}
+      {/* Tooltip card — position written by reposition() (ref). */}
       <div
-        className={`hds-onboarding-tooltip is-${pos.placement}`}
-        style={{ left: pos.left, top: pos.top, width: TOOLTIP_WIDTH }}
+        ref={tooltipRef}
+        className="hds-onboarding-tooltip is-bottom"
+        style={{ left: 0, top: 0, width: TOOLTIP_WIDTH }}
       >
         <span className="hds-onboarding-arrow" aria-hidden />
         <div className="hds-onboarding-head">

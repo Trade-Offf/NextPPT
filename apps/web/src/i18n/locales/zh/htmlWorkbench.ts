@@ -1,13 +1,11 @@
 export default {
   page: {
-    title: 'HTML 工作台',
+    title: 'HTML 演示台',
     subtitle: '保留交互，只改文字，导出完整 HTML',
     empty: '拖入或选择一个 HTML 文件',
-    emptyHint: 'AI 生成的带动画/交互的 HTML 演示稿，在这里改字不破坏原有效果',
     pickFile: '选择文件',
     dragHint: '或拖入 .html 文件',
-    backHome: '返回首页',
-    backToEditor: '回到 PPT 编辑器',
+    trySample: '或先看示例',
     errorNoHtml: '请选择 .html 文件',
     errorFailed: '加载失败，请重试',
     loading: '加载中…',

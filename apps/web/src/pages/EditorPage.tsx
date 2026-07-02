@@ -604,7 +604,7 @@ export function EditorPage() {
           aria-label={t('page.backHome')}
           title={t('page.backHome')}
         >
-          <img src="/icon-192.png" alt="NextPPT" className="w-full h-full" />
+          <img src="/icon-192.png" alt="NextPPT" width={28} height={28} className="w-full h-full" />
         </button>
         {!docMode && (
           <>

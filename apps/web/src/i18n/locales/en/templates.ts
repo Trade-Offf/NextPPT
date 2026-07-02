@@ -40,7 +40,7 @@ const templates: typeof zh = {
     },
     resume: {
       title: 'Kami-style resume',
-      desc: 'A Chinese resume typeset in the official Kami design language (modelled on Musk\'s career, updated to 2026): metric masthead, three-step timeline, role/actions/impact projects, conviction calls and core skills — strict 2-page A4, serif-led hierarchy, ink-blue accents. Open or download it; the bundled prompt is a reusable Kami resume spec — just swap in your own history.',
+      desc: 'A Chinese resume typeset in the official Kami design language (modelled on Musk\'s career, updated to 2026): metric masthead, three-step timeline, role/actions/impact projects, conviction calls and core skills, strict 2-page A4, serif-led hierarchy, ink-blue accents. Open or download it; the bundled prompt is a reusable Kami resume spec, just swap in your own history.',
     },
     'deck-classic': {
       title: 'Terminal-style deck',
@@ -48,7 +48,7 @@ const templates: typeof zh = {
     },
     'deck-report': {
       title: 'Business report deck',
-      desc: 'A light, business-style multi-page report deck (project-management analysis view): a health donut, a risk-priority pyramid, a resource heat matrix, a capacity line chart and a main-line relay flow — five inline SVG charts — plus health-status lights, P0/P1/P2 level pills, color-topped cards and an action table, accented in ink navy with a single sans-serif for projector readability. Open it in the editor or download it; the bundled prompt is a reusable business-report design spec for any topic.',
+      desc: 'A light, business-style multi-page report deck (project-management analysis view): a health donut, a risk-priority pyramid, a resource heat matrix, a capacity line chart and a main-line relay flow, five inline SVG charts, plus health-status lights, P0/P1/P2 level pills, color-topped cards and an action table, accented in ink navy with a single sans-serif for projector readability. Open it in the editor or download it; the bundled prompt is a reusable business-report design spec for any topic.',
     },
     'sakura-chroma': {
       title: 'Sakura Chroma',
@@ -60,7 +60,7 @@ const templates: typeof zh = {
     },
     'peoples-platform': {
       title: "People's Platform · Block & Bold",
-      desc: 'A multi-page deck on cream paper with bold blue/orange/red color blocks: Alfa Slab One mega-titles with layered text-shadow stamp effect, grain noise overlay, heavy black borders — high visual impact. Open it in the editor or download it; the bundled prompt is a reusable Block & Bold design spec for any topic.',
+      desc: 'A multi-page deck on cream paper with bold blue/orange/red color blocks: Alfa Slab One mega-titles with layered text-shadow stamp effect, grain noise overlay, heavy black borders, high visual impact. Open it in the editor or download it; the bundled prompt is a reusable Block & Bold design spec for any topic.',
     },
     'long-table': {
       title: 'Long Table',

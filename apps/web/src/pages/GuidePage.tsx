@@ -115,7 +115,7 @@ export function GuidePage() {
         }
       />
 
-      <div className="max-w-[1200px] mx-auto px-6 sm:px-8 pb-20">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 pb-20">
         {/* ── 3-step rhythm strip ─────────────────────────────── */}
         <section className="pt-9 pb-2 guide-intro">
           <h2 className="sr-only">{t('flow.eyebrow')}</h2>
@@ -139,7 +139,7 @@ export function GuidePage() {
             <div className="hds-guide-illus">
               <picture>
                 <source srcSet="/guide-step-generate.webp" type="image/webp" />
-                <img src="/guide-step-generate.png" alt="" loading="lazy" />
+                <img src="/guide-step-generate.png" alt={t('generate.title')} width={1200} height={675} loading="lazy" />
               </picture>
             </div>
             <div className="hds-guide-story-body">
@@ -199,7 +199,7 @@ export function GuidePage() {
               <div className="hds-guide-illus">
                 <picture>
                   <source srcSet="/guide-step-edit.webp" type="image/webp" />
-                  <img src="/guide-step-edit.png" alt="" loading="lazy" />
+                  <img src="/guide-step-edit.png" alt={t('edit.title')} width={1200} height={675} loading="lazy" />
                 </picture>
               </div>
               {/* Looping micro-demo: a cursor clicking a text line that lights up. */}
@@ -244,7 +244,7 @@ export function GuidePage() {
             <div className="hds-guide-illus">
               <picture>
                 <source srcSet="/guide-step-export.webp" type="image/webp" />
-                <img src="/guide-step-export.png" alt="" loading="lazy" />
+                <img src="/guide-step-export.png" alt={t('export.title')} width={1200} height={675} loading="lazy" />
               </picture>
             </div>
             <div className="hds-guide-story-body">

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useLocalePrefix } from '../hooks/useGuideNav.js';
 import { useOpenDeck } from '../fs/useOpenDeck.js';
+import { gsap, useGSAP } from '../lib/gsap.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { SiteFluidBackdrop } from '../components/SiteFluidBackdrop.js';
 import { TEMPLATES, findTemplate, type TemplateItem } from '../data/templates.js';
@@ -45,11 +46,14 @@ function SampleThumb({ url, kind }: { url: string; kind: TemplateItem['kind'] })
     }
   };
 
+  // Aspect ratio matches the real canvas: decks are 16:9, docs are A4 portrait.
+  const aspect = isDoc ? '794 / 1123' : '16 / 9';
+
   return (
     <div
       ref={ref}
       className="w-full rounded-xl overflow-hidden"
-      style={{ aspectRatio: '16 / 9', position: 'relative', background: '#f5f4ed', boxShadow: 'inset 0 0 0 1px rgba(20,20,19,0.08)' }}
+      style={{ aspectRatio: aspect, position: 'relative', background: '#f5f4ed', boxShadow: 'inset 0 0 0 1px rgba(20,20,19,0.08)' }}
     >
       <iframe
         src={url}
@@ -76,10 +80,9 @@ function SampleThumb({ url, kind }: { url: string; kind: TemplateItem['kind'] })
 
 export function TemplatesPage() {
   const { t } = useTranslation('templates');
-  const navigate = useNavigate();
-  const prefix = useLocalePrefix();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { state: easterState } = useEasterEggs();
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const visibleTemplates = useMemo(
     () => TEMPLATES.filter((item) => !item.easterEgg || easterState.terminalUnlocked),
@@ -87,34 +90,56 @@ export function TemplatesPage() {
   );
   const selected = selectedId ? findTemplate(selectedId) : undefined;
 
+  // When the number of cards is odd, the last card also spans 2 columns so the
+  // bento grid closes without an empty cell.
+  const lastSpan = visibleTemplates.length % 2 === 1 ? 'lg:col-span-2' : '';
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        if (selected) {
+          // Detail panel slides in from the right when a template is opened.
+          gsap.from('.tpl-detail', { autoAlpha: 0, x: 30, duration: 0.5, ease: 'power3.out' });
+        } else {
+          gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.7 } })
+            .from('.tpl-eyebrow', { autoAlpha: 0, y: 14 })
+            .from('.tpl-title', { autoAlpha: 0, y: 20 }, '-=0.5')
+            .from('.tpl-sub', { autoAlpha: 0, y: 14 }, '-=0.5')
+            .from('.tpl-card', { autoAlpha: 0, y: 24, stagger: 0.08 }, '-=0.4');
+        }
+      });
+    },
+    { scope: rootRef, dependencies: [selected] },
+  );
+
   return (
-    <div className="hds-cinema relative w-full min-h-screen overflow-x-hidden">
+    <div ref={rootRef} className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden">
       <SiteFluidBackdrop />
       <div className="relative z-10">
         <SiteHeader alwaysScrolled />
 
-        <main className="max-w-6xl mx-auto px-6 pt-16 sm:pt-24 pb-20">
+        <main className="max-w-7xl mx-auto px-6 pt-16 sm:pt-24 pb-20">
           {!selected ? (
             <>
-              <header className="max-w-2xl">
-                <p className="hds-fig-label">{t('hero.eyebrow')}</p>
-                <h1 className="mt-3 text-3xl lg:text-[2.6rem] font-bold tracking-tight text-[var(--label)] leading-tight">
+              <header className="max-w-xl">
+                <p className="tpl-eyebrow hds-fig-label">{t('hero.eyebrow')}</p>
+                <h1 className="tpl-title mt-4 text-3xl lg:text-[2.6rem] font-bold tracking-tight text-[var(--label)] leading-tight">
                   {t('hero.title')}
                 </h1>
-                <p className="mt-4 text-[15px] text-[var(--secondary-label)] leading-relaxed">
+                <p className="tpl-sub mt-4 text-[15px] text-[var(--secondary-label)] leading-relaxed">
                   {t('hero.subtitle')}
                 </p>
-                <button
-                  onClick={() => navigate(prefix || '/')}
-                  className="hds-btn px-4 py-2 text-xs mt-6"
-                >
-                  {t('hero.back')}
-                </button>
               </header>
 
-              <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {visibleTemplates.map((item) => (
-                  <TemplateCard key={item.id} item={item} onOpen={() => setSelectedId(item.id)} />
+              <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5 grid-flow-dense">
+                {visibleTemplates.map((item, i) => (
+                  <TemplateCard
+                    key={item.id}
+                    item={item}
+                    onOpen={() => setSelectedId(item.id)}
+                    className={i === 0 ? 'lg:col-span-2' : i === visibleTemplates.length - 1 ? lastSpan : ''}
+                  />
                 ))}
               </div>
             </>
@@ -130,18 +155,24 @@ export function TemplatesPage() {
 function KindBadge({ kind }: { kind: TemplateItem['kind'] }) {
   const { t } = useTranslation('templates');
   return (
-    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full border border-[var(--separator)] text-[var(--secondary-label)]">
+    <span
+      className={
+        kind === 'deck'
+          ? 'text-[10px] font-medium px-2 py-0.5 rounded-full border border-[rgba(139,147,232,0.35)] bg-[rgba(139,147,232,0.08)] text-[var(--system-blue)]'
+          : 'text-[10px] font-medium px-2 py-0.5 rounded-full border border-[var(--separator)] text-[var(--secondary-label)]'
+      }
+    >
       {kind === 'deck' ? t('card.deck') : t('card.doc')}
     </span>
   );
 }
 
-function TemplateCard({ item, onOpen }: { item: TemplateItem; onOpen: () => void }) {
+function TemplateCard({ item, onOpen, className = '' }: { item: TemplateItem; onOpen: () => void; className?: string }) {
   const { t } = useTranslation('templates');
   return (
     <button
       onClick={onOpen}
-      className="hds-glass-card p-5 text-left flex flex-col gap-3 transition-transform hover:-translate-y-0.5"
+      className={`tpl-card hds-glass-card group p-6 text-left flex flex-col gap-3 transition-transform hover:-translate-y-1 ${className}`}
     >
       {/* Live preview when a sample exists, else a placeholder */}
       {item.sampleUrl ? (
@@ -156,7 +187,23 @@ function TemplateCard({ item, onOpen }: { item: TemplateItem; onOpen: () => void
         <KindBadge kind={item.kind} />
       </div>
       <p className="text-[13px] text-[var(--secondary-label)] leading-relaxed">{t(`items.${item.id}.desc`)}</p>
-      <span className="text-xs text-[var(--system-blue)] mt-auto">{t('card.viewDetail')} →</span>
+      <span className="text-xs text-[var(--system-blue)] mt-auto inline-flex items-center gap-1.5">
+        {t('card.viewDetail')}
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="transition-transform duration-300 group-hover:translate-x-1"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14M13 5l7 7-7 7" />
+        </svg>
+      </span>
     </button>
   );
 }
@@ -188,109 +235,132 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
   };
 
   return (
-    <div className="max-w-3xl">
-      <button onClick={onBack} className="hds-btn px-4 py-2 text-xs">← {t('detail.back')}</button>
+    <div className="tpl-detail">
+      <button
+        onClick={onBack}
+        className="group hds-btn px-4 py-2 text-xs inline-flex items-center gap-1.5"
+      >
+        <svg
+          width="12"
+          height="12"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="transition-transform duration-300 group-hover:-translate-x-1"
+          aria-hidden="true"
+        >
+          <path d="M19 12H5M11 19l-7-7 7-7" />
+        </svg>
+        {t('detail.back')}
+      </button>
 
-      <div className="mt-6 flex items-center gap-3">
-        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--label)]">
-          {t(`items.${item.id}.title`)}
-        </h1>
-        <KindBadge kind={item.kind} />
-      </div>
-      <p className="mt-3 text-[15px] text-[var(--secondary-label)] leading-relaxed">{t(`items.${item.id}.desc`)}</p>
-
-      {item.sampleUrl && (
-        <div className="mt-5 flex items-center gap-2.5 flex-wrap">
-          <button onClick={openInEditor} disabled={loading} className="hds-btn-primary px-5 py-2 text-xs rounded-full disabled:opacity-50">
-            {t('detail.openInEditor')}
-          </button>
-          <a href={item.sampleUrl} download className="hds-btn px-4 py-2 text-xs">{t('detail.download')}</a>
+      {/* Two-column split: preview sticks on the left, meta flows on the right. */}
+      <div className="mt-6 grid lg:grid-cols-2 gap-8 items-start">
+        {/* Left: sticky preview */}
+        <div className="lg:sticky lg:top-24">
+          {item.sampleUrl ? (
+            <SampleThumb url={item.sampleUrl} kind={item.kind} />
+          ) : (
+            <div className="w-full aspect-[16/9] rounded-2xl border border-dashed border-[var(--rule)] bg-white/[0.03] grid place-items-center">
+              <span className="text-[13px] text-[var(--tertiary-label)]">{t('detail.previewPlaceholder')}</span>
+            </div>
+          )}
+          {item.sampleUrl && (
+            <div className="mt-4 flex items-center gap-2.5 flex-wrap">
+              <button onClick={openInEditor} disabled={loading} className="hds-btn-primary px-5 py-2 text-xs rounded-full disabled:opacity-50">
+                {t('detail.openInEditor')}
+              </button>
+              <a href={item.sampleUrl} download className="hds-btn px-4 py-2 text-xs">{t('detail.download')}</a>
+            </div>
+          )}
+          {error && (
+            <div id="hds-open-error" className="mt-3 text-xs text-[var(--system-red,#ef4444)]">{error}</div>
+          )}
         </div>
-      )}
 
-      {error && (
-        <div id="hds-open-error" className="mt-3 text-xs text-[var(--system-red,#ef4444)]">{error}</div>
-      )}
-
-      <section className="mt-8">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">{t('detail.previewTitle')}</h2>
-        {item.sampleUrl ? (
-          <SampleThumb url={item.sampleUrl} kind={item.kind} />
-        ) : (
-          <div className="w-full aspect-[16/9] rounded-2xl border border-dashed border-[var(--rule)] bg-white/[0.03] grid place-items-center">
-            <span className="text-[13px] text-[var(--tertiary-label)]">{t('detail.previewPlaceholder')}</span>
+        {/* Right: flowing meta */}
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--label)]">
+              {t(`items.${item.id}.title`)}
+            </h1>
+            <KindBadge kind={item.kind} />
           </div>
-        )}
-      </section>
+          <p className="mt-3 text-[15px] text-[var(--secondary-label)] leading-relaxed">{t(`items.${item.id}.desc`)}</p>
 
-      <section className="mt-8">
-        <div className="flex items-center justify-between mb-3 gap-2">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)]">{t('detail.promptTitle')}</h2>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPromptOpen((v) => !v)}
-              disabled={!item.prompt}
-              aria-expanded={promptOpen}
-              className="hds-btn px-3 py-1.5 text-xs inline-flex items-center gap-1.5 disabled:opacity-40"
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.7}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ transform: promptOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}
+          <section className="mt-8">
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)]">{t('detail.promptTitle')}</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPromptOpen((v) => !v)}
+                  disabled={!item.prompt}
+                  aria-expanded={promptOpen}
+                  className="hds-btn px-3 py-1.5 text-xs inline-flex items-center gap-1.5 disabled:opacity-40"
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.7}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ transform: promptOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}
+                  >
+                    <path d="M5 7.5l5 5 5-5" />
+                  </svg>
+                  {promptOpen ? t('detail.collapse') : t('detail.expand')}
+                </button>
+                <button
+                  onClick={copy}
+                  disabled={!item.prompt}
+                  className="hds-btn-primary px-4 py-1.5 text-xs rounded-full disabled:opacity-40"
+                >
+                  {copied ? t('detail.copied') : t('detail.copyPrompt')}
+                </button>
+              </div>
+            </div>
+            {promptOpen ? (
+              <pre className="rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-4 text-[13px] text-[var(--secondary-label)] leading-relaxed whitespace-pre-wrap break-words">
+                {item.prompt || t('detail.todo')}
+              </pre>
+            ) : (
+              <button
+                onClick={() => item.prompt && setPromptOpen(true)}
+                disabled={!item.prompt}
+                className="w-full text-left rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-4 text-[13px] text-[var(--tertiary-label)] leading-relaxed disabled:opacity-60"
               >
-                <path d="M5 7.5l5 5 5-5" />
-              </svg>
-              {promptOpen ? t('detail.collapse') : t('detail.expand')}
-            </button>
-            <button
-              onClick={copy}
-              disabled={!item.prompt}
-              className="hds-btn-primary px-4 py-1.5 text-xs rounded-full disabled:opacity-40"
-            >
-              {copied ? t('detail.copied') : t('detail.copyPrompt')}
-            </button>
-          </div>
+                {item.prompt ? t('detail.promptHint') : t('detail.todo')}
+              </button>
+            )}
+          </section>
+
+          {/* Usage */}
+          <section className="mt-6 rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-5">
+            <h2 className="text-[13px] font-semibold text-[var(--label)] mb-1.5">{t('detail.usageTitle')}</h2>
+            <p className="text-[13px] text-[var(--secondary-label)] leading-relaxed">{t('detail.usage')}</p>
+          </section>
+
+          {item.credit && (
+            <p className="mt-6 text-xs text-[var(--tertiary-label)]">
+              {t('detail.creditPrefix')}{' '}
+              <a
+                href={item.credit.href}
+                target="_blank"
+                rel="noreferrer"
+                className="text-[var(--system-blue)] hover:underline"
+              >
+                {item.credit.name}
+              </a>
+            </p>
+          )}
         </div>
-        {promptOpen ? (
-          <pre className="rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-4 text-[13px] text-[var(--secondary-label)] leading-relaxed whitespace-pre-wrap break-words">
-            {item.prompt || t('detail.todo')}
-          </pre>
-        ) : (
-          <button
-            onClick={() => item.prompt && setPromptOpen(true)}
-            disabled={!item.prompt}
-            className="w-full text-left rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-4 text-[13px] text-[var(--tertiary-label)] leading-relaxed disabled:opacity-60"
-          >
-            {item.prompt ? t('detail.promptHint') : t('detail.todo')}
-          </button>
-        )}
-      </section>
-
-      {/* Usage */}
-      <section className="mt-8 rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-5">
-        <h2 className="text-[13px] font-semibold text-[var(--label)] mb-1.5">{t('detail.usageTitle')}</h2>
-        <p className="text-[13px] text-[var(--secondary-label)] leading-relaxed">{t('detail.usage')}</p>
-      </section>
-
-      {item.credit && (
-        <p className="mt-6 text-xs text-[var(--tertiary-label)]">
-          {t('detail.creditPrefix')}{' '}
-          <a
-            href={item.credit.href}
-            target="_blank"
-            rel="noreferrer"
-            className="text-[var(--system-blue)] hover:underline"
-          >
-            {item.credit.name}
-          </a>
-        </p>
-      )}
+      </div>
     </div>
   );
 }

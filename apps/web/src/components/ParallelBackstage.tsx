@@ -25,7 +25,7 @@ function Avatar({ src, name }: { src: string; name: string }) {
   if (failed) {
     // Fallback when an avatar is missing or generation was refused.
     return (
-      <div className="grid h-full w-full place-items-center bg-[rgba(168,85,255,0.14)] text-base font-semibold text-[#d9c2ff]">
+      <div className="grid h-full w-full place-items-center bg-[rgba(139,147,232,0.14)] text-base font-semibold text-[#c7cbf6]">
         {name.slice(0, 1)}
       </div>
     );
@@ -50,7 +50,7 @@ export function ParallelBackstage() {
 
   return (
     <section id="parallel" className="relative px-6 py-20 lg:py-28 scroll-mt-20">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-2xl text-center">
           <p className="reveal-pass hds-fig-label">{t('parallel.eyebrow')}</p>
           <h2 className="reveal-pass mt-3 text-3xl font-bold leading-tight tracking-tight text-[var(--label)] lg:text-[2.5rem]">

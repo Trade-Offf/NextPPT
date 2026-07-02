@@ -1,9 +1,11 @@
 import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useOpenDeck, FS_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
 import { useLocalePrefix, useGuideNav } from '../hooks/useGuideNav.js';
+import { useFocusTrap } from '../hooks/useFocusTrap.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { EditorPreview } from '../components/EditorPreview.js';
 import { TemplateCarousel } from '../components/TemplateCarousel.js';
@@ -36,10 +38,32 @@ export function LandingPage() {
   const rootRef = useRef<HTMLDivElement>(null);
   const pains = t('value.pains', { returnObjects: true }) as string[];
 
+  // Click "点击上传" → pop a choice modal. HTML 演示台 is the new main path
+  // (keeps animations/interactions), PPT 编辑器 is the legacy deck editor
+  // (paginated, exports PPTX/PDF). Drag-and-drop still routes to the PPT
+  // editor for backward compatibility.
+  const [showUploadChoice, setShowUploadChoice] = useState(false);
+  const uploadModalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(uploadModalRef, showUploadChoice);
   const handleUpload = () => {
     if (loading) return;
+    setShowUploadChoice(true);
+  };
+  const chooseHtmlDeck = () => {
+    setShowUploadChoice(false);
+    navigate(`${prefix}/html`);
+  };
+  const choosePptEditor = () => {
+    setShowUploadChoice(false);
     void handlePickFile();
   };
+
+  useEffect(() => {
+    if (!showUploadChoice) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowUploadChoice(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showUploadChoice]);
 
   useGSAP(
     () => {
@@ -67,7 +91,7 @@ export function LandingPage() {
   return (
     <div
       ref={rootRef}
-      className="hds-cinema relative w-full min-h-screen overflow-x-hidden"
+      className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden"
       onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
@@ -90,7 +114,7 @@ export function LandingPage() {
       <div className="relative z-10">
       <SiteHeader />
 
-      <section id="top" className="hds-hero relative px-6 pt-16 sm:pt-24 pb-16">
+      <section id="top" className="hds-hero relative px-6 pt-16 sm:pt-24 pb-12">
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <h1 className="hero-h1 hds-hero-title hds-display text-[clamp(2.3rem,5.6vw,4rem)]">
             {t('hero.titleA')}<br className="hidden sm:block" />{t('hero.titleB')}<span className="hds-hero-accent"> {t('hero.titleAccent')} </span>{t('hero.titleC')}
@@ -102,6 +126,8 @@ export function LandingPage() {
             <OpenDeckErrorAlert
               className="mt-6 max-w-md mx-auto text-left"
               error={error}
+              onRetry={() => void handlePickFile()}
+              onSample={() => void openTemplateSample('/sample-deck.html', 'sample-deck.html')}
             />
           )}
           <div className={`hero-cta flex flex-wrap items-center justify-center gap-3 ${error ? 'mt-6' : 'mt-9'}`}>
@@ -110,15 +136,8 @@ export function LandingPage() {
             </button>
             <button onClick={() => navigate(`${prefix}/templates`)} className="hds-btn px-5 py-3 text-sm">{t('hero.ctaGuide')}</button>
           </div>
-          <p className="hero-support mt-4 text-xs text-[var(--tertiary-label)]">{t('hero.support')}</p>
-          <button
-            onClick={() => navigate(`${prefix}/html`)}
-            className="mt-2 text-xs text-[var(--tertiary-label)] underline-offset-2 hover:text-[var(--secondary-label)] hover:underline transition-colors"
-          >
-            {t('hero.htmlWorkbenchHint')}
-          </button>
           {fsSupported && (
-            <p className="hero-support mt-2 text-xs text-[var(--tertiary-label)] flex items-center justify-center gap-1.5">
+            <p className="hero-support mt-4 text-xs text-[var(--tertiary-label)] flex items-center justify-center gap-1.5">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
               </svg>
@@ -127,13 +146,16 @@ export function LandingPage() {
           )}
         </div>
 
-        <div id="preview" className="hero-preview relative z-10 mt-14 sm:mt-16 scroll-mt-20">
+      </section>
+
+      <section id="preview" className="relative px-6 pb-20 lg:pb-28 scroll-mt-20">
+        <div className="hero-preview relative z-10">
           <EditorPreview />
         </div>
       </section>
 
       <section id="start" className="value-section px-6 py-20 lg:py-28 scroll-mt-20">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
             <p className="reveal-pain hds-fig-label">{t('value.eyebrow')}</p>
             <h2 className="reveal-pain mt-3 text-3xl lg:text-[2.5rem] font-bold tracking-tight text-[var(--label)] leading-tight">
@@ -176,10 +198,10 @@ export function LandingPage() {
       <ParallelBackstage />
 
       <footer className="border-t border-[var(--separator)] px-6 py-12">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 gap-12 text-sm">
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2">
-              <img src="/brand-n.png" alt="" className="hds-emblem w-6 h-6" />
+              <img src="/brand-n.png" alt="" width={24} height={24} className="hds-emblem w-6 h-6" />
               <span className="hds-wordmark">NextPPT</span>
             </div>
             <p className="mt-3 text-xs text-[var(--tertiary-label)] leading-relaxed">{t('footer.tagline')}</p>
@@ -226,6 +248,8 @@ export function LandingPage() {
             <ul className="space-y-2 text-[var(--secondary-label)]">
               <li><button onClick={() => document.getElementById('preview')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-[var(--label)]">{t('footer.preview')}</button></li>
               <li><button onClick={() => document.getElementById('start')?.scrollIntoView({ behavior: 'smooth' })} className="hover:text-[var(--label)]">{t('footer.start')}</button></li>
+              <li><span className="text-[var(--tertiary-label)]">· {t('footer.localFirst')}</span></li>
+              <li><span className="text-[var(--tertiary-label)]">· {t('footer.noLogin')}</span></li>
             </ul>
           </div>
           <div>
@@ -236,17 +260,71 @@ export function LandingPage() {
               <li><a href="/sample-deck.html" download className="hover:text-[var(--label)]">{t('footer.sample')}</a></li>
             </ul>
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)] mb-3">{t('footer.colAbout')}</p>
-            <ul className="space-y-2 text-[var(--secondary-label)]">
-              <li><span>{t('footer.localFirst')}</span></li>
-              <li><span>{t('footer.noLogin')}</span></li>
-            </ul>
-          </div>
         </div>
-        <p className="max-w-5xl mx-auto mt-10 text-xs text-[var(--tertiary-label)]">{t('footer.copy', { year: new Date().getFullYear() })}</p>
+        <p className="max-w-7xl mx-auto mt-10 text-xs text-[var(--tertiary-label)]">{t('footer.copy', { year: new Date().getFullYear() })}</p>
       </footer>
       </div>
+
+      {showUploadChoice && createPortal(
+        <div className="hds-modal-backdrop" onClick={() => setShowUploadChoice(false)}>
+          <div
+            ref={uploadModalRef}
+            className="hds-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('hub.modePrompt')}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="hds-modal-header">
+              <h2 className="hds-modal-heading">{t('hub.modePrompt')}</h2>
+              <button className="hds-modal-x" onClick={() => setShowUploadChoice(false)} aria-label={t('hub.modeCancel')} title={t('hub.modeCancel')}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+                  <path d="M3.5 3.5l7 7M10.5 3.5l-7 7" />
+                </svg>
+              </button>
+            </div>
+            <div className="hds-modal-body">
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={chooseHtmlDeck}
+                  className="hds-mode-card hds-mode-card-primary group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="hds-mode-icon" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="16 18 22 12 16 6" />
+                        <polyline points="8 6 2 12 8 18" />
+                      </svg>
+                    </span>
+                    <span className="text-[14px] font-semibold text-[var(--label)]">{t('hub.modeHtml')}</span>
+                    <span className="hds-mode-pill">main</span>
+                  </div>
+                  <p className="mt-1.5 text-[12.5px] text-[var(--secondary-label)] leading-relaxed">{t('hub.modeHtmlDesc')}</p>
+                </button>
+                <button
+                  onClick={choosePptEditor}
+                  className="hds-mode-card group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="hds-mode-icon hds-mode-icon-muted" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="4" width="18" height="14" rx="2" />
+                        <line x1="3" y1="9" x2="21" y2="9" />
+                      </svg>
+                    </span>
+                    <span className="text-[14px] font-semibold text-[var(--label)]">{t('hub.modePpt')}</span>
+                  </div>
+                  <p className="mt-1.5 text-[12.5px] text-[var(--secondary-label)] leading-relaxed">{t('hub.modePptDesc')}</p>
+                </button>
+              </div>
+              <div className="mt-5 flex items-center justify-end">
+                <button onClick={() => setShowUploadChoice(false)} className="hds-dialog-btn">{t('hub.modeCancel')}</button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }

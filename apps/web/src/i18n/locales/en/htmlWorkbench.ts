@@ -1,13 +1,11 @@
 export default {
   page: {
-    title: 'HTML Workbench',
+    title: 'HTML Deck',
     subtitle: 'Keep interactions, edit text only, export full HTML',
     empty: 'Drop or pick an HTML file',
-    emptyHint: 'AI-generated HTML decks with animations/interactions — edit text here without breaking the original effects',
     pickFile: 'Pick file',
     dragHint: 'or drop a .html file',
-    backHome: 'Back home',
-    backToEditor: 'Back to PPT editor',
+    trySample: 'Try a sample first',
     errorNoHtml: 'Please pick a .html file',
     errorFailed: 'Failed to load, please retry',
     loading: 'Loading…',

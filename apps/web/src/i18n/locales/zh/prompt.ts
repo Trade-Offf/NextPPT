@@ -20,10 +20,10 @@ export default {
 - 每个 .slide 尺寸严格为 16:9：width: 1280px; height: 720px; box-sizing: border-box; overflow: hidden; position: relative。
 - 用 flex/grid 在这 1280×720 的固定画布内排版，内容不要溢出。
 - 配色、字体、间距都在 head 的 <style> 里定义；可用 @import 引入 Google Fonts，或使用系统字体栈。
-- 文本一律用语义标签承载：标题用 h1/h2/h3，正文用 p，要点用 ul>li，强调用 span/strong——这样用户进编辑器后可以直接点选改字。
+- 文本一律用语义标签承载：标题用 h1/h2/h3，正文用 p，要点用 ul>li，强调用 span/strong，这样用户进编辑器后可以直接点选改字。
 
 【资源约束（必须严格遵守）】
-- 禁止使用任何相对路径资源（如 ./img.png、assets/x.svg）——文件要能脱离文件夹独立打开。
+- 禁止使用任何相对路径资源（如 ./img.png、assets/x.svg），文件要能脱离文件夹独立打开。
 - 需要图形时，只能用：内联 <svg>、data: URI（base64 内嵌图片），或可公网访问的绝对 CDN 链接（https://…）。
 
 【内容要求】

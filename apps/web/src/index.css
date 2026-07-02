@@ -4,14 +4,15 @@
    HDS · macOS-flavoured design tokens
    ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  /* Brand palette (NextPPT violet) */
-  --system-blue: #7e14ff;
-  --system-blue-press: #6a0fd6;
+  /* Brand palette — Linear deep indigo-blue (#5e6ad2 family). Cool, intellectual,
+     reads as blue (hue ≈ 235°) not violet (hue ≈ 280°). */
+  --system-blue: #5e6ad2;
+  --system-blue-press: #4a55b8;
 
   /* Label colors */
   --label: #1d1d1f;
   --secondary-label: #51515c;
-  --tertiary-label: #8e8e93;
+  --tertiary-label: #6b6b70;
 
   /* Surfaces */
   --window-bg: #ececec;
@@ -20,7 +21,7 @@
   --editor-bg: #1e1e1e;
   --rule: #e3e3e6;
   --separator: #d8d8dc;
-  --cobalt-lt: #f3ebff;
+  --cobalt-lt: rgba(94, 106, 210, 0.14);
 
   /* Vibrancy (translucent sidebars/toolbars) */
   --vibrancy-sidebar: rgba(246, 246, 248, 0.72);
@@ -36,13 +37,19 @@
 
   --radius-window: 12px;
 
+  /* Unified motion language */
+  --ease-out: var(--ease-out);
+  --ease-in-out: var(--ease-in-out);
+  --dur-fast: 0.15s;
+  --dur: 0.25s;
+
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --system-blue: #a855ff;
-    --system-blue-press: #9333ea;
+    --system-blue: #8b93e8;
+    --system-blue-press: #a5acf0;
     --label: #f5f5f7;
     --secondary-label: #aeaeb2;
     --tertiary-label: #8e8e93;
@@ -52,18 +59,11 @@
     --editor-bg: #1e1e1e;
     --rule: #38383a;
     --separator: #48484a;
-    --cobalt-lt: #2a1b40;
+    --cobalt-lt: rgba(139, 147, 232, 0.14);
     --vibrancy-sidebar: rgba(40, 40, 43, 0.7);
     --vibrancy-toolbar: rgba(36, 36, 38, 0.78);
     --vibrancy-panel: rgba(38, 38, 41, 0.76);
     color-scheme: dark;
-  }
-  /* HTML workbench uses a cool metallic steel-blue accent instead of the global
-     violet, in both light and dark modes. */
-  .hds-html-workbench {
-    --system-blue: #8b9bb8;
-    --system-blue-press: #6b7b98;
-    --cobalt-lt: rgba(139, 155, 184, 0.14);
   }
 }
 
@@ -201,32 +201,59 @@ button:disabled,
   background: var(--content-bg);
   color: var(--label);
   box-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.06);
-  transition: background 0.12s ease, box-shadow 0.12s ease;
+  transition: background var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
-.hds-btn:hover:not(:disabled) { background: var(--control-bg); }
-.hds-btn:active:not(:disabled) { background: var(--separator); }
+.hds-btn:hover:not(:disabled) {
+  background: var(--control-bg);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+.hds-btn:active:not(:disabled) {
+  background: var(--separator);
+  transform: translateY(0);
+  box-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.06);
+}
 
 .hds-btn-primary {
   border-radius: 7px;
   background: var(--system-blue);
   color: #fff;
   border: 0.5px solid transparent;
-  box-shadow: 0 1px 2px rgba(126, 20, 255, 0.35);
-  transition: background 0.12s ease;
+  box-shadow: 0 1px 2px rgba(94, 106, 210, 0.35);
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
-.hds-btn-primary:hover:not(:disabled) { background: var(--system-blue-press); }
-.hds-btn-primary:active:not(:disabled) { background: var(--system-blue-press); }
+.hds-btn-primary:hover:not(:disabled) {
+  background: var(--system-blue-press);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(94, 106, 210, 0.3);
+}
+.hds-btn-primary:active:not(:disabled) {
+  background: var(--system-blue-press);
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(94, 106, 210, 0.35);
+}
 .hds-btn-primary:disabled { opacity: 0.5; }
 
 .hds-btn-danger {
   border-radius: 7px;
-  border: 0.5px solid rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
-  transition: background 0.12s ease, color 0.12s ease;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.14);
+  color: #c53030;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
 }
-.hds-btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.85); color: #fff; }
-.hds-btn-danger:active:not(:disabled) { background: #ef4444; color: #fff; }
+.hds-btn-danger:hover:not(:disabled) {
+  background: #ef4444;
+  color: #fff;
+  transform: translateY(-1px);
+}
+.hds-btn-danger:active:not(:disabled) {
+  background: #dc2626;
+  color: #fff;
+  transform: translateY(0);
+}
 
 /* ── Segmented control ───────────────────────────────────────────────────── */
 .hds-segmented {
@@ -258,13 +285,13 @@ button:disabled,
 /* ── Window chrome (landing) ─────────────────────────────────────────────── */
 .hds-landing-bg {
   background:
-    radial-gradient(1200px 600px at 50% -10%, rgba(126, 20, 255, 0.12), transparent 60%),
+    radial-gradient(1200px 600px at 50% -10%, rgba(94, 106, 210, 0.12), transparent 60%),
     linear-gradient(180deg, #e9eef5 0%, #eef1f6 100%);
 }
 @media (prefers-color-scheme: dark) {
   .hds-landing-bg {
     background:
-      radial-gradient(1200px 600px at 50% -10%, rgba(10, 132, 255, 0.18), transparent 60%),
+      radial-gradient(1200px 600px at 50% -10%, rgba(139, 147, 232, 0.18), transparent 60%),
       linear-gradient(180deg, #15161a 0%, #1b1c20 100%);
   }
 }
@@ -302,7 +329,7 @@ button:disabled,
 /* ── Drawer slide-in ─────────────────────────────────────────────────────── */
 .hds-drawer {
   box-shadow: -16px 0 48px rgba(0, 0, 0, 0.22);
-  animation: hds-slide-in 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: hds-slide-in 0.22s var(--ease-out);
 }
 @keyframes hds-slide-in {
   from { transform: translateX(100%); }
@@ -509,7 +536,7 @@ select.hds-input {
 .hds-segment.is-icon { display: inline-flex; align-items: center; justify-content: center; }
 
 /* Themed slider (opacity). The native range is near-invisible on the dark glass
-   panel, so paint a two-tone track (violet fill up to --val, separator after)
+   panel, so paint a two-tone track (accent fill up to --val, separator after)
    with a crisp white thumb. --val is set inline from the control value. */
 .hds-range {
   -webkit-appearance: none;
@@ -586,7 +613,7 @@ select.hds-input {
   height: 6px;
   border-radius: 9999px;
   background: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(126, 20, 255, 0.16);
+  box-shadow: 0 0 0 3px rgba(139, 147, 232, 0.16);
   flex-shrink: 0;
 }
 
@@ -594,17 +621,37 @@ select.hds-input {
   background: var(--vibrancy-panel);
   -webkit-backdrop-filter: saturate(180%) blur(24px);
   backdrop-filter: saturate(180%) blur(24px);
-  border: 0.5px solid var(--separator);
-  border-radius: 18px;
+  border: 1px solid var(--separator);
+  border-radius: 16px;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.5) inset,
     0 24px 60px rgba(0, 0, 0, 0.16);
+  /* Hover lifts the card and shifts the border toward the brand accent,
+     complementing the group-hover image zoom inside. */
+  transition:
+    border-color var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+.hds-glass-card:hover {
+  border-color: rgba(139, 147, 232, 0.4);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.5) inset,
+    0 28px 70px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(139, 147, 232, 0.12);
 }
 @media (prefers-color-scheme: dark) {
   .hds-glass-card {
     box-shadow:
       0 1px 0 rgba(255, 255, 255, 0.06) inset,
       0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+  .hds-glass-card:hover {
+    border-color: rgba(139, 147, 232, 0.45);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.08) inset,
+      0 28px 70px rgba(0, 0, 0, 0.55),
+      0 0 0 1px rgba(139, 147, 232, 0.18);
   }
 }
 
@@ -613,7 +660,7 @@ select.hds-input {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.hds-fade-up { animation: hdsFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hds-fade-up { animation: hdsFadeUp 0.5s var(--ease-out) both; }
 .hds-fade-up-delay { animation-delay: 0.08s; }
 @media (prefers-reduced-motion: reduce) {
   .hds-fade-up { animation: none; }
@@ -652,7 +699,7 @@ select.hds-input {
     0 1px 1px rgba(0, 0, 0, 0.04),
     0 12px 36px rgba(0, 0, 0, 0.18);
   overflow: hidden;
-  animation: hdsModalIn 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: hdsModalIn 0.18s var(--ease-out) both;
 }
 .hds-modal-header {
   display: flex;
@@ -713,6 +760,60 @@ select.hds-input {
   border-color: transparent;
 }
 .hds-dialog-btn.is-danger:hover { background: #d6383d; }
+
+/* Upload-mode choice cards in the landing modal. The primary card (HTML deck)
+   carries the steel-blue accent ring + icon to signal it is the main path;
+   the secondary card (PPT editor) stays quiet. */
+.hds-mode-card {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border-radius: 12px;
+  border: 0.5px solid var(--separator);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 14px 16px;
+  transition: border-color var(--dur) var(--ease-out), background var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+.hds-mode-card:hover {
+  border-color: var(--rule);
+  background: rgba(255, 255, 255, 0.04);
+}
+.hds-mode-card-primary {
+  border-color: rgba(139, 147, 232, 0.4);
+  background: rgba(139, 147, 232, 0.06);
+}
+.hds-mode-card-primary:hover {
+  border-color: var(--system-blue);
+  background: rgba(139, 147, 232, 0.1);
+  transform: translateY(-1px);
+}
+.hds-mode-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--system-blue);
+  color: #fff;
+  flex-shrink: 0;
+}
+.hds-mode-icon-muted {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--secondary-label);
+  border: 0.5px solid var(--separator);
+}
+.hds-mode-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--system-blue);
+  color: #fff;
+}
 
 /* Numbered steps */
 .hds-steps { display: flex; flex-direction: column; gap: 12px; }
@@ -1214,10 +1315,10 @@ select.hds-input {
 }
 
 .hds-floating-rail {
-  animation: hdsSlideInLeft 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: hdsSlideInLeft 0.24s var(--ease-out) both;
 }
 .hds-floating-inspector {
-  animation: hdsSlideInRight 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: hdsSlideInRight 0.24s var(--ease-out) both;
 }
 @keyframes hdsSlideInRight {
   from { opacity: 0; transform: translateX(16px); }
@@ -1234,20 +1335,43 @@ select.hds-input {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    HDS · Landing / guide theme — scoped under .hds-cinema, editor untouched.
-   Near-black Linear-style palette, cool indigo accent.
+   Near-black Linear-style palette, cool metallic steel-blue accent.
    ═══════════════════════════════════════════════════════════════════════════ */
 .hds-cinema {
   --label: #f7f8f8;
   --secondary-label: #a0a4ab;
-  --tertiary-label: #6b7077;
+  --tertiary-label: #8b8e96;
   --window-bg: #08090a;
   --content-bg: #0e0f12;
   --control-bg: #16181c;
   --separator: rgba(255, 255, 255, 0.09);
   --rule: rgba(255, 255, 255, 0.06);
-  --system-blue: #8b8ef0;
-  --system-blue-press: #a3a6f5;
-  --cobalt-lt: rgba(139, 142, 240, 0.12);
+  --system-blue: #8b93e8;
+  --system-blue-press: #a5acf0;
+  --cobalt-lt: rgba(139, 147, 232, 0.14);
+  --vibrancy-panel: rgba(18, 19, 22, 0.6);
+  --vibrancy-toolbar: rgba(8, 9, 10, 0.72);
+  color-scheme: dark;
+  color: var(--label);
+  background: var(--window-bg);
+}
+
+/* HTML Workbench shares the same dark Linear palette as cinema, so the
+   SiteHeader (alwaysScrolled) and toolbar match the dark canvas regardless
+   of the user's system color-scheme. Without this, light-mode users see a
+   white nav bar floating over a dark workbench. */
+.hds-html-workbench {
+  --label: #f7f8f8;
+  --secondary-label: #a0a4ab;
+  --tertiary-label: #8b8e96;
+  --window-bg: #08090a;
+  --content-bg: #0e0f12;
+  --control-bg: #16181c;
+  --separator: rgba(255, 255, 255, 0.09);
+  --rule: rgba(255, 255, 255, 0.06);
+  --system-blue: #8b93e8;
+  --system-blue-press: #a5acf0;
+  --cobalt-lt: rgba(139, 147, 232, 0.14);
   --vibrancy-panel: rgba(18, 19, 22, 0.6);
   --vibrancy-toolbar: rgba(8, 9, 10, 0.72);
   color-scheme: dark;
@@ -1259,8 +1383,8 @@ select.hds-input {
 .hds-hero {
   position: relative;
   background:
-    radial-gradient(1100px 560px at 50% -10%, rgba(139, 142, 240, 0.12), transparent 60%),
-    radial-gradient(760px 520px at 82% 4%, rgba(96, 110, 200, 0.06), transparent 55%),
+    radial-gradient(1100px 560px at 50% -10%, rgba(139, 147, 232, 0.18), transparent 60%),
+    radial-gradient(760px 520px at 82% 4%, rgba(94, 106, 210, 0.1), transparent 55%),
     transparent;
 }
 .hds-hero::before {
@@ -1283,7 +1407,7 @@ select.hds-input {
   color: var(--label);
 }
 .hds-hero-accent {
-  background: linear-gradient(180deg, #c9cbff, #8b8ef0);
+  background: linear-gradient(180deg, #c7cbf6, #8b93e8);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1298,7 +1422,7 @@ select.hds-input {
 }
 .hds-cinema .hds-pill::before {
   background: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(139, 142, 240, 0.16);
+  box-shadow: 0 0 0 3px rgba(139, 147, 232, 0.2);
 }
 
 /* Glass surfaces → refined dark panels with a hairline top sheen */
@@ -1308,6 +1432,13 @@ select.hds-input {
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.05) inset,
     0 24px 70px rgba(0, 0, 0, 0.5);
+}
+.hds-cinema .hds-glass-card:hover {
+  border-color: rgba(139, 147, 232, 0.45);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 28px 80px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(139, 147, 232, 0.18);
 }
 
 /* Linear primary button = near-white plate, dark ink */
@@ -1347,7 +1478,7 @@ select.hds-input {
   z-index: 50;
   border-bottom: 0.5px solid transparent;
   background: transparent;
-  transition: background 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
+  transition: background var(--dur) var(--ease-out), border-color var(--dur) var(--ease-out), backdrop-filter var(--dur) var(--ease-out);
 }
 .hds-nav.is-scrolled {
   background: var(--vibrancy-toolbar);
@@ -1356,12 +1487,66 @@ select.hds-input {
   backdrop-filter: saturate(180%) blur(20px);
 }
 .hds-nav-link {
+  position: relative;
   font-size: 13px;
   font-weight: 500;
   color: var(--secondary-label);
-  transition: color 0.15s ease;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-out);
 }
-.hds-nav-link:hover { color: var(--label); }
+.hds-nav-link:hover {
+  color: var(--label);
+  background: var(--control-bg-hover, rgba(255, 255, 255, 0.06));
+}
+.hds-nav-link.is-active {
+  color: var(--label);
+}
+.hds-nav-link.is-active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--system-blue);
+  transform: translateX(-50%);
+}
+.hds-nav-version {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(139, 147, 232, 0.14);
+  color: var(--system-blue);
+  border: 1px solid rgba(139, 147, 232, 0.28);
+  margin-left: 3px;
+}
+
+/* Scroll progress — Linear-style 2px line at the nav bottom.
+   Tracks page scroll position via inline transform scaleX(0..1). */
+.hds-nav-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--system-blue);
+  transform-origin: left;
+  transform: scaleX(0);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+  pointer-events: none;
+}
+.hds-nav.is-scrolled .hds-nav-progress { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .hds-nav-progress { transition: none; }
+}
 
 /* ── Open-deck error (opaque on cinema hero) ─────────────────────────────── */
 .hds-open-error {
@@ -1376,6 +1561,36 @@ select.hds-input {
   font-size: 13px;
   line-height: 1.5;
   color: #f0e8e9;
+}
+/* Recovery actions — care-first: never leave the user stuck. */
+.hds-error-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.hds-error-btn {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 7px;
+  border: 0.5px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f0e8e9;
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.hds-error-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+.hds-error-btn-primary {
+  background: var(--system-blue);
+  border-color: transparent;
+  color: #fff;
+}
+.hds-error-btn-primary:hover {
+  background: var(--system-blue-press);
+  border-color: transparent;
 }
 
 /* ── Language switcher (zh / EN) ─────────────────────────────────────────── */
@@ -1420,7 +1635,7 @@ select.hds-input {
   height: 70%;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(60% 100% at 50% 0%, rgba(139, 142, 240, 0.22), transparent 70%);
+  background: radial-gradient(60% 100% at 50% 0%, rgba(139, 147, 232, 0.24), transparent 70%);
   filter: blur(18px);
 }
 .hds-preview-frame {
@@ -1443,24 +1658,159 @@ select.hds-input {
   background: rgba(255, 255, 255, 0.02);
 }
 .hds-preview-dot { width: 10px; height: 10px; border-radius: 50%; }
+.hds-preview-edit-dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--system-blue);
+  box-shadow: 0 0 0 3px rgba(139, 147, 232, 0.22);
+  animation: hds-preview-pulse 1.8s var(--ease-in-out) infinite;
+}
+/* Expanding halo ring — reinforces the "editing now" signal. */
+.hds-preview-edit-dot::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 999px;
+  border: 1px solid var(--system-blue);
+  animation: hds-preview-ring 2.4s var(--ease-out) infinite;
+}
+@keyframes hds-preview-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@keyframes hds-preview-ring {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-preview-edit-dot,
+  .hds-preview-edit-dot::after { animation: none; }
+  .hds-preview-edit-dot::after { display: none; }
+}
 .hds-preview-selected {
   outline: 1.5px solid var(--system-blue);
   outline-offset: 2px;
   border-radius: 3px;
+  /* Breathing outline — simulates an active text selection being edited. */
+  animation: hds-preview-select-breath 2.8s var(--ease-in-out) infinite;
+}
+@keyframes hds-preview-select-breath {
+  0%, 100% { outline-color: var(--system-blue); }
+  50% { outline-color: rgba(139, 147, 232, 0.35); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-preview-selected { animation: none; }
+}
+.hds-preview-eyebrow {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--system-blue);
+}
+.hds-preview-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  animation: hds-preview-bar-in 0.9s var(--ease-out) both;
+}
+.hds-preview-bar:nth-child(2) { animation-delay: 0.15s; }
+.hds-preview-bar:nth-child(3) { animation-delay: 0.3s; }
+@keyframes hds-preview-bar-in {
+  from { transform: scaleX(0); transform-origin: left; opacity: 0; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-preview-bar { animation: none; }
+}
+.hds-preview-tile {
+  height: 56px;
+  border-radius: 6px;
+  border: 0.5px solid var(--separator);
+  background: rgba(255, 255, 255, 0.025);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+}
+.hds-preview-bar-v {
+  width: 6px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--system-blue), rgba(139, 147, 232, 0.3));
+  /* Entrance (1s) → live breathing (3.6s loop). Staggered start per bar. */
+  animation:
+    hds-preview-bar-v-in 1s var(--ease-out) both,
+    hds-preview-bar-live 3.6s var(--ease-in-out) 1.2s infinite;
+}
+.hds-preview-bar-v:nth-child(2) { animation-delay: 0.2s, 1.6s; }
+.hds-preview-bar-v:nth-child(3) { animation-delay: 0.4s, 2.0s; }
+.hds-preview-bar-v:nth-child(4) { animation-delay: 0.6s, 2.4s; }
+@keyframes hds-preview-bar-v-in {
+  from { transform: scaleY(0); transform-origin: bottom; }
+  to { transform: scaleY(1); }
+}
+@keyframes hds-preview-bar-live {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.55); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-preview-bar-v { animation: none; }
+}
+.hds-preview-shimmer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.04) 50%, transparent 70%);
+  background-size: 250% 100%;
+  animation: hds-preview-shimmer 4s linear infinite;
+}
+@keyframes hds-preview-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-preview-shimmer { animation: none; opacity: 0; }
+}
+.hds-preview-change {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 0.5px solid var(--separator);
+  /* Each change row lights up in turn — simulates edits being recorded. */
+  animation: hds-preview-change-flash 6s var(--ease-in-out) infinite;
+}
+.hds-preview-change:nth-child(2) { animation-delay: 2s; }
+.hds-preview-change:nth-child(3) { animation-delay: 4s; }
+@keyframes hds-preview-change-flash {
+  0%, 28%, 100% { background: rgba(255, 255, 255, 0.02); border-color: var(--separator); }
+  6% { background: rgba(139, 147, 232, 0.14); border-color: rgba(139, 147, 232, 0.45); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-preview-change { animation: none; }
+}
+.hds-preview-change-icon {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  color: var(--system-blue);
+  flex-shrink: 0;
 }
 
 /* Section eyebrow numbering (FIG 0.x feel) */
 .hds-fig-label {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 11px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--tertiary-label);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Parallel Backstage Pass — homepage celebrity testimonial (fictional)
-   Glassy "backstage pass" cards with a violet halo that ties to the avatars.
+   Glassy "backstage pass" cards with a metallic halo that ties to the avatars.
    ═══════════════════════════════════════════════════════════════════════════ */
 .hds-pass-card {
   position: relative;
@@ -1468,32 +1818,32 @@ select.hds-input {
   flex-direction: column;
   border-radius: 18px;
   border: 0.5px solid var(--separator);
-  background: linear-gradient(180deg, rgba(168, 85, 255, 0.05), rgba(255, 255, 255, 0.015));
+  background: linear-gradient(180deg, rgba(139, 147, 232, 0.05), rgba(255, 255, 255, 0.015));
   -webkit-backdrop-filter: saturate(160%) blur(18px);
   backdrop-filter: saturate(160%) blur(18px);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.05) inset,
     0 18px 50px rgba(0, 0, 0, 0.45);
   overflow: hidden;
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: transform 0.35s var(--ease-out), border-color 0.35s ease, box-shadow 0.35s ease;
 }
 .hds-pass-card::before {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(420px 170px at 50% -28%, rgba(168, 85, 255, 0.20), transparent 70%);
+  background: radial-gradient(420px 170px at 50% -28%, rgba(139, 147, 232, 0.20), transparent 70%);
   opacity: 0.85;
 }
 .hds-pass-card > * { position: relative; z-index: 1; }
 .hds-pass-card:hover {
   transform: translateY(-6px);
-  border-color: rgba(168, 85, 255, 0.5);
+  border-color: rgba(139, 147, 232, 0.5);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.08) inset,
     0 26px 72px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(168, 85, 255, 0.25),
-    0 0 38px rgba(168, 85, 255, 0.22);
+    0 0 0 1px rgba(139, 147, 232, 0.25),
+    0 0 38px rgba(139, 147, 232, 0.22);
 }
 
 /* Avatar frame with halo ring + hover scan-light sweep */
@@ -1502,7 +1852,7 @@ select.hds-input {
   overflow: hidden;
   border-radius: 14px;
   isolation: isolate;
-  background: #14101e;
+  background: #12161e;
 }
 .hds-pass-avatar img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .hds-pass-avatar::before {
@@ -1521,12 +1871,12 @@ select.hds-input {
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(199, 203, 255, 0.30) 47%, rgba(168, 85, 255, 0.10) 53%, transparent 70%);
+  background: linear-gradient(115deg, transparent 30%, rgba(199, 203, 246, 0.30) 47%, rgba(139, 147, 232, 0.10) 53%, transparent 70%);
   transform: translateX(-130%);
   transition: transform 0.85s ease;
 }
 .hds-pass-card:hover .hds-pass-avatar::before {
-  box-shadow: inset 0 0 0 1px rgba(168, 85, 255, 0.45), inset 0 0 24px rgba(168, 85, 255, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(139, 147, 232, 0.45), inset 0 0 24px rgba(139, 147, 232, 0.25);
 }
 .hds-pass-card:hover .hds-pass-avatar::after { transform: translateX(130%); }
 
@@ -1541,17 +1891,17 @@ select.hds-input {
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.03em;
-  color: #d9c2ff;
-  background: rgba(168, 85, 255, 0.12);
-  border: 0.5px solid rgba(168, 85, 255, 0.35);
+  color: #c7cbf6;
+  background: rgba(139, 147, 232, 0.12);
+  border: 0.5px solid rgba(139, 147, 232, 0.35);
 }
 .hds-pass-tag::before {
   content: '';
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #c084fc;
-  box-shadow: 0 0 0 3px rgba(168, 85, 255, 0.2);
+  background: #8b93e8;
+  box-shadow: 0 0 0 3px rgba(139, 147, 232, 0.2);
 }
 
 /* Small monospace "PASS" code text */
@@ -1580,6 +1930,130 @@ select.hds-input {
   .hds-pass-avatar::after { display: none; }
 }
 
+/* ── HTML deck empty state — Linear-style centered card ─────────────────── */
+.hds-empty-card {
+  width: 100%;
+  max-width: 420px;
+  /* Staggered entrance: card fades up, inner elements cascade in. */
+  animation: hds-empty-in 0.6s var(--ease-out) both;
+}
+@keyframes hds-empty-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-empty-card { animation: none; }
+}
+
+.hds-empty-icon-wrap {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 24px;
+  border-radius: 14px;
+  background: rgba(139, 147, 232, 0.1);
+  border: 1px solid rgba(139, 147, 232, 0.28);
+  color: var(--system-blue);
+  box-shadow: 0 0 32px rgba(139, 147, 232, 0.14), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  /* Gentle breathing — draws the eye without being noisy. */
+  animation: hds-empty-breath 3.6s var(--ease-in-out) infinite;
+}
+@keyframes hds-empty-breath {
+  0%, 100% { box-shadow: 0 0 28px rgba(139, 147, 232, 0.12), 0 1px 0 rgba(255, 255, 255, 0.04) inset; }
+  50% { box-shadow: 0 0 44px rgba(139, 147, 232, 0.22), 0 1px 0 rgba(255, 255, 255, 0.06) inset; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hds-empty-icon-wrap { animation: none; }
+}
+
+.hds-empty-title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--label);
+  margin-bottom: 8px;
+}
+.hds-empty-subtitle {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--secondary-label);
+  margin-bottom: 24px;
+}
+.hds-empty-error {
+  font-size: 12px;
+  color: var(--system-red, #ef4444);
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Dropzone — primary CTA + drag hint merged into one cohesive target. */
+.hds-empty-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 20px;
+  border-radius: 14px;
+  border: 1px dashed rgba(139, 147, 232, 0.35);
+  background: rgba(139, 147, 232, 0.03);
+  cursor: pointer;
+  transition:
+    border-color var(--dur) var(--ease-out),
+    background var(--dur) var(--ease-out),
+    transform var(--dur) var(--ease-out);
+}
+.hds-empty-dropzone:hover {
+  border-color: var(--system-blue);
+  background: rgba(139, 147, 232, 0.07);
+  transform: translateY(-1px);
+}
+.is-drag-active .hds-empty-dropzone {
+  border-color: var(--system-blue);
+  background: rgba(139, 147, 232, 0.12);
+  transform: scale(1.01);
+}
+.hds-empty-dropzone button {
+  /* The inner button keeps its own interaction; the dropzone wrapper is a
+     visual hint, the actual click target is the button. */
+  pointer-events: none;
+}
+.hds-empty-drop-icon {
+  color: var(--tertiary-label);
+  transition: color var(--dur) var(--ease-out);
+}
+.hds-empty-dropzone:hover .hds-empty-drop-icon {
+  color: var(--system-blue);
+}
+.hds-empty-drag-hint {
+  font-size: 11px;
+  color: var(--tertiary-label);
+}
+
+/* Secondary action — "try sample" sits on the same visual level, not orphaned. */
+.hds-empty-sample {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--secondary-label);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.hds-empty-sample:hover { color: var(--system-blue); }
+.hds-empty-sample-arrow {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.hds-empty-sample:hover .hds-empty-sample-arrow {
+  transform: translateX(2px);
+}
+
 /* ─── Onboarding coach mark (Linear-flavoured) ─────────────────────────────
    Spotlight overlay + tooltip card. The spotlight uses a box-shadow cutout so
    the highlighted anchor stays visible while the rest of the UI is dimmed. The
@@ -1601,10 +2075,10 @@ select.hds-input {
   border-radius: 10px;
   border: 1.5px solid rgba(192, 198, 210, 0.7);
   pointer-events: none;
-  transition: left 260ms cubic-bezier(0.32, 0.72, 0, 1),
-              top 260ms cubic-bezier(0.32, 0.72, 0, 1),
-              width 260ms cubic-bezier(0.32, 0.72, 0, 1),
-              height 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  transition: left 260ms var(--ease-out),
+              top 260ms var(--ease-out),
+              width 260ms var(--ease-out),
+              height 260ms var(--ease-out);
 }
 
 .hds-onboarding-tooltip {
@@ -1621,7 +2095,7 @@ select.hds-input {
     0 2px 8px rgba(0, 0, 0, 0.28);
   color: #f5f5f7;
   pointer-events: auto;
-  animation: hds-onboarding-fade 240ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: hds-onboarding-fade 240ms var(--ease-out) both;
 }
 
 @keyframes hds-onboarding-fade {
@@ -1778,7 +2252,7 @@ select.hds-input {
   border: 0.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.38);
-  animation: hds-onboarding-toast-in 280ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation: hds-onboarding-toast-in 280ms var(--ease-out) both;
   pointer-events: none;
 }
 
@@ -1815,7 +2289,7 @@ select.hds-input {
   color: var(--tertiary-label);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.32, 0.72, 0, 1), color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s var(--ease-out), color 0.2s ease, box-shadow 0.2s ease;
 }
 .easter-robot:hover {
   transform: scale(1.1);
@@ -1907,7 +2381,7 @@ select.hds-input {
   border: 0.5px solid var(--separator);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
   text-align: center;
-  animation: easter-modal-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: easter-modal-in 0.28s var(--ease-out);
 }
 @keyframes easter-modal-in {
   from { opacity: 0; transform: scale(0.94) translateY(8px); }
@@ -1992,4 +2466,23 @@ select.hds-input {
 .easter-modal-close:hover {
   background: var(--control-bg);
   color: var(--label);
+}
+
+/* ── prefers-reduced-motion global fallback ───────────────────────────────
+   Catch any animation we missed in per-keyframe reduce blocks. Taste Skill
+   §6.B: MOTION>3 must degrade. This is the safety net. */
+@media (prefers-reduced-motion: reduce) {
+  .hds-drawer,
+  .hds-modal,
+  .hds-onboarding-card,
+  .hds-onboarding-tooltip,
+  .easter-plus-one,
+  .easter-overlay,
+  .easter-modal,
+  .easter-modal-input,
+  [class^="easter-"],
+  [class*=" easter-"] {
+    animation: none !important;
+    transition: none !important;
+  }
 }
