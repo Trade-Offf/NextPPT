@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import type { RouteRecord } from 'vite-react-ssg';
 import { LocaleLayout } from './components/LocaleLayout.js';
+import { RouteErrorPage } from './components/RouteErrorPage.js';
 import { LandingPage } from './pages/LandingPage.js';
 import { NotFoundPage } from './pages/NotFoundPage.js';
 import { useDeckStore } from './store/deckStore.js';
@@ -56,6 +57,16 @@ function localeChildren() {
 }
 
 export const routes: RouteRecord[] = [
-  { path: '/', element: <LocaleLayout locale={'zh' as Locale} />, children: localeChildren() },
-  { path: '/en', element: <LocaleLayout locale={'en' as Locale} />, children: localeChildren() },
+  {
+    path: '/',
+    element: <LocaleLayout locale={'zh' as Locale} />,
+    errorElement: <RouteErrorPage />,
+    children: localeChildren(),
+  },
+  {
+    path: '/en',
+    element: <LocaleLayout locale={'en' as Locale} />,
+    errorElement: <RouteErrorPage />,
+    children: localeChildren(),
+  },
 ];

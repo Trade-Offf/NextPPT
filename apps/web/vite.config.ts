@@ -64,5 +64,16 @@ export default defineConfig({
       '/', '/guide', '/templates', '/explore', '/explore/feishu-whiteboard', '/html',
       '/en', '/en/guide', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard', '/en/html',
     ],
+    // Inline static loader JSON into every shell so hydration never fetch()es
+    // /static-loader-data/*.json (those requests often fail with CONNECTION_RESET
+    // on CF Pages and crash the app — see scripts/inline-ssg-loader-data.mjs).
+    async onFinished(dir) {
+      const { execFileSync } = await import('node:child_process');
+      execFileSync(
+        process.execPath,
+        [path.resolve(__dirname, 'scripts/inline-ssg-loader-data.mjs'), dir],
+        { stdio: 'inherit' },
+      );
+    },
   },
 });

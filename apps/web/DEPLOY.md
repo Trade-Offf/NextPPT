@@ -16,6 +16,8 @@ After build, `apps/web/dist` must contain at least:
 
 - `index.html`, `guide/index.html`, `en/index.html`, `en/guide/index.html`
 - `assets/` with hashed `.js` and `.css` (e.g. `app-*.js`, `client-*.js`)
+- `static-loader-data/` + `static-loader-data-manifest-*.json` (vite-react-ssg loader artifacts)
+- Prerendered HTML with inlined `__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__` / `__VITE_REACT_SSG_STATIC_LOADER_DATA__` (added by `scripts/inline-ssg-loader-data.mjs` in `ssgOptions.onFinished`)
 - `public` files copied in (`sample-deck.html`, images, `_redirects`, `_headers`, `404.html`)
 
 ---
@@ -84,9 +86,11 @@ DEPLOY_DOMAIN=https://htmldeckstudio.pages.dev pnpm verify-deploy
 The script checks:
 
 - Homepage returns HTML and references `/assets/app-*.js`
+- Homepage inlines `__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__` + `__VITE_REACT_SSG_STATIC_LOADER_DATA__`
 - The real bundle returns `application/javascript`
 - A **deliberately missing** `/assets/*.js` does **not** return `text/html` with 200 (SPA fallback)
 - Prerendered routes `/guide`, `/en`, `/en/guide` return HTML
+- `static-loader-data-manifest-{hash}.json` and `static-loader-data/index.{hash}.json` return JSON
 
 Exit code `0` = healthy; `1` = fix Cloudflare SPA setting or redeploy.
 
@@ -116,6 +120,21 @@ curl -sI "https://next-ppt.com/assets/app-WRONG.js" | grep -iE "HTTP/|content-ty
 
 ---
 
+## Symptom: "Unexpected Application Error! Failed to fetch"
+
+Hydration used to `fetch('/static-loader-data/…json')` via vite-react-ssg. On Cloudflare those requests often fail with `net::ERR_CONNECTION_RESET`, and React Router shows its default error page.
+
+**Fix (already in the build):** `ssgOptions.onFinished` runs `scripts/inline-ssg-loader-data.mjs`, which embeds the loader manifest + data into every prerendered HTML. With the globals set, the client **never** fetches those JSON files.
+
+If you still see this after deploy:
+
+1. View Source on `/` — must include `__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__`
+2. Confirm `dist` uploaded includes `static-loader-data/` + the manifest (fallback only)
+3. Purge cache and redeploy
+4. Run `pnpm verify-deploy`
+
+---
+
 ## Symptom: console `chrome-error://chromewebdata/`
 
 On the **landing page**, this is usually **not** app code:
@@ -135,7 +154,8 @@ Intermittent **white screens** are almost always the missing-JS-as-HTML issue ab
 | Path | Policy | Why |
 | --- | --- | --- |
 | `/assets/*` | `immutable`, 1 year | Hashed filenames — safe to cache forever **when the file exists** |
-| `/`, `/guide`, `/en`, `/en/guide` | `max-age=0, must-revalidate` | HTML shells must refresh after deploy so they pick up new asset hashes |
+| `/static-loader-data/*`, `static-loader-data-manifest-*.json` | `immutable`, 1 year | Build-hash in filename |
+| `/`, `/guide`, `/templates`, `/explore`, `/html`, `/en`, … | `max-age=0, must-revalidate` | HTML shells must refresh after deploy so they pick up new asset hashes + inlined loader data |
 | `404.html` | `no-store` | Error page should never be cached |
 
 **Important:** `immutable` on `/assets/*` is only safe when missing assets return **404**. If SPA mode serves HTML for missing JS, that wrong HTML can be cached for a year — another reason to disable SPA fallback.
@@ -146,7 +166,8 @@ Intermittent **white screens** are almost always the missing-JS-as-HTML issue ab
 
 - [ ] `dist/404.html` deployed (disables Pages SPA auto-fallback)
 - [ ] Output directory = `apps/web/dist`
-- [ ] Full `dist` uploaded (including new `assets/`)
+- [ ] Full `dist` uploaded (including new `assets/`, `static-loader-data/`, manifest)
+- [ ] Homepage HTML has inlined `__VITE_REACT_SSG_STATIC_LOADER_*` globals
 - [ ] **Purge cache** after deploy
 - [ ] `pnpm verify-deploy` exits 0
 - [ ] Spot-check in Incognito: open file, editor loads

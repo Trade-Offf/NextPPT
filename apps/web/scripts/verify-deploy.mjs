@@ -91,6 +91,30 @@ async function main() {
   const assetPath = assetMatch[0];
   line('index references hashed bundle', true, assetPath);
 
+  // SSG loader data must be inlined so hydration does not fetch /static-loader-data/*.json
+  // (those requests frequently fail with ERR_CONNECTION_RESET and crash the app).
+  const hasInlineManifest = html.includes('__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__');
+  const hasInlineData = html.includes('__VITE_REACT_SSG_STATIC_LOADER_DATA__');
+  line(
+    'index inlines SSG loader globals',
+    hasInlineManifest && hasInlineData,
+    hasInlineManifest && hasInlineData
+      ? 'MANIFEST + DATA present'
+      : 'missing — rebuild with scripts/inline-ssg-loader-data.mjs',
+  );
+  if (!hasInlineManifest || !hasInlineData) {
+    fail(
+      'Homepage HTML is missing inlined __VITE_REACT_SSG_STATIC_LOADER_* globals. ' +
+        'Hydration will fetch /static-loader-data/*.json and may crash with Failed to fetch. ' +
+        'Redeploy a build that runs ssgOptions.onFinished / inline-ssg-loader-data.mjs.',
+    );
+  }
+
+  const hashMatch = html.match(/__VITE_REACT_SSG_HASH__\s*=\s*'([A-Za-z0-9_-]+)'/);
+  if (!hashMatch) fail('Could not find __VITE_REACT_SSG_HASH__ in homepage HTML.');
+  const ssgHash = hashMatch[1];
+  line('SSG hash', true, ssgHash);
+
   // ── 2. Real JS bundle ───────────────────────────────────────────────────
   const assetRes = await head(assetPath);
   const assetType = header(assetRes, 'content-type').split(';')[0].trim().toLowerCase();
@@ -131,6 +155,30 @@ async function main() {
     const ok = res.ok && header(res, 'content-type').includes('text/html');
     line(`GET ${path}`, ok, `${res.status}`);
     if (!ok) fail(`Prerendered route ${path} failed.`);
+  }
+
+  // ── 6. Static loader artifacts (fallback if clients somehow still fetch) ─
+  const manifestPath = `/static-loader-data-manifest-${ssgHash}.json`;
+  const indexLoaderPath = `/static-loader-data/index.${ssgHash}.json`;
+  for (const path of [manifestPath, indexLoaderPath]) {
+    let res;
+    try {
+      res = await fetchRetry(path);
+    } catch (err) {
+      fail(
+        `Could not reach ${path} — ${err instanceof Error ? err.message : err}. ` +
+          'Deploy full apps/web/dist including static-loader-data/ and the manifest.',
+      );
+    }
+    const ct = header(res, 'content-type');
+    const ok = res.ok && ct.includes('application/json');
+    line(`GET ${path}`, ok, `${res.status} ${ct}`);
+    if (!ok) {
+      fail(
+        `${path} must return JSON 200 (got ${res.status} ${ct}). ` +
+          'Incomplete dist upload — include static-loader-data/ + manifest.',
+      );
+    }
   }
 
   console.log('\nOK — deploy looks healthy.');
