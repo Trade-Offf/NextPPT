@@ -61,8 +61,8 @@ export default defineConfig({
   ssgOptions: {
     dirStyle: 'nested',
     includedRoutes: () => [
-      '/', '/guide', '/templates', '/explore', '/explore/feishu-whiteboard', '/html',
-      '/en', '/en/guide', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard', '/en/html',
+      '/', '/guide', '/guide/generate', '/guide/edit', '/guide/export', '/templates', '/explore', '/explore/feishu-whiteboard', '/html',
+      '/en', '/en/guide', '/en/guide/generate', '/en/guide/edit', '/en/guide/export', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard', '/en/html',
     ],
     // Inline static loader JSON into every shell so hydration never fetch()es
     // /static-loader-data/*.json (those requests often fail with CONNECTION_RESET

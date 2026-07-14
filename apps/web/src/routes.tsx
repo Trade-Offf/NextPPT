@@ -47,6 +47,7 @@ function localeChildren() {
   return [
     { index: true, element: <HomeRoute /> },
     { path: 'guide', element: <Suspense fallback={null}><GuidePage /></Suspense> },
+    { path: 'guide/:tab', element: <Suspense fallback={null}><GuidePage /></Suspense> },
     { path: 'templates', element: <Suspense fallback={null}><TemplatesPage /></Suspense> },
     { path: 'explore', element: <Suspense fallback={null}><ExplorePage /></Suspense> },
     { path: 'explore/:slug', element: <Suspense fallback={null}><ExploreArticlePage /></Suspense> },

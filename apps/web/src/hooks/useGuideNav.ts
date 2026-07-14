@@ -24,7 +24,7 @@ export function useGuideNav() {
 
   const openGuide = useCallback(
     (anchor?: GuideTab) => {
-      navigate(`${prefix}/guide${anchor ? `#${anchor}` : ''}`);
+      navigate(`${prefix}/guide${anchor ? `/${anchor}` : ''}`);
     },
     [navigate, prefix],
   );

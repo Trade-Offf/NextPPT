@@ -1173,6 +1173,45 @@ select.hds-input {
   object-fit: cover;
 }
 .hds-guide-story-body { min-width: 0; }
+
+/* Sub-card for each editor inside the edit / export sections */
+.hds-guide-editor-card {
+  padding: 18px 20px;
+  border-radius: 11px;
+  border: 1px solid var(--separator);
+  background: rgba(255, 255, 255, 0.025);
+  margin-bottom: 14px;
+}
+.hds-guide-editor-card:last-child { margin-bottom: 0; }
+.hds-guide-editor-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.hds-guide-editor-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--label);
+}
+.hds-guide-editor-pill {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--system-blue);
+  background: var(--cobalt-lt);
+  border: 1px solid rgba(94, 106, 210, 0.3);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+.hds-guide-editor-desc {
+  font-size: 13px;
+  color: var(--secondary-label);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
 .hds-guide-step-tag {
   display: inline-block;
   font-size: 17px;

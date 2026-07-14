@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useDeckStore } from '../store/deckStore.js';
 import { useOpenDeck, FILE_API_SUPPORTED } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP, revealOnScroll } from '../lib/gsap.js';
-import { useGuideNav } from '../hooks/useGuideNav.js';
+import { useGuideNav, useLocalePrefix } from '../hooks/useGuideNav.js';
 import { SiteHeader } from '../components/SiteHeader.js';
 import { OpenDeckErrorAlert } from '../components/OpenDeckErrorAlert.js';
 import type { GuideTab } from '../data/guide.js';
 
-const ANCHORS: readonly GuideTab[] = ['generate', 'edit', 'export'];
+const TABS: readonly GuideTab[] = ['generate', 'edit', 'export'];
 
-function anchorFromHash(hash: string): GuideTab | null {
-  const h = hash.replace('#', '');
-  return (ANCHORS as readonly string[]).includes(h) ? (h as GuideTab) : null;
+function tabFromParam(param: string | undefined): GuideTab | null {
+  if (!param) return null;
+  return (TABS as readonly string[]).includes(param) ? (param as GuideTab) : null;
 }
 
 interface Step { title: string; desc: string }
@@ -22,8 +22,10 @@ export function GuidePage() {
   const { t } = useTranslation('guide');
   const { t: tPrompt } = useTranslation('prompt');
   const { closeGuide } = useGuideNav();
-  const { hash } = useLocation();
-  const hashAnchor = anchorFromHash(hash);
+  const navigate = useNavigate();
+  const prefix = useLocalePrefix();
+  const { tab: tabParam } = useParams<{ tab: string }>();
+  const activeTab = tabFromParam(tabParam);
 
   const hasDeck = useDeckStore((s) => s.slides.length > 0);
   const { error, handlePickFile, handlePickFolder } = useOpenDeck();
@@ -33,8 +35,10 @@ export function GuidePage() {
 
   const flowSteps = t('flow.steps', { returnObjects: true }) as Step[];
   const manualSteps = t('generate.steps', { returnObjects: true, topic: tPrompt('topic') }) as Step[];
-  const abilities = t('edit.abilities', { returnObjects: true }) as Step[];
-  const exportNotes = t('export.notes', { returnObjects: true }) as string[];
+  const htmlDeckAbilities = t('edit.htmlDeck.abilities', { returnObjects: true }) as Step[];
+  const pptEditorAbilities = t('edit.pptEditor.abilities', { returnObjects: true }) as Step[];
+  const htmlExportNotes = t('export.htmlExport.notes', { returnObjects: true }) as string[];
+  const pptExportNotes = t('export.pptExport.notes', { returnObjects: true }) as string[];
   const promptText = tPrompt('generate', { topic: tPrompt('topic') });
 
   // Esc returns to the page the reader came from.
@@ -44,11 +48,11 @@ export function GuidePage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [closeGuide]);
 
-  // Scroll to the requested anchor whenever the hash changes.
+  // Scroll to the requested tab whenever the path param changes.
   useEffect(() => {
-    if (!hashAnchor) return;
-    document.getElementById(`guide-${hashAnchor}`)?.scrollIntoView({ block: 'start' });
-  }, [hashAnchor]);
+    if (!activeTab) return;
+    document.getElementById(`guide-${activeTab}`)?.scrollIntoView({ block: 'start' });
+  }, [activeTab]);
 
   // Entrance animation + per-section scroll reveals. The guide scrolls inside
   // a fixed container, so ScrollTrigger must use scrollRef as its scroller.
@@ -210,32 +214,57 @@ export function GuidePage() {
                   <span className="hds-mini-line is-short" />
                   <svg className="hds-mini-cursor" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 7-6 2-2 6-6-15z" /></svg>
                 </div>
-                <p className="hds-mini-caption">{t('edit.demoHint')}</p>
               </div>
             </div>
             <div className="hds-guide-story-body">
               <span className="hds-guide-step-tag">{t('edit.title')}</span>
               <p className="text-sm text-[var(--secondary-label)] leading-relaxed mt-2 mb-5">{t('edit.intro')}</p>
 
-              <ul className="hds-guide-abilities">
-                {abilities.map((a) => (
-                  <li key={a.title}>
-                    <svg className="hds-ability-tick" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3.2 3.2L13 4.5" /></svg>
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-[var(--label)] leading-tight">{a.title}</p>
-                      <p className="text-xs text-[var(--secondary-label)] leading-relaxed mt-0.5">{a.desc}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {/* HTML 演示台 */}
+              <div className="hds-guide-editor-card">
+                <div className="hds-guide-editor-head">
+                  <h3 className="hds-guide-editor-name">{t('edit.htmlDeck.name')}</h3>
+                  <span className="hds-guide-editor-pill">{t('edit.htmlDeck.pill')}</span>
+                </div>
+                <p className="hds-guide-editor-desc">{t('edit.htmlDeck.desc')}</p>
+                <ul className="hds-guide-abilities">
+                  {htmlDeckAbilities.map((a) => (
+                    <li key={a.title}>
+                      <svg className="hds-ability-tick" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3.2 3.2L13 4.5" /></svg>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-medium text-[var(--label)] leading-tight">{a.title}</p>
+                        <p className="text-xs text-[var(--secondary-label)] leading-relaxed mt-0.5">{a.desc}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <button onClick={() => navigate(`${prefix}/html`)} className="hds-btn-primary px-3.5 py-1.5 text-xs mt-3">{t('edit.htmlDeck.cta')}</button>
+              </div>
 
-              <div className="hds-guide-action">
-                <span className="text-xs text-[var(--tertiary-label)]">{t('edit.actionLabel')}</span>
-                {hasDeck ? (
-                  <button onClick={closeGuide} className="hds-btn-primary px-3.5 py-1.5 text-xs">{t('header.backToEdit')}</button>
-                ) : (
-                  <OpenButton label={t('edit.openMine')} />
-                )}
+              {/* PPT 编辑器 */}
+              <div className="hds-guide-editor-card">
+                <div className="hds-guide-editor-head">
+                  <h3 className="hds-guide-editor-name">{t('edit.pptEditor.name')}</h3>
+                </div>
+                <p className="hds-guide-editor-desc">{t('edit.pptEditor.desc')}</p>
+                <ul className="hds-guide-abilities">
+                  {pptEditorAbilities.map((a) => (
+                    <li key={a.title}>
+                      <svg className="hds-ability-tick" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3.2 3.2L13 4.5" /></svg>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-medium text-[var(--label)] leading-tight">{a.title}</p>
+                        <p className="text-xs text-[var(--secondary-label)] leading-relaxed mt-0.5">{a.desc}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-3">
+                  {hasDeck ? (
+                    <button onClick={closeGuide} className="hds-btn-primary px-3.5 py-1.5 text-xs">{t('header.backToEdit')}</button>
+                  ) : (
+                    <OpenButton label={t('edit.pptEditor.cta')} />
+                  )}
+                </div>
               </div>
             </div>
           </section>
@@ -250,14 +279,36 @@ export function GuidePage() {
             <div className="hds-guide-story-body">
               <span className="hds-guide-step-tag">{t('export.title')}</span>
               <p className="text-sm text-[var(--secondary-label)] leading-relaxed mt-2 mb-5">{t('export.intro')}</p>
-              <ul className="hds-steps">
-                {exportNotes.map((note, i) => (
-                  <li key={note} className="hds-step">
-                    <span className="hds-step-num">{i + 1}</span>
-                    <p className="text-sm text-[var(--label)] leading-relaxed min-w-0">{note}</p>
-                  </li>
-                ))}
-              </ul>
+
+              {/* HTML 演示台导出 */}
+              <div className="hds-guide-editor-card">
+                <div className="hds-guide-editor-head">
+                  <h3 className="hds-guide-editor-name">{t('export.htmlExport.name')}</h3>
+                </div>
+                <ul className="hds-steps">
+                  {htmlExportNotes.map((note, i) => (
+                    <li key={note} className="hds-step">
+                      <span className="hds-step-num">{i + 1}</span>
+                      <p className="text-sm text-[var(--label)] leading-relaxed min-w-0">{note}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* PPT 编辑器导出 */}
+              <div className="hds-guide-editor-card">
+                <div className="hds-guide-editor-head">
+                  <h3 className="hds-guide-editor-name">{t('export.pptExport.name')}</h3>
+                </div>
+                <ul className="hds-steps">
+                  {pptExportNotes.map((note, i) => (
+                    <li key={note} className="hds-step">
+                      <span className="hds-step-num">{i + 1}</span>
+                      <p className="text-sm text-[var(--label)] leading-relaxed min-w-0">{note}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
               <div className="hds-guide-action">
                 {hasDeck ? (
