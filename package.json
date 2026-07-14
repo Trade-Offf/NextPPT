@@ -13,7 +13,8 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "verify-deploy": "pnpm --filter @hds/web verify-deploy"
+    "verify-deploy": "pnpm --filter @hds/web verify-deploy",
+    "deploy-web": "./scripts/deploy-web.sh"
   },
   "devDependencies": {
     "concurrently": "^10.0.0",

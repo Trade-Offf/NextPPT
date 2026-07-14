@@ -1,4 +1,21 @@
-# Deploying the web app (Cloudflare Pages / static hosts)
+# Deploying the web app
+
+> **Primary host (since 2026-07):** Hong Kong VPS (`47.243.33.162`) via Caddy — Cloudflare Pages free anycast IPs are intermittently reset on mainland China TLS (`ERR_CONNECTION_RESET`).  
+> **Backup:** `https://htmldeckstudio.pages.dev` (Cloudflare Pages Git deploy still runs).
+
+## Architecture
+
+| Host | Role | DNS |
+| --- | --- | --- |
+| `47.243.33.162` (Aliyun HK) + Caddy | **Production** static site + API | `next-ppt.com` / `www` **A, DNS-only (grey cloud)** → VPS |
+| same VPS | Export API | `api.next-ppt.com` → Caddy → `api` container |
+| Cloudflare Pages | Overseas backup only | `htmldeckstudio.pages.dev` |
+
+```
+Browser ──HTTPS──► Caddy (VPS)
+                     ├─ next-ppt.com  → /srv/web  (rsync of apps/web/dist)
+                     └─ api.next-ppt.com → api:3000
+```
 
 ## Build output
 
@@ -7,10 +24,8 @@ Always deploy the **Vite build folder**, not the source tree:
 | Setting | Value |
 | --- | --- |
 | **Build command** | `pnpm install && pnpm --filter @hds/web build` |
-| **Output directory** | `apps/web/dist` |
+| **Output directory** | `apps/web/dist` → rsync to VPS `web-dist/` |
 | **Node** | 20+ |
-
-From the repo root, `pnpm build` also works (builds protocol + all apps).
 
 After build, `apps/web/dist` must contain at least:
 
@@ -22,64 +37,83 @@ After build, `apps/web/dist` must contain at least:
 
 ---
 
-## Cloudflare Pages — required settings
+## Production deploy (VPS) — primary
 
-### 1. Disable SPA fallback (critical)
-
-**Cloudflare Pages has no SPA toggle in the dashboard.** You are not missing a setting — the UI under **设置 → 构建** is all there is for build config.
-
-Pages enables SPA-style fallback **automatically** when the build output has **no `404.html` at the root**. Any missing path (including deleted `/assets/app-OLDHASH.js` after a deploy) then returns `index.html` with **200 + text/html**. The browser tries to execute that HTML as JavaScript → **white screen / intermittent load failure**.
-
-**Fix: ship `404.html` in `apps/web/dist`**
-
-This repo includes `apps/web/public/404.html`. Vite copies it to `dist/404.html` on build. Once that file is deployed:
-
-- Missing paths return **HTTP 404** with the custom 404 page
-- SPA auto-fallback to `index.html` is **disabled**
-
-After deploying:
-
-1. **Redeploy** (push to `main` or trigger a new build in the dashboard you showed)
-2. **Purge cache** — Caching → Purge Everything
-3. Run `pnpm verify-deploy` — the “missing /assets/*.js” check must pass
-
-Quick manual check:
+From the repo root on a machine that can SSH to the VPS:
 
 ```bash
-curl -s "https://next-ppt.com/404.html" | grep "页面未找到"
-# Must print 页面未找到. If you see the homepage instead, 404.html is not deployed yet.
+# First-time or after Caddyfile / compose changes:
+#   on VPS: git pull && docker compose up -d
 
-curl -sI "https://next-ppt.com/assets/app-WRONG.js" | grep -i content-type
-# Must NOT be text/html with 200 after the fix.
+pnpm deploy-web
+# equivalent: ./scripts/deploy-web.sh
 ```
 
-This repo intentionally avoids a global `/* /index.html 200` rule in `_redirects`. Only `/en/*` needs SPA-style fallback because English shells are prerendered separately; Chinese routes are real files on disk.
+What the script does:
 
-### 2. Output directory
+1. `pnpm --filter @hds/web build`
+2. `rsync -az --delete apps/web/dist/` → `root@47.243.33.162:/root/html-deck-studio/web-dist/`
+3. Reload Caddy (picks up Caddyfile; static files need no restart)
+4. `DEPLOY_DOMAIN=https://next-ppt.com pnpm verify-deploy`
 
-Must be `apps/web/dist` — **not** `apps/web`, **not** repo root.
+Overrides:
 
-### 3. Upload the full `dist` every deploy
+```bash
+DEPLOY_HOST=root@47.243.33.162 DEPLOY_PATH=/root/html-deck-studio ./scripts/deploy-web.sh
+SKIP_BUILD=1 ./scripts/deploy-web.sh      # rsync existing dist only
+SKIP_VERIFY=1 ./scripts/deploy-web.sh     # skip smoke test
+```
 
-If only `index.html` updates but old `assets/` is dropped from the upload, the new HTML references JS files that no longer exist on the server.
+Compose mounts `./web-dist` read-only at `/srv/web` for Caddy ([docker-compose.yml](../../docker-compose.yml), [Caddyfile](../../Caddyfile)).
 
-### 4. Purge cache after each production deploy
+### DNS cutover (one-time, Cloudflare dashboard)
 
-**Caching** → **Configuration** → **Purge Everything**
+Mainland `ERR_CONNECTION_RESET` was caused by **Cloudflare orange-cloud (proxied) free IPs**, not by app code.
 
-Otherwise users may keep a cached `index.html` that points at a previous deploy's hashed JS.
+1. Cloudflare → DNS for `next-ppt.com`
+2. Delete / edit existing orange-cloud CNAME/A for apex and `www`
+3. Create **A** records:
+   - `next-ppt.com` → `47.243.33.162` — **DNS only (grey cloud)**
+   - `www` → `47.243.33.162` — **DNS only (grey cloud)**
+4. Leave `api` as-is (already points at VPS)
+5. Wait for propagation; Caddy auto-issues Let’s Encrypt for the new names (ports 80/443 open)
+6. Keep Pages project for `htmldeckstudio.pages.dev` as overseas backup — do **not** point the apex back to orange-cloud unless VPS is down
+
+Quick check after cutover:
+
+```bash
+dig +short next-ppt.com A
+# Expect: 47.243.33.162   (NOT 104.21.x / 172.67.x)
+
+# Direct (VPN/proxy off), spam the homepage — should be 0 resets
+for i in $(seq 1 20); do curl -sS -o /dev/null -w "%{http_code}\n" https://next-ppt.com/; done
+```
+
+---
+
+## Cloudflare Pages — backup only
+
+Build settings (if you still use Pages for `*.pages.dev`):
+
+| Setting | Value |
+| --- | --- |
+| Build command | `pnpm install && pnpm --filter @hds/web build` |
+| Output directory | `apps/web/dist` |
+| Node | 20+ |
+
+### Disable SPA fallback on Pages
+
+Pages enables SPA-style fallback **automatically** when the build output has **no `404.html` at the root**. Ship `apps/web/public/404.html` so missing hashed JS returns real 404, not `index.html` with 200.
 
 ---
 
 ## Verify after deploy
 
-### Automated (recommended)
-
 ```bash
-# Default domain: https://next-ppt.com
+# Production (VPS)
 pnpm verify-deploy
 
-# Custom preview / staging domain
+# Pages backup
 DEPLOY_DOMAIN=https://htmldeckstudio.pages.dev pnpm verify-deploy
 ```
 
@@ -92,19 +126,25 @@ The script checks:
 - Prerendered routes `/guide`, `/en`, `/en/guide` return HTML
 - `static-loader-data-manifest-{hash}.json` and `static-loader-data/index.{hash}.json` return JSON
 
-Exit code `0` = healthy; `1` = fix Cloudflare SPA setting or redeploy.
+Exit code `0` = healthy.
 
 ### Manual curl
 
 ```bash
-# 1. Copy app-*.js from View Source on /
 curl -sI "https://next-ppt.com/assets/app-HASH.js" | grep -i content-type
 # Expect: application/javascript
 
-# 2. Deliberately wrong hash — must NOT be HTML 200
 curl -sI "https://next-ppt.com/assets/app-WRONG.js" | grep -iE "HTTP/|content-type"
 # Expect: 404 (or 403), NOT "200" + "text/html"
 ```
+
+---
+
+## Symptom: mainland `ERR_CONNECTION_RESET` / “无法访问此网站”
+
+**Diagnosis (2026-07):** TCP to Cloudflare edge IPs succeeds, but TLS is reset (`Recv failure: Connection reset by peer`) for CF free anycast ranges (`104.21.x`, `172.67.x`). Same IP with `SNI=www.cloudflare.com` also resets. Controllers (baidu / vercel / netlify / **this VPS**) succeed. Empty Network tab + “Provisional headers” = connection died before any HTTP response — not an app bug.
+
+**Fix:** serve the site from the HK VPS (this doc’s primary path) with **grey-cloud** DNS. Do not put the apex back behind Cloudflare proxy unless you accept mainland unreliability.
 
 ---
 
@@ -112,62 +152,40 @@ curl -sI "https://next-ppt.com/assets/app-WRONG.js" | grep -iE "HTTP/|content-ty
 
 1. Open DevTools → **Network** → click the red `*.js` request.
 2. If **Status 200** and **Content-Type: text/html** → SPA fallback or missing file served as `index.html`.
-   - Redeploy with `404.html` at dist root (above)
-   - Redeploy full `dist`
-   - Purge cache
-3. If **Status 404** → build output path wrong or incomplete deploy; fix output directory and redeploy.
-4. Run `pnpm verify-deploy` to confirm.
+   - Ensure `404.html` is in `web-dist` / Pages dist
+   - Redeploy full dist
+3. If **Status 404** → incomplete upload; re-run `pnpm deploy-web`.
+4. Run `pnpm verify-deploy`.
 
 ---
 
 ## Symptom: "Unexpected Application Error! Failed to fetch"
 
-Hydration used to `fetch('/static-loader-data/…json')` via vite-react-ssg. On Cloudflare those requests often fail with `net::ERR_CONNECTION_RESET`, and React Router shows its default error page.
+Hydration used to `fetch('/static-loader-data/…json')` via vite-react-ssg. Build now inlines loader globals via `scripts/inline-ssg-loader-data.mjs` so the client never needs those requests.
 
-**Fix (already in the build):** `ssgOptions.onFinished` runs `scripts/inline-ssg-loader-data.mjs`, which embeds the loader manifest + data into every prerendered HTML. With the globals set, the client **never** fetches those JSON files.
-
-If you still see this after deploy:
+If you still see this:
 
 1. View Source on `/` — must include `__VITE_REACT_SSG_STATIC_LOADER_MANIFEST__`
-2. Confirm `dist` uploaded includes `static-loader-data/` + the manifest (fallback only)
-3. Purge cache and redeploy
-4. Run `pnpm verify-deploy`
+2. Redeploy with a fresh `pnpm deploy-web`
 
 ---
 
-## Symptom: console `chrome-error://chromewebdata/`
+## Cache headers
 
-On the **landing page**, this is usually **not** app code:
-
-- No Service Worker is registered
-- No iframe on the homepage (`EditorPreview` is static DOM)
-- Often caused by **browser extensions** (wallet, assistant, ad blockers) injecting into the page
-
-**Quick check:** open the site in an **Incognito** window with extensions disabled. If the error disappears, ignore it for production monitoring.
-
-Intermittent **white screens** are almost always the missing-JS-as-HTML issue above, not this console line.
-
----
-
-## Cache headers (in `public/_headers`)
+On VPS these are set in [Caddyfile](../../Caddyfile). On Pages, [public/_headers](public/_headers) still applies.
 
 | Path | Policy | Why |
 | --- | --- | --- |
-| `/assets/*` | `immutable`, 1 year | Hashed filenames — safe to cache forever **when the file exists** |
-| `/static-loader-data/*`, `static-loader-data-manifest-*.json` | `immutable`, 1 year | Build-hash in filename |
-| `/`, `/guide`, `/templates`, `/explore`, `/html`, `/en`, … | `max-age=0, must-revalidate` | HTML shells must refresh after deploy so they pick up new asset hashes + inlined loader data |
-| `404.html` | `no-store` | Error page should never be cached |
-
-**Important:** `immutable` on `/assets/*` is only safe when missing assets return **404**. If SPA mode serves HTML for missing JS, that wrong HTML can be cached for a year — another reason to disable SPA fallback.
+| `/assets/*`, `/static-loader-data/*`, manifest | `immutable`, 1 year | Hashed filenames |
+| HTML shells (`/`, `/guide`, `/en`, …) | `max-age=0, must-revalidate` | Pick up new asset hashes after deploy |
+| `404.html` | `no-store` | Never cache the error page |
 
 ---
 
 ## Deploy checklist
 
-- [ ] `dist/404.html` deployed (disables Pages SPA auto-fallback)
-- [ ] Output directory = `apps/web/dist`
-- [ ] Full `dist` uploaded (including new `assets/`, `static-loader-data/`, manifest)
-- [ ] Homepage HTML has inlined `__VITE_REACT_SSG_STATIC_LOADER_*` globals
-- [ ] **Purge cache** after deploy
-- [ ] `pnpm verify-deploy` exits 0
-- [ ] Spot-check in Incognito: open file, editor loads
+- [ ] VPS: `git pull` + `docker compose up -d` (Caddyfile / compose changed)
+- [ ] `pnpm deploy-web` exits 0
+- [ ] `dig +short next-ppt.com` → `47.243.33.162` (grey cloud)
+- [ ] Direct (no VPN): 20× `curl https://next-ppt.com/` → all 200, no reset
+- [ ] Spot-check Incognito: `/`, `/guide`, `/en/guide`

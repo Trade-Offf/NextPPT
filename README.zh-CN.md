@@ -96,16 +96,19 @@ flowchart LR
 
 ## 部署与发版校验
 
-前端静态站部署在 Cloudflare Pages，完整说明见 [apps/web/DEPLOY.md](apps/web/DEPLOY.md)。
+**生产前端**部署在香港 VPS（Caddy 静态站），完整说明见 [apps/web/DEPLOY.md](apps/web/DEPLOY.md)。Cloudflare Pages（`*.pages.dev`）仅作海外备份。
 
-发版后务必做两件事：
+发版：
 
-1. **确保 `dist/404.html` 已部署**（Cloudflare Pages 没有 Dashboard 开关；没有根目录 `404.html` 时会自动 SPA 回退，缺失的 `/assets/*.js` 会返回 HTML，用户偶发白屏）
-2. 清缓存并跑校验：`pnpm verify-deploy`
+```bash
+pnpm deploy-web   # build + rsync 到 VPS + verify-deploy
+```
+
+DNS 须为**灰云**指向 VPS（`47.243.33.162`）。橙云（Cloudflare 代理）在大陆会概率性 TLS 重置（`ERR_CONNECTION_RESET`）。
 
 ## 文档
 
-- [apps/web/DEPLOY.md](apps/web/DEPLOY.md) — Cloudflare Pages 部署与排障
+- [apps/web/DEPLOY.md](apps/web/DEPLOY.md) — VPS 主部署、DNS 灰云切流、备份 Pages、排障
 - [docs/ROADMAP.md](docs/ROADMAP.md) — 后续规划
 - [docs/GROWTH.md](docs/GROWTH.md) — 定位与渠道
 - [docs/PRD.md](docs/PRD.md) · [docs/TRD.md](docs/TRD.md) — 产品与技术方案

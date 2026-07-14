@@ -1,3 +1,4 @@
+# Export API (unchanged).
 api.next-ppt.com {
 	# Stream SSE export progress without buffering.
 	reverse_proxy api:3000 {
@@ -8,4 +9,54 @@ api.next-ppt.com {
 	request_body {
 		max_size 210MB
 	}
+}
+
+# Static web app (migrated off Cloudflare Pages to avoid China TLS RST on CF free IPs).
+next-ppt.com {
+	encode zstd gzip
+	root * /srv/web
+
+	# Hashed build assets — immutable (content-hashed filenames).
+	@immutable path /assets/* /static-loader-data/* /static-loader-data-manifest-*.json
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	# Prerendered HTML shells — always revalidate after deploy.
+	@html {
+		not path /assets/* /static-loader-data/* /static-loader-data-manifest-*.json
+		path *.html /
+		path /guide /guide/ /templates /templates/ /explore /explore/ /explore/* /html /html/
+		path /en /en/ /en/*
+	}
+	header @html Cache-Control "public, max-age=0, must-revalidate"
+
+	header /404.html Cache-Control "no-store"
+
+	# Nested SSG shells (dirStyle: nested) + /en/* SPA fallback for unprerendered paths.
+	# Missing hashed assets must 404 (not return HTML) — handled by try_files order.
+	@enFallback {
+		path /en/*
+		not path /en/assets/* /en/static-loader-data/*
+	}
+	handle @enFallback {
+		try_files {path} {path}/ /en/index.html
+		file_server
+	}
+
+	handle {
+		try_files {path} {path}/index.html {path}.html
+		file_server
+	}
+
+	# Unknown paths → branded 404.html (still HTTP 404).
+	handle_errors {
+		@404 expression {http.error.status_code} == 404
+		handle @404 {
+			rewrite * /404.html
+			file_server
+		}
+	}
+}
+
+www.next-ppt.com {
+	redir https://next-ppt.com{uri} permanent
 }

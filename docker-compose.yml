@@ -30,6 +30,8 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Static web dist (rsync from CI/local). See scripts/deploy-web.sh.
+      - ./web-dist:/srv/web:ro
       - caddy_data:/data
       - caddy_config:/config
     restart: always

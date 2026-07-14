@@ -1,0 +1,4 @@
+# Static site files are rsync'd here on the VPS (see scripts/deploy-web.sh).
+# Keep the directory in git so docker-compose can mount it; contents stay local/remote only.
+*
+!.gitkeep
