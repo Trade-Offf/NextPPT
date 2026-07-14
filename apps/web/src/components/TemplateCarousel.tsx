@@ -233,7 +233,7 @@ export function TemplateCarousel({ onOpenSample, loading }: TemplateCarouselProp
               height: 6,
               background:
                 i === index
-                  ? 'var(--system-blue, #0a84ff)'
+                  ? 'var(--system-blue, #5e6ad2)'
                   : 'rgba(255,255,255,0.2)',
             }}
           />

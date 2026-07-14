@@ -6,14 +6,12 @@ const landing: typeof zh = {
     guide: 'Guide',
     templates: 'Templates',
     explore: 'Explore',
-    openFile: 'Open file',
     htmlWorkbench: 'HTML Deck',
   },
   hero: {
     titleA: 'HTML is the',
     titleB: 'next-gen',
     titleAccent: 'presentation container',
-    titleC: '',
     subtitle:
       'More vivid than PPT, richer than markdown, more intuitive than Excel. Drop in an AI-generated HTML deck, edit text and images, keep the animations and interactions intact, project it straight to the stage.',
     loading: 'Loading…',
@@ -57,40 +55,6 @@ const landing: typeof zh = {
     dropRightCta: 'Release to open PPT Editor',
     dropDivider: 'or',
     dropHtmlOnly: 'HTML Deck only supports .html files',
-  },
-  sampleShowcase: {
-    eyebrow: 'Built-in samples',
-    title: 'Open 4 ready-made decks in one click',
-    subtitle:
-      'No files to prepare, no folder to pick, jump straight into the editor and start editing, swapping images, and exporting.',
-    noFsNote:
-      'Your browser cannot read or write local files yet, but you can still open the built-in sample and try editing and exporting.',
-    loading: 'Loading sample…',
-    openError: 'The sample failed to load. Please try again later or open an HTML file manually.',
-    open: 'Open',
-    openInEditor: 'Open in editor',
-    cards: [
-      {
-        title: 'Product Launch',
-        subtitle: 'Keynote / product launch',
-        desc: 'Multi-page titles with image & copy pairs, perfect for product launches and quarterly updates.',
-      },
-      {
-        title: 'Quarterly Roadmap',
-        subtitle: 'Roadmap / strategy',
-        desc: 'Layered structure with highlight sections, great for internal reviews and team syncs.',
-      },
-      {
-        title: 'Portfolio Deck',
-        subtitle: 'Portfolio / resume deck',
-        desc: 'Image-first showcase pages, ideal for turning a resume or portfolio into a projector-ready deck.',
-      },
-      {
-        title: 'Tech Talk',
-        subtitle: 'Tech talk / conference',
-        desc: 'Code blocks and diagram pages, built for conferences, internal sharing, and teaching.',
-      },
-    ],
   },
   preview: {
     eyebrow: 'Q3 Roadmap',

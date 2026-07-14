@@ -25,7 +25,7 @@ function Avatar({ src, name }: { src: string; name: string }) {
   if (failed) {
     // Fallback when an avatar is missing or generation was refused.
     return (
-      <div className="grid h-full w-full place-items-center bg-[rgba(139,147,232,0.14)] text-base font-semibold text-[#c7cbf6]">
+      <div className="grid h-full w-full place-items-center bg-[var(--cobalt-lt)] text-base font-semibold text-[#c7cbf6]">
         {name.slice(0, 1)}
       </div>
     );

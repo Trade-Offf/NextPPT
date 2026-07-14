@@ -51,4 +51,4 @@ export function revealOnScroll(
   });
 }
 
-export { gsap, ScrollTrigger, useGSAP };
+export { gsap, useGSAP };

@@ -76,7 +76,7 @@ export function ExportDrawer({ open, onClose }: ExportDrawerProps) {
       const formData = new FormData();
       formData.append('format', format);
       formData.append('resolution', resolution);
-      formData.append('watermark', 'off'); // TODO: tie to plan
+      formData.append('watermark', 'off');
       formData.append('pageRange', pageRange);
       formData.append('mode', docMode ? 'doc' : 'deck');
       formData.append(

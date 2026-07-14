@@ -28,18 +28,16 @@
   --vibrancy-toolbar: rgba(250, 250, 252, 0.8);
   --vibrancy-panel: rgba(248, 248, 250, 0.78);
 
-  /* Legacy aliases kept for any remaining references */
-  --ink: var(--label);
+  /* Legacy aliases kept for remaining editor references */
   --cobalt: var(--system-blue);
   --slate: var(--secondary-label);
   --silver: var(--tertiary-label);
-  --paper: var(--control-bg);
 
   --radius-window: 12px;
 
-  /* Unified motion language */
-  --ease-out: var(--ease-out);
-  --ease-in-out: var(--ease-in-out);
+  /* Unified motion language — Linear-style curves */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-fast: 0.15s;
   --dur: 0.25s;
 
@@ -85,24 +83,6 @@ body {
   contain: strict;
 }
 
-/* ── Traffic lights ──────────────────────────────────────────────────────── */
-.hds-traffic-lights {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.tl {
-  width: 12px;
-  height: 12px;
-  border-radius: 9999px;
-  display: inline-block;
-  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18);
-}
-.tl-red { background: #ff5f57; }
-.tl-amber { background: #febc2e; }
-.tl-green { background: #28c840; }
-
 /* ── Unified toolbar (vibrancy) ──────────────────────────────────────────── */
 .hds-toolbar {
   background: var(--vibrancy-toolbar);
@@ -141,12 +121,6 @@ body {
   .hds-thumb-skeleton { animation: none; }
 }
 
-/* ── Canvas stage ────────────────────────────────────────────────────────── */
-.hds-canvas-stage {
-  background:
-    radial-gradient(circle at 50% 0%, rgba(0, 0, 0, 0.03), transparent 70%),
-    var(--window-bg);
-}
 .hds-canvas-card {
   border-radius: 10px;
   box-shadow:
@@ -294,36 +268,6 @@ button:disabled,
       radial-gradient(1200px 600px at 50% -10%, rgba(139, 147, 232, 0.18), transparent 60%),
       linear-gradient(180deg, #15161a 0%, #1b1c20 100%);
   }
-}
-.hds-window {
-  background: var(--content-bg);
-  border-radius: var(--radius-window);
-  border: 0.5px solid var(--separator);
-  box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.05),
-    0 24px 60px rgba(0, 0, 0, 0.28);
-  overflow: hidden;
-}
-.hds-window-titlebar {
-  height: 40px;
-  display: flex;
-  align-items: center;
-  padding: 0 14px;
-  position: relative;
-  background: var(--vibrancy-toolbar);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 0.5px solid var(--separator);
-}
-.hds-window-title {
-  position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--secondary-label);
-  pointer-events: none;
 }
 
 /* ── Drawer slide-in ─────────────────────────────────────────────────────── */
@@ -594,29 +538,6 @@ select.hds-input {
    HDS · Landing hero
    ═══════════════════════════════════════════════════════════════════════════ */
 
-.hds-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 12px 5px 10px;
-  font-size: 12px;
-  color: var(--secondary-label);
-  background: var(--vibrancy-panel);
-  -webkit-backdrop-filter: saturate(180%) blur(10px);
-  backdrop-filter: saturate(180%) blur(10px);
-  border: 0.5px solid var(--separator);
-  border-radius: 9999px;
-}
-.hds-pill::before {
-  content: "";
-  width: 6px;
-  height: 6px;
-  border-radius: 9999px;
-  background: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(139, 147, 232, 0.16);
-  flex-shrink: 0;
-}
-
 .hds-glass-card {
   background: var(--vibrancy-panel);
   -webkit-backdrop-filter: saturate(180%) blur(24px);
@@ -659,11 +580,6 @@ select.hds-input {
 @keyframes hdsFadeUp {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
-}
-.hds-fade-up { animation: hdsFadeUp 0.5s var(--ease-out) both; }
-.hds-fade-up-delay { animation-delay: 0.08s; }
-@media (prefers-reduced-motion: reduce) {
-  .hds-fade-up { animation: none; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1117,17 +1033,6 @@ select.hds-input {
   .hds-drop-zone-right { border-left: none; border-top: none; border-radius: 0 0 20px 20px; }
   .hds-drop-divider { top: 50%; left: 50%; }
 }
-.hds-mode-pill {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: var(--system-blue);
-  color: #fff;
-}
 
 /* Numbered steps */
 .hds-steps { display: flex; flex-direction: column; gap: 12px; }
@@ -1225,37 +1130,6 @@ select.hds-input {
   margin-top: 18px;
   padding-top: 16px;
   border-top: 0.5px solid var(--separator);
-}
-
-/* Scenario cards as accordion */
-.hds-acc {
-  padding: 0;
-  overflow: hidden;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-.hds-acc:hover { border-color: rgba(255, 255, 255, 0.14); }
-.hds-acc.is-open { background: rgba(255, 255, 255, 0.03); }
-.hds-acc-head {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 18px 22px;
-  text-align: left;
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--label);
-}
-.hds-acc-chev {
-  flex-shrink: 0;
-  color: var(--secondary-label);
-  transition: transform 0.2s ease;
-}
-.hds-acc.is-open .hds-acc-chev { transform: rotate(180deg); }
-.hds-acc-body {
-  padding: 2px 22px 22px;
-  animation: hdsFadeUp 0.18s ease both;
 }
 
 /* ── Guide: linear illustrated story steps ─────────────────────────────────── */
@@ -1721,22 +1595,11 @@ select.hds-input {
   color: var(--label);
 }
 .hds-hero-accent {
-  background: linear-gradient(180deg, #c7cbf6, #8b93e8);
+  background: linear-gradient(180deg, #c7cbf6, var(--system-blue));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-}
-
-/* Pills → quiet dark chips with a subtle cool dot */
-.hds-cinema .hds-pill {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.09);
-  color: var(--secondary-label);
-}
-.hds-cinema .hds-pill::before {
-  background: var(--system-blue);
-  box-shadow: 0 0 0 3px rgba(139, 147, 232, 0.2);
 }
 
 /* Glass surfaces → refined dark panels with a hairline top sheen */
@@ -1773,10 +1636,6 @@ select.hds-input {
 
 /* Section eyebrow / divider rules on dark */
 .hds-cinema .hds-hairline { border-color: var(--separator); }
-
-/* Scroll-reveal hook: GSAP drives these; if JS never runs they stay visible.
-   useGSAP sets the from-state before first paint, so there is no flash. */
-.hds-reveal { will-change: transform, opacity; }
 
 /* Big cinematic display type for the hero headline */
 .hds-display {
@@ -2214,7 +2073,7 @@ select.hds-input {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: #8b93e8;
+  background: var(--system-blue);
   box-shadow: 0 0 0 3px rgba(139, 147, 232, 0.2);
 }
 

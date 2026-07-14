@@ -196,7 +196,7 @@ export function LandingPage() {
       <section id="top" className="hds-hero relative px-6 pt-16 sm:pt-24 pb-12">
         <div className="relative z-10 max-w-3xl mx-auto text-center">
           <h1 className="hero-h1 hds-hero-title hds-display text-[clamp(2.3rem,5.6vw,4rem)]">
-            {t('hero.titleA')}<br className="hidden sm:block" />{t('hero.titleB')}<span className="hds-hero-accent"> {t('hero.titleAccent')} </span>{t('hero.titleC')}
+            {t('hero.titleA')}<br className="hidden sm:block" />{t('hero.titleB')}<span className="hds-hero-accent"> {t('hero.titleAccent')} </span>
           </h1>
           <p className="hero-sub mt-6 text-[15px] sm:text-[17px] text-[var(--secondary-label)] leading-relaxed max-w-xl mx-auto">
             {t('hero.subtitle')}

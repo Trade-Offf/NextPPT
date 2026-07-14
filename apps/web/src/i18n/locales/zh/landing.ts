@@ -4,14 +4,12 @@ export default {
     guide: '使用指南',
     templates: '模版市场',
     explore: '探索',
-    openFile: '打开文件',
     htmlWorkbench: 'HTML 演示台',
   },
   hero: {
     titleA: 'HTML 是',
     titleB: '下一代',
     titleAccent: '展示容器',
-    titleC: '',
     subtitle:
       '比 PPT 更生动，比 markdown 更丰富，比 Excel 更直观。AI 生成的 HTML 演示稿，拖进来改字换图，保留动画和交互，直接投影上台。',
     loading: '加载中…',
@@ -55,39 +53,6 @@ export default {
     dropRightCta: '松手进 PPT 编辑器',
     dropDivider: '或',
     dropHtmlOnly: 'HTML 演示台仅支持 .html 文件',
-  },
-  sampleShowcase: {
-    eyebrow: '内置示例',
-    title: '一键打开 4 份预制演示稿',
-    subtitle: '不用准备文件，不用选文件夹，点击即进入编辑器，直接改字、换图、导出。',
-    noFsNote:
-      '当前浏览器暂不支持本地文件读写，但你仍然可以打开内置示例直接体验编辑与导出。',
-    loading: '正在加载示例…',
-    openError: '示例加载失败，请稍后再试或手动打开一个 HTML 文件。',
-    open: '打开',
-    openInEditor: '在编辑器中打开',
-    cards: [
-      {
-        title: '产品发布会',
-        subtitle: 'Keynote / 产品发布',
-        desc: '多页标题 + 图文对照，适合产品发布、季度汇报。',
-      },
-      {
-        title: '季度路线图',
-        subtitle: 'Roadmap / 路线图',
-        desc: '分层结构 + 重点区块，适合内部评审、团队同步。',
-      },
-      {
-        title: '作品集演示',
-        subtitle: 'Portfolio / 作品集',
-        desc: '图片为中心的展示页，适合把简历或作品改成可投影的演示。',
-      },
-      {
-        title: '技术分享',
-        subtitle: 'Tech Talk / 技术分享',
-        desc: '代码块 + 图表页，适合 conference、内部分享与教学。',
-      },
-    ],
   },
   preview: {
     eyebrow: 'Q3 Roadmap',
