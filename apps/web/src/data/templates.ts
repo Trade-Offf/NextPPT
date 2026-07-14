@@ -13,6 +13,7 @@ export interface TemplateItem {
 
 const KAMI_CREDIT = { name: 'Kami · Tw93', href: 'https://kami.tw93.fun/index-zh.html' } as const;
 const FRONTEND_SLIDES_CREDIT = { name: 'zarazhangrui/frontend-slides', href: 'https://github.com/zarazhangrui/frontend-slides' } as const;
+const PPT_MASTER_CREDIT = { name: 'hugohe3/ppt-master', href: 'https://github.com/hugohe3/ppt-master' } as const;
 
 export const TEMPLATES: TemplateItem[] = [
   {
@@ -551,6 +552,308 @@ grain 噪点纹理叠层
 组织方式
 ────────────────────────────────────────
 约 8 页：cover / manifesto / index / featured / menu / quote / schedule / closing，每页固定 1280×720，信息密度高、版面布满。`,
+  },
+  {
+    id: 'brutalist-newspaper',
+    kind: 'deck',
+    tags: ['Brutalist', 'Newspaper', '16:9'],
+    sampleUrl: '/template-brutalist-newspaper.html',
+    credit: PPT_MASTER_CREDIT,
+    prompt: `用「Brutalist 报章风」设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度极高、版面布满，像一份折叠的报纸。
+以下只规定视觉与排版规范，不限定你写什么内容。
+
+────────────────────────────────────────
+01 · Canvas 画布
+────────────────────────────────────────
+页面底色：newsprint #f4f1ea（米白报纸纸，同时设 @page { background: #f4f1ea }）
+正文墨色：ink #1a1a1a（近黑油墨，不取纯黑）
+次级墨色：ink-2 #3d3d3d / muted #6b6b6b / faint #9a9a9a
+唯一强调色：spot-red #C8102E（仅用于关键数字、 kicker、印章、警示线，全篇占比不超过 3%）
+禁止引入第二种彩色；禁止渐变铺底；禁止纯白 #ffffff 当背景
+
+────────────────────────────────────────
+02 · Halftone 半色调图
+────────────────────────────────────────
+所有图片用 halftone 黑白处理：filter: grayscale(1) contrast(1.15) brightness(0.95)
+再叠一层 radial-gradient 模拟网点：background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.5) 1px, transparent 1.5px); background-size: 3px 3px; opacity: 0.5
+图片四周用 1.5px 实线 ink 描边，不要圆角
+禁止彩色照片；禁止 box-shadow 软投影
+
+────────────────────────────────────────
+03 · Typography 字体层级
+────────────────────────────────────────
+衬线（标题 / 正文）：'Libre Caslon Text', 'Times New Roman', Georgia, serif
+无衬线（kicker / 标签 / caption）：'Inter', 'Helvetica Neue', sans-serif，weight 700-900
+等宽（数据 / 页码 / 时间戳）：'JetBrains Mono', ui-monospace, monospace
+
+字号梯度（刻意密集，像报纸）：
+  Masthead   72-96px  serif weight 700  line-height 0.95  letter-spacing -0.02em
+  H1         44-56px  serif weight 700  line-height 1.0
+  H2         28-34px  serif weight 700  line-height 1.05
+  H3         20-24px  serif weight 600  line-height 1.15
+  Body Lead  16-18px  serif weight 400  line-height 1.45
+  Body       13-14px  serif weight 400  line-height 1.5
+  Caption    11-12px  sans weight 700   letter-spacing 0.08em  uppercase
+  Micro      9-10px   mono weight 500   letter-spacing 0.1em
+强调改用 .spot 红色或字号升档，不要合成 bold 当唯一手段
+
+────────────────────────────────────────
+04 · Layout 报章网格
+────────────────────────────────────────
+每页用 12 列网格（grid-template-columns: repeat(12, 1fr); gap: 16px）
+满版排版，padding 只用 32-40px，不要大留白
+栏目之间用 1px ink 实线分隔（border-right: 1px solid #1a1a1a）
+跨栏标题用 grid-column: span 12；半栏图用 span 4-5
+不规则破栏：cover 页 masthead 居中，正文页可以 5+4+3 不对称分栏
+禁止居中卡片式布局；禁止大块留白
+
+────────────────────────────────────────
+05 · Slide 骨架
+────────────────────────────────────────
+顶部 masthead（高 56-72px）：
+  左：报头名（serif 700 28-36px）+ 期号（mono 11px）
+  中：分类标签（sans 700 12px uppercase，spot-red）
+  右：日期 + 页码（mono 11px）
+  下：1.5px ink 实线
+中部 body（flex 纵向或 grid 12 列，padding 32-40px）：
+  kicker（sans 700 11px uppercase，spot-red，前缀 "▍" 或 "//"）→ headline（serif H1）→ lead（serif lead）→ 多栏正文 + halftone 图
+底部 footer（高 28px，1px ink 顶线）：
+  左：栏目名 · 中：格言或注脚 · 右：页码 NN / TOTAL（mono）
+
+────────────────────────────────────────
+06 · Components 原子组件
+────────────────────────────────────────
+Kicker：sans 700 11px uppercase + spot-red + 前缀 "▍"
+Drop cap：段首大写字母 serif 96px float:left + 3 行高 + spot-red
+Pull quote：serif italic 32-40px + 上下 1px ink 线 + 左 3px spot-red 竖线
+Stat block：mono 大数字 56-72px（spot-red）+ sans 小标签（uppercase 11px）
+Data table：1px ink 实线边框，表头 sans 700 uppercase 11px 黑底白字，行高紧凑
+Halftone figure：grayscale 图 + 网点叠层 + 1.5px ink 描边 + sans caption（11px uppercase）
+Stamp：旋转 -8° 的矩形框 + sans 700 14px uppercase + spot-red 边框（"OFFICIAL" / "EXCLUSIVE" / "BREAKING"）
+Byline：mono 10px "BY <NAME>" + sans 11px 出处
+Rule line：1px ink 实线，或 1.5px 双线（border-top: 1.5px double #1a1a1a）
+Column divider：1px ink 竖线分隔多栏
+
+────────────────────────────────────────
+07 · Inline SVG Charts 内联图表（至少 3 处）
+────────────────────────────────────────
+数据新闻风图表，黑白为主 + spot-red 点缀：
+  柱状图：ink 实心柱 + spot-red 焦点柱 + 1px ink 轴线
+  折线图：ink 实线 + spot-red 关键点 + dashed ink 参考线
+  数据矩阵：单元格用 ink 实心 / 网格 / 空白三态，spot-red 高亮焦点格
+  时间线：1px ink 主轴 + 实心圆点节点 + mono 日期标签
+SVG 内 font-family 与页面同步；text-anchor / dominant-baseline 精确对齐
+禁止彩色填充；禁止渐变；禁止阴影
+
+────────────────────────────────────────
+Anti-Patterns 反面示例（必须规避）
+────────────────────────────────────────
+✗ 纯白背景或彩色照片；✗ 渐变铺底或软投影
+✗ 引入第二种彩色（红以外）；✗ 居中卡片式留白布局
+✗ 大块空白未填满；✗ 合成 bold 当唯一强调手段
+✗ 圆角超过 4px；✗ 半透明 rgba 叠色（应实色）
+
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+约 10 页：cover / headline / data / quote / feature / timeline / matrix / sidebar / closing / colophon，每页固定 1280×720，信息密度极高、版面像报纸一样布满，遵循以上全部规范。`,
+  },
+  {
+    id: 'bloomberg-editorial',
+    kind: 'deck',
+    tags: ['Bloomberg', 'Data', '16:9'],
+    sampleUrl: '/template-bloomberg-editorial.html',
+    credit: PPT_MASTER_CREDIT,
+    prompt: `用「Bloomberg / Economist 数据新闻编辑风」设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高、多列布局、微型图表丰富。
+以下只规定视觉与排版规范，不限定你写什么内容。
+
+────────────────────────────────────────
+01 · Canvas 画布
+────────────────────────────────────────
+页面底色：paper #fafaf7（极浅米白，同时设 @page { background: #fafaf7 }）
+正文墨色：ink #0a0a0a（近黑）
+次级墨色：ink-2 #2a2a2a / muted #6b6b6b / faint #9a9a9a
+品牌色：bloomberg-navy #1F3A5F（深海军蓝，标题、轴线、焦点数据）
+辅助色：amber #d97706（警示 / 上升）、green #047857（向好 / 下降反向）
+禁止纯白 #ffffff 当背景；禁止渐变铺底；禁止彩色照片
+
+────────────────────────────────────────
+02 · Typography 字体层级
+────────────────────────────────────────
+衬线（标题 / 引用）：'Source Serif Pro', 'Charter', Georgia, serif
+无衬线（正文 / UI）：'Inter', 'Helvetica Neue', sans-serif
+等宽（数据 / 表格 / 时间戳）：'JetBrains Mono', ui-monospace, monospace，font-variant-numeric: tabular-nums
+
+字号梯度：
+  Masthead   48-64px  serif weight 700  line-height 1.0  letter-spacing -0.02em
+  H1         32-40px  serif weight 700  line-height 1.1
+  H2         22-26px  serif weight 600  line-height 1.2
+  H3         16-18px  sans weight 700   line-height 1.3  uppercase  letter-spacing 0.04em
+  Body Lead  15-16px  serif weight 400  line-height 1.55
+  Body       12-13px  sans weight 400   line-height 1.55
+  Caption    10-11px  sans weight 600   letter-spacing 0.08em  uppercase
+  Data       13-14px  mono weight 500   tabular-nums
+  Micro      9-10px   mono weight 500   letter-spacing 0.1em
+强调改用 navy 品牌色或字号升档，不要合成 bold 当唯一手段
+
+────────────────────────────────────────
+03 · Layout 多列编辑网格
+────────────────────────────────────────
+每页用 6-8 列网格（grid-template-columns: repeat(8, 1fr); gap: 20px）
+padding 36-44px，栏间用 0.5px muted 竖线分隔
+不对称分栏常见：主栏 5 列 + 侧栏 3 列，或 6+2
+侧栏（sidebar）放：editor's note / 微型图表 / 相关数据 / 名词解释
+禁止居中卡片式布局；禁止大块留白；每页都要有侧栏内容
+
+────────────────────────────────────────
+04 · Slide 骨架
+────────────────────────────────────────
+顶部 masthead（高 44-52px）：
+  左：刊名（serif 700 24-28px）+ 期号（mono 11px）
+  中：栏目标签（sans 700 11px uppercase，navy，下 2px navy 实线）
+  右：日期 + 页码（mono 11px）
+  下：0.5px ink 实线
+中部 body（grid 8 列，padding 36-44px）：
+  section-label（sans 700 11px uppercase，navy）→ headline（serif H1）→ deck（serif lead，一句话摘要）→ 多栏正文 + 微型图表 + 侧栏
+底部 footer（高 24px，0.5px ink 顶线）：
+  左：栏目 · 中：来源 / 注脚 · 右：页码 NN / TOTAL（mono）
+
+────────────────────────────────────────
+05 · Components 原子组件
+────────────────────────────────────────
+Section label：sans 700 11px uppercase + navy + 下 2px navy 实线
+Deck（副标题）：serif italic 18-22px + muted + max-width 60ch
+Pull quote：serif italic 28-36px + 左 3px navy 竖线 + 上下 0.5px ink 线
+Stat card：mono 大数字 40-56px（navy 或 amber/green 语义色）+ sans 小标签 + 同比变化（▲ green / ▼ red）
+Data table：表头 sans 700 uppercase 10px navy + 0.5px ink 下线，行用 0.5px muted 分隔，数字 mono tabular-nums 右对齐
+Sidebar box：0.5px ink 边框 + padding 16px + sans 700 uppercase 10px 标题 + serif 13px 正文
+Micro chart：60-120px 高的微型图表，0.5px ink 轴线 + navy 数据线
+Editor's note：serif italic 12px + muted + 左 2px muted 线
+Source line：mono 9px + faint + "SOURCE: ..."
+
+────────────────────────────────────────
+06 · Inline SVG Charts 内联图表（至少 5 处）
+────────────────────────────────────────
+数据新闻风微型图表，navy 主色 + amber/green 语义色：
+  折线图：navy 实线 + amber 焦点 + dashed muted 参考线
+  柱状图：navy 实心 + amber 焦点柱 + 0.5px ink 轴线
+  环形图：navy 主段 + muted 次段 + 中心 mono 总数
+  桑基图：navy 流线 + 0.5px ink 节点
+  散点图：navy 圆点 + amber 焦点点 + 0.5px muted 象限线
+  热力矩阵：单元格用 navy 实心 / 浅 navy / 空白三态
+SVG 内 font-family 与页面同步；text-anchor / dominant-baseline 精确对齐
+轴线 0.5px ink / muted；禁止渐变；禁止阴影
+
+────────────────────────────────────────
+Anti-Patterns 反面示例（必须规避）
+────────────────────────────────────────
+✗ 纯白背景或彩色照片；✗ 渐变铺底或软投影
+✗ 居中卡片式留白布局；✗ 大块空白未填满
+✗ 合成 bold 当唯一强调；✗ 引入 navy/amber/green 以外的彩色
+✗ 圆角超过 4px；✗ 表格用 rgba 透明色（应实色）
+
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+约 12 页：cover / editor-note / contents / data-1 / data-2 / sidebar / compare / timeline / matrix / quote / risk / closing，每页固定 1280×720，多列布局、微型图表丰富、信息密度高、版面布满，遵循以上全部规范。`,
+  },
+  {
+    id: 'swiss-grid',
+    kind: 'deck',
+    tags: ['Swiss', 'Grid', '16:9'],
+    sampleUrl: '/template-swiss-grid.html',
+    credit: PPT_MASTER_CREDIT,
+    prompt: `用「瑞士国际主义平面设计风（Swiss Typographic Style）」设计语言帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），严格网格、Helvetica、不对称平衡、红黑双色印刷感，致敬 Josef Müller-Brockmann。
+以下只规定视觉与排版规范，不限定你写什么内容。
+
+────────────────────────────────────────
+01 · Canvas 画布
+────────────────────────────────────────
+页面底色：paper #f5f5f3（极浅暖灰白，同时设 @page { background: #f5f5f3 }）
+正文墨色：ink #111111（近黑）
+唯一强调色：swiss-red #C8102E（仅用于焦点元素：数字、几何块、强调词、网格指示线，全篇占比不超过 8%）
+禁止引入第三种彩色；禁止渐变；禁止照片；禁止软投影
+
+────────────────────────────────────────
+02 · Typography 字体层级（全篇 Helvetica）
+────────────────────────────────────────
+字体栈统一：'Inter', 'Helvetica Neue', 'Helvetica', Arial, sans-serif
+（用 Google Fonts 引入 Inter；CDN: https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap）
+全篇只用这一套无衬线，标题正文不混排不同字族。
+等宽（仅用于数据 / 编号）：'JetBrains Mono', ui-monospace, monospace
+
+字号梯度（刻意大跨度，靠字号拉层级）：
+  Display   96-128px  weight 900  line-height 0.9   letter-spacing -0.04em
+  H1        64-80px   weight 700  line-height 0.95  letter-spacing -0.03em
+  H2        40-48px   weight 600  line-height 1.0   letter-spacing -0.02em
+  H3        24-28px   weight 500  line-height 1.15
+  Body Lead 18-20px   weight 400  line-height 1.5
+  Body      14-15px   weight 400  line-height 1.55
+  Caption   11-12px   weight 500  line-height 1.4   letter-spacing 0.04em
+  Label     9-10px    weight 700  line-height 1.3   letter-spacing 0.12em  uppercase
+强调改用 swiss-red 或字号升档，不要合成 bold 当唯一手段
+
+────────────────────────────────────────
+03 · Layout 严格网格
+────────────────────────────────────────
+每页用 12 列网格（grid-template-columns: repeat(12, 1fr); gap: 24px; padding: 48-56px）
+不对称平衡：标题占 7-9 列偏左 / 偏右，留 3-5 列负空间
+负空间（negative space）是设计语言的一部分，不要填满
+网格指示线（可选）：0.5px ink 虚线显示网格列，作为版式证据
+禁止居中布局；禁止对称；禁止填满整个画布
+
+────────────────────────────────────────
+04 · Slide 骨架
+────────────────────────────────────────
+顶部（高 32-40px）：
+  左：刊名 / 章节名（label 10px uppercase，swiss-red 或 ink）
+  右：页码 NN / TOTAL（mono 11px）
+  下：0.5px ink 实线
+中部 body（grid 12 列，padding 48-56px）：
+  label（uppercase 10px，swiss-red）→ display 标题（96-128px，偏左或偏右）→ body lead（18-20px，max-width 50ch）→ 几何块 / 图表 / 文字块按网格排列
+底部（高 24px，0.5px ink 顶线）：
+  左：栏目 · 中：格言 · 右：页码（mono）
+
+────────────────────────────────────────
+05 · Components 原子组件
+────────────────────────────────────────
+Label：sans 700 10px uppercase + letter-spacing 0.12em + swiss-red
+Display number：sans 900 128px + swiss-red + line-height 0.9 + tabular-nums
+Geometric block：纯色矩形 / 圆形 / 三角形，swiss-red 或 ink 实心，作为视觉锚点
+Pull quote：sans 700 32-40px + 左 3px swiss-red 竖线 + max-width 40ch
+Stat block：sans 900 64-80px 数字（swiss-red）+ sans 500 12px label（uppercase）
+Rule line：0.5px ink 实线，或 2px swiss-red 实线（强调）
+Grid guide：0.5px ink 虚线（stroke-dasharray: 2 4），显示 12 列网格
+Bar / column chart：ink 或 swiss-red 实心矩形，无轴线
+Section divider：2px swiss-red 水平线 + 上下大留白
+
+────────────────────────────────────────
+06 · Inline SVG 几何元素（至少 3 处）
+────────────────────────────────────────
+极简几何，红黑双色：
+  柱状图：ink 或 swiss-red 实心矩形，无轴线，无网格
+  圆形构图：swiss-red 实心圆 + ink 描边圆，作为视觉锚点
+  线条图：2px ink 实线 + swiss-red 焦点段
+  几何拼贴：矩形 + 圆形 + 三角形组合，按网格对齐
+  网格图：12 列虚线网格 + 实心块标记焦点
+SVG 内 font-family 与页面同步（Inter）
+禁止渐变；禁止阴影；禁止彩色；禁止照片
+
+────────────────────────────────────────
+Anti-Patterns 反面示例（必须规避）
+────────────────────────────────────────
+✗ 居中布局或对称构图；✗ 填满整个画布不留负空间
+✗ 引入 swiss-red 以外的彩色；✗ 渐变 / 阴影 / 照片
+✗ 混排多种字族（应全篇 Inter）；✗ 合成 bold 当唯一强调
+✗ 圆角超过 2px；✗ 装饰性元素（应为功能几何）
+
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+约 10 页：cover / quote / principle / grid / figure / type / layout / negative-space / output / colophon，每页固定 1280×720，严格 12 列网格、不对称平衡、红黑双色、大留白，遵循以上全部规范。`,
   },
 ];
 

@@ -697,8 +697,8 @@ export function EditorPage() {
           aria-label={t('page.replayTour')}
           title={t('page.replayTourTitle')}
         >
-          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M10 2.5l1.6 3.4 3.7.5-2.7 2.6.7 3.7L10 11l-3.3 1.7.7-3.7L4.7 6.4l3.7-.5L10 2.5z" />
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <path d="M10 2.5l1.6 3.4 3.7.5-2.7 2.6.7 3.7L10 11l-3.3 1.7.7-3.7L4.7 6.4l3.7-.5L10 2.5z" transform="translate(0, 2.4)" />
           </svg>
           <span className="hds-bar-toggle-label">{t('page.replayTour')}</span>
         </button>

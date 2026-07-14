@@ -148,7 +148,7 @@ export function LandingPage() {
   return (
     <div
       ref={rootRef}
-      className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden"
+      className="hds-cinema relative w-full min-h-[100dvh] overflow-x-clip"
       onDragOver={onDragOverSplit}
       onDragLeave={onDragLeaveSplit}
       onDrop={onDropSplit}

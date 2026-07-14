@@ -21,6 +21,10 @@ const TemplatesPage = lazy(() =>
   import('./pages/TemplatesPage.js').then((m) => ({ default: m.TemplatesPage })),
 );
 
+const TemplateDetailPage = lazy(() =>
+  import('./pages/TemplatesPage.js').then((m) => ({ default: m.TemplateDetailPage })),
+);
+
 const ExplorePage = lazy(() =>
   import('./pages/ExplorePage.js').then((m) => ({ default: m.ExplorePage })),
 );
@@ -49,6 +53,7 @@ function localeChildren() {
     { path: 'guide', element: <Suspense fallback={null}><GuidePage /></Suspense> },
     { path: 'guide/:tab', element: <Suspense fallback={null}><GuidePage /></Suspense> },
     { path: 'templates', element: <Suspense fallback={null}><TemplatesPage /></Suspense> },
+    { path: 'templates/:id', element: <Suspense fallback={null}><TemplateDetailPage /></Suspense> },
     { path: 'explore', element: <Suspense fallback={null}><ExplorePage /></Suspense> },
     { path: 'explore/:slug', element: <Suspense fallback={null}><ExploreArticlePage /></Suspense> },
     { path: 'html', element: <Suspense fallback={null}><HtmlWorkbenchPage /></Suspense> },

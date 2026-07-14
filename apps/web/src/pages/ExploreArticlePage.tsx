@@ -56,7 +56,7 @@ export function ExploreArticlePage() {
   };
 
   return (
-    <div className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden">
+    <div className="hds-cinema relative w-full min-h-[100dvh] overflow-x-clip">
       <Head>
         <title>{seoTitle}</title>
         <meta name="description" content={articleDesc} />

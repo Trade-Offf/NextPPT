@@ -64,5 +64,17 @@ export default {
       title: '长桌 Long Table',
       desc: '暖奶油 + 单一锈红克制点缀的多页 deck：描边胶囊按钮、圆形版次徽章、矩形标签与座位胶囊，Bricolage Grotesque 全大写标题 + Fraunces 斜体衬线撑引言，菜单/清单页表格化排版。可直接在编辑器打开或下载；附带的提示词是通用 Long Table 设计规范，可套用到任意主题。',
     },
+    'brutalist-newspaper': {
+      title: 'Brutalist 报章',
+      desc: '米白报纸纸 + 单点红 + halftone 黑白图的 Brutalist 报章风多页 deck：12 列密集网格、Libre Caslon Text 衬线 masthead、段首大写字母、印章 / 专栏分隔线 / 数据表，像一份折叠的报纸。可直接在编辑器打开或下载；附带的提示词是通用 Brutalist 报章设计规范，可套用到任意主题。灵感来自 hugohe3/ppt-master。',
+    },
+    'bloomberg-editorial': {
+      title: 'Bloomberg 数据新闻',
+      desc: '极浅米白 + 深海军蓝 + 琥珀/翠绿语义色的 Bloomberg / Economist 数据新闻编辑风多页 deck：8 列网格主栏+侧栏、Source Serif Pro 衬线标题、微型折线/柱状/环形/桑基/散点/热力矩阵图、editor\'s note 侧栏、source 来源行。可直接在编辑器打开或下载；附带的提示词是通用 Bloomberg 数据新闻设计规范，可套用到任意主题。灵感来自 hugohe3/ppt-master。',
+    },
+    'swiss-grid': {
+      title: 'Swiss 瑞士网格',
+      desc: '极浅暖灰白 + 红黑双色的瑞士国际主义平面设计风多页 deck：严格 12 列网格、Inter 全篇无衬线、Display 96-128px 大字号、不对称平衡、负空间作为设计语言、几何块 / 网格指示线 / 极简柱状图，致敬 Josef Müller-Brockmann。可直接在编辑器打开或下载；附带的提示词是通用 Swiss 瑞士网格设计规范，可套用到任意主题。灵感来自 hugohe3/ppt-master。',
+    },
   },
 };

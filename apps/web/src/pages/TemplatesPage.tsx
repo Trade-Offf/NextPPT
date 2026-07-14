@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useLocalePrefix } from '../hooks/useGuideNav.js';
 import { useOpenDeck } from '../fs/useOpenDeck.js';
 import { gsap, useGSAP } from '../lib/gsap.js';
@@ -80,7 +80,8 @@ function SampleThumb({ url, kind }: { url: string; kind: TemplateItem['kind'] })
 
 export function TemplatesPage() {
   const { t } = useTranslation('templates');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const prefix = useLocalePrefix();
   const { state: easterState } = useEasterEggs();
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -88,64 +89,149 @@ export function TemplatesPage() {
     () => TEMPLATES.filter((item) => !item.easterEgg || easterState.terminalUnlocked),
     [easterState.terminalUnlocked],
   );
-  const selected = selectedId ? findTemplate(selectedId) : undefined;
 
-  // When the number of cards is odd, the last card also spans 2 columns so the
-  // bento grid closes without an empty cell.
-  const lastSpan = visibleTemplates.length % 2 === 1 ? 'lg:col-span-2' : '';
+  // Layout: hero feature (nextppt-kami) + gallery featured (resume 2×2 + 4) + rest (3-col)
+  const heroItem = visibleTemplates[0];
+  const galleryFeatured = visibleTemplates[1];
+  const galleryRight = visibleTemplates.slice(2, 6);
+  const rest = visibleTemplates.slice(6);
+
+  const openDetail = (id: string) => navigate(`${prefix}/templates/${id}`);
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        if (selected) {
-          // Detail panel slides in from the right when a template is opened.
-          gsap.from('.tpl-detail', { autoAlpha: 0, x: 30, duration: 0.5, ease: 'power3.out' });
-        } else {
-          gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.7 } })
-            .from('.tpl-eyebrow', { autoAlpha: 0, y: 14 })
-            .from('.tpl-title', { autoAlpha: 0, y: 20 }, '-=0.5')
-            .from('.tpl-sub', { autoAlpha: 0, y: 14 }, '-=0.5')
-            .from('.tpl-card', { autoAlpha: 0, y: 24, stagger: 0.08 }, '-=0.4');
-        }
+        gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.7 } })
+          .from('.tpl-hero-eyebrow', { autoAlpha: 0, y: 14 })
+          .from('.tpl-hero-title', { autoAlpha: 0, y: 20 }, '-=0.5')
+          .from('.tpl-hero-sub', { autoAlpha: 0, y: 14 }, '-=0.5')
+          .from('.tpl-hero-count', { autoAlpha: 0, y: 10 }, '-=0.4')
+          .from('.tpl-hero-feature', { autoAlpha: 0, y: 24, scale: 0.98 }, '-=0.5')
+          .from('.tpl-card', { autoAlpha: 0, y: 28, stagger: 0.06 }, '-=0.3');
       });
     },
-    { scope: rootRef, dependencies: [selected] },
+    { scope: rootRef, dependencies: [] },
   );
 
   return (
-    <div ref={rootRef} className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden">
+    <div ref={rootRef} className="hds-cinema relative w-full min-h-[100dvh] overflow-x-clip">
       <SiteFluidBackdrop />
       <div className="relative z-10">
         <SiteHeader alwaysScrolled />
 
-        <main className="max-w-7xl mx-auto px-6 pt-16 sm:pt-24 pb-20">
-          {!selected ? (
-            <>
-              <header className="max-w-xl">
-                <p className="tpl-eyebrow hds-fig-label">{t('hero.eyebrow')}</p>
-                <h1 className="tpl-title mt-4 text-3xl lg:text-[2.6rem] font-bold tracking-tight text-[var(--label)] leading-tight">
-                  {t('hero.title')}
-                </h1>
-                <p className="tpl-sub mt-4 text-[15px] text-[var(--secondary-label)] leading-relaxed">
-                  {t('hero.subtitle')}
-                </p>
-              </header>
+        <main className="max-w-6xl mx-auto px-6 sm:px-8 pt-12 sm:pt-16 pb-24">
+          <header className="tpl-hero">
+            <div className="tpl-hero-text">
+              <p className="tpl-hero-eyebrow">{t('hero.eyebrow')}</p>
+              <h1 className="tpl-hero-title">{t('hero.title')}</h1>
+              <p className="tpl-hero-sub">{t('hero.subtitle')}</p>
+              <p className="tpl-hero-count">
+                <strong>{String(visibleTemplates.length).padStart(2, '0')}</strong>
+                <span>curated templates · local-first</span>
+              </p>
+            </div>
+            {heroItem && (
+              <button
+                onClick={() => openDetail(heroItem.id)}
+                className="tpl-hero-feature"
+                aria-label={t('card.viewDetail')}
+              >
+                <div className="tpl-hero-feature-thumb">
+                  <span className="tpl-hero-feature-num">N° 01 · Featured</span>
+                  {heroItem.sampleUrl ? (
+                    <SampleThumb url={heroItem.sampleUrl} kind={heroItem.kind} />
+                  ) : (
+                    <div className="w-full aspect-[16/9] grid place-items-center border border-dashed border-[var(--rule)] bg-white/[0.03]">
+                      <span className="text-[11px] text-[var(--tertiary-label)]">{t('detail.previewPlaceholder')}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="tpl-hero-feature-meta">
+                  <div className="tpl-hero-feature-meta-left">
+                    <span className="tpl-hero-feature-name">{t(`items.${heroItem.id}.title`)}</span>
+                    <span className="tpl-hero-feature-kind">
+                      {heroItem.kind === 'deck' ? t('card.deck') : t('card.doc')}
+                    </span>
+                  </div>
+                  <span className="tpl-hero-feature-cta">
+                    {t('card.viewDetail')}
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                  </span>
+                </div>
+              </button>
+            )}
+          </header>
 
-              <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-5 grid-flow-dense">
-                {visibleTemplates.map((item, i) => (
+          {galleryFeatured && (
+            <div className="tpl-gallery-featured">
+              <TemplateCard
+                item={galleryFeatured}
+                index={2}
+                onOpen={() => openDetail(galleryFeatured.id)}
+                featured
+              />
+              <div className="tpl-gallery-right">
+                {galleryRight.map((item, i) => (
                   <TemplateCard
                     key={item.id}
                     item={item}
-                    onOpen={() => setSelectedId(item.id)}
-                    className={i === 0 ? 'lg:col-span-2' : i === visibleTemplates.length - 1 ? lastSpan : ''}
+                    index={3 + i}
+                    onOpen={() => openDetail(item.id)}
                   />
                 ))}
               </div>
-            </>
-          ) : (
-            <TemplateDetail item={selected} onBack={() => setSelectedId(null)} />
+            </div>
           )}
+
+          {rest.length > 0 && (
+            <div className="tpl-gallery-rest">
+              {rest.map((item, i) => (
+                <TemplateCard
+                  key={item.id}
+                  item={item}
+                  index={7 + i}
+                  onOpen={() => openDetail(item.id)}
+                />
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export function TemplateDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const prefix = useLocalePrefix();
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  const item = id ? findTemplate(id) : undefined;
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.from('.tpl-detail', { autoAlpha: 0, y: 20, duration: 0.5, ease: 'power3.out' });
+      });
+    },
+    { scope: rootRef, dependencies: [id] },
+  );
+
+  if (!item) {
+    navigate(`${prefix}/templates`, { replace: true });
+    return null;
+  }
+
+  return (
+    <div ref={rootRef} className="hds-cinema relative w-full min-h-[100dvh] overflow-x-clip">
+      <SiteFluidBackdrop />
+      <div className="relative z-10">
+        <SiteHeader alwaysScrolled />
+        <main className="max-w-6xl mx-auto px-6 sm:px-8 pt-12 sm:pt-16 pb-24">
+          <TemplateDetail item={item} onBack={() => navigate(`${prefix}/templates`)} />
         </main>
       </div>
     </div>
@@ -155,55 +241,48 @@ export function TemplatesPage() {
 function KindBadge({ kind }: { kind: TemplateItem['kind'] }) {
   const { t } = useTranslation('templates');
   return (
-    <span
-      className={
-        kind === 'deck'
-          ? 'text-[10px] font-medium px-2 py-0.5 rounded-full border border-[rgba(139,147,232,0.35)] bg-[rgba(139,147,232,0.08)] text-[var(--system-blue)]'
-          : 'text-[10px] font-medium px-2 py-0.5 rounded-full border border-[var(--separator)] text-[var(--secondary-label)]'
-      }
-    >
+    <span className={`tpl-kind ${kind === 'doc' ? 'is-doc' : ''}`}>
       {kind === 'deck' ? t('card.deck') : t('card.doc')}
     </span>
   );
 }
 
-function TemplateCard({ item, onOpen, className = '' }: { item: TemplateItem; onOpen: () => void; className?: string }) {
+function TemplateCard({ item, index, onOpen, featured }: { item: TemplateItem; index: number; onOpen: () => void; featured?: boolean }) {
   const { t } = useTranslation('templates');
+  const num = String(index).padStart(2, '0');
   return (
     <button
       onClick={onOpen}
-      className={`tpl-card hds-glass-card group p-6 text-left flex flex-col gap-3 transition-transform hover:-translate-y-1 ${className}`}
+      className={`tpl-card ${featured ? 'is-featured' : ''}`}
     >
-      {/* Live preview when a sample exists, else a placeholder */}
-      {item.sampleUrl ? (
-        <SampleThumb url={item.sampleUrl} kind={item.kind} />
-      ) : (
-        <div className="w-full aspect-[16/9] rounded-xl border border-dashed border-[var(--rule)] bg-white/[0.03] grid place-items-center">
-          <span className="text-[11px] text-[var(--tertiary-label)]">{t('detail.previewPlaceholder')}</span>
-        </div>
-      )}
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-[15px] font-semibold text-[var(--label)]">{t(`items.${item.id}.title`)}</h3>
-        <KindBadge kind={item.kind} />
+      <div className="tpl-card-thumb">
+        <span className="tpl-card-num">N° {num}</span>
+        {item.sampleUrl ? (
+          <SampleThumb url={item.sampleUrl} kind={item.kind} />
+        ) : (
+          <div className="w-full aspect-[16/9] grid place-items-center border border-dashed border-[var(--rule)] bg-white/[0.03]">
+            <span className="text-[11px] text-[var(--tertiary-label)]">{t('detail.previewPlaceholder')}</span>
+          </div>
+        )}
       </div>
-      <p className="text-[13px] text-[var(--secondary-label)] leading-relaxed">{t(`items.${item.id}.desc`)}</p>
-      <span className="text-xs text-[var(--system-blue)] mt-auto inline-flex items-center gap-1.5">
-        {t('card.viewDetail')}
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="transition-transform duration-300 group-hover:translate-x-1"
-          aria-hidden="true"
-        >
-          <path d="M5 12h14M13 5l7 7-7 7" />
-        </svg>
-      </span>
+      <div className="tpl-card-meta">
+        <div className="tpl-card-head">
+          <h3 className="tpl-card-name">{t(`items.${item.id}.title`)}</h3>
+          <KindBadge kind={item.kind} />
+        </div>
+        <p className="tpl-card-desc">{t(`items.${item.id}.desc`)}</p>
+        <div className="tpl-card-foot">
+          <div className="tpl-card-tags">
+            {item.tags.slice(0, 2).map((tag) => (
+              <span key={tag} className="tpl-card-tag">{tag}</span>
+            ))}
+          </div>
+          <span className="tpl-card-cta">
+            View
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </span>
+        </div>
+      </div>
     </button>
   );
 }
@@ -236,64 +315,72 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
 
   return (
     <div className="tpl-detail">
-      <button
-        onClick={onBack}
-        className="group hds-btn px-4 py-2 text-xs inline-flex items-center gap-1.5"
-      >
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="transition-transform duration-300 group-hover:-translate-x-1"
-          aria-hidden="true"
-        >
-          <path d="M19 12H5M11 19l-7-7 7-7" />
-        </svg>
+      <button onClick={onBack} className="tpl-detail-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 19l-7-7 7-7" /></svg>
         {t('detail.back')}
       </button>
 
-      {/* Two-column split: preview sticks on the left, meta flows on the right. */}
-      <div className="mt-6 grid lg:grid-cols-2 gap-8 items-start">
-        {/* Left: sticky preview */}
-        <div className="lg:sticky lg:top-24">
-          {item.sampleUrl ? (
-            <SampleThumb url={item.sampleUrl} kind={item.kind} />
-          ) : (
-            <div className="w-full aspect-[16/9] rounded-2xl border border-dashed border-[var(--rule)] bg-white/[0.03] grid place-items-center">
-              <span className="text-[13px] text-[var(--tertiary-label)]">{t('detail.previewPlaceholder')}</span>
-            </div>
-          )}
+      <div className="tpl-detail-grid">
+        {/* Left: sticky preview + actions */}
+        <div className="tpl-detail-preview">
+          <div className="tpl-detail-preview-frame">
+            {item.sampleUrl ? (
+              <SampleThumb url={item.sampleUrl} kind={item.kind} />
+            ) : (
+              <div className="w-full aspect-[16/9] grid place-items-center border border-dashed border-[var(--rule)] bg-white/[0.03]">
+                <span className="text-[13px] text-[var(--tertiary-label)]">{t('detail.previewPlaceholder')}</span>
+              </div>
+            )}
+          </div>
           {item.sampleUrl && (
-            <div className="mt-4 flex items-center gap-2.5 flex-wrap">
-              <button onClick={openInEditor} disabled={loading} className="hds-btn-primary px-5 py-2 text-xs rounded-full disabled:opacity-50">
+            <div className="tpl-detail-actions">
+              <button onClick={openInEditor} disabled={loading} className="hds-btn-primary px-5 py-2 text-xs disabled:opacity-50">
                 {t('detail.openInEditor')}
               </button>
               <a href={item.sampleUrl} download className="hds-btn px-4 py-2 text-xs">{t('detail.download')}</a>
             </div>
           )}
           {error && (
-            <div id="hds-open-error" className="mt-3 text-xs text-[var(--system-red,#ef4444)]">{error}</div>
+            <div className="mt-3 text-xs text-[var(--system-red,#ef4444)]">{error}</div>
           )}
         </div>
 
-        {/* Right: flowing meta */}
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-[var(--label)]">
-              {t(`items.${item.id}.title`)}
-            </h1>
-            <KindBadge kind={item.kind} />
-          </div>
-          <p className="mt-3 text-[15px] text-[var(--secondary-label)] leading-relaxed">{t(`items.${item.id}.desc`)}</p>
+        {/* Right: meta flow */}
+        <div className="tpl-detail-body">
+          <p className="tpl-detail-eyebrow">
+            {item.kind === 'deck' ? t('card.deck') : t('card.doc')} · Template
+          </p>
+          <h1 className="tpl-detail-title">{t(`items.${item.id}.title`)}</h1>
+          <p className="tpl-detail-desc">{t(`items.${item.id}.desc`)}</p>
 
-          <section className="mt-8">
+          {/* Meta bar */}
+          <div className="tpl-detail-meta-bar">
+            <div className="tpl-detail-meta-item">
+              <span className="tpl-detail-meta-label">Type</span>
+              <span className="tpl-detail-meta-value">{item.kind === 'deck' ? t('card.deck') : t('card.doc')}</span>
+            </div>
+            <div className="tpl-detail-meta-item">
+              <span className="tpl-detail-meta-label">Tags</span>
+              <span className="tpl-detail-meta-value">{item.tags.length} categories</span>
+            </div>
+            {item.credit && (
+              <div className="tpl-detail-meta-item">
+                <span className="tpl-detail-meta-label">Source</span>
+                <span className="tpl-detail-meta-value">{item.credit.name}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Usage */}
+          <section className="tpl-detail-section">
+            <p className="tpl-detail-section-label">{t('detail.usageTitle')}</p>
+            <p className="text-sm text-[var(--secondary-label)] leading-relaxed max-w-[56ch]">{t('detail.usage')}</p>
+          </section>
+
+          {/* Prompt */}
+          <section className="tpl-detail-section">
             <div className="flex items-center justify-between mb-3 gap-2">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--tertiary-label)]">{t('detail.promptTitle')}</h2>
+              <p className="tpl-detail-section-label" style={{ marginBottom: 0 }}>{t('detail.promptTitle')}</p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setPromptOpen((v) => !v)}
@@ -301,60 +388,31 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
                   aria-expanded={promptOpen}
                   className="hds-btn px-3 py-1.5 text-xs inline-flex items-center gap-1.5 disabled:opacity-40"
                 >
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 20 20"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={1.7}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ transform: promptOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}
-                  >
-                    <path d="M5 7.5l5 5 5-5" />
-                  </svg>
+                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ transform: promptOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M5 7.5l5 5 5-5" /></svg>
                   {promptOpen ? t('detail.collapse') : t('detail.expand')}
                 </button>
-                <button
-                  onClick={copy}
-                  disabled={!item.prompt}
-                  className="hds-btn-primary px-4 py-1.5 text-xs rounded-full disabled:opacity-40"
-                >
+                <button onClick={copy} disabled={!item.prompt} className="hds-btn-primary px-4 py-1.5 text-xs disabled:opacity-40">
                   {copied ? t('detail.copied') : t('detail.copyPrompt')}
                 </button>
               </div>
             </div>
             {promptOpen ? (
-              <pre className="rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-4 text-[13px] text-[var(--secondary-label)] leading-relaxed whitespace-pre-wrap break-words">
-                {item.prompt || t('detail.todo')}
-              </pre>
+              <pre className="tpl-detail-prompt-expanded">{item.prompt || t('detail.todo')}</pre>
             ) : (
               <button
                 onClick={() => item.prompt && setPromptOpen(true)}
                 disabled={!item.prompt}
-                className="w-full text-left rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-4 text-[13px] text-[var(--tertiary-label)] leading-relaxed disabled:opacity-60"
+                className="tpl-detail-prompt-collapsed disabled:opacity-60"
               >
                 {item.prompt ? t('detail.promptHint') : t('detail.todo')}
               </button>
             )}
           </section>
 
-          {/* Usage */}
-          <section className="mt-6 rounded-2xl border border-[var(--separator)] bg-white/[0.025] p-5">
-            <h2 className="text-[13px] font-semibold text-[var(--label)] mb-1.5">{t('detail.usageTitle')}</h2>
-            <p className="text-[13px] text-[var(--secondary-label)] leading-relaxed">{t('detail.usage')}</p>
-          </section>
-
           {item.credit && (
-            <p className="mt-6 text-xs text-[var(--tertiary-label)]">
+            <p className="tpl-detail-credit">
               {t('detail.creditPrefix')}{' '}
-              <a
-                href={item.credit.href}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[var(--system-blue)] hover:underline"
-              >
+              <a href={item.credit.href} target="_blank" rel="noreferrer" className="text-[var(--system-blue)] hover:underline">
                 {item.credit.name}
               </a>
             </p>

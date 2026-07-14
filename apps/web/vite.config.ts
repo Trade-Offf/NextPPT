@@ -60,10 +60,22 @@ export default defineConfig({
   // `nested` → dist/guide/index.html, dist/en/index.html, dist/en/guide/index.html.
   ssgOptions: {
     dirStyle: 'nested',
-    includedRoutes: () => [
-      '/', '/guide', '/guide/generate', '/guide/edit', '/guide/export', '/templates', '/explore', '/explore/feishu-whiteboard', '/html',
-      '/en', '/en/guide', '/en/guide/generate', '/en/guide/edit', '/en/guide/export', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard', '/en/html',
-    ],
+    includedRoutes: () => {
+      // Read template ids from the data source so SSG stays in sync with TEMPLATES.
+      const src = fs.readFileSync(
+        path.resolve(__dirname, 'src/data/templates.ts'),
+        'utf-8',
+      );
+      const templateIds = [...src.matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]);
+      const templateRoutes = templateIds.map((id) => `/templates/${id}`);
+      const enTemplateRoutes = templateIds.map((id) => `/en/templates/${id}`);
+      return [
+        '/', '/guide', '/guide/generate', '/guide/edit', '/guide/export', '/templates', '/explore', '/explore/feishu-whiteboard', '/html',
+        '/en', '/en/guide', '/en/guide/generate', '/en/guide/edit', '/en/guide/export', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard', '/en/html',
+        ...templateRoutes,
+        ...enTemplateRoutes,
+      ];
+    },
     // Inline static loader JSON into every shell so hydration never fetch()es
     // /static-loader-data/*.json (those requests often fail with CONNECTION_RESET
     // on CF Pages and crash the app — see scripts/inline-ssg-loader-data.mjs).

@@ -66,6 +66,18 @@ const templates: typeof zh = {
       title: 'Long Table',
       desc: 'A multi-page deck on warm cream with a single restrained rust-red accent: outlined pill buttons, circular edition badges, rect tags and seats pills, Bricolage Grotesque all-caps titles + Fraunces italic for pull quotes, tabular menu layouts. Open it in the editor or download it; the bundled prompt is a reusable Long Table design spec for any topic.',
     },
+    'brutalist-newspaper': {
+      title: 'Brutalist Newspaper',
+      desc: 'A multi-page deck on newsprint cream with a single spot-red and halftone monochrome images in Brutalist newspaper style: dense 12-column grid, Libre Caslon Text serif masthead, drop caps, stamps, column dividers and data tables — like a folded newspaper. Open it in the editor or download it; the bundled prompt is a reusable Brutalist newspaper design spec for any topic. Inspired by hugohe3/ppt-master.',
+    },
+    'bloomberg-editorial': {
+      title: 'Bloomberg Data Editorial',
+      desc: 'A multi-page deck on near-white paper with deep navy and amber/green semantic colors in Bloomberg / Economist data-journalism editorial style: 8-column main+sidebar grid, Source Serif Pro headlines, micro line/bar/donut/sankey/scatter/heat-matrix charts, editor\'s note sidebars, source lines. Open it in the editor or download it; the bundled prompt is a reusable Bloomberg data-editorial design spec for any topic. Inspired by hugohe3/ppt-master.',
+    },
+    'swiss-grid': {
+      title: 'Swiss Grid',
+      desc: 'A multi-page deck on warm off-white with red-black duotone in Swiss International Typographic style: strict 12-column grid, Inter sans throughout, Display 96-128px type, asymmetric balance, negative space as design language, geometric blocks / grid guides / minimal bar charts — an homage to Josef Müller-Brockmann. Open it in the editor or download it; the bundled prompt is a reusable Swiss grid design spec for any topic. Inspired by hugohe3/ppt-master.',
+    },
   },
 };
 

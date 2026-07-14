@@ -119,107 +119,110 @@ export function GuidePage() {
         }
       />
 
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 pb-20">
-        {/* ── 3-step rhythm strip ─────────────────────────────── */}
-        <section className="pt-9 pb-2 guide-intro">
-          <h2 className="sr-only">{t('flow.eyebrow')}</h2>
-          <p className="hds-guide-eyebrow">{t('flow.eyebrow')}</p>
-          <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 pb-24">
+        {/* ── Intro chapter ──────────────────────────────────── */}
+        <section className="hds-guide-intro guide-intro">
+          <p className="hds-guide-intro-eyebrow">{t('flow.eyebrow')}</p>
+          <h1 className="hds-guide-intro-title">{t('header.title')}</h1>
+          <div className="hds-guide-timeline">
             {flowSteps.map((f, i) => (
-              <div key={f.title} className="hds-guide-flow-step flow-step">
-                <span className="hds-step-num">{i + 1}</span>
+              <div key={f.title} className="hds-guide-tl-step flow-step">
+                <span className="hds-guide-tl-num">{String(i + 1).padStart(2, '0')}</span>
                 <div className="min-w-0">
-                  <p className="text-[13px] font-semibold text-[var(--label)] leading-tight">{f.title}</p>
-                  <p className="text-xs text-[var(--secondary-label)] leading-relaxed mt-1">{f.desc}</p>
+                  <p className="hds-guide-tl-title">{f.title}</p>
+                  <p className="hds-guide-tl-desc">{f.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        <div className="flex flex-col gap-6 mt-10">
+        {/* ── Chapter 01 — Generate ──────────────────────────── */}
+        <section id="guide-generate" className="hds-guide-story reveal-section scroll-mt-24">
+          <div className="hds-guide-story-num">01</div>
+          <div className="hds-guide-story-body">
+            <h2 className="hds-guide-story-title">{t('generate.title')}</h2>
+            <p className="hds-guide-story-intro">{t('generate.intro')}</p>
+            <p className="hds-term">{t('generate.promptWhat')}</p>
 
-          <section id="guide-generate" className="hds-guide-story reveal-section scroll-mt-24">
             <div className="hds-guide-illus">
               <picture>
                 <source srcSet="/guide-step-generate.webp" type="image/webp" />
                 <img src="/guide-step-generate.png" alt={t('generate.title')} width={1200} height={675} loading="lazy" />
               </picture>
             </div>
-            <div className="hds-guide-story-body">
-              <span className="hds-guide-step-tag">{t('generate.title')}</span>
-              <p className="text-sm text-[var(--secondary-label)] leading-relaxed mt-2 mb-3">{t('generate.intro')}</p>
-              <p className="hds-term mb-5">{t('generate.promptWhat')}</p>
 
-              <ol className="hds-steps mb-6">
-                {manualSteps.map((step, i) => (
-                  <li key={step.title} className="hds-step">
-                    <span className="hds-step-num">{i + 1}</span>
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-[var(--label)] leading-tight">{step.title}</p>
-                      <p className="text-xs text-[var(--secondary-label)] leading-relaxed mt-0.5">{step.desc}</p>
-                    </div>
-                  </li>
-                ))}
-              </ol>
+            <ol className="hds-steps mt-7">
+              {manualSteps.map((step, i) => (
+                <li key={step.title} className="hds-step">
+                  <span className="hds-step-num">{i + 1}</span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-[var(--label)] leading-tight">{step.title}</p>
+                    <p className="text-xs text-[var(--secondary-label)] leading-relaxed mt-0.5">{step.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
 
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="hds-inspector-label" style={{ padding: 0 }}>{t('generate.promptLabel')}</span>
-                <div className="flex items-center gap-2">
-                  <button onClick={copyPrompt} className={`hds-copy-btn ${copied ? 'is-copied' : ''}`}>
-                    {copied ? (
-                      <>
-                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3.2 3.2L13 4.5" /></svg>
-                        {t('generate.copied')}
-                      </>
-                    ) : (
-                      <>
-                        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5}><rect x="5" y="5" width="9" height="9" rx="1.5" /><path d="M3 11V3.5A1.5 1.5 0 014.5 2H11" strokeLinecap="round" /></svg>
-                        {t('generate.copy')}
-                      </>
-                    )}
-                  </button>
-                  <button onClick={() => setPromptOpen((v) => !v)} className="hds-copy-btn" aria-expanded={promptOpen}>
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ transform: promptOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M4 6l4 4 4-4" /></svg>
-                    {promptOpen ? t('generate.collapse') : t('generate.expand')}
-                  </button>
-                </div>
-              </div>
-              {promptOpen ? (
-                <pre className="hds-code-block" style={{ maxHeight: 'none' }}><code>{promptText}</code></pre>
-              ) : (
-                <p className="text-xs text-[var(--tertiary-label)] leading-relaxed">{t('generate.promptHint')}</p>
-              )}
-
-              <div className="hds-guide-action">
-                <span className="text-xs text-[var(--tertiary-label)]">{t('generate.actionLabel')}</span>
-                <OpenButton label={t('generate.openGenerated')} />
+            <div className="flex items-center justify-between gap-2 mt-7 mb-2">
+              <span className="hds-inspector-label" style={{ padding: 0 }}>{t('generate.promptLabel')}</span>
+              <div className="flex items-center gap-2">
+                <button onClick={copyPrompt} className={`hds-copy-btn ${copied ? 'is-copied' : ''}`}>
+                  {copied ? (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3.2 3.2L13 4.5" /></svg>
+                      {t('generate.copied')}
+                    </>
+                  ) : (
+                    <>
+                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5}><rect x="5" y="5" width="9" height="9" rx="1.5" /><path d="M3 11V3.5A1.5 1.5 0 014.5 2H11" strokeLinecap="round" /></svg>
+                      {t('generate.copy')}
+                    </>
+                  )}
+                </button>
+                <button onClick={() => setPromptOpen((v) => !v)} className="hds-copy-btn" aria-expanded={promptOpen}>
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ transform: promptOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M4 6l4 4 4-4" /></svg>
+                  {promptOpen ? t('generate.collapse') : t('generate.expand')}
+                </button>
               </div>
             </div>
-          </section>
+            {promptOpen ? (
+              <pre className="hds-code-block" style={{ maxHeight: 'none' }}><code>{promptText}</code></pre>
+            ) : (
+              <p className="text-xs text-[var(--tertiary-label)] leading-relaxed">{t('generate.promptHint')}</p>
+            )}
 
-          <section id="guide-edit" className="hds-guide-story is-reverse reveal-section scroll-mt-24">
-            <div className="hds-guide-illus-col">
-              <div className="hds-guide-illus">
-                <picture>
-                  <source srcSet="/guide-step-edit.webp" type="image/webp" />
-                  <img src="/guide-step-edit.png" alt={t('edit.title')} width={1200} height={675} loading="lazy" />
-                </picture>
-              </div>
-              {/* Looping micro-demo: a cursor clicking a text line that lights up. */}
-              <div className="hds-mini-demo" aria-hidden="true">
-                <div className="hds-mini-slide">
-                  <span className="hds-mini-line is-title" />
-                  <span className="hds-mini-line" />
-                  <span className="hds-mini-line is-short" />
-                  <svg className="hds-mini-cursor" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 7-6 2-2 6-6-15z" /></svg>
-                </div>
+            <div className="hds-guide-action">
+              <span className="text-xs text-[var(--tertiary-label)]">{t('generate.actionLabel')}</span>
+              <OpenButton label={t('generate.openGenerated')} />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Chapter 02 — Edit ──────────────────────────────── */}
+        <section id="guide-edit" className="hds-guide-story reveal-section scroll-mt-24">
+          <div className="hds-guide-story-num">02</div>
+          <div className="hds-guide-story-body">
+            <h2 className="hds-guide-story-title">{t('edit.title')}</h2>
+            <p className="hds-guide-story-intro">{t('edit.intro')}</p>
+
+            <div className="hds-guide-illus">
+              <picture>
+                <source srcSet="/guide-step-edit.webp" type="image/webp" />
+                <img src="/guide-step-edit.png" alt={t('edit.title')} width={1200} height={675} loading="lazy" />
+              </picture>
+            </div>
+            {/* Looping micro-demo: a cursor clicking a text line that lights up. */}
+            <div className="hds-mini-demo mt-3" aria-hidden="true">
+              <div className="hds-mini-slide">
+                <span className="hds-mini-line is-title" />
+                <span className="hds-mini-line" />
+                <span className="hds-mini-line is-short" />
+                <svg className="hds-mini-cursor" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 7-6 2-2 6-6-15z" /></svg>
               </div>
             </div>
-            <div className="hds-guide-story-body">
-              <span className="hds-guide-step-tag">{t('edit.title')}</span>
-              <p className="text-sm text-[var(--secondary-label)] leading-relaxed mt-2 mb-5">{t('edit.intro')}</p>
 
+            <div className="hds-guide-editors">
               {/* HTML 演示台 */}
               <div className="hds-guide-editor-card">
                 <div className="hds-guide-editor-head">
@@ -232,13 +235,13 @@ export function GuidePage() {
                     <li key={a.title}>
                       <svg className="hds-ability-tick" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3.2 3.2L13 4.5" /></svg>
                       <div className="min-w-0">
-                        <p className="text-[13px] font-medium text-[var(--label)] leading-tight">{a.title}</p>
+                        <p className="text-sm font-medium text-[var(--label)] leading-tight">{a.title}</p>
                         <p className="text-xs text-[var(--secondary-label)] leading-relaxed mt-0.5">{a.desc}</p>
                       </div>
                     </li>
                   ))}
                 </ul>
-                <button onClick={() => navigate(`${prefix}/html`)} className="hds-btn-primary px-3.5 py-1.5 text-xs mt-3">{t('edit.htmlDeck.cta')}</button>
+                <button onClick={() => navigate(`${prefix}/html`)} className="hds-btn-primary px-3.5 py-1.5 text-xs mt-4">{t('edit.htmlDeck.cta')}</button>
               </div>
 
               {/* PPT 编辑器 */}
@@ -252,13 +255,13 @@ export function GuidePage() {
                     <li key={a.title}>
                       <svg className="hds-ability-tick" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M3 8.5l3.2 3.2L13 4.5" /></svg>
                       <div className="min-w-0">
-                        <p className="text-[13px] font-medium text-[var(--label)] leading-tight">{a.title}</p>
+                        <p className="text-sm font-medium text-[var(--label)] leading-tight">{a.title}</p>
                         <p className="text-xs text-[var(--secondary-label)] leading-relaxed mt-0.5">{a.desc}</p>
                       </div>
                     </li>
                   ))}
                 </ul>
-                <div className="mt-3">
+                <div className="mt-4">
                   {hasDeck ? (
                     <button onClick={closeGuide} className="hds-btn-primary px-3.5 py-1.5 text-xs">{t('header.backToEdit')}</button>
                   ) : (
@@ -267,19 +270,24 @@ export function GuidePage() {
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <section id="guide-export" className="hds-guide-story reveal-section scroll-mt-24">
+        {/* ── Chapter 03 — Export ────────────────────────────── */}
+        <section id="guide-export" className="hds-guide-story reveal-section scroll-mt-24">
+          <div className="hds-guide-story-num">03</div>
+          <div className="hds-guide-story-body">
+            <h2 className="hds-guide-story-title">{t('export.title')}</h2>
+            <p className="hds-guide-story-intro">{t('export.intro')}</p>
+
             <div className="hds-guide-illus">
               <picture>
                 <source srcSet="/guide-step-export.webp" type="image/webp" />
                 <img src="/guide-step-export.png" alt={t('export.title')} width={1200} height={675} loading="lazy" />
               </picture>
             </div>
-            <div className="hds-guide-story-body">
-              <span className="hds-guide-step-tag">{t('export.title')}</span>
-              <p className="text-sm text-[var(--secondary-label)] leading-relaxed mt-2 mb-5">{t('export.intro')}</p>
 
+            <div className="hds-guide-editors">
               {/* HTML 演示台导出 */}
               <div className="hds-guide-editor-card">
                 <div className="hds-guide-editor-head">
@@ -309,23 +317,23 @@ export function GuidePage() {
                   ))}
                 </ul>
               </div>
-
-              <div className="hds-guide-action">
-                {hasDeck ? (
-                  <>
-                    <span className="text-xs text-[var(--tertiary-label)]">{t('export.actionHasDeck')}</span>
-                    <button onClick={closeGuide} className="hds-btn-primary px-3.5 py-1.5 text-xs">{t('export.backToExport')}</button>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-xs text-[var(--tertiary-label)]">{t('export.actionNoDeck')}</span>
-                    <OpenButton label={t('export.openFile')} />
-                  </>
-                )}
-              </div>
             </div>
-          </section>
-        </div>
+
+            <div className="hds-guide-action">
+              {hasDeck ? (
+                <>
+                  <span className="text-xs text-[var(--tertiary-label)]">{t('export.actionHasDeck')}</span>
+                  <button onClick={closeGuide} className="hds-btn-primary px-3.5 py-1.5 text-xs">{t('export.backToExport')}</button>
+                </>
+              ) : (
+                <>
+                  <span className="text-xs text-[var(--tertiary-label)]">{t('export.actionNoDeck')}</span>
+                  <OpenButton label={t('export.openFile')} />
+                </>
+              )}
+            </div>
+          </div>
+        </section>
 
         {error && (
           <OpenDeckErrorAlert className="mt-8 text-xs" error={error} />

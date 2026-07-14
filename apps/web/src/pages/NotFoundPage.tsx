@@ -10,7 +10,7 @@ export function NotFoundPage() {
   const prefix = useLocalePrefix();
 
   return (
-    <div className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden">
+    <div className="hds-cinema relative w-full min-h-[100dvh] overflow-x-clip">
       <Head>
         <title>{t('notFound.title')}</title>
         <meta name="robots" content="noindex, nofollow" />

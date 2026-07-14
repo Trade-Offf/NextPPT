@@ -7,6 +7,9 @@ const landing: typeof zh = {
     templates: 'Templates',
     explore: 'Explore',
     htmlWorkbench: 'HTML Deck',
+    openMenu: 'Open menu',
+    closeMenu: 'Close menu',
+    menuLabel: 'Main navigation',
   },
   hero: {
     titleA: 'HTML is the',

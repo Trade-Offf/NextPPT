@@ -1,0 +1,1677 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>The Capital Brief — Bloomberg/Economitorial Template</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper:    #fafaf7;
+    --paper-2:  #f3f2ec;
+    --ink:      #0a0a0a;
+    --ink-2:    #2a2a2a;
+    --muted:    #6b6b6b;
+    --faint:    #9a9a9a;
+    --navy:     #1F3A5F;
+    --navy-2:   #34547d;
+    --navy-tint:#cdd7e3;
+    --amber:    #d97706;
+    --green:    #047857;
+    --red:      #b91c1c;
+    --rule:     #0a0a0a;
+    --hairline: rgba(10,10,10,0.45);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; background: #1a1a1a;
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+  }
+  @page { size: 1280px 720px; margin: 0; }
+
+  .slide {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  /* ─── TYPE SYSTEM ─────────────────────────────────────────── */
+  .serif    { font-family: 'Source Serif Pro', 'Charter', Georgia, serif; }
+  .sans     { font-family: 'Inter', sans-serif; }
+  .mono     { font-family: 'JetBrains Mono', ui-monospace, monospace;
+              font-variant-numeric: tabular-nums; letter-spacing: 0.01em; }
+
+  .masthead { font-family: 'Source Serif Pro', Georgia, serif;
+              font-weight: 700; font-size: 22px; letter-spacing: 0.02em;
+              color: var(--ink); }
+  .masthead-sm { font-family: 'Source Serif Pro', Georgia, serif;
+              font-weight: 700; font-size: 16px; letter-spacing: 0.04em; }
+
+  .h1 { font-family: 'Source Serif Pro', Georgia, serif;
+        font-weight: 700; font-size: 38px; line-height: 1.08;
+        letter-spacing: -0.01em; color: var(--ink); }
+  .h2 { font-family: 'Source Serif Pro', Georgia, serif;
+        font-weight: 700; font-size: 24px; line-height: 1.15;
+        letter-spacing: -0.005em; color: var(--ink); }
+  .h3 { font-family: 'Inter', sans-serif; font-weight: 700;
+        font-size: 11px; text-transform: uppercase;
+        letter-spacing: 0.14em; color: var(--navy); }
+
+  .deck { font-family: 'Source Serif Pro', Georgia, serif;
+          font-style: italic; font-weight: 400; font-size: 18px;
+          line-height: 1.4; color: var(--muted); }
+
+  .body-tx { font-family: 'Inter', sans-serif; font-size: 12.5px;
+             line-height: 1.55; color: var(--ink-2); }
+  .body-tx-sm { font-family: 'Inter', sans-serif; font-size: 11.5px;
+                line-height: 1.5; color: var(--ink-2); }
+
+  .caption { font-family: 'Inter', sans-serif; font-weight: 600;
+             font-size: 10px; text-transform: uppercase;
+             letter-spacing: 0.16em; color: var(--muted); }
+  .micro   { font-family: 'Inter', sans-serif; font-weight: 500;
+             font-size: 9px; text-transform: uppercase;
+             letter-spacing: 0.14em; color: var(--faint); }
+
+  .data    { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+             font-size: 13px; color: var(--ink); }
+  .data-sm { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+             font-size: 11px; color: var(--ink-2); }
+  .stat-big { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+              font-weight: 600; font-size: 36px; line-height: 1; color: var(--navy); }
+  .stat-mega { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+               font-weight: 600; font-size: 54px; line-height: 1; color: var(--navy);
+               letter-spacing: -0.01em; }
+
+  /* ─── PAGE SKELETON ───────────────────────────────────────── */
+  .canvas {
+    position: absolute; inset: 0;
+    padding: 28px 40px 24px 40px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 0;
+  }
+
+  /* Masthead row */
+  .masthead-row {
+    border-top: 0.5px solid var(--ink);
+    padding-top: 8px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 6px;
+  }
+  .masthead-row .mh-left  { text-align: left; }
+  .masthead-row .mh-mid   { text-align: center; }
+  .masthead-row .mh-right { text-align: right; }
+  .mh-left .sec-label {
+    display: inline-block; font-family: 'Inter', sans-serif;
+    font-weight: 700; font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.18em; color: var(--navy);
+    padding-bottom: 4px; border-bottom: 2px solid var(--navy);
+  }
+
+  /* Footer row */
+  .footer-row {
+    border-top: 0.5px solid var(--ink);
+    padding-top: 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    gap: 16px;
+    font-family: 'Inter', sans-serif; font-size: 9.5px;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .footer-row .f-right { text-align: right; font-family: 'JetBrains Mono', monospace;
+                         font-variant-numeric: tabular-nums; color: var(--ink); }
+  .footer-row .f-mid   { text-align: center; }
+  .source-line { font-family: 'JetBrains Mono', monospace;
+                 font-variant-numeric: tabular-nums; font-size: 9px;
+                 color: var(--faint); letter-spacing: 0.06em;
+                 text-transform: uppercase; }
+
+  /* 8-col body grid */
+  .grid-8 {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 20px;
+    padding: 18px 0 14px 0;
+  }
+  .col-5 { grid-column: span 5; }
+  .col-3 { grid-column: span 3; }
+  .col-4 { grid-column: span 4; }
+  .col-2 { grid-column: span 2; }
+  .col-8 { grid-column: span 8; }
+  .col-6 { grid-column: span 6; }
+
+  /* Vertical column rule between main and sidebar */
+  .col-divider {
+    position: relative;
+  }
+  .col-divider::before {
+    content: ''; position: absolute;
+    left: -10px; top: 0; bottom: 0;
+    width: 0.5px; background: var(--muted);
+  }
+
+  /* ─── COMPONENTS ──────────────────────────────────────────── */
+  .section-label {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.18em; color: var(--navy);
+    padding-bottom: 5px; border-bottom: 2px solid var(--navy);
+    display: inline-block; margin-bottom: 12px;
+  }
+
+  .pull-quote {
+    font-family: 'Source Serif Pro', Georgia, serif;
+    font-style: italic; font-size: 21px; line-height: 1.35;
+    color: var(--ink); padding: 14px 0 14px 16px;
+    border-left: 3px solid var(--navy);
+    border-top: 0.5px solid var(--ink);
+    border-bottom: 0.5px solid var(--ink);
+    margin: 8px 0;
+  }
+  .pull-quote .attr {
+    display: block; margin-top: 10px; font-family: 'Inter', sans-serif;
+    font-style: normal; font-weight: 600; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.14em; color: var(--muted);
+  }
+
+  .stat-card {
+    border-top: 0.5px solid var(--ink);
+    padding: 10px 0 8px 0;
+  }
+  .stat-card .stat-label {
+    font-family: 'Inter', sans-serif; font-weight: 600;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--muted); margin-bottom: 6px;
+  }
+  .stat-card .stat-val {
+    font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    font-weight: 600; font-size: 32px; line-height: 1; color: var(--navy);
+  }
+  .stat-card .stat-val.amber { color: var(--amber); }
+  .stat-card .stat-val.green { color: var(--green); }
+  .stat-card .stat-delta {
+    font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    font-size: 11px; margin-top: 4px;
+  }
+  .stat-card .stat-delta.up   { color: var(--green); }
+  .stat-card .stat-delta.down { color: var(--red); }
+  .stat-card .stat-delta::before { content: '▲ '; }
+  .stat-card .stat-delta.down::before { content: '▼ '; }
+
+  .sidebar-box {
+    border: 0.5px solid var(--ink);
+    padding: 14px 14px 12px 14px;
+  }
+  .sidebar-box .sb-title {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.16em; color: var(--navy);
+    border-bottom: 0.5px solid var(--ink);
+    padding-bottom: 6px; margin-bottom: 8px;
+  }
+  .sidebar-box p {
+    font-family: 'Source Serif Pro', Georgia, serif;
+    font-size: 12.5px; line-height: 1.5; color: var(--ink-2);
+    margin: 0 0 8px 0;
+  }
+  .sidebar-box .sb-list {
+    font-family: 'Inter', sans-serif; font-size: 11px;
+    color: var(--ink-2); line-height: 1.55;
+  }
+  .sidebar-box .sb-list li {
+    list-style: none; padding: 4px 0;
+    border-bottom: 0.5px solid var(--faint);
+    display: grid; grid-template-columns: 1fr auto; gap: 8px;
+  }
+  .sidebar-box .sb-list li:last-child { border-bottom: 0; }
+  .sidebar-box .sb-list .sb-val {
+    font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    color: var(--navy); font-weight: 500;
+  }
+
+  .data-table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'Inter', sans-serif; font-size: 11px;
+  }
+  .data-table thead th {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 9.5px; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--navy);
+    text-align: left; padding: 6px 6px 6px 0;
+    border-bottom: 0.5px solid var(--ink);
+  }
+  .data-table thead th.num { text-align: right; }
+  .data-table tbody td {
+    padding: 6px 6px 6px 0; border-bottom: 0.5px solid var(--faint);
+    color: var(--ink-2);
+  }
+  .data-table tbody td.num {
+    font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+    text-align: right; color: var(--ink);
+  }
+  .data-table tbody td.num.amber { color: var(--amber); font-weight: 500; }
+  .data-table tbody td.num.green { color: var(--green); font-weight: 500; }
+  .data-table tbody tr:last-child td { border-bottom: 0.5px solid var(--ink); }
+
+  .editors-note {
+    font-family: 'Source Serif Pro', Georgia, serif;
+    font-style: italic; font-size: 12.5px; line-height: 1.55;
+    color: var(--muted); padding-left: 12px;
+    border-left: 2px solid var(--muted);
+  }
+
+  .heat-cell { display: inline-block; width: 14px; height: 14px; }
+  .heat-on   { background: var(--navy); }
+  .heat-mid  { background: var(--navy-tint); }
+  .heat-off  { background: var(--paper-2); border: 0.5px solid var(--faint); }
+
+  /* Drop cap for lede paragraphs */
+  .lede::first-letter {
+    font-family: 'Source Serif Pro', Georgia, serif;
+    font-weight: 700; font-size: 48px; line-height: 0.85;
+    float: left; padding: 4px 8px 0 0; color: var(--navy);
+  }
+  .lede { font-family: 'Source Serif Pro', Georgia, serif;
+          font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+
+  /* Bullet list */
+  .bullets { list-style: none; padding: 0; margin: 0; }
+  .bullets li {
+    padding: 4px 0 4px 14px; position: relative;
+    font-family: 'Inter', sans-serif; font-size: 11.5px;
+    line-height: 1.5; color: var(--ink-2);
+    border-bottom: 0.5px solid var(--faint);
+  }
+  .bullets li:last-child { border-bottom: 0; }
+  .bullets li::before {
+    content: ''; position: absolute; left: 0; top: 11px;
+    width: 6px; height: 1.5px; background: var(--navy);
+  }
+
+  /* Index list (contents) */
+  .toc-row {
+    display: grid; grid-template-columns: 36px 1fr 60px 80px;
+    gap: 12px; align-items: baseline;
+    padding: 8px 0; border-bottom: 0.5px solid var(--faint);
+  }
+  .toc-row .toc-num { font-family: 'JetBrains Mono', monospace; color: var(--navy);
+                      font-size: 12px; font-variant-numeric: tabular-nums; }
+  .toc-row .toc-ttl { font-family: 'Source Serif Pro', Georgia, serif;
+                      font-size: 15px; color: var(--ink); }
+  .toc-row .toc-sec { font-family: 'Inter', sans-serif; font-size: 10px;
+                      text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+  .toc-row .toc-pg  { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+                      font-size: 11px; color: var(--ink); text-align: right; }
+
+  /* Timeline */
+  .tl-row {
+    display: grid; grid-template-columns: 90px 16px 1fr;
+    gap: 12px; align-items: start;
+    padding: 8px 0; border-bottom: 0.5px solid var(--faint);
+  }
+  .tl-row:last-child { border-bottom: 0; }
+  .tl-date { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+             font-size: 11px; color: var(--navy); font-weight: 500; }
+  .tl-mark { position: relative; height: 100%; }
+  .tl-mark::before {
+    content: ''; position: absolute; left: 7px; top: 4px; bottom: -8px;
+    width: 0.5px; background: var(--ink);
+  }
+  .tl-row:last-child .tl-mark::before { display: none; }
+  .tl-mark .dot {
+    position: absolute; left: 3px; top: 5px;
+    width: 9px; height: 9px; background: var(--paper);
+    border: 1.5px solid var(--navy); border-radius: 50%;
+  }
+  .tl-mark .dot.amber { background: var(--amber); border-color: var(--amber); }
+  .tl-body .tl-ttl { font-family: 'Source Serif Pro', Georgia, serif;
+                     font-size: 13px; color: var(--ink); font-weight: 600; line-height: 1.3; }
+  .tl-body .tl-desc { font-family: 'Inter', sans-serif; font-size: 11px;
+                      color: var(--ink-2); line-height: 1.45; margin-top: 2px; }
+
+  /* Quadrant chart container */
+  .quadrant-note {
+    font-family: 'Inter', sans-serif; font-size: 10.5px;
+    color: var(--ink-2); line-height: 1.45;
+    padding: 8px 10px; border: 0.5px solid var(--faint);
+    background: var(--paper-2);
+  }
+  .quadrant-note .qn-tag {
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--navy); display: block; margin-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 1 — COVER
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s1">
+  <div class="canvas">
+    <!-- Masthead -->
+    <div class="masthead-row">
+      <div class="mh-left">
+        <div class="masthead">THE CAPITAL BRIEF</div>
+        <div class="caption" style="margin-top:2px;">A Quarterly Review of Global Capital · est. 2014</div>
+      </div>
+      <div class="mh-mid">
+        <div class="caption">Vol. XII · No. 04</div>
+      </div>
+      <div class="mh-right">
+        <div class="data" style="font-size:11px;">MON · 14 JUL 2026</div>
+        <div class="caption" style="margin-top:2px;">Issue No. 0421 · $24.00</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="grid-8" style="padding-top: 28px;">
+      <div class="col-5">
+        <div class="section-label">SPECIAL REPORT · ARTIFICIAL INTELLIGENCE</div>
+        <h1 class="h1" style="font-size: 60px; line-height: 1.02; letter-spacing:-0.015em; margin: 18px 0 22px 0;">
+          The Great AI Capital Surge of 2026:
+          <span style="color:var(--navy);">$412 Billion and Counting</span>
+        </h1>
+        <p class="deck" style="font-size:20px; max-width: 620px;">
+          A six-month investigation into the largest concentrated capital reallocation since the dot-com bubble — who paid, who received, and what the bill looks like when it comes due.
+        </p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-top: 32px; border-top: 0.5px solid var(--ink); padding-top: 14px;">
+          <div>
+            <div class="caption">Total AI Capex, H1 2026</div>
+            <div class="stat-mega" style="margin-top:6px;">$412B</div>
+            <div class="data-sm" style="color:var(--green); margin-top:4px;">▲ 64.2% YoY</div>
+          </div>
+          <div>
+            <div class="caption">VC Funding Raised</div>
+            <div class="stat-mega" style="margin-top:6px;">$78.4B</div>
+            <div class="data-sm" style="color:var(--amber); margin-top:4px;">▲ 41.8% YoY</div>
+          </div>
+          <div>
+            <div class="caption">Median Round Size</div>
+            <div class="stat-mega" style="margin-top:6px;">$24M</div>
+            <div class="data-sm" style="color:var(--red); margin-top:4px;">▼ 8.1% YoY</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="caption" style="margin-bottom:10px;">In this issue · 11 dispatches</div>
+        <div class="sidebar-box" style="margin-bottom:14px;">
+          <div class="sb-title">Lead Story</div>
+          <p>Three hyperscalers now account for <strong style="color:var(--navy);">71%</strong> of all AI infrastructure spending — a concentration ratio higher than oil, semiconductors, or cloud itself.</p>
+        </div>
+
+        <!-- Cover micro chart: capex trend -->
+        <div class="caption" style="margin-bottom:6px;">Hyperscaler AI capex, $B</div>
+        <svg viewBox="0 0 280 110" width="100%" height="110" style="display:block;">
+          <line x1="20" y1="92" x2="278" y2="92" stroke="#0a0a0a" stroke-width="0.5"/>
+          <line x1="20" y1="10" x2="20" y2="92" stroke="#0a0a0a" stroke-width="0.5"/>
+          <text x="14" y="14" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">120</text>
+          <text x="14" y="52" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">60</text>
+          <text x="14" y="94" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">0</text>
+          <!-- bars -->
+          <g fill="#1F3A5F">
+            <rect x="28"  y="78" width="20" height="14"/>
+            <rect x="54"  y="72" width="20" height="20"/>
+            <rect x="80"  y="64" width="20" height="28"/>
+            <rect x="106" y="56" width="20" height="36"/>
+            <rect x="132" y="48" width="20" height="44"/>
+            <rect x="158" y="38" width="20" height="54"/>
+            <rect x="184" y="28" width="20" height="64"/>
+            <rect x="210" y="20" width="20" height="72"/>
+          </g>
+          <!-- amber focus bar -->
+          <rect x="236" y="12" width="20" height="80" fill="#d97706"/>
+          <text x="246" y="9" font-family="JetBrains Mono" font-size="8" fill="#d97706" text-anchor="middle" font-weight="600">112</text>
+          <text x="38"  y="104" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">'23</text>
+          <text x="90"  y="104" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">'24</text>
+          <text x="142" y="104" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">'25</text>
+          <text x="194" y="104" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">'26E</text>
+          <text x="246" y="104" font-family="JetBrains Mono" font-size="8" fill="#d97706" text-anchor="middle" font-weight="600">H1'26</text>
+        </svg>
+
+        <div class="source-line" style="margin-top:6px;">SOURCE: CB Insights, company filings, Brief estimates</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · SPECIAL REPORT</div>
+      <div class="f-mid">ARTIFICIAL INTELLIGENCE · GLOBAL CAPITAL FLOWS</div>
+      <div class="f-right">PAGE 01 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 2 — EDITOR'S NOTE
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s2">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF</div></div>
+      <div class="mh-mid"><div class="caption">FROM THE EDITOR</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 02</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 24px;">
+      <div class="col-5">
+        <div class="section-label">Editor's Letter</div>
+        <h2 class="h1" style="font-size: 32px; margin: 10px 0 14px 0;">
+          When the capital is louder than the code.
+        </h2>
+        <p class="deck" style="margin-bottom:18px;">
+          A note on why this issue reads less like a technology quarterly, and more like a sovereign-bond prospectus.
+        </p>
+
+        <p class="lede" style="margin-bottom: 12px;">
+          Six months into 2026, the numbers have moved past what any analyst model can comfortably call "forecastable." The four largest AI infrastructure spenders in the United States have together committed more capital in 180 days than the entire global semiconductor industry invested in the five years from 2017 to 2021 combined.
+        </p>
+        <p class="body-tx" style="margin-bottom: 10px;">
+          This issue is built around a single question: <em>what does the capital know that the products do not?</em> We have stripped out the speculation, the demo-stage valuations, and the seeding rounds, and focused instead on the harder money — committed capex, drawn-down facilities, hyperscaler offtake agreements, and the sovereign funds now writing directly into compute reserves.
+        </p>
+        <p class="body-tx" style="margin-bottom: 10px;">
+          What emerges is a picture of concentration. Three firms, three geographies, three use cases. The long tail of the AI startup market has not disappeared, but it has been quietly re-priced — downward — even as the headline numbers climb. The dispersion between the top decile and the median has rarely been wider.
+        </p>
+        <div class="editors-note" style="margin-top: 16px;">
+          The Brief has chosen to publish every underlying figure in this issue as a public dataset. Readers with corrections are invited to write to the desk. We will publish the deltas next quarter, with attribution.
+        </div>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="sidebar-box" style="margin-bottom:14px;">
+          <div class="sb-title">Methodology</div>
+          <p>Capital figures drawn from 10-K and 10-Q filings, sovereign wealth disclosures, and 412 verified term sheets dated 1 Jan – 30 Jun 2026. All values in nominal USD.</p>
+          <p style="font-style:italic; color:var(--muted); font-size:11.5px;">"Committed" = signed offtake. "Deployed" = cash settled. The gap matters.</p>
+        </div>
+
+        <div class="caption" style="margin-bottom:6px;">Capex committed vs deployed, $B</div>
+        <svg viewBox="0 0 280 120" width="100%" height="120" style="display:block;">
+          <line x1="20" y1="100" x2="278" y2="100" stroke="#0a0a0a" stroke-width="0.5"/>
+          <line x1="20" y1="10" x2="20" y2="100" stroke="#0a0a0a" stroke-width="0.5"/>
+          <text x="14" y="14" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">500</text>
+          <text x="14" y="58" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">250</text>
+          <text x="14" y="102" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">0</text>
+          <!-- committed line (navy) -->
+          <polyline points="40,82 90,68 140,48 190,28 240,14" fill="none" stroke="#1F3A5F" stroke-width="2"/>
+          <!-- deployed line (amber) -->
+          <polyline points="40,90 90,84 140,74 190,62 240,52" fill="none" stroke="#d97706" stroke-width="2"/>
+          <!-- dashed reference line -->
+          <line x1="20" y1="55" x2="278" y2="55" stroke="#9a9a9a" stroke-width="0.5" stroke-dasharray="3,3"/>
+          <text x="276" y="52" font-family="Inter" font-size="8" fill="#9a9a9a" text-anchor="end">2025 avg</text>
+          <!-- points -->
+          <g fill="#1F3A5F"><circle cx="40" cy="82" r="2"/><circle cx="90" cy="68" r="2"/><circle cx="140" cy="48" r="2"/><circle cx="190" cy="28" r="2"/><circle cx="240" cy="14" r="3" stroke="#0a0a0a" stroke-width="0.5"/></g>
+          <g fill="#d97706"><circle cx="40" cy="90" r="2"/><circle cx="90" cy="84" r="2"/><circle cx="140" cy="74" r="2"/><circle cx="190" cy="62" r="2"/><circle cx="240" cy="52" r="2"/></g>
+          <text x="40"  y="112" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">Q1'25</text>
+          <text x="90"  y="112" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">Q3'25</text>
+          <text x="140" y="112" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">Q1'26</text>
+          <text x="190" y="112" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">Q2'26</text>
+          <text x="240" y="112" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">H2'26E</text>
+        </svg>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:6px;">
+          <div><span style="display:inline-block;width:14px;height:2px;background:#1F3A5F;vertical-align:middle;"></span> <span class="data-sm">Committed</span></div>
+          <div><span style="display:inline-block;width:14px;height:2px;background:#d97706;vertical-align:middle;"></span> <span class="data-sm">Deployed</span></div>
+        </div>
+        <div class="source-line" style="margin-top:8px;">SOURCE: Brief capital tracker · n=412</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · EDITOR'S LETTER</div>
+      <div class="f-mid">SIGNED: M. RAVENSCROFT, EDITOR</div>
+      <div class="f-right">02 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 3 — CONTENTS
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s3">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF</div></div>
+      <div class="mh-mid"><div class="caption">CONTENTS · ISSUE NO. 0421</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 03</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 22px;">
+      <div class="col-5">
+        <div class="section-label">Contents</div>
+        <h2 class="h1" style="font-size: 30px; margin: 8px 0 18px 0;">
+          Eleven dispatches on the largest capital reallocation of the decade.
+        </h2>
+
+        <div class="toc-row">
+          <div class="toc-num">01.</div>
+          <div class="toc-ttl">The Great AI Capital Surge of 2026</div>
+          <div class="toc-sec">Cover</div>
+          <div class="toc-pg">p. 01</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">02.</div>
+          <div class="toc-ttl">When the capital is louder than the code</div>
+          <div class="toc-sec">Editor</div>
+          <div class="toc-pg">p. 02</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">04.</div>
+          <div class="toc-ttl">The VC landscape, redrawn</div>
+          <div class="toc-sec">Markets</div>
+          <div class="toc-pg">p. 04</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">05.</div>
+          <div class="toc-ttl">Hyperscaler capex: the four-firm concentration</div>
+          <div class="toc-sec">Infrastructure</div>
+          <div class="toc-pg">p. 05</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">06.</div>
+          <div class="toc-ttl">The valuation bubble, mapped</div>
+          <div class="toc-sec">Valuations</div>
+          <div class="toc-pg">p. 06</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">07.</div>
+          <div class="toc-ttl">Where the investor money actually sits</div>
+          <div class="toc-sec">Investors</div>
+          <div class="toc-pg">p. 07</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">08.</div>
+          <div class="toc-ttl">Three geographies, three strategies</div>
+          <div class="toc-sec">Geography</div>
+          <div class="toc-pg">p. 08</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">09.</div>
+          <div class="toc-ttl">A timeline of the capital cascade</div>
+          <div class="toc-sec">Chronology</div>
+          <div class="toc-pg">p. 09</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">10.</div>
+          <div class="toc-ttl">The risk quadrant: what could break</div>
+          <div class="toc-sec">Risk</div>
+          <div class="toc-pg">p. 10</div>
+        </div>
+        <div class="toc-row">
+          <div class="toc-num">11.</div>
+          <div class="toc-ttl">Closing notes &amp; sources</div>
+          <div class="toc-sec">Colophon</div>
+          <div class="toc-pg">p. 11</div>
+        </div>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="caption" style="margin-bottom:8px;">Issue at a glance</div>
+        <div class="stat-card">
+          <div class="stat-label">Dispatches</div>
+          <div class="stat-val">11</div>
+          <div class="stat-delta up">3 vs prior issue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Charts &amp; tables</div>
+          <div class="stat-val">38</div>
+          <div class="stat-delta up">12 vs prior issue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sources cited</div>
+          <div class="stat-val">214</div>
+          <div class="stat-delta up">+ 41 QoQ</div>
+        </div>
+
+        <div class="caption" style="margin: 14px 0 6px 0;">Coverage by section</div>
+        <svg viewBox="0 0 280 80" width="100%" height="80" style="display:block;">
+          <line x1="0" y1="60" x2="280" y2="60" stroke="#0a0a0a" stroke-width="0.5"/>
+          <!-- horizontal bars by section -->
+          <g font-family="Inter" font-size="9" fill="#2a2a2a">
+            <text x="0" y="12">Markets</text>
+            <rect x="70" y="6" width="80" height="8" fill="#1F3A5F"/>
+            <text x="156" y="12" font-family="JetBrains Mono" font-size="9" fill="#1F3A5F">9</text>
+
+            <text x="0" y="26">Infra</text>
+            <rect x="70" y="20" width="110" height="8" fill="#1F3A5F"/>
+            <text x="186" y="26" font-family="JetBrains Mono" font-size="9" fill="#1F3A5F">12</text>
+
+            <text x="0" y="40">Valuations</text>
+            <rect x="70" y="34" width="65" height="8" fill="#1F3A5F"/>
+            <text x="141" y="40" font-family="JetBrains Mono" font-size="9" fill="#1F3A5F">7</text>
+
+            <text x="0" y="54">Risk</text>
+            <rect x="70" y="48" width="45" height="8" fill="#d97706"/>
+            <text x="121" y="54" font-family="JetBrains Mono" font-size="9" fill="#d97706">5</text>
+
+            <text x="0" y="68">Geo</text>
+            <rect x="70" y="62" width="35" height="8" fill="#1F3A5F"/>
+            <text x="111" y="68" font-family="JetBrains Mono" font-size="9" fill="#1F3A5F">4</text>
+          </g>
+        </svg>
+        <div class="source-line" style="margin-top:6px;">SOURCE: Brief editorial ledger</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · CONTENTS</div>
+      <div class="f-mid">ISSUE 0421 · Q3 2026</div>
+      <div class="f-right">03 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 4 — VC LANDSCAPE
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s4">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF · MARKETS</div></div>
+      <div class="mh-mid"><div class="caption">DISPATCH 04</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 04</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 22px;">
+      <div class="col-5">
+        <div class="section-label">Venture Capital</div>
+        <h2 class="h1" style="font-size: 34px; margin: 8px 0 10px 0;">
+          The VC landscape, redrawn.
+        </h2>
+        <p class="deck" style="margin-bottom: 14px;">
+          Round counts fell, dollars rose, and the median quietly went the other way.
+        </p>
+
+        <!-- Main line chart: AI VC funding by quarter -->
+        <div class="caption" style="margin-bottom:6px;">AI venture funding, $B per quarter · Q1 2023 — Q2 2026</div>
+        <svg viewBox="0 0 560 240" width="100%" height="240" style="display:block; border-top: 0.5px solid var(--ink); border-bottom: 0.5px solid var(--ink);">
+          <!-- y-axis -->
+          <line x1="36" y1="10" x2="36" y2="200" stroke="#0a0a0a" stroke-width="0.5"/>
+          <line x1="36" y1="200" x2="556" y2="200" stroke="#0a0a0a" stroke-width="0.5"/>
+          <g font-family="JetBrains Mono" font-size="9" fill="#9a9a9a" text-anchor="end">
+            <text x="32" y="14">$24B</text>
+            <text x="32" y="62">$18B</text>
+            <text x="32" y="110">$12B</text>
+            <text x="32" y="158">$6B</text>
+            <text x="32" y="204">$0</text>
+          </g>
+          <!-- gridlines -->
+          <g stroke="#9a9a9a" stroke-width="0.3" stroke-dasharray="2,3">
+            <line x1="36" y1="62" x2="556" y2="62"/>
+            <line x1="36" y1="110" x2="556" y2="110"/>
+            <line x1="36" y1="158" x2="556" y2="158"/>
+          </g>
+          <!-- dashed reference: 2024 avg -->
+          <line x1="36" y1="100" x2="556" y2="100" stroke="#6b6b6b" stroke-width="0.6" stroke-dasharray="4,3"/>
+          <text x="552" y="96" font-family="Inter" font-size="8.5" fill="#6b6b6b" text-anchor="end">2024 avg · $13.2B</text>
+
+          <!-- Deal count line (muted) -->
+          <polyline points="60,150 120,140 180,160 240,170 300,165 360,175 420,170 480,160 540,150"
+                    fill="none" stroke="#9a9a9a" stroke-width="1" stroke-dasharray="2,2"/>
+          <!-- Funding line (navy) -->
+          <polyline points="60,170 120,140 180,110 240,95 300,75 360,60 420,50 480,38 540,22"
+                    fill="none" stroke="#1F3A5F" stroke-width="2.2"/>
+          <!-- area fill -->
+          <polyline points="60,170 120,140 180,110 240,95 300,75 360,60 420,50 480,38 540,22 540,200 60,200"
+                    fill="#1F3A5F" fill-opacity="0.06" stroke="none"/>
+          <!-- amber focus point on latest -->
+          <circle cx="540" cy="22" r="4.5" fill="#d97706" stroke="#0a0a0a" stroke-width="0.6"/>
+          <text x="540" y="14" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#d97706" text-anchor="middle">$23.8B</text>
+          <!-- other navy points -->
+          <g fill="#1F3A5F">
+            <circle cx="60" cy="170" r="2.5"/><circle cx="120" cy="140" r="2.5"/>
+            <circle cx="180" cy="110" r="2.5"/><circle cx="240" cy="95" r="2.5"/>
+            <circle cx="300" cy="75" r="2.5"/><circle cx="360" cy="60" r="2.5"/>
+            <circle cx="420" cy="50" r="2.5"/><circle cx="480" cy="38" r="2.5"/>
+          </g>
+          <!-- x labels -->
+          <g font-family="JetBrains Mono" font-size="8.5" fill="#9a9a9a" text-anchor="middle">
+            <text x="60" y="218">Q1'23</text><text x="120" y="218">Q2'23</text>
+            <text x="180" y="218">Q3'23</text><text x="240" y="218">Q4'23</text>
+            <text x="300" y="218">Q1'24</text><text x="360" y="218">Q2'24</text>
+            <text x="420" y="218">Q1'25</text><text x="480" y="218">Q4'25</text>
+            <text x="540" y="218" fill="#d97706" font-weight="600">Q2'26</text>
+          </g>
+          <!-- annotation -->
+          <line x1="240" y1="95" x2="240" y2="78" stroke="#6b6b6b" stroke-width="0.4"/>
+          <text x="244" y="76" font-family="Source Serif Pro" font-style="italic" font-size="9.5" fill="#6b6b6b">GPT-4o cycle begins</text>
+        </svg>
+
+        <p class="body-tx" style="margin-top: 12px;">
+          The shape is now familiar: fewer, larger rounds, with capital concentrating at the top of the funnel. Deal count fell <strong>22%</strong> year-on-year even as dollars committed climbed <strong>41.8%</strong>. The median round, stripped of mega-rounds, is down to <strong>$8.4M</strong> — its lowest level since 2019.
+        </p>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="sidebar-box" style="margin-bottom: 12px;">
+          <div class="sb-title">Top AI rounds, H1 2026</div>
+          <ul class="sb-list" style="padding:0; margin:0;">
+            <li><span>Anthropic</span><span class="sb-val">$15.0B</span></li>
+            <li><span>xAI</span><span class="sb-val">$10.0B</span></li>
+            <li><span>Mistral AI</span><span class="sb-val">$6.8B</span></li>
+            <li><span>Perplexity</span><span class="sb-val">$3.2B</span></li>
+            <li><span>Scale AI</span><span class="sb-val">$2.5B</span></li>
+            <li><span>Cohere</span><span class="sb-val">$2.0B</span></li>
+          </ul>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Total VC funding, H1 2026</div>
+          <div class="stat-val">$78.4B</div>
+          <div class="stat-delta up">41.8% YoY</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Deal count, H1 2026</div>
+          <div class="stat-val amber">1,847</div>
+          <div class="stat-delta down">22.1% YoY</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Median round size</div>
+          <div class="stat-val" style="color:var(--red);">$8.4M</div>
+          <div class="stat-delta down">8.1% YoY</div>
+        </div>
+
+        <div class="editors-note" style="margin-top: 12px;">
+          The dispersion between the top decile and the median has rarely been wider. The middle of the market is hollowing out.
+        </div>
+        <div class="source-line" style="margin-top:8px;">SOURCE: PitchBook, CB Insights, Brief tracker</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · MARKETS</div>
+      <div class="f-mid">VC LANDSCAPE · H1 2026</div>
+      <div class="f-right">04 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 5 — HYPERSCALER CAPEX
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s5">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF · INFRASTRUCTURE</div></div>
+      <div class="mh-mid"><div class="caption">DISPATCH 05</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 05</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 20px;">
+      <div class="col-5">
+        <div class="section-label">Hyperscaler Capex</div>
+        <h2 class="h1" style="font-size: 32px; margin: 8px 0 8px 0;">
+          Four firms, $293 billion, one calendar year.
+        </h2>
+        <p class="deck" style="margin-bottom: 10px;">
+          The concentration ratio is now higher than oil, semiconductors, or cloud itself.
+        </p>
+
+        <!-- Bar chart: hyperscaler capex by year -->
+        <div class="caption" style="margin-bottom:6px;">AI infrastructure capex by firm, $B · FY 2022 — FY 2026E</div>
+        <svg viewBox="0 0 560 220" width="100%" height="220" style="display:block;">
+          <line x1="40" y1="180" x2="556" y2="180" stroke="#0a0a0a" stroke-width="0.5"/>
+          <line x1="40" y1="10" x2="40" y2="180" stroke="#0a0a0a" stroke-width="0.5"/>
+          <g font-family="JetBrains Mono" font-size="9" fill="#9a9a9a" text-anchor="end">
+            <text x="36" y="14">$120B</text>
+            <text x="36" y="58">$80B</text>
+            <text x="36" y="102">$40B</text>
+            <text x="36" y="146">$20B</text>
+            <text x="36" y="184">$0</text>
+          </g>
+          <!-- 5 years × 4 firms grouped bars -->
+          <!-- year 2022 -->
+          <g>
+            <rect x="60"  y="166" width="14" height="14" fill="#1F3A5F"/>
+            <rect x="76"  y="160" width="14" height="20" fill="#34547d"/>
+            <rect x="92"  y="170" width="14" height="10" fill="#6b6b6b"/>
+            <rect x="108" y="172" width="14" height="8"  fill="#9a9a9a"/>
+          </g>
+          <!-- year 2023 -->
+          <g>
+            <rect x="148" y="150" width="14" height="30" fill="#1F3A5F"/>
+            <rect x="164" y="142" width="14" height="38" fill="#34547d"/>
+            <rect x="180" y="158" width="14" height="22" fill="#6b6b6b"/>
+            <rect x="196" y="162" width="14" height="18" fill="#9a9a9a"/>
+          </g>
+          <!-- year 2024 -->
+          <g>
+            <rect x="236" y="118" width="14" height="62" fill="#1F3A5F"/>
+            <rect x="252" y="106" width="14" height="74" fill="#34547d"/>
+            <rect x="268" y="132" width="14" height="48" fill="#6b6b6b"/>
+            <rect x="284" y="140" width="14" height="40" fill="#9a9a9a"/>
+          </g>
+          <!-- year 2025 -->
+          <g>
+            <rect x="324" y="80"  width="14" height="100" fill="#1F3A5F"/>
+            <rect x="340" y="68"  width="14" height="112" fill="#34547d"/>
+            <rect x="356" y="100" width="14" height="80"  fill="#6b6b6b"/>
+            <rect x="372" y="112" width="14" height="68"  fill="#9a9a9a"/>
+          </g>
+          <!-- year 2026E — amber focus -->
+          <g>
+            <rect x="412" y="40"  width="14" height="140" fill="#d97706"/>
+            <rect x="428" y="28"  width="14" height="152" fill="#d97706" fill-opacity="0.78"/>
+            <rect x="444" y="60"  width="14" height="120" fill="#d97706" fill-opacity="0.56"/>
+            <rect x="460" y="76"  width="14" height="104" fill="#d97706" fill-opacity="0.34"/>
+          </g>
+          <!-- year labels -->
+          <g font-family="JetBrains Mono" font-size="9" fill="#9a9a9a" text-anchor="middle">
+            <text x="91"  y="196">2022</text>
+            <text x="179" y="196">2023</text>
+            <text x="267" y="196">2024</text>
+            <text x="355" y="196">2025</text>
+            <text x="443" y="196" fill="#d97706" font-weight="600">2026E</text>
+          </g>
+          <!-- callouts -->
+          <text x="419" y="34" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#d97706">$112B</text>
+          <text x="435" y="22" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#d97706">$98B</text>
+          <!-- legend -->
+          <g font-family="Inter" font-size="8.5" fill="#2a2a2a">
+            <rect x="60" y="208" width="8" height="8" fill="#1F3A5F"/><text x="72" y="215">MSFT</text>
+            <rect x="120" y="208" width="8" height="8" fill="#34547d"/><text x="132" y="215">GOOG</text>
+            <rect x="180" y="208" width="8" height="8" fill="#6b6b6b"/><text x="192" y="215">META</text>
+            <rect x="240" y="208" width="8" height="8" fill="#9a9a9a"/><text x="252" y="215">AMZN</text>
+          </g>
+        </svg>
+
+        <p class="body-tx" style="margin-top: 8px;">
+          For the first time, two firms — Microsoft and Alphabet — will each spend more on AI infrastructure in a single year than the entire global semiconductor capex cycle of 2018. Amazon and Meta are not far behind. Together, the four commit <strong>$293B</strong> in 2026.
+        </p>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="sidebar-box" style="margin-bottom: 12px;">
+          <div class="sb-title">Concentration ratio</div>
+          <p>Top-4 hyperscalers account for <strong style="color:var(--navy); font-family:'JetBrains Mono'; font-size:14px;">71.2%</strong> of all AI infrastructure spending globally — surpassing the four-firm concentration of oil majors (62%), semis (58%), and cloud (67%).</p>
+        </div>
+
+        <div class="caption" style="margin-bottom:6px;">Capex by firm, FY 2026E</div>
+        <table class="data-table" style="margin-bottom: 14px;">
+          <thead>
+            <tr>
+              <th>Firm</th>
+              <th class="num">Capex</th>
+              <th class="num">YoY</th>
+              <th class="num">Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Microsoft</td><td class="num amber">$112B</td><td class="num green">+38%</td><td class="num">38.2%</td></tr>
+            <tr><td>Alphabet</td><td class="num amber">$98B</td><td class="num green">+44%</td><td class="num">33.4%</td></tr>
+            <tr><td>Meta</td><td class="num">$48B</td><td class="num green">+52%</td><td class="num">16.4%</td></tr>
+            <tr><td>Amazon</td><td class="num">$35B</td><td class="num green">+27%</td><td class="num">11.9%</td></tr>
+            <tr><td>Others</td><td class="num">$119B</td><td class="num green">+19%</td><td class="num">—</td></tr>
+            <tr><td><strong>Total</strong></td><td class="num"><strong>$412B</strong></td><td class="num green"><strong>+34%</strong></td><td class="num">100%</td></tr>
+          </tbody>
+        </table>
+
+        <div class="editors-note">
+          Offtake agreements — multi-year committed compute purchases by foundation-model labs — now represent 38% of hyperscaler AI revenue. The customers are also the dependents.
+        </div>
+        <div class="source-line" style="margin-top:8px;">SOURCE: Company 10-K/10-Q, Brief estimates</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · INFRASTRUCTURE</div>
+      <div class="f-mid">HYPERSCALER CAPEX · FY 2026E</div>
+      <div class="f-right">05 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 6 — VALUATION BUBBLE (SCATTER)
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s6">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF · VALUATIONS</div></div>
+      <div class="mh-mid"><div class="caption">DISPATCH 06</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 06</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 20px;">
+      <div class="col-5">
+        <div class="section-label">Valuations</div>
+        <h2 class="h1" style="font-size: 32px; margin: 8px 0 8px 0;">
+          The bubble, mapped: revenue multiples vs growth.
+        </h2>
+        <p class="deck" style="margin-bottom: 10px;">
+          Each dot is a funded AI company. The amber dots are the ones the market cannot afford to be wrong about.
+        </p>
+
+        <!-- Scatter plot: valuation multiple vs revenue growth -->
+        <svg viewBox="0 0 560 280" width="100%" height="280" style="display:block;">
+          <!-- axes -->
+          <line x1="50" y1="20" x2="50" y2="240" stroke="#0a0a0a" stroke-width="0.5"/>
+          <line x1="50" y1="240" x2="556" y2="240" stroke="#0a0a0a" stroke-width="0.5"/>
+          <!-- y labels: revenue multiple -->
+          <g font-family="JetBrains Mono" font-size="9" fill="#9a9a9a" text-anchor="end">
+            <text x="46" y="24">200×</text>
+            <text x="46" y="80">150×</text>
+            <text x="46" y="136">100×</text>
+            <text x="46" y="192">50×</text>
+            <text x="46" y="244">0×</text>
+          </g>
+          <!-- x labels: revenue growth % -->
+          <g font-family="JetBrains Mono" font-size="9" fill="#9a9a9a" text-anchor="middle">
+            <text x="50"  y="256">0%</text>
+            <text x="177" y="256">100%</text>
+            <text x="303" y="256">200%</text>
+            <text x="430" y="256">300%</text>
+            <text x="556" y="256">400%</text>
+          </g>
+          <!-- axis titles -->
+          <text x="22" y="14" font-family="Inter" font-size="9" fill="#6b6b6b" font-weight="600">REV MULTIPLE (×)</text>
+          <text x="552" y="270" font-family="Inter" font-size="9" fill="#6b6b6b" font-weight="600" text-anchor="end">YOY REVENUE GROWTH (%)</text>
+
+          <!-- quadrant lines -->
+          <line x1="303" y1="20" x2="303" y2="240" stroke="#9a9a9a" stroke-width="0.4" stroke-dasharray="3,3"/>
+          <line x1="50" y1="136" x2="556" y2="136" stroke="#9a9a9a" stroke-width="0.4" stroke-dasharray="3,3"/>
+
+          <!-- quadrant labels -->
+          <text x="55" y="32" font-family="Inter" font-size="8.5" fill="#9a9a9a" font-style="italic">HIGH MULT · LOW GROWTH (risk)</text>
+          <text x="308" y="32" font-family="Inter" font-size="8.5" fill="#9a9a9a" font-style="italic">HIGH MULT · HIGH GROWTH (frontier)</text>
+          <text x="55" y="232" font-family="Inter" font-size="8.5" fill="#9a9a9a" font-style="italic">LOW MULT · LOW GROWTH (commodity)</text>
+          <text x="308" y="232" font-family="Inter" font-size="8.5" fill="#9a9a9a" font-style="italic">LOW MULT · HIGH GROWTH (underpriced)</text>
+
+          <!-- data points: navy dots -->
+          <g fill="#1F3A5F" fill-opacity="0.7">
+            <circle cx="120" cy="180" r="4"/>
+            <circle cx="160" cy="160" r="4"/>
+            <circle cx="200" cy="140" r="4"/>
+            <circle cx="220" cy="120" r="5"/>
+            <circle cx="260" cy="100" r="4"/>
+            <circle cx="280" cy="85" r="4"/>
+            <circle cx="300" cy="70" r="4"/>
+            <circle cx="330" cy="55" r="4"/>
+            <circle cx="360" cy="45" r="5"/>
+            <circle cx="390" cy="38" r="4"/>
+            <circle cx="420" cy="50" r="4"/>
+            <circle cx="450" cy="65" r="4"/>
+            <circle cx="470" cy="80" r="4"/>
+            <circle cx="100" cy="200" r="3.5"/>
+            <circle cx="140" cy="195" r="3.5"/>
+            <circle cx="180" cy="175" r="3.5"/>
+            <circle cx="240" cy="165" r="3.5"/>
+            <circle cx="270" cy="150" r="3.5"/>
+            <circle cx="310" cy="135" r="3.5"/>
+            <circle cx="340" cy="120" r="3.5"/>
+          </g>
+          <!-- amber focus points (the "frontier" cluster) -->
+          <g fill="#d97706" stroke="#0a0a0a" stroke-width="0.5">
+            <circle cx="380" cy="30" r="6"/>
+            <circle cx="410" cy="22" r="6.5"/>
+            <circle cx="440" cy="34" r="6"/>
+          </g>
+          <!-- labels for amber points -->
+          <text x="380" y="20" font-family="Inter" font-size="9" font-weight="600" fill="#0a0a0a" text-anchor="middle">Anthropic</text>
+          <text x="410" y="12" font-family="Inter" font-size="9" font-weight="600" fill="#0a0a0a" text-anchor="middle">xAI</text>
+          <text x="440" y="24" font-family="Inter" font-size="9" font-weight="600" fill="#0a0a0a" text-anchor="middle">OpenAI</text>
+        </svg>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="pull-quote" style="margin-top: 0;">
+          "We are not pricing companies anymore. We are pricing the option that one of these firms becomes the operating system of the next decade."
+          <span class="attr">— A. Whitfield, Partner, Sequoia · Jun 2026</span>
+        </div>
+
+        <div class="caption" style="margin: 14px 0 6px 0;">Top AI valuations, H1 2026</div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Company</th><th class="num">Valuation</th><th class="num">Rev mult</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>OpenAI</td><td class="num">$340B</td><td class="num amber">182×</td></tr>
+            <tr><td>Anthropic</td><td class="num">$180B</td><td class="num amber">156×</td></tr>
+            <tr><td>xAI</td><td class="num">$120B</td><td class="num amber">210×</td></tr>
+            <tr><td>Databricks</td><td class="num">$62B</td><td class="num">38×</td></tr>
+            <tr><td>Mistral</td><td class="num">$14B</td><td class="num amber">88×</td></tr>
+            <tr><td>Perplexity</td><td class="num">$9B</td><td class="num">42×</td></tr>
+          </tbody>
+        </table>
+
+        <div class="editors-note" style="margin-top: 12px;">
+          The median multiple for funded AI companies is now <strong style="color:var(--navy);">47×</strong> next-twelve-months revenue. The historical median for enterprise software at equivalent growth rates: <strong>12×</strong>.
+        </div>
+        <div class="source-line" style="margin-top:8px;">SOURCE: PitchBook, Brief valuation index</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · VALUATIONS</div>
+      <div class="f-mid">AI VALUATION MAP · H1 2026</div>
+      <div class="f-right">06 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 7 — INVESTOR DONUT
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s7">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF · INVESTORS</div></div>
+      <div class="mh-mid"><div class="caption">DISPATCH 07</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 07</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 22px;">
+      <div class="col-5">
+        <div class="section-label">Investor Composition</div>
+        <h2 class="h1" style="font-size: 32px; margin: 8px 0 10px 0;">
+          Where the investor money actually sits.
+        </h2>
+        <p class="deck" style="margin-bottom: 14px;">
+          Sovereign funds are now the single largest capital pool in AI — a structural change in 18 months.
+        </p>
+
+        <div style="display:grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: center;">
+          <!-- Donut chart -->
+          <svg viewBox="0 0 240 240" width="240" height="240" style="display:block;">
+            <!-- segments via stroke-dasharray on circles; r=80, c=2*pi*80≈502.65 -->
+            <!-- Sovereign 28% -->
+            <circle cx="120" cy="120" r="80" fill="none" stroke="#1F3A5F" stroke-width="36"
+                    stroke-dasharray="140.7 361.9" stroke-dashoffset="0" transform="rotate(-90 120 120)"/>
+            <!-- VC 24% -->
+            <circle cx="120" cy="120" r="80" fill="none" stroke="#34547d" stroke-width="36"
+                    stroke-dasharray="120.6 382" stroke-dashoffset="-140.7" transform="rotate(-90 120 120)"/>
+            <!-- Hyperscalers 22% -->
+            <circle cx="120" cy="120" r="80" fill="none" stroke="#6b6b6b" stroke-width="36"
+                    stroke-dasharray="110.6 392" stroke-dashoffset="-261.3" transform="rotate(-90 120 120)"/>
+            <!-- PE 14% -->
+            <circle cx="120" cy="120" r="80" fill="none" stroke="#9a9a9a" stroke-width="36"
+                    stroke-dasharray="70.4 432.2" stroke-dashoffset="-371.9" transform="rotate(-90 120 120)"/>
+            <!-- Corporate 8% -->
+            <circle cx="120" cy="120" r="80" fill="none" stroke="#d97706" stroke-width="36"
+                    stroke-dasharray="40.2 462.4" stroke-dashoffset="-442.3" transform="rotate(-90 120 120)"/>
+            <!-- Other 4% -->
+            <circle cx="120" cy="120" r="80" fill="none" stroke="#cdd7e3" stroke-width="36"
+                    stroke-dasharray="20.1 482.5" stroke-dashoffset="-482.5" transform="rotate(-90 120 120)"/>
+            <!-- center label -->
+            <text x="120" y="116" font-family="JetBrains Mono" font-size="22" font-weight="600" fill="#1F3A5F" text-anchor="middle">$412B</text>
+            <text x="120" y="134" font-family="Inter" font-size="8.5" fill="#6b6b6b" text-anchor="middle" letter-spacing="1.5">TOTAL H1'26</text>
+          </svg>
+
+          <!-- Legend -->
+          <div style="font-family:'Inter'; font-size:11px;">
+            <div style="display:grid; grid-template-columns: 14px 1fr auto auto; gap:8px; align-items:center; padding: 5px 0; border-bottom: 0.5px solid var(--faint);">
+              <span style="width:10px;height:10px;background:#1F3A5F;display:inline-block;"></span>
+              <span>Sovereign wealth</span><span class="data-sm" style="color:var(--navy);">$115.4B</span><span class="data-sm">28%</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 14px 1fr auto auto; gap:8px; align-items:center; padding: 5px 0; border-bottom: 0.5px solid var(--faint);">
+              <span style="width:10px;height:10px;background:#34547d;display:inline-block;"></span>
+              <span>Venture capital</span><span class="data-sm" style="color:var(--navy);">$98.9B</span><span class="data-sm">24%</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 14px 1fr auto auto; gap:8px; align-items:center; padding: 5px 0; border-bottom: 0.5px solid var(--faint);">
+              <span style="width:10px;height:10px;background:#6b6b6b;display:inline-block;"></span>
+              <span>Hyperscaler internal</span><span class="data-sm" style="color:var(--navy);">$90.6B</span><span class="data-sm">22%</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 14px 1fr auto auto; gap:8px; align-items:center; padding: 5px 0; border-bottom: 0.5px solid var(--faint);">
+              <span style="width:10px;height:10px;background:#9a9a9a;display:inline-block;"></span>
+              <span>Private equity</span><span class="data-sm" style="color:var(--navy);">$57.7B</span><span class="data-sm">14%</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 14px 1fr auto auto; gap:8px; align-items:center; padding: 5px 0; border-bottom: 0.5px solid var(--faint);">
+              <span style="width:10px;height:10px;background:#d97706;display:inline-block;"></span>
+              <span>Corporate strategic</span><span class="data-sm" style="color:var(--amber);">$33.0B</span><span class="data-sm">8%</span>
+            </div>
+            <div style="display:grid; grid-template-columns: 14px 1fr auto auto; gap:8px; align-items:center; padding: 5px 0;">
+              <span style="width:10px;height:10px;background:#cdd7e3;display:inline-block;"></span>
+              <span>Other (debt, family office)</span><span class="data-sm">$16.5B</span><span class="data-sm">4%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="stat-card">
+          <div class="stat-label">Sovereign share, H1 2026</div>
+          <div class="stat-val">28.0%</div>
+          <div class="stat-delta up">+ 19 pts vs H1 2024</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">VC share, H1 2026</div>
+          <div class="stat-val amber">24.0%</div>
+          <div class="stat-delta down">– 11 pts vs H1 2024</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Corporate strategic</div>
+          <div class="stat-val">8.0%</div>
+          <div class="stat-delta up">+ 4 pts vs H1 2024</div>
+        </div>
+
+        <div class="sidebar-box" style="margin-top: 14px;">
+          <div class="sb-title">Top sovereign allocators</div>
+          <ul class="sb-list" style="padding:0; margin:0;">
+            <li><span>PIF (Saudi Arabia)</span><span class="sb-val">$24.8B</span></li>
+            <li><span>GIC (Singapore)</span><span class="sb-val">$18.2B</span></li>
+            <li><span>Mubadala (UAE)</span><span class="sb-val">$15.6B</span></li>
+            <li><span>NBIM (Norway)</span><span class="sb-val">$12.4B</span></li>
+            <li><span>ADIA (UAE)</span><span class="sb-val">$9.8B</span></li>
+            <li><span>CIC (China)</span><span class="sb-val">$8.6B</span></li>
+          </ul>
+        </div>
+        <div class="source-line" style="margin-top:8px;">SOURCE: SWFI, Brief investor tracker</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · INVESTORS</div>
+      <div class="f-mid">CAPITAL COMPOSITION · H1 2026</div>
+      <div class="f-right">07 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 8 — COMPARISON (SANKEY + HEATMAP)
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s8">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF · GEOGRAPHY</div></div>
+      <div class="mh-mid"><div class="caption">DISPATCH 08</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 08</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 20px;">
+      <div class="col-5">
+        <div class="section-label">Three Geographies</div>
+        <h2 class="h1" style="font-size: 30px; margin: 8px 0 10px 0;">
+          United States, China, Europe: three strategies, one race.
+        </h2>
+        <p class="deck" style="margin-bottom: 12px;">
+          Capital source → deployer → use case. The flows now diverge by region more than they converge.
+        </p>
+
+        <!-- Sankey-style flow diagram -->
+        <div class="caption" style="margin-bottom:6px;">Capital flow by region &amp; use case, $B · H1 2026</div>
+        <svg viewBox="0 0 560 230" width="100%" height="230" style="display:block;">
+          <!-- Left nodes: capital sources -->
+          <g font-family="Inter" font-size="9" fill="#0a0a0a">
+            <rect x="20" y="20"  width="6" height="60" fill="#1F3A5F"/>
+            <text x="32" y="40">United States</text>
+            <text x="32" y="54" font-family="JetBrains Mono" font-size="9" fill="#1F3A5F">$198B</text>
+            <rect x="20" y="95"  width="6" height="44" fill="#34547d"/>
+            <text x="32" y="115">China</text>
+            <text x="32" y="129" font-family="JetBrains Mono" font-size="9" fill="#34547d">$84B</text>
+            <rect x="20" y="155" width="6" height="36" fill="#6b6b6b"/>
+            <text x="32" y="175">Europe</text>
+            <text x="32" y="189" font-family="JetBrains Mono" font-size="9" fill="#6b6b6b">$52B</text>
+          </g>
+          <!-- Right nodes: use cases -->
+          <g font-family="Inter" font-size="9" fill="#0a0a0a">
+            <rect x="534" y="15"  width="6" height="50" fill="#1F3A5F"/>
+            <text x="528" y="35" text-anchor="end">Foundation models</text>
+            <text x="528" y="49" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#1F3A5F">$148B</text>
+            <rect x="534" y="80"  width="6" height="60" fill="#34547d"/>
+            <text x="528" y="105" text-anchor="end">Compute / datacenters</text>
+            <text x="528" y="119" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#34547d">$176B</text>
+            <rect x="534" y="155" width="6" height="40" fill="#6b6b6b"/>
+            <text x="528" y="175" text-anchor="end">Applications</text>
+            <text x="528" y="189" text-anchor="end" font-family="JetBrains Mono" font-size="9" fill="#6b6b6b">$88B</text>
+          </g>
+          <!-- Flows: navy ribbons (simplified as polygons) -->
+          <!-- US → Foundation models (large) -->
+          <path d="M 26,50 C 280,50 280,40 534,40 L 534,15 C 280,15 280,20 26,20 Z" fill="#1F3A5F" fill-opacity="0.55"/>
+          <!-- US → Compute (large) -->
+          <path d="M 26,80 C 280,80 280,110 534,110 L 534,80 C 280,80 280,50 26,50 Z" fill="#1F3A5F" fill-opacity="0.35"/>
+          <!-- US → Apps (medium) -->
+          <path d="M 26,80 C 280,80 280,175 534,175 L 534,155 C 280,155 280,80 26,80 Z" fill="#1F3A5F" fill-opacity="0.18"/>
+          <!-- China → Foundation models -->
+          <path d="M 26,95 C 280,95 280,40 534,40 L 534,40 C 280,40 280,95 26,95 Z" fill="#34547d" fill-opacity="0.4"/>
+          <!-- China → Compute (largest China flow) -->
+          <path d="M 26,139 C 280,139 280,140 534,140 L 534,80 C 280,80 280,95 26,95 Z" fill="#34547d" fill-opacity="0.5"/>
+          <!-- Europe → Apps (largest Europe flow) -->
+          <path d="M 26,155 C 280,155 280,195 534,195 L 534,195 C 280,195 280,155 26,155 Z" fill="#6b6b6b" fill-opacity="0.45"/>
+          <!-- Europe → Compute -->
+          <path d="M 26,191 C 280,191 280,140 534,140 L 534,140 C 280,140 280,191 26,191 Z" fill="#6b6b6b" fill-opacity="0.25"/>
+          <!-- node borders -->
+          <g stroke="#0a0a0a" stroke-width="0.5" fill="none">
+            <rect x="20" y="20" width="6" height="60"/>
+            <rect x="20" y="95" width="6" height="44"/>
+            <rect x="20" y="155" width="6" height="36"/>
+            <rect x="534" y="15" width="6" height="50"/>
+            <rect x="534" y="80" width="6" height="60"/>
+            <rect x="534" y="155" width="6" height="40"/>
+          </g>
+        </svg>
+
+        <p class="body-tx" style="margin-top: 8px;">
+          The United States dominates foundation-model funding; China concentrates on compute sovereignty; Europe, late and smaller, skews toward application-layer capital. The three regions are no longer running the same race.
+        </p>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="caption" style="margin-bottom: 6px;">Capital deployment heatmap · by quarter</div>
+        <div class="sidebar-box" style="padding: 10px;">
+          <div class="sb-title">Region × Quarter intensity</div>
+          <div style="display:grid; grid-template-columns: 56px repeat(6, 1fr); gap: 3px; font-family:'JetBrains Mono'; font-size:9px; align-items:center;">
+            <div></div>
+            <div style="text-align:center; color:var(--muted);">Q1'25</div>
+            <div style="text-align:center; color:var(--muted);">Q2'25</div>
+            <div style="text-align:center; color:var(--muted);">Q3'25</div>
+            <div style="text-align:center; color:var(--muted);">Q4'25</div>
+            <div style="text-align:center; color:var(--muted);">Q1'26</div>
+            <div style="text-align:center; color:var(--amber); font-weight:600;">Q2'26</div>
+
+            <div style="color:var(--ink-2);">US</div>
+            <div style="text-align:center;"><span class="heat-cell heat-mid"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-mid"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on" style="outline:1px solid #d97706;"></span></div>
+
+            <div style="color:var(--ink-2);">CN</div>
+            <div style="text-align:center;"><span class="heat-cell heat-off"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-mid"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-mid"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+
+            <div style="color:var(--ink-2);">EU</div>
+            <div style="text-align:center;"><span class="heat-cell heat-off"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-off"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-mid"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-mid"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+
+            <div style="color:var(--ink-2);">Other</div>
+            <div style="text-align:center;"><span class="heat-cell heat-off"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-off"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-off"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-mid"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-mid"></span></div>
+            <div style="text-align:center;"><span class="heat-cell heat-on"></span></div>
+          </div>
+          <div style="display:flex; gap: 12px; margin-top: 8px; font-family:'Inter'; font-size:9px; color:var(--muted);">
+            <span><span class="heat-cell heat-on" style="width:10px;height:10px;vertical-align:middle;"></span> &gt;$30B</span>
+            <span><span class="heat-cell heat-mid" style="width:10px;height:10px;vertical-align:middle;"></span> $10–30B</span>
+            <span><span class="heat-cell heat-off" style="width:10px;height:10px;vertical-align:middle;"></span> &lt;$10B</span>
+          </div>
+        </div>
+
+        <table class="data-table" style="margin-top: 12px;">
+          <thead>
+            <tr><th>Region</th><th class="num">H1'26</th><th class="num">YoY</th><th class="num">Share</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>United States</td><td class="num">$198B</td><td class="num green">+42%</td><td class="num">59%</td></tr>
+            <tr><td>China</td><td class="num">$84B</td><td class="num green">+58%</td><td class="num">25%</td></tr>
+            <tr><td>Europe</td><td class="num">$52B</td><td class="num green">+31%</td><td class="num">15%</td></tr>
+            <tr><td>Rest of world</td><td class="num">$18B</td><td class="num green">+22%</td><td class="num">4%</td></tr>
+          </tbody>
+        </table>
+        <div class="source-line" style="margin-top:8px;">SOURCE: Brief regional tracker, OECD</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · GEOGRAPHY</div>
+      <div class="f-mid">REGIONAL CAPITAL FLOWS · H1 2026</div>
+      <div class="f-right">08 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 9 — TIMELINE
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s9">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF · CHRONOLOGY</div></div>
+      <div class="mh-mid"><div class="caption">DISPATCH 09</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 09</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 22px;">
+      <div class="col-5">
+        <div class="section-label">Chronology</div>
+        <h2 class="h1" style="font-size: 32px; margin: 8px 0 12px 0;">
+          The capital cascade, in eighteen months.
+        </h2>
+        <p class="deck" style="margin-bottom: 14px;">
+          Eleven events that redrew the map of who pays for intelligence.
+        </p>
+
+        <div class="tl-row">
+          <div class="tl-date">Jan 2025</div>
+          <div class="tl-mark"><div class="dot"></div></div>
+          <div class="tl-body">
+            <div class="tl-ttl">Stargate announced · $500B committed</div>
+            <div class="tl-desc">Microsoft, OpenAI and Oracle unveil a 10-year infrastructure plan. Largest single commitment in AI history.</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date">Mar 2025</div>
+          <div class="tl-mark"><div class="dot"></div></div>
+          <div class="tl-body">
+            <div class="tl-ttl">PIF launches $40B AI allocation</div>
+            <div class="tl-desc">Saudi sovereign fund signals direct investment in foundation-model labs, bypassing traditional VC.</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date">Jun 2025</div>
+          <div class="tl-mark"><div class="dot"></div></div>
+          <div class="tl-body">
+            <div class="tl-ttl">Anthropic Series F · $15B</div>
+            <div class="tl-desc">Largest single round of the year. Sovereign and strategic capital replaces traditional VC as lead.</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date">Sep 2025</div>
+          <div class="tl-mark"><div class="dot"></div></div>
+          <div class="tl-body">
+            <div class="tl-ttl">Alphabet Q3 capex guidance raised to $82B</div>
+            <div class="tl-desc">First sign that hyperscaler guidance was systematically underestimating demand by 30%+.</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date">Nov 2025</div>
+          <div class="tl-mark"><div class="dot"></div></div>
+          <div class="tl-body">
+            <div class="tl-ttl">China announces national compute reserve</div>
+            <div class="tl-desc">Beijing designates AI compute a strategic resource; state banks commit $60B to domestic capacity.</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date">Feb 2026</div>
+          <div class="tl-mark"><div class="dot amber"></div></div>
+          <div class="tl-body">
+            <div class="tl-ttl">xAI Series E · $10B at $120B valuation</div>
+            <div class="tl-desc">Pricing momentum shifts; xAI valuation triples in six months on Grok 4 deployment metrics.</div>
+          </div>
+        </div>
+        <div class="tl-row">
+          <div class="tl-date">May 2026</div>
+          <div class="tl-mark"><div class="dot amber"></div></div>
+          <div class="tl-body">
+            <div class="tl-ttl">Hyperscaler H1 capex hits $147B</div>
+            <div class="tl-desc">Run-rate exceeds full-year 2025 by Q2. The constraint shifts from capital to power and chips.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="sidebar-box" style="margin-bottom: 12px;">
+          <div class="sb-title">Cumulative committed, $B</div>
+          <svg viewBox="0 0 240 110" width="100%" height="110" style="display:block;">
+            <line x1="20" y1="92" x2="238" y2="92" stroke="#0a0a0a" stroke-width="0.5"/>
+            <line x1="20" y1="10" x2="20" y2="92" stroke="#0a0a0a" stroke-width="0.5"/>
+            <g font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">
+              <text x="16" y="14">$500B</text>
+              <text x="16" y="55">$250B</text>
+              <text x="16" y="94">$0</text>
+            </g>
+            <polyline points="28,86 56,80 84,70 112,58 140,46 168,32 196,22 224,12"
+                      fill="none" stroke="#1F3A5F" stroke-width="2"/>
+            <polyline points="28,86 56,80 84,70 112,58 140,46 168,32 196,22 224,12 224,92 28,92"
+                      fill="#1F3A5F" fill-opacity="0.08" stroke="none"/>
+            <g fill="#1F3A5F">
+              <circle cx="28" cy="86" r="2"/><circle cx="56" cy="80" r="2"/>
+              <circle cx="84" cy="70" r="2"/><circle cx="112" cy="58" r="2"/>
+              <circle cx="140" cy="46" r="2"/><circle cx="168" cy="32" r="2"/>
+              <circle cx="196" cy="22" r="2"/><circle cx="224" cy="12" r="3" fill="#d97706" stroke="#0a0a0a" stroke-width="0.4"/>
+            </g>
+            <text x="224" y="9" font-family="JetBrains Mono" font-size="8" font-weight="600" fill="#d97706" text-anchor="middle">$486B</text>
+            <g font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">
+              <text x="28" y="104">J'25</text><text x="84" y="104">J'25</text>
+              <text x="140" y="104">N'25</text><text x="224" y="104">M'26</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Cumulative committed, H1 2026</div>
+          <div class="stat-val">$486B</div>
+          <div class="stat-delta up">+ 312% vs H1 2024</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Largest single round</div>
+          <div class="stat-val amber">$15.0B</div>
+          <div class="stat-delta up">Anthropic · Jun 2025</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Sovereign commitments</div>
+          <div class="stat-val">$115.4B</div>
+          <div class="stat-delta up">28% of total flow</div>
+        </div>
+        <div class="source-line" style="margin-top:8px;">SOURCE: Brief event ledger · 11 events tracked</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · CHRONOLOGY</div>
+      <div class="f-mid">TIMELINE · JAN 2025 — JUN 2026</div>
+      <div class="f-right">09 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 10 — RISK QUADRANT
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s10">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF · RISK</div></div>
+      <div class="mh-mid"><div class="caption">DISPATCH 10</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 10</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 20px;">
+      <div class="col-5">
+        <div class="section-label">Risk Quadrant</div>
+        <h2 class="h1" style="font-size: 30px; margin: 8px 0 8px 0;">
+          What could break: a 2×2 of the risks that matter.
+        </h2>
+        <p class="deck" style="margin-bottom: 10px;">
+          Probability on one axis, severity on the other. The amber dot is the one keeping desks awake.
+        </p>
+
+        <!-- 2x2 quadrant chart -->
+        <svg viewBox="0 0 560 280" width="100%" height="280" style="display:block;">
+          <!-- axes -->
+          <line x1="50" y1="20" x2="50" y2="240" stroke="#0a0a0a" stroke-width="0.5"/>
+          <line x1="50" y1="240" x2="556" y2="240" stroke="#0a0a0a" stroke-width="0.5"/>
+          <line x1="303" y1="20" x2="303" y2="240" stroke="#9a9a9a" stroke-width="0.5" stroke-dasharray="3,3"/>
+          <line x1="50" y1="130" x2="556" y2="130" stroke="#9a9a9a" stroke-width="0.5" stroke-dasharray="3,3"/>
+
+          <!-- axis labels -->
+          <text x="22" y="14" font-family="Inter" font-size="9" fill="#6b6b6b" font-weight="600">SEVERITY →</text>
+          <text x="552" y="256" font-family="Inter" font-size="9" fill="#6b6b6b" font-weight="600" text-anchor="end">← PROBABILITY</text>
+
+          <!-- quadrant labels -->
+          <text x="60" y="34" font-family="Inter" font-size="9" fill="#9a9a9a" font-style="italic">HIGH SEV · LOW PROB (tail)</text>
+          <text x="308" y="34" font-family="Inter" font-size="9" fill="#9a9a9a" font-style="italic">HIGH SEV · HIGH PROB (acute)</text>
+          <text x="60" y="232" font-family="Inter" font-size="9" fill="#9a9a9a" font-style="italic">LOW SEV · LOW PROB (noise)</text>
+          <text x="308" y="232" font-family="Inter" font-size="9" fill="#9a9a9a" font-style="italic">LOW SEV · HIGH PROB (chronic)</text>
+
+          <!-- risk dots (navy) with labels -->
+          <g fill="#1F3A5F">
+            <circle cx="160" cy="60" r="6"/>
+            <circle cx="240" cy="80" r="5"/>
+            <circle cx="180" cy="180" r="4"/>
+            <circle cx="380" cy="200" r="5"/>
+            <circle cx="430" cy="180" r="4"/>
+            <circle cx="490" cy="210" r="4"/>
+          </g>
+          <!-- amber acute risk -->
+          <circle cx="420" cy="55" r="8" fill="#d97706" stroke="#0a0a0a" stroke-width="0.6"/>
+
+          <!-- labels -->
+          <g font-family="Inter" font-size="9.5" fill="#0a0a0a">
+            <text x="170" y="64">Regulatory breakup</text>
+            <text x="250" y="84">Power constraints</text>
+            <text x="190" y="184">Talent inflation</text>
+            <text x="390" y="204">Round markups</text>
+            <text x="440" y="184">Offtake renegotiation</text>
+            <text x="498" y="214">Cloud repricing</text>
+          </g>
+          <text x="430" y="50" font-family="Inter" font-size="10" font-weight="600" fill="#d97706">Chip supply shock</text>
+
+          <!-- scale markers -->
+          <g font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">
+            <text x="46" y="24">HIGH</text>
+            <text x="46" y="244">LOW</text>
+          </g>
+          <g font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">
+            <text x="50" y="256">LOW</text>
+            <text x="556" y="256">HIGH</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="caption" style="margin-bottom: 6px;">Reading the quadrant</div>
+
+        <div class="quadrant-note" style="margin-bottom: 8px;">
+          <span class="qn-tag">Acute · chip supply shock</span>
+          A single geopolitical event affecting TSMC or ASML could compress 2026 deployable compute by 30–45%. Hyperscaler offtake agreements have no force-majeure relief for this scenario.
+        </div>
+        <div class="quadrant-note" style="margin-bottom: 8px;">
+          <span class="qn-tag">Tail · regulatory breakup</span>
+          DOJ and EU Commission inquiries into hyperscaler-offtake bundling are at early stage. A structural remedy would re-price 24–36 months of committed capex.
+        </div>
+        <div class="quadrant-note" style="margin-bottom: 8px;">
+          <span class="qn-tag">Chronic · cloud repricing</span>
+          Sustained 12–18% annual declines in per-FLOP cost are eroding the unit economics of offtake agreements. Customers are increasingly demanding pass-through clauses.
+        </div>
+        <div class="quadrant-note">
+          <span class="qn-tag">Noise · talent inflation</span>
+          Comp inflation of 25–40% for senior researchers remains a friction, not a constraint. Capital can substitute for headcount at the margin.
+        </div>
+
+        <div class="editors-note" style="margin-top: 12px;">
+          The Brief's base case assigns a 38% probability to at least one acute risk materialising within 18 months.
+        </div>
+        <div class="source-line" style="margin-top:8px;">SOURCE: Brief risk model v4.2 · Jul 2026</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · RISK</div>
+      <div class="f-mid">RISK QUADRANT · 18-MONTH HORIZON</div>
+      <div class="f-right">10 / 11</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SLIDE 11 — CLOSING / COLOPHON
+     ═══════════════════════════════════════════════════════════════ -->
+<section class="slide" id="s11">
+  <div class="canvas">
+    <div class="masthead-row">
+      <div class="mh-left"><div class="masthead-sm">THE CAPITAL BRIEF · COLOPHON</div></div>
+      <div class="mh-mid"><div class="caption">DISPATCH 11 · CLOSING</div></div>
+      <div class="mh-right"><div class="data" style="font-size:10.5px;">14 JUL 2026 · P. 11</div></div>
+    </div>
+
+    <div class="grid-8" style="padding-top: 24px;">
+      <div class="col-5">
+        <div class="section-label">Closing</div>
+        <h2 class="h1" style="font-size: 34px; margin: 8px 0 16px 0;">
+          The bill comes due in 2028.
+        </h2>
+
+        <div class="pull-quote" style="font-size: 22px; margin: 12px 0 16px 0;">
+          "Capital cycles do not end because the technology fails. They end because the cost of capital, in the broadest sense, finally exceeds the option value of waiting. We are not there yet. We will be."
+          <span class="attr">— M. Ravenscroft, Editor · closing remarks</span>
+        </div>
+
+        <p class="body-tx" style="margin-bottom: 10px;">
+          The 2026 surge is not, in our reading, a bubble in the conventional sense. The capital is real, the customers are real, and the unit economics — at the hyperscaler tier — are improving. What it is, instead, is a <em>concentration event</em>: a once-in-a-decade reordering in which a small number of firms, geographies, and use cases absorb the overwhelming share of available capital, leaving the long tail to re-price downward.
+        </p>
+        <p class="body-tx" style="margin-bottom: 10px;">
+          The question for the next eighteen months is not whether the capital continues. It will. The question is whether the <em>returns</em> on that capital — measured not in valuation marks but in deployable intelligence at sustainable unit cost — begin to converge with the commitment curve. On present evidence, they will not. The gap is the story.
+        </p>
+
+        <div class="editors-note" style="margin-top: 12px;">
+          The Brief will publish a follow-up dispatch in October 2026 covering H2 capital flows, the first full-year hyperscaler ROI disclosures, and the sovereign-fund withdrawal scenarios. Subscribers will receive the dataset in advance.
+        </div>
+      </div>
+
+      <div class="col-3 col-divider">
+        <div class="sidebar-box" style="margin-bottom: 12px;">
+          <div class="sb-title">Sources &amp; methodology</div>
+          <ul class="sb-list" style="padding:0; margin:0;">
+            <li><span>Company filings (10-K, 10-Q)</span><span class="sb-val">68</span></li>
+            <li><span>Term sheets (verified)</span><span class="sb-val">412</span></li>
+            <li><span>Sovereign disclosures</span><span class="sb-val">34</span></li>
+            <li><span>Analyst estimates</span><span class="sb-val">86</span></li>
+            <li><span>Primary interviews</span><span class="sb-val">14</span></li>
+            <li><strong>Total sources</strong><span class="sb-val"><strong>214</strong></span></li>
+          </ul>
+        </div>
+
+        <div class="caption" style="margin-bottom:6px;">Capital flow, full series · $B</div>
+        <svg viewBox="0 0 280 90" width="100%" height="90" style="display:block;">
+          <line x1="20" y1="76" x2="278" y2="76" stroke="#0a0a0a" stroke-width="0.5"/>
+          <line x1="20" y1="10" x2="20" y2="76" stroke="#0a0a0a" stroke-width="0.5"/>
+          <g font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="end">
+            <text x="16" y="14">$120B</text>
+            <text x="16" y="46">$60B</text>
+            <text x="16" y="78">$0</text>
+          </g>
+          <polyline points="30,70 60,66 90,58 120,48 150,38 180,28 210,18 240,12 270,8"
+                    fill="none" stroke="#1F3A5F" stroke-width="2"/>
+          <polyline points="30,70 60,66 90,58 120,48 150,38 180,28 210,18 240,12 270,8 270,76 30,76"
+                    fill="#1F3A5F" fill-opacity="0.08" stroke="none"/>
+          <circle cx="270" cy="8" r="3" fill="#d97706" stroke="#0a0a0a" stroke-width="0.4"/>
+          <text x="270" y="86" font-family="JetBrains Mono" font-size="8" fill="#d97706" text-anchor="middle" font-weight="600">Q2'26</text>
+          <text x="30" y="86" font-family="JetBrains Mono" font-size="8" fill="#9a9a9a" text-anchor="middle">Q1'24</text>
+        </svg>
+
+        <div style="margin-top: 14px; padding-top: 10px; border-top: 0.5px solid var(--ink);">
+          <div class="caption" style="margin-bottom: 6px;">Colophon</div>
+          <div class="body-tx-sm" style="line-height: 1.55;">
+            Set in <span class="serif" style="font-style:italic;">Source Serif Pro</span>, <span class="sans">Inter</span> &amp; <span class="mono">JetBrains Mono</span>. Navy #1F3A5F on paper #fafaf7. Printed quarterly. Edited by M. Ravenscroft. Data desk: S. Okafor, J. Lindqvist. © 2026 The Capital Brief.
+          </div>
+        </div>
+        <div class="source-line" style="margin-top:10px;">SOURCE: Brief composite · all figures reconciled to 30 Jun 2026</div>
+      </div>
+    </div>
+
+    <div class="footer-row">
+      <div>THE CAPITAL BRIEF · CLOSING</div>
+      <div class="f-mid">END OF ISSUE 0421 · NEXT: OCT 2026</div>
+      <div class="f-right">11 / 11</div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

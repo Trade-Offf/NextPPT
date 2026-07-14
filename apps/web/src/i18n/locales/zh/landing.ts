@@ -5,6 +5,9 @@ export default {
     templates: '模版市场',
     explore: '探索',
     htmlWorkbench: 'HTML 演示台',
+    openMenu: '打开菜单',
+    closeMenu: '关闭菜单',
+    menuLabel: '主导航',
   },
   hero: {
     titleA: 'HTML 是',

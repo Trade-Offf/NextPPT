@@ -28,7 +28,7 @@ export function ExplorePage() {
   );
 
   return (
-    <div ref={rootRef} className="hds-cinema relative w-full min-h-[100dvh] overflow-x-hidden">
+    <div ref={rootRef} className="hds-cinema relative w-full min-h-[100dvh] overflow-x-clip">
       <SiteFluidBackdrop />
       <div className="relative z-10">
         <SiteHeader alwaysScrolled />
