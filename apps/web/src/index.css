@@ -3544,6 +3544,50 @@ select.hds-input {
 @media (min-width: 1024px) {
   .tpl-detail-preview { position: sticky; top: 96px; }
 }
+
+/* Static / Motion variant toggle — segmented control above the preview frame */
+.tpl-detail-variant-toggle {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--control-bg);
+  border: 0.5px solid var(--separator);
+  gap: 2px;
+  margin-bottom: 14px;
+}
+.tpl-detail-variant-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  color: var(--tertiary-label);
+  transition: color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+}
+.tpl-detail-variant-btn:hover { color: var(--secondary-label); }
+.tpl-detail-variant-btn.is-active {
+  background: var(--content-bg);
+  color: var(--label);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+/* Small tag next to the prompt title indicating which variant is active */
+.tpl-detail-prompt-variant-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border-radius: 4px;
+  color: var(--system-blue);
+  background: var(--cobalt-lt);
+  vertical-align: middle;
+}
+
 .tpl-detail-preview-frame {
   border-radius: 18px;
   overflow: hidden;

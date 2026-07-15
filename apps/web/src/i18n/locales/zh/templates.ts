@@ -27,6 +27,9 @@ export default {
     creditPrefix: '设计规范来自',
     openInEditor: '在编辑器打开',
     download: '下载 HTML',
+    variantLabel: '动效模式切换',
+    static: '静态',
+    motion: '动效',
   },
   carousel: {
     open: '在编辑器打开',

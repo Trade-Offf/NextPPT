@@ -6,6 +6,14 @@ export interface TemplateItem {
   tags: string[];
   prompt: string;
   sampleUrl?: string;
+  /**
+   * Motion variant: when provided, the detail page shows a Static/Motion toggle.
+   * - motionPrompt: prompt that extends `prompt` with a Motion & Interaction chapter
+   * - motionSampleUrl: HTML sample with scroll-triggered reveal + signature animations
+   * Existing static templates are untouched; only templates that opt in get the toggle.
+   */
+  motionPrompt?: string;
+  motionSampleUrl?: string;
   credit?: { name: string; href: string };
   /** Hidden by default; only visible after the easter-egg unlock. */
   easterEgg?: boolean;
@@ -15,14 +23,43 @@ const KAMI_CREDIT = { name: 'Kami · Tw93', href: 'https://kami.tw93.fun/index-z
 const FRONTEND_SLIDES_CREDIT = { name: 'zarazhangrui/frontend-slides', href: 'https://github.com/zarazhangrui/frontend-slides' } as const;
 const PPT_MASTER_CREDIT = { name: 'hugohe3/ppt-master', href: 'https://github.com/hugohe3/ppt-master' } as const;
 
-export const TEMPLATES: TemplateItem[] = [
-  {
-    id: 'nextppt-kami',
-    kind: 'deck',
-    tags: ['Kami', 'NextPPT'],
-    sampleUrl: '/kami-nextppt-deck.html',
-    credit: KAMI_CREDIT,
-    prompt: `用 Kami 设计系统帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+/** Motion chapter appended to the kami static prompt to form the motion prompt. */
+const KAMI_MOTION_CHAPTER = `
+────────────────────────────────────────
+09 · Motion & Interaction 动效与交互
+────────────────────────────────────────
+HTML 相比 PPT 的核心优势是"活的"。每个 .slide 进入视口时，其子元素应依次入场：
+  · 标题/正文/图表/数据卡加 class="reveal"，默认 opacity:0; transform:translateY(24px)
+  · .slide.is-visible .reveal → opacity:1; transform:none; transition:opacity .6s ease, transform .6s ease
+  · 子元素用 transition-delay 依次延迟（0s / .1s / .2s / .3s），形成编排感
+  · 触发方式：页尾 <script> 用 IntersectionObserver（threshold:0.15）给 .slide 加 .is-visible
+
+封面签名动效：
+  · 匠心之轮外圈刻度：@keyframes spin 60s linear infinite
+  · 中心光晕：@keyframes pulse 3s ease-in-out alternate（scale + opacity）
+  · 径向线：stroke-dashoffset 从全长→0，1.2s，依次延迟
+
+SVG 图表绘制：
+  · 焦点 path/line 加 class="draw-path"
+  · stroke-dasharray:1000; stroke-dashoffset:1000 → 0，2s ease-out
+  · slide 可见时由 JS 触发 animation
+
+hover 微交互：
+  · Featured Card / Metric：hover translateY(-3px) + shadow 加深，transition .2s
+
+约束：
+  · 不引入外部 JS 库（GSAP/Motion 等），只用原生 CSS @keyframes + IntersectionObserver
+  · 全部动效在 <style> 和 <script> 内，不外链
+  · @media (prefers-reduced-motion: reduce) { animation:none; transition:none; .reveal{opacity:1;transform:none} }
+  · 脚本总量不超过 60 行 vanilla JS
+`;
+
+const KAMI_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
+✗ 动效无 prefers-reduced-motion 降级
+✗ 页面一加载就全量播放动画（必须 scroll-triggered）`;
+
+/** Static Kami prompt — chapters 01–08 + anti-patterns + organization. */
+const KAMI_STATIC_PROMPT = `用 Kami 设计系统帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
 输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
 以下只规定视觉与排版规范，不限定你写什么内容。
 
@@ -150,7 +187,37 @@ Anti-Patterns 反面示例（必须规避）
 组织方式
 ────────────────────────────────────────
 按内容自然组织页数与每页结构，不要凑页数或留半页空白；图表类型按内容选用。
-每页都要信息密度高、版面布满，标题用 serif、正文用 sans，遵循以上全部规范。`,
+每页都要信息密度高、版面布满，标题用 serif、正文用 sans，遵循以上全部规范。`;
+
+/** Motion Kami prompt = static prompt + Motion chapter + motion anti-patterns. */
+const KAMI_MOTION_PROMPT = `${KAMI_STATIC_PROMPT}
+${KAMI_MOTION_CHAPTER}
+────────────────────────────────────────
+Anti-Patterns 反面示例（必须规避）
+────────────────────────────────────────
+✗ 背景用 #fff 纯白或 #f3f4f6 冷灰
+✗ Tag 用 rgba() 透明色
+✗ 标题 font-weight: 600 或 700 合成 bold
+✗ box-shadow 硬投影（0.3 透明度以上）
+✗ 引入红 / 绿 / 橙 / 紫等第二强调色
+✗ Ink Blue 占面积超过 5%
+${KAMI_MOTION_ANTI_PATTERNS}
+────────────────────────────────────────
+组织方式
+────────────────────────────────────────
+按内容自然组织页数与每页结构，不要凑页数或留半页空白；图表类型按内容选用。
+每页都要信息密度高、版面布满，标题用 serif、正文用 sans，遵循以上全部规范。`;
+
+export const TEMPLATES: TemplateItem[] = [
+  {
+    id: 'nextppt-kami',
+    kind: 'deck',
+    tags: ['Kami', 'NextPPT'],
+    sampleUrl: '/kami-nextppt-deck.html',
+    motionSampleUrl: '/kami-nextppt-deck-motion.html',
+    credit: KAMI_CREDIT,
+    prompt: KAMI_STATIC_PROMPT,
+    motionPrompt: KAMI_MOTION_PROMPT,
   },
   {
     id: 'resume',

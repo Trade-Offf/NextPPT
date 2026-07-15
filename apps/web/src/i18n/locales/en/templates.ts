@@ -29,6 +29,9 @@ const templates: typeof zh = {
     creditPrefix: 'Design system by',
     openInEditor: 'Open in editor',
     download: 'Download HTML',
+    variantLabel: 'Motion mode toggle',
+    static: 'Static',
+    motion: 'Motion',
   },
   carousel: {
     open: 'Open in Editor',
