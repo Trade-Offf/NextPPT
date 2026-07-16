@@ -20,18 +20,6 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/templates"/>
   </url>
   <url>
-    <loc>https://next-ppt.com/explore</loc>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/explore"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/explore"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/explore"/>
-  </url>
-  <url>
-    <loc>https://next-ppt.com/explore/feishu-whiteboard</loc>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/explore/feishu-whiteboard"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/explore/feishu-whiteboard"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/explore/feishu-whiteboard"/>
-  </url>
-  <url>
     <loc>https://next-ppt.com/en/</loc>
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/"/>
@@ -48,17 +36,5 @@
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/templates"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/templates"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/templates"/>
-  </url>
-  <url>
-    <loc>https://next-ppt.com/en/explore</loc>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/explore"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/explore"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/explore"/>
-  </url>
-  <url>
-    <loc>https://next-ppt.com/en/explore/feishu-whiteboard</loc>
-    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://next-ppt.com/explore/feishu-whiteboard"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://next-ppt.com/en/explore/feishu-whiteboard"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://next-ppt.com/explore/feishu-whiteboard"/>
   </url>
 </urlset>

@@ -121,7 +121,6 @@ export function SiteHeader({ trailing, alwaysScrolled = false, hideProgress = fa
     <>
       <button onClick={() => navigate(`${prefix}/html`)} className={`hds-nav-link ${isActive('/html') ? 'is-active' : ''}`}>{t('nav.htmlWorkbench')}</button>
       <button onClick={() => navigate(`${prefix}/templates`)} className={`hds-nav-link ${isActive('/templates') ? 'is-active' : ''}`}>{t('nav.templates')}</button>
-      <button onClick={() => navigate(`${prefix}/explore`)} className={`hds-nav-link ${isActive('/explore') ? 'is-active' : ''}`}>{t('nav.explore')}</button>
       <button onClick={() => openGuide('generate')} className={`hds-nav-link ${isActive('/guide') ? 'is-active' : ''}`}>{t('nav.guide')}</button>
     </>
   );

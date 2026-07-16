@@ -21,9 +21,6 @@
 /templates
   Cache-Control: public, max-age=0, must-revalidate
 
-/explore
-  Cache-Control: public, max-age=0, must-revalidate
-
 /html
   Cache-Control: public, max-age=0, must-revalidate
 
@@ -34,9 +31,6 @@
   Cache-Control: public, max-age=0, must-revalidate
 
 /en/templates
-  Cache-Control: public, max-age=0, must-revalidate
-
-/en/explore
   Cache-Control: public, max-age=0, must-revalidate
 
 /en/html

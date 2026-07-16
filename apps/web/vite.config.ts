@@ -70,8 +70,8 @@ export default defineConfig({
       const templateRoutes = templateIds.map((id) => `/templates/${id}`);
       const enTemplateRoutes = templateIds.map((id) => `/en/templates/${id}`);
       return [
-        '/', '/guide', '/guide/generate', '/guide/edit', '/guide/export', '/templates', '/explore', '/explore/feishu-whiteboard', '/html',
-        '/en', '/en/guide', '/en/guide/generate', '/en/guide/edit', '/en/guide/export', '/en/templates', '/en/explore', '/en/explore/feishu-whiteboard', '/en/html',
+        '/', '/guide', '/guide/generate', '/guide/edit', '/guide/export', '/templates', '/html',
+        '/en', '/en/guide', '/en/guide/generate', '/en/guide/edit', '/en/guide/export', '/en/templates', '/en/html',
         ...templateRoutes,
         ...enTemplateRoutes,
       ];

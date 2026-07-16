@@ -25,14 +25,6 @@ const TemplateDetailPage = lazy(() =>
   import('./pages/TemplatesPage.js').then((m) => ({ default: m.TemplateDetailPage })),
 );
 
-const ExplorePage = lazy(() =>
-  import('./pages/ExplorePage.js').then((m) => ({ default: m.ExplorePage })),
-);
-
-const ExploreArticlePage = lazy(() =>
-  import('./pages/ExploreArticlePage.js').then((m) => ({ default: m.ExploreArticlePage })),
-);
-
 const HtmlWorkbenchPage = lazy(() =>
   import('./pages/HtmlWorkbenchPage.js').then((m) => ({ default: m.HtmlWorkbenchPage })),
 );
@@ -54,8 +46,6 @@ function localeChildren() {
     { path: 'guide/:tab', element: <Suspense fallback={null}><GuidePage /></Suspense> },
     { path: 'templates', element: <Suspense fallback={null}><TemplatesPage /></Suspense> },
     { path: 'templates/:id', element: <Suspense fallback={null}><TemplateDetailPage /></Suspense> },
-    { path: 'explore', element: <Suspense fallback={null}><ExplorePage /></Suspense> },
-    { path: 'explore/:slug', element: <Suspense fallback={null}><ExploreArticlePage /></Suspense> },
     { path: 'html', element: <Suspense fallback={null}><HtmlWorkbenchPage /></Suspense> },
     // Unknown paths get a branded 404 with noindex instead of a silent redirect.
     { path: '*', element: <NotFoundPage /> },

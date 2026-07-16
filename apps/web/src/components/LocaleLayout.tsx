@@ -6,18 +6,16 @@ import { getI18n, localePrefix, type Locale } from '../i18n/index.js';
 
 const SITE = 'https://next-ppt.com';
 
-type Page = 'home' | 'guide' | 'explore';
+type Page = 'home' | 'guide';
 
 function pageFromPath(pathname: string): Page {
   if (pathname.endsWith('/guide')) return 'guide';
-  if (pathname.includes('/explore')) return 'explore';
   return 'home';
 }
 
 function urlFor(locale: Locale, page: Page): string {
   const prefix = localePrefix(locale);
   if (page === 'guide') return `${SITE}${prefix}/guide`;
-  if (page === 'explore') return `${SITE}${prefix}/explore`;
   return `${SITE}${prefix || '/'}`;
 }
 

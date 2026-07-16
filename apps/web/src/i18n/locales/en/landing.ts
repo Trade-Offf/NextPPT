@@ -5,7 +5,6 @@ const landing: typeof zh = {
     homeAria: 'NextPPT home',
     guide: 'Guide',
     templates: 'Templates',
-    explore: 'Explore',
     htmlWorkbench: 'HTML Deck',
     openMenu: 'Open menu',
     closeMenu: 'Close menu',

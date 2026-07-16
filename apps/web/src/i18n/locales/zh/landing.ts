@@ -3,7 +3,6 @@ export default {
     homeAria: 'NextPPT 首页',
     guide: '使用指南',
     templates: '模版市场',
-    explore: '探索',
     htmlWorkbench: 'HTML 演示台',
     openMenu: '打开菜单',
     closeMenu: '关闭菜单',

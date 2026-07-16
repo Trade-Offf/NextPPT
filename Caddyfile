@@ -24,7 +24,7 @@ next-ppt.com {
 	@html {
 		not path /assets/* /static-loader-data/* /static-loader-data-manifest-*.json
 		path *.html /
-		path /guide /guide/ /templates /templates/ /explore /explore/ /explore/* /html /html/
+		path /guide /guide/ /templates /templates/ /html /html/
 		path /en /en/ /en/*
 	}
 	header @html Cache-Control "public, max-age=0, must-revalidate"
