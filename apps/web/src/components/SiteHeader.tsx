@@ -16,9 +16,11 @@ interface SiteHeaderProps {
    * Landing page omits this prop to keep its intentional hero fade-in.
    */
   alwaysScrolled?: boolean;
+  /** Suppress the scroll progress bar. Use on short pages where it adds noise. */
+  hideProgress?: boolean;
 }
 
-export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps) {
+export function SiteHeader({ trailing, alwaysScrolled = false, hideProgress = false }: SiteHeaderProps) {
   const { t } = useTranslation('landing');
   const { openGuide } = useGuideNav();
   const navigate = useNavigate();
@@ -80,9 +82,11 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
 
   useEffect(() => {
     if (alwaysScrolled) {
-      // No transition needed; progress bar still tracks scroll position.
       headerRef.current?.classList.add('is-scrolled');
     }
+
+    // Short pages pass hideProgress — skip the rAF loop entirely.
+    if (hideProgress) return;
 
     let raf = 0;
     const update = () => {
@@ -103,8 +107,6 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
       raf = requestAnimationFrame(update);
     };
     update();
-    // Use document.scrollingElement events; the rAF does NOT touch React state,
-    // so this is compliant with Taste Skill §5.D (rAF only writes DOM directly).
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
     return () => {
@@ -112,7 +114,7 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
     };
-  }, [alwaysScrolled]);
+  }, [alwaysScrolled, hideProgress]);
 
   // Shared nav link cluster — rendered in the desktop bar and the mobile panel.
   const navLinks = (
@@ -185,14 +187,15 @@ export function SiteHeader({ trailing, alwaysScrolled = false }: SiteHeaderProps
       )}
 
       {/* Scroll progress indicator — Linear-style 2px line at the nav bottom.
-          transform is written directly by the rAF loop above (ref), never via
-          React state — see Taste Skill §5.D. */}
-      <span
-        ref={progressRef}
-        className="hds-nav-progress"
-        style={{ transform: 'scaleX(0)' }}
-        aria-hidden="true"
-      />
+          Suppressed on short pages via hideProgress. */}
+      {!hideProgress && (
+        <span
+          ref={progressRef}
+          className="hds-nav-progress"
+          style={{ transform: 'scaleX(0)' }}
+          aria-hidden="true"
+        />
+      )}
 
       {/* +1s floating indicators on rapid logo clicks */}
       {easter.plusOnes.map((p) => (

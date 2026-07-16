@@ -229,7 +229,7 @@ export function TemplateDetailPage() {
     <div ref={rootRef} className="hds-cinema relative w-full min-h-[100dvh] overflow-x-clip">
       <SiteFluidBackdrop />
       <div className="relative z-10">
-        <SiteHeader alwaysScrolled />
+        <SiteHeader alwaysScrolled hideProgress />
         <main className="max-w-6xl mx-auto px-6 sm:px-8 pt-12 sm:pt-16 pb-24">
           <TemplateDetail item={item} onBack={() => navigate(`${prefix}/templates`)} />
         </main>
@@ -292,10 +292,10 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
   const navigate = useNavigate();
   const prefix = useLocalePrefix();
   const { openTemplateSample, loading, error } = useOpenDeck();
-  const [copied, setCopied] = useState(false);
-  const [promptOpen, setPromptOpen] = useState(false);
   const hasMotion = Boolean(item.motionPrompt && item.motionSampleUrl);
   const [motionMode, setMotionMode] = useState(false);
+  const [promptOpen, setPromptOpen] = useState<{ static: boolean; motion: boolean }>({ static: false, motion: false });
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // When motion is unavailable, force static. Stays in sync if item changes.
   useEffect(() => {
@@ -305,20 +305,45 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
   const activePrompt = motionMode ? (item.motionPrompt ?? item.prompt) : item.prompt;
   const activeSampleUrl = motionMode ? (item.motionSampleUrl ?? item.sampleUrl) : item.sampleUrl;
 
-  const copy = async () => {
-    if (!activePrompt) return;
+  const copyText = async (text: string | undefined, key: string) => {
+    if (!text) return;
     try {
-      await navigator.clipboard.writeText(activePrompt);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      await navigator.clipboard.writeText(text);
     } catch {
-      /* clipboard blocked */
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
     }
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 1500);
   };
+
+  // Single-prompt copy (used in the non-motion layout)
+  const copy = () => copyText(activePrompt, 'single');
 
   const openInEditor = async () => {
     if (!activeSampleUrl) return;
     const fileName = activeSampleUrl.split('/').pop() || 'sample.html';
+    // Motion HTML carries JS animations that the PPT editor would strip.
+    // Route it to the HTML workbench via the same sessionStorage channel
+    // the homepage split-drop uses.
+    if (motionMode) {
+      try {
+        const res = await fetch(activeSampleUrl);
+        const text = await res.text();
+        sessionStorage.setItem(
+          'hds_pending_html',
+          JSON.stringify({ name: fileName, text }),
+        );
+        navigate(`${prefix}/html`);
+        return;
+      } catch {
+        /* fetch failed — fall back to the deck editor */
+      }
+    }
     const ok = await openTemplateSample(activeSampleUrl, fileName);
     if (ok) navigate(prefix || '/');
   };
@@ -331,9 +356,8 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
       </button>
 
       <div className="tpl-detail-grid">
-        {/* Left: sticky preview + actions */}
         <div className="tpl-detail-preview">
-          {/* Static / Motion toggle — only shown when the template ships a motion variant */}
+          {/* Variant toggle — Linear editorial style: text labels + hairline indicator */}
           {hasMotion && (
             <div className="tpl-detail-variant-toggle" role="tablist" aria-label={t('detail.variantLabel')}>
               <button
@@ -342,16 +366,16 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
                 onClick={() => setMotionMode(false)}
                 className={`tpl-detail-variant-btn ${!motionMode ? 'is-active' : ''}`}
               >
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="12" height="10" rx="1.5" /><path d="M4.5 6.5h7M4.5 9.5h5" /></svg>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round"><rect x="1" y="1" width="8" height="8" /><path d="M3 4h4M3 6h2.5" /></svg>
                 {t('detail.static')}
               </button>
               <button
                 role="tab"
                 aria-selected={motionMode}
                 onClick={() => setMotionMode(true)}
-                className={`tpl-detail-variant-btn ${motionMode ? 'is-active' : ''}`}
+                className={`tpl-detail-variant-btn is-motion ${motionMode ? 'is-active' : ''}`}
               >
-                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M2 8l3-3 3 3 3-5 3 5" /><circle cx="5" cy="11.5" r="0.8" fill="currentColor" stroke="none" /><circle cx="8" cy="11.5" r="0.8" fill="currentColor" stroke="none" /><circle cx="11" cy="11.5" r="0.8" fill="currentColor" stroke="none" /></svg>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M1 5c1.5-2 2.5-2 4 0s2.5 2 4 0" /></svg>
                 {t('detail.motion')}
               </button>
             </div>
@@ -368,7 +392,7 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
           {activeSampleUrl && (
             <div className="tpl-detail-actions">
               <button onClick={openInEditor} disabled={loading} className="hds-btn-primary px-5 py-2 text-xs disabled:opacity-50">
-                {t('detail.openInEditor')}
+                {motionMode ? t('detail.openInWorkbench') : t('detail.openInEditor')}
               </button>
               <a href={activeSampleUrl} download className="hds-btn px-4 py-2 text-xs">{t('detail.download')}</a>
             </div>
@@ -386,7 +410,6 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
           <h1 className="tpl-detail-title">{t(`items.${item.id}.title`)}</h1>
           <p className="tpl-detail-desc">{t(`items.${item.id}.desc`)}</p>
 
-          {/* Meta bar */}
           <div className="tpl-detail-meta-bar">
             <div className="tpl-detail-meta-item">
               <span className="tpl-detail-meta-label">Type</span>
@@ -399,66 +422,127 @@ function TemplateDetail({ item, onBack }: { item: TemplateItem; onBack: () => vo
             {item.credit && (
               <div className="tpl-detail-meta-item">
                 <span className="tpl-detail-meta-label">Source</span>
-                <span className="tpl-detail-meta-value">{item.credit.name}</span>
+                <a href={item.credit.href} target="_blank" rel="noreferrer" className="tpl-detail-meta-value tpl-detail-meta-link">
+                  {item.credit.name}
+                  <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 4, opacity: 0.6, display: 'inline-block', verticalAlign: 'baseline' }}><path d="M3 7L7 3M7 3H4M7 3v3" /></svg>
+                </a>
               </div>
             )}
           </div>
 
           {/* Usage */}
-          <section className="tpl-detail-section">
+          <section style={{ marginTop: 20 }}>
             <p className="tpl-detail-section-label">{t('detail.usageTitle')}</p>
             <p className="text-sm text-[var(--secondary-label)] leading-relaxed max-w-[56ch]">{t('detail.usage')}</p>
           </section>
+        </div>
+      </div>
 
-          {/* Prompt */}
-          <section className="tpl-detail-section">
-            <div className="flex items-center justify-between mb-3 gap-2">
-              <p className="tpl-detail-section-label" style={{ marginBottom: 0 }}>
+      {/* Prompt — full-width row below the grid. Static left, Motion right. */}
+      <section className={`tpl-detail-prompt-section ${hasMotion ? 'is-dual' : ''}`}>
+        {hasMotion ? (
+          <div className="tpl-detail-prompt-dual">
+            <div className="tpl-detail-prompt-col">
+              <div className="tpl-detail-prompt-head">
+                <span className="tpl-detail-prompt-label">
+                  {t('detail.promptTitle')}
+                  <span className="tpl-detail-prompt-variant-tag">{t('detail.static')}</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPromptOpen((v) => ({ ...v, static: !v.static }))}
+                    aria-expanded={promptOpen.static}
+                    className="tpl-detail-prompt-toggle"
+                  >
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ transform: promptOpen.static ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M3 4.5l3 3 3-3" /></svg>
+                    {promptOpen.static ? t('detail.collapse') : t('detail.expand')}
+                  </button>
+                  <button onClick={() => copyText(item.prompt, 'static')} className="tpl-detail-prompt-copy">
+                    {copiedKey === 'static' ? t('detail.copied') : t('detail.copyPrompt')}
+                  </button>
+                </div>
+              </div>
+              {promptOpen.static ? (
+                <pre className="tpl-detail-prompt-expanded">{item.prompt || t('detail.todo')}</pre>
+              ) : (
+                <button
+                  onClick={() => item.prompt && setPromptOpen((v) => ({ ...v, static: true }))}
+                  disabled={!item.prompt}
+                  className="tpl-detail-prompt-collapsed disabled:opacity-60"
+                >
+                  {item.prompt ? t('detail.promptHint') : t('detail.todo')}
+                </button>
+              )}
+            </div>
+
+            <div className="tpl-detail-prompt-col">
+              <div className="tpl-detail-prompt-head">
+                <span className="tpl-detail-prompt-label">
+                  {t('detail.promptTitle')}
+                  <span className="tpl-detail-prompt-variant-tag">{t('detail.motion')}</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPromptOpen((v) => ({ ...v, motion: !v.motion }))}
+                    aria-expanded={promptOpen.motion}
+                    className="tpl-detail-prompt-toggle"
+                  >
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ transform: promptOpen.motion ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M3 4.5l3 3 3-3" /></svg>
+                    {promptOpen.motion ? t('detail.collapse') : t('detail.expand')}
+                  </button>
+                  <button onClick={() => copyText(item.motionPrompt, 'motion')} className="tpl-detail-prompt-copy">
+                    {copiedKey === 'motion' ? t('detail.copied') : t('detail.copyPrompt')}
+                  </button>
+                </div>
+              </div>
+              {promptOpen.motion ? (
+                <pre className="tpl-detail-prompt-expanded">{item.motionPrompt || t('detail.todo')}</pre>
+              ) : (
+                <button
+                  onClick={() => item.motionPrompt && setPromptOpen((v) => ({ ...v, motion: true }))}
+                  disabled={!item.motionPrompt}
+                  className="tpl-detail-prompt-collapsed disabled:opacity-60"
+                >
+                  {item.motionPrompt ? t('detail.promptHint') : t('detail.todo')}
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="tpl-detail-prompt-head">
+              <span className="tpl-detail-prompt-label">
                 {t('detail.promptTitle')}
-                {hasMotion && (
-                  <span className="tpl-detail-prompt-variant-tag">
-                    {motionMode ? t('detail.motion') : t('detail.static')}
-                  </span>
-                )}
-              </p>
+              </span>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setPromptOpen((v) => !v)}
+                  onClick={() => setPromptOpen((v) => ({ ...v, static: !v.static }))}
                   disabled={!activePrompt}
-                  aria-expanded={promptOpen}
-                  className="hds-btn px-3 py-1.5 text-xs inline-flex items-center gap-1.5 disabled:opacity-40"
+                  aria-expanded={promptOpen.static}
+                  className="tpl-detail-prompt-toggle disabled:opacity-40"
                 >
-                  <svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ transform: promptOpen ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M5 7.5l5 5 5-5" /></svg>
-                  {promptOpen ? t('detail.collapse') : t('detail.expand')}
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ transform: promptOpen.static ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><path d="M3 4.5l3 3 3-3" /></svg>
+                  {promptOpen.static ? t('detail.collapse') : t('detail.expand')}
                 </button>
-                <button onClick={copy} disabled={!activePrompt} className="hds-btn-primary px-4 py-1.5 text-xs disabled:opacity-40">
-                  {copied ? t('detail.copied') : t('detail.copyPrompt')}
+                <button onClick={copy} disabled={!activePrompt} className="tpl-detail-prompt-copy disabled:opacity-40">
+                  {copiedKey === 'single' ? t('detail.copied') : t('detail.copyPrompt')}
                 </button>
               </div>
             </div>
-            {promptOpen ? (
+            {promptOpen.static ? (
               <pre className="tpl-detail-prompt-expanded">{activePrompt || t('detail.todo')}</pre>
             ) : (
               <button
-                onClick={() => activePrompt && setPromptOpen(true)}
+                onClick={() => activePrompt && setPromptOpen((v) => ({ ...v, static: true }))}
                 disabled={!activePrompt}
                 className="tpl-detail-prompt-collapsed disabled:opacity-60"
               >
                 {activePrompt ? t('detail.promptHint') : t('detail.todo')}
               </button>
             )}
-          </section>
-
-          {item.credit && (
-            <p className="tpl-detail-credit">
-              {t('detail.creditPrefix')}{' '}
-              <a href={item.credit.href} target="_blank" rel="noreferrer" className="text-[var(--system-blue)] hover:underline">
-                {item.credit.name}
-              </a>
-            </p>
-          )}
-        </div>
-      </div>
+          </>
+        )}
+      </section>
     </div>
   );
 }

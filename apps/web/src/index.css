@@ -3541,52 +3541,58 @@ select.hds-input {
 }
 
 .tpl-detail-preview { position: relative; }
-@media (min-width: 1024px) {
-  .tpl-detail-preview { position: sticky; top: 96px; }
-}
 
-/* Static / Motion variant toggle — segmented control above the preview frame */
+/* Variant toggle — Linear editorial style: text labels + hairline indicator.
+   No segmented control, no filled buttons — just typography + a 2px underline. */
 .tpl-detail-variant-toggle {
   display: inline-flex;
-  padding: 3px;
-  border-radius: 9px;
-  background: var(--control-bg);
-  border: 0.5px solid var(--separator);
-  gap: 2px;
-  margin-bottom: 14px;
+  align-items: baseline;
+  gap: 0;
+  border-bottom: 0.5px solid var(--separator);
+  margin-bottom: 18px;
 }
 .tpl-detail-variant-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  font-size: 12px;
+  gap: 7px;
+  padding: 8px 16px 10px 0;
+  margin-right: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
   font-weight: 500;
-  border-radius: 6px;
+  letter-spacing: 0.06em;
   color: var(--tertiary-label);
-  transition: color 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+  transition: color 0.2s var(--ease-out);
 }
 .tpl-detail-variant-btn:hover { color: var(--secondary-label); }
-.tpl-detail-variant-btn.is-active {
-  background: var(--content-bg);
-  color: var(--label);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+.tpl-detail-variant-btn.is-active { color: var(--label); }
+.tpl-detail-variant-btn.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 16px;
+  bottom: -0.5px;
+  height: 2px;
+  background: var(--label);
 }
+.tpl-detail-variant-btn.is-motion.is-active { color: var(--system-blue); }
+.tpl-detail-variant-btn.is-motion.is-active::after { background: var(--system-blue); }
+.tpl-detail-variant-btn.is-motion:not(.is-active) { color: var(--system-blue); opacity: 0.5; }
+.tpl-detail-variant-btn svg { opacity: 0.7; }
+.tpl-detail-variant-btn.is-active svg { opacity: 1; }
 
-/* Small tag next to the prompt title indicating which variant is active */
+/* Variant tag next to prompt label — plain mono text, not a colored chip */
 .tpl-detail-prompt-variant-tag {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 1px 7px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  border-radius: 4px;
-  color: var(--system-blue);
-  background: var(--cobalt-lt);
-  vertical-align: middle;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: var(--tertiary-label);
+  margin-left: 6px;
+  text-transform: lowercase;
 }
+.tpl-detail-prompt-variant-tag::before { content: '·'; margin-right: 6px; }
 
 .tpl-detail-preview-frame {
   border-radius: 18px;
@@ -3695,14 +3701,77 @@ select.hds-input {
   opacity: 0.5;
 }
 
+/* Prompt section — lives in the left column below the preview + actions */
+.tpl-detail-prompt-section {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 0.5px solid var(--separator);
+}
+.tpl-detail-prompt-section.is-dual { padding-top: 20px; }
+
+/* Dual prompt layout — static left, motion right, aligned full-width */
+.tpl-detail-prompt-dual {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 640px) {
+  .tpl-detail-prompt-dual { grid-template-columns: 1fr 1fr; gap: 28px; }
+}
+.tpl-detail-prompt-col { min-width: 0; }
+.tpl-detail-prompt-col .tpl-detail-prompt-head { margin-bottom: 10px; }
+.tpl-detail-prompt-col .tpl-detail-prompt-expanded { max-height: 320px; font-size: 11.5px; }
+.tpl-detail-prompt-col .tpl-detail-prompt-collapsed { font-size: 12px; padding: 14px 16px; }
+.tpl-detail-prompt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.tpl-detail-prompt-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tertiary-label);
+}
+.tpl-detail-prompt-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--secondary-label);
+  border: 0.5px solid var(--separator);
+  border-radius: 7px;
+  background: transparent;
+  transition: color 0.15s var(--ease-out), border-color 0.15s var(--ease-out), background 0.15s var(--ease-out);
+}
+.tpl-detail-prompt-toggle:hover { color: var(--label); border-color: var(--tertiary-label); background: var(--control-bg); }
+.tpl-detail-prompt-copy {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 7px;
+  background: var(--system-blue);
+  color: #fff;
+  border: 0.5px solid transparent;
+  transition: background 0.15s var(--ease-out), transform 0.15s var(--ease-out);
+}
+.tpl-detail-prompt-copy:hover:not(:disabled) { background: var(--system-blue-press); }
+.tpl-detail-prompt-copy:active:not(:disabled) { transform: scale(0.97); }
+
 .tpl-detail-prompt-collapsed {
   width: 100%;
   text-align: left;
   border: 0.5px solid var(--separator);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.025);
-  padding: 16px 20px;
-  font-size: 13px;
+  padding: 14px 18px;
+  font-size: 12px;
   color: var(--tertiary-label);
   cursor: pointer;
   transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
@@ -3716,21 +3785,23 @@ select.hds-input {
   border: 0.5px solid var(--separator);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.025);
-  padding: 20px 22px;
+  padding: 16px 18px;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-  font-size: 12px;
-  line-height: 1.75;
+  font-size: 11.5px;
+  line-height: 1.7;
   color: var(--secondary-label);
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 480px;
+  max-height: 340px;
   overflow: auto;
 }
 
-.tpl-detail-credit {
-  font-size: 12px;
-  color: var(--tertiary-label);
-  margin-top: 32px;
-  padding-top: 18px;
-  border-top: 0.5px solid var(--separator);
+/* Source link in the meta bar */
+.tpl-detail-meta-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  text-decoration: none;
+  transition: color 0.15s var(--ease-out);
 }
+.tpl-detail-meta-link:hover { color: var(--system-blue); }

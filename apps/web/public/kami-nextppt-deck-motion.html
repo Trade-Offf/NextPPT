@@ -45,7 +45,7 @@
       @page { size:1280px 720px; margin:0; background:#f5f4ed; }
 
       body {
-        background:#c9c5b8; color:var(--near); font-family:var(--serif);
+        background:#d8d3c4; color:var(--near); font-family:var(--serif);
         display:flex; flex-direction:column; align-items:center; gap:24px;
         padding:32px 20px; -webkit-font-smoothing:antialiased;
         letter-spacing:.2px; font-synthesis:none;
@@ -54,7 +54,7 @@
       .slide {
         width:1280px; height:720px; background:var(--parchment);
         padding:54px 76px 56px; position:relative; overflow:hidden; flex-shrink:0;
-        display:flex; flex-direction:column;
+        display:flex; flex-direction:column; isolation: isolate;
       }
 
       /* ── editorial chrome ── */
@@ -168,22 +168,46 @@
       .s-axis { font-family:var(--mono); font-size:9.5px; fill:var(--stone); letter-spacing:.3px; }
       .s-val { font-family:var(--mono); font-size:11px; fill:var(--brand); font-weight:500; font-variant-numeric:tabular-nums; }
 
-      /* ── Motion layer ── */
-      :root { --ease: cubic-bezier(0.16, 1, 0.3, 1); }
+      /* ── Motion layer (Cinematic) ── */
+      :root { --ease: cubic-bezier(0.16, 1, 0.3, 1); --ease-soft: cubic-bezier(0.32, 0.72, 0, 1); }
 
-      /* Scroll-triggered reveal */
-      .slide:not(.is-visible) .reveal { opacity: 0; transform: translateY(24px); }
-      .slide.is-visible .reveal {
-        opacity: 1; transform: none;
-        transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+      /* === Cinematic Reveal System === */
+      .slide:not(.is-visible) .reveal { opacity: 0; transform: translateY(20px); }
+      .slide:not(.is-visible) .reveal-scale { opacity: 0; transform: scale(0.94); }
+      .slide:not(.is-visible) .reveal-blur { opacity: 0; transform: translateY(16px); filter: blur(6px); }
+      .slide:not(.is-visible) .reveal-slide-l { opacity: 0; transform: translateX(-24px); }
+      .slide:not(.is-visible) .reveal-slide-r { opacity: 0; transform: translateX(24px); }
+
+      .slide.is-visible .reveal,
+      .slide.is-visible .reveal-scale,
+      .slide.is-visible .reveal-blur,
+      .slide.is-visible .reveal-slide-l,
+      .slide.is-visible .reveal-slide-r {
+        opacity: 1; transform: none; filter: none;
+        transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), filter 0.7s ease;
       }
       .reveal-d1 { transition-delay: 0s; }
-      .reveal-d2 { transition-delay: 0.1s; }
-      .reveal-d3 { transition-delay: 0.2s; }
-      .reveal-d4 { transition-delay: 0.3s; }
-      .reveal-d5 { transition-delay: 0.4s; }
+      .reveal-d2 { transition-delay: 0.12s; }
+      .reveal-d3 { transition-delay: 0.24s; }
+      .reveal-d4 { transition-delay: 0.36s; }
+      .reveal-d5 { transition-delay: 0.48s; }
+      .reveal-d6 { transition-delay: 0.6s; }
 
-      /* SVG chart draw animation */
+      /* === Cover Signature Animation === */
+      @keyframes spin-slow { to { transform: rotate(360deg); } }
+      @keyframes spin-reverse { to { transform: rotate(-360deg); } }
+      .spin-wheel { animation: spin-slow 40s linear infinite; transform-origin: center; transform-box: fill-box; }
+      .spin-wheel-reverse { animation: spin-reverse 60s linear infinite; transform-origin: center; transform-box: fill-box; }
+
+      @keyframes halo-pulse {
+        0%, 100% { transform: scale(1); opacity: 0.3; }
+        50% { transform: scale(1.2); opacity: 0.7; }
+      }
+      .halo-pulse { animation: halo-pulse 3s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+      .halo-pulse-2 { animation: halo-pulse 4s ease-in-out infinite 0.5s; transform-origin: center; transform-box: fill-box; }
+      .halo-pulse-3 { animation: halo-pulse 5s ease-in-out infinite 1s; transform-origin: center; transform-box: fill-box; }
+
+      /* === SVG Chart Advanced Draw === */
       .draw-path {
         stroke-dasharray: var(--len, 1000);
         stroke-dashoffset: var(--len, 1000);
@@ -193,68 +217,118 @@
       }
       @keyframes path-draw { to { stroke-dashoffset: 0; } }
 
-      /* Cover: spinning wheel */
-      @keyframes spin-slow { to { transform: rotate(360deg); } }
-      .spin-wheel { animation: spin-slow 60s linear infinite; transform-origin: center; }
-
-      /* Cover: pulsing halo */
-      @keyframes halo-pulse {
-        0%, 100% { transform: scale(1); opacity: 0.3; }
-        50% { transform: scale(1.15); opacity: 0.6; }
+      /* Bar chart grow */
+      .bar-grow { transform: scaleY(0); transform-origin: bottom; transform-box: fill-box; }
+      .slide.is-visible .bar-grow {
+        animation: bar-grow 0.8s var(--ease) forwards;
       }
-      .halo-pulse { animation: halo-pulse 3s ease-in-out infinite; transform-origin: center; }
-      .halo-pulse-2 { animation: halo-pulse 4s ease-in-out infinite 0.5s; transform-origin: center; }
-      .halo-pulse-3 { animation: halo-pulse 5s ease-in-out infinite 1s; transform-origin: center; }
+      @keyframes bar-grow { to { transform: scaleY(1); } }
 
-      /* Hover micro-interactions */
-      .featured-card, .metric-card {
-        transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+      /* Data point pop */
+      .data-point { opacity: 0; transform: scale(0); transform-origin: center; transform-box: fill-box; }
+      .slide.is-visible .data-point {
+        animation: point-pop 0.4s var(--ease) forwards;
+        animation-delay: 1.8s;
       }
-      .featured-card:hover, .metric-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      @keyframes point-pop { to { opacity: 1; transform: scale(1); } }
+
+      /* === Parallax === */
+      .parallax-bg { transform: translateY(var(--parallax, 0px)); transition: transform 0.1s linear; }
+
+      /* === Page Transition === */
+      .slide { transition: opacity 0.5s ease; }
+      .slide:not(.is-visible) { opacity: 0.6; }
+
+      /* === Cursor Spotlight (cover only) === */
+      .cursor-spotlight {
+        background: radial-gradient(300px circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
+          rgba(27, 54, 93, 0.06), transparent 70%);
+        transition: background 0.3s ease;
       }
 
-      /* Reduced motion */
+      /* === Hover Micro-Interactions === */
+      .featured-card {
+        transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+      }
+      .featured-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        border-color: var(--brand, #1B365D);
+      }
+      .metric-card {
+        transition: transform 0.2s var(--ease);
+      }
+      .metric-card:hover { transform: scale(1.03); }
+
+      /* === Ambient Breathing === */
+      @keyframes breathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      @keyframes glow {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+      .breathe { animation: breathe 4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+      .glow { animation: glow 3s ease-in-out infinite; }
+
+      /* === Count-Up === */
+      .metric-num { font-variant-numeric: tabular-nums; }
+
+      /* === Reduced Motion === */
       @media (prefers-reduced-motion: reduce) {
-        .slide:not(.is-visible) .reveal { opacity: 1; transform: none; }
-        .slide.is-visible .reveal { transition: none; }
+        .slide:not(.is-visible) .reveal,
+        .slide:not(.is-visible) .reveal-scale,
+        .slide:not(.is-visible) .reveal-blur,
+        .slide:not(.is-visible) .reveal-slide-l,
+        .slide:not(.is-visible) .reveal-slide-r { opacity: 1; transform: none; filter: none; }
+        .slide:not(.is-visible) { opacity: 1; }
+        .slide.is-visible .reveal,
+        .slide.is-visible .reveal-scale,
+        .slide.is-visible .reveal-blur,
+        .slide.is-visible .reveal-slide-l,
+        .slide.is-visible .reveal-slide-r { transition: none; }
         .draw-path { stroke-dashoffset: 0; animation: none; }
-        .spin-wheel, .halo-pulse, .halo-pulse-2, .halo-pulse-3 { animation: none; }
+        .bar-grow { transform: scaleY(1); animation: none; }
+        .data-point { opacity: 1; transform: scale(1); animation: none; }
+        .spin-wheel, .spin-wheel-reverse, .halo-pulse, .halo-pulse-2, .halo-pulse-3,
+        .breathe, .glow { animation: none; }
+        .title-char { opacity: 1; transform: none; }
         .featured-card:hover, .metric-card:hover { transform: none; }
+        .parallax-bg { transform: none; }
       }
     </style>
   </head>
   <body>
 
     <!-- ════════════ 01 · 封面 ════════════ -->
-    <section class="slide">
-      <div class="eyebrow">NextPPT · HTML Deck Studio · Kami Template</div>
-      <div style="display:grid;grid-template-columns:1.35fr 1fr;gap:40px;flex:1;align-items:center">
-        <div>
-          <h1 class="title" style="font-size:72px;line-height:1.1;letter-spacing:1px;font-weight:500;max-width:14ch">
+    <section class="slide cursor-spotlight">
+      <div class="eyebrow reveal reveal-d1">NextPPT · HTML Deck Studio · Kami Template</div>
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:36px;flex:1;align-items:center">
+        <div style="min-width:0">
+          <h1 class="title reveal reveal-blur reveal-d2" style="font-size:72px;line-height:1.1;font-weight:500;max-width:16ch;text-align:left">
             把一件小事<br />做到不丢人，
           </h1>
-          <h1 class="title" style="font-size:72px;line-height:1.1;letter-spacing:1px;font-weight:500;color:var(--brand);margin-top:4px">
+          <h1 class="title reveal reveal-blur reveal-d2" style="font-size:72px;line-height:1.1;font-weight:500;color:var(--brand);margin-top:4px;max-width:16ch;text-align:left">
             就是理想主义。
           </h1>
-          <p class="lead" style="font-size:15px;margin-top:24px;max-width:42ch;line-height:1.6">
+          <p class="lead reveal reveal-d3" style="font-size:15px;margin-top:24px;max-width:42ch;line-height:1.6">
             AI 替你写，你替 AI 收尾——本地优先的 HTML 演示稿剪刀，点哪改哪，一键导出视觉一致的 PPTX 与 PDF。不替你表达，只把你的表达修到配得上它本身。
           </p>
-          <div style="margin-top:22px;display:flex;gap:8px;flex-wrap:wrap">
+          <div class="reveal reveal-d4" style="margin-top:22px;display:flex;gap:8px;flex-wrap:wrap">
             <span class="tag">本地优先</span><span class="tag">不注册</span><span class="tag">文件不离开电脑</span><span class="tag">开源</span>
           </div>
         </div>
 
         <!-- ── 匠心之轮：同心圆 + 360° 刻度 + 放射线 + 中心光点 ── -->
-        <svg viewBox="0 0 420 420" width="420" height="420" style="margin:0 auto">
+        <svg viewBox="0 0 420 420" width="380" height="380" style="margin:0 auto" class="reveal reveal-scale reveal-d4">
           <!-- 四象限极淡参考线 -->
           <g stroke="var(--b-08)" stroke-width=".5" fill="none">
             <line x1="210" y1="10" x2="210" y2="410"/>
             <line x1="10" y1="210" x2="410" y2="210"/>
           </g>
           <!-- 同心圆环 -->
-          <g fill="none" stroke="var(--border)">
+          <g fill="none" stroke="var(--border)" class="spin-wheel-reverse">
             <circle cx="210" cy="210" r="185" stroke-width=".5"/>
             <circle cx="210" cy="210" r="150" stroke-width=".5"/>
             <circle cx="210" cy="210" r="115" stroke-width=".5"/>
@@ -306,7 +380,7 @@
           <!-- 中心光晕 + 实心点 -->
           <circle class="halo-pulse" cx="210" cy="210" r="28" fill="var(--b-08)"/>
           <circle class="halo-pulse-2" cx="210" cy="210" r="18" fill="var(--b-16)"/>
-          <circle class="halo-pulse-3" cx="210" cy="210" r="6" fill="var(--brand)"/>
+          <circle class="halo-pulse-3 breathe" cx="210" cy="210" r="6" fill="var(--brand)"/>
 
           <!-- 4 个数据标注气泡（指向外圈） -->
           <!-- top: 编辑延迟 -->
@@ -316,10 +390,10 @@
             <text x="0" y="-32" text-anchor="middle" class="s-mono-xs">编辑反馈</text>
           </g>
           <!-- right: 导出格式 -->
-          <g transform="translate(325,210)">
+          <g transform="translate(320,210)">
             <line x1="0" y1="0" x2="12" y2="0" stroke="var(--brand)" stroke-width=".8"/>
-            <text x="50" y="-2" text-anchor="middle" class="s-val" style="font-size:13px">PPTX·PDF</text>
-            <text x="50" y="12" text-anchor="middle" class="s-mono-xs">双格式导出</text>
+            <text x="48" y="-2" text-anchor="middle" class="s-val" style="font-size:13px">PPTX·PDF</text>
+            <text x="48" y="12" text-anchor="middle" class="s-mono-xs">双格式导出</text>
           </g>
           <!-- bottom: 本地优先 -->
           <g transform="translate(210,325)">
@@ -328,10 +402,10 @@
             <text x="0" y="42" text-anchor="middle" class="s-mono-xs">本地优先</text>
           </g>
           <!-- left: 撤销深度 -->
-          <g transform="translate(95,210)">
+          <g transform="translate(100,210)">
             <line x1="0" y1="0" x2="-12" y2="0" stroke="var(--brand)" stroke-width=".8"/>
-            <text x="-50" y="-2" text-anchor="middle" class="s-val" style="font-size:13px">100 步</text>
-            <text x="-50" y="12" text-anchor="middle" class="s-mono-xs">撤销栈深度</text>
+            <text x="-48" y="-2" text-anchor="middle" class="s-val" style="font-size:13px">100 步</text>
+            <text x="-48" y="12" text-anchor="middle" class="s-mono-xs">撤销栈深度</text>
           </g>
 
           <!-- 角标 -->
@@ -342,7 +416,7 @@
       </div>
 
       <!-- 底部格言条 -->
-      <div style="margin-top:4px;display:flex;align-items:center;justify-content:space-between;border-top:.5px solid var(--border);padding-top:14px">
+      <div class="reveal reveal-d5" style="margin-top:4px;display:flex;align-items:center;justify-content:space-between;border-top:.5px solid var(--border);padding-top:14px">
         <p class="cap" style="font-size:12px;color:var(--olive);font-style:italic">"工具最好的归宿，是让你忘记它存在。"</p>
         <div style="display:flex;gap:24px">
           <div class="metric"><div class="v" style="font-size:20px">3 步</div><div class="k">打开 · 编辑 · 导出</div></div>
@@ -354,23 +428,23 @@
 
     <!-- ════════════ 02 · 行业痛点 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">01 · 行业痛点</div>
-      <h1 class="title">AI 很会写 HTML，却把"改"和"导"留给了你</h1>
-      <p class="lead">用 HTML 做演示本是更自由的选择——可一旦要临场改一句话、要交一份 PPT，麻烦就开始了。三类痛点覆盖了 92% 的真实使用场景。</p>
+      <div class="eyebrow reveal reveal-d1">01 · 行业痛点</div>
+      <h1 class="title reveal reveal-blur reveal-d2">AI 很会写 HTML，却把"改"和"导"留给了你</h1>
+      <p class="lead reveal reveal-d3">用 HTML 做演示本是更自由的选择——可一旦要临场改一句话、要交一份 PPT，麻烦就开始了。三类痛点覆盖了 92% 的真实使用场景。</p>
       <div class="cols3 grow" style="margin-top:18px;align-items:stretch">
         <!-- pain 1 -->
-        <div class="card" style="display:flex;flex-direction:column">
+        <div class="card reveal reveal-slide-l reveal-d3" style="display:flex;flex-direction:column">
           <svg viewBox="0 0 40 40" width="36" height="36" style="margin-bottom:8px">
             <path d="M8 30 L20 18 L26 24 L14 36 Z" fill="none" stroke="var(--brand)" stroke-width="1.4" stroke-linejoin="round"/>
             <path d="M20 18 L26 12 L32 18 L26 24" fill="none" stroke="var(--brand)" stroke-width="1.4" stroke-linejoin="round"/>
             <path d="M24 16 L30 22" stroke="var(--stone)" stroke-width="1.2" stroke-dasharray="2 2"/>
-            <circle cx="10" cy="34" r="1.4" fill="var(--brand)"/>
+            <circle class="glow" cx="10" cy="34" r="1.4" fill="var(--brand)"/>
           </svg>
           <h3 style="font-weight:500;font-size:15px;color:var(--near);margin-bottom:6px">写得好，改得累</h3>
           <p class="body" style="font-size:12.5px">改个错字，得回到 AI 工具发 prompt、等响应、看 Diff、再保存。一次不爽，十次崩溃。</p>
           <div style="margin-top:auto;padding-top:12px">
             <div class="chart-title">改一句话平均耗时</div>
-            <svg viewBox="0 0 200 28" width="100%" height="28">
+            <svg viewBox="0 0 220 28" width="100%" height="28">
               <rect x="0" y="10" width="30" height="10" fill="var(--b-22)"/>
               <rect x="0" y="10" width="168" height="10" fill="var(--brand)"/>
               <text x="174" y="19" class="s-val" style="font-size:9px">7.2 min</text>
@@ -379,7 +453,7 @@
           </div>
         </div>
         <!-- pain 2 -->
-        <div class="card" style="display:flex;flex-direction:column">
+        <div class="card reveal reveal-d4" style="display:flex;flex-direction:column">
           <svg viewBox="0 0 40 40" width="36" height="36" style="margin-bottom:8px">
             <rect x="6" y="8" width="28" height="18" rx="1.5" fill="none" stroke="var(--brand)" stroke-width="1.4"/>
             <line x1="20" y1="26" x2="20" y2="34" stroke="var(--brand)" stroke-width="1.4"/>
@@ -399,7 +473,7 @@
           </div>
         </div>
         <!-- pain 3 -->
-        <div class="card" style="display:flex;flex-direction:column">
+        <div class="card reveal reveal-slide-r reveal-d5" style="display:flex;flex-direction:column">
           <svg viewBox="0 0 40 40" width="36" height="36" style="margin-bottom:8px">
             <path d="M12 8 C8 8 6 11 6 14 C6 18 9 20 12 20 L28 20 C31 20 34 22 34 26 C34 29 31 32 28 32 L14 32" fill="none" stroke="var(--brand)" stroke-width="1.4" stroke-linecap="round"/>
             <line x1="6" y1="6" x2="34" y2="34" stroke="var(--stone)" stroke-width="1.4"/>
@@ -423,10 +497,10 @@
 
     <!-- ════════════ 03 · 产品理念 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">02 · 产品理念</div>
-      <h1 class="title">克制比堆功能更难，也更值钱</h1>
+      <div class="eyebrow reveal reveal-d1">02 · 产品理念</div>
+      <h1 class="title reveal reveal-blur reveal-d2">克制比堆功能更难，也更值钱</h1>
       <div class="cols32 grow" style="margin-top:20px;align-items:stretch">
-        <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="reveal reveal-slide-l reveal-d3" style="display:flex;flex-direction:column;gap:18px">
           <ul class="dash" style="gap:14px">
             <li><b>窄，是一种诚实。</b>只做"改与导"三件事，任何 HTML 都能进，不锁格式、不绑模板。</li>
             <li><b>保真，是基本的尊重。</b>导出的每一页，都该和你在屏幕上看到的一模一样。</li>
@@ -434,11 +508,11 @@
             <li><b>长期，才配叫作品。</b>不追风口，把一件小事打磨到对得起每天用它的人。</li>
           </ul>
           <div class="cols2" style="gap:16px;margin-top:4px">
-            <div class="card"><div class="metric"><div class="v">3</div><div class="k">只做三件事<br />不扩张功能边界</div></div></div>
+            <div class="card"><div class="metric"><div class="v metric-num" data-num="3">0</div><div class="k">只做三件事<br />不扩张功能边界</div></div></div>
             <div class="card"><div class="metric"><div class="v">100%</div><div class="k">像素级保真<br />所见即所导</div></div></div>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="reveal reveal-slide-r reveal-d3" style="display:flex;flex-direction:column;gap:14px">
           <p class="quote lg" style="font-size:22px">我们不替你表达，<br />只把你的表达，<br />修到配得上它本身。
             <span class="by">— 这是这款工具存在的全部理由</span>
           </p>
@@ -453,11 +527,11 @@
 
     <!-- ════════════ 04 · 功能架构图 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">03 · 功能架构</div>
-      <h1 class="title">HTML 进来，点选编辑，一键导出</h1>
-      <p class="lead">没有学习成本的工作流——它不替你生成，也不替你创作，只让"已经有的东西"变得可改、可交付。架构分三层：输入接入、编辑内核、导出引擎。</p>
-      <div class="grow" style="margin-top:14px;display:flex;align-items:center">
-        <svg viewBox="0 0 1130 410" width="1130" style="max-height:100%">
+      <div class="eyebrow reveal reveal-d1">03 · 功能架构</div>
+      <h1 class="title reveal reveal-blur reveal-d2">HTML 进来，点选编辑，一键导出</h1>
+      <p class="lead reveal reveal-d3">没有学习成本的工作流——它不替你生成，也不替你创作，只让"已经有的东西"变得可改、可交付。架构分三层：输入接入、编辑内核、导出引擎。</p>
+      <div class="grow reveal reveal-scale reveal-d4" style="margin-top:14px;display:flex;align-items:center">
+        <svg viewBox="0 0 1130 410" width="100%" style="max-height:100%">
           <!-- layer labels -->
           <text x="6" y="24" class="s-mono-xs" style="letter-spacing:1.4px;text-transform:uppercase">L1 · 输入</text>
           <text x="6" y="170" class="s-mono-xs" style="letter-spacing:1.4px;text-transform:uppercase">L2 · 编辑内核</text>
@@ -559,11 +633,11 @@
 
     <!-- ════════════ 05 · 编辑能力雷达图 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">04 · 编辑能力</div>
-      <h1 class="title">点哪改哪，六维度都够硬</h1>
+      <div class="eyebrow reveal reveal-d1">04 · 编辑能力</div>
+      <h1 class="title reveal reveal-blur reveal-d2">点哪改哪，六维度都够硬</h1>
       <div class="cols32 grow" style="margin-top:14px;align-items:stretch">
         <!-- radar chart -->
-        <div class="chart-panel" style="display:flex;flex-direction:column">
+        <div class="chart-panel reveal reveal-scale reveal-d4" style="display:flex;flex-direction:column">
           <div class="chart-title">编辑能力雷达 · 6 维度评分 (0–100)</div>
           <svg viewBox="0 0 400 360" width="100%" style="flex:1;max-height:430px">
             <!-- grid rings -->
@@ -587,12 +661,12 @@
               fill="var(--b-16)" stroke="var(--brand)" stroke-width="1.6"/>
             <!-- data points -->
             <g fill="var(--brand)">
-              <circle cx="200" cy="81" r="3.2"/>
-              <circle cx="303.6" cy="140.2" r="3.2"/>
-              <circle cx="295.7" cy="255.3" r="3.2"/>
-              <circle cx="200" cy="314.4" r="3.2"/>
-              <circle cx="98.7" cy="258.5" r="3.2"/>
-              <circle cx="90.8" cy="136.9" r="3.2"/>
+              <circle class="data-point" cx="200" cy="81" r="3.2"/>
+              <circle class="data-point" cx="303.6" cy="140.2" r="3.2"/>
+              <circle class="data-point" cx="295.7" cy="255.3" r="3.2"/>
+              <circle class="data-point" cx="200" cy="314.4" r="3.2"/>
+              <circle class="data-point" cx="98.7" cy="258.5" r="3.2"/>
+              <circle class="data-point" cx="90.8" cy="136.9" r="3.2"/>
             </g>
             <!-- axis labels -->
             <text x="200" y="68" text-anchor="middle" class="s-lab" style="font-size:11.5px">所见即所得</text>
@@ -611,7 +685,7 @@
           </svg>
         </div>
         <!-- dimension table + stat cards -->
-        <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="reveal reveal-slide-r reveal-d3" style="display:flex;flex-direction:column;gap:12px">
           <div class="card" style="padding:12px 14px">
             <div class="chart-title">维度解读</div>
             <table class="tbl" style="margin-top:4px">
@@ -625,7 +699,7 @@
             </table>
           </div>
           <div class="cols2" style="gap:10px">
-            <div class="card"><div class="metric"><div class="v">91.2</div><div class="k">综合均分</div></div></div>
+            <div class="card"><div class="metric"><div class="v metric-num" data-num="91.2">0</div><div class="k">综合均分</div></div></div>
             <div class="card"><div class="metric"><div class="v">0</div><div class="k">需学习的<br />新语法</div></div></div>
           </div>
         </div>
@@ -636,13 +710,13 @@
 
     <!-- ════════════ 06 · 导出保真度 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">05 · 导出保真度</div>
-      <h1 class="title">高保真导出，且文件不离开你的电脑</h1>
-      <p class="lead">导出用真实浏览器渲染后截图成稿，所见即所得。三种保真度指标均高于 94%，远超在线工具与手动转换。</p>
+      <div class="eyebrow reveal reveal-d1">05 · 导出保真度</div>
+      <h1 class="title reveal reveal-blur reveal-d2">高保真导出，且文件不离开你的电脑</h1>
+      <p class="lead reveal reveal-d3">导出用真实浏览器渲染后截图成稿，所见即所得。三种保真度指标均高于 94%，远超在线工具与手动转换。</p>
       <div class="grow" style="margin-top:14px;display:flex;flex-direction:column;gap:14px">
         <div class="cols3">
           <!-- ring 1 -->
-          <div class="chart-panel" style="text-align:center">
+          <div class="chart-panel reveal reveal-scale reveal-d4" style="text-align:center">
             <div class="chart-title">PPTX 像素保真</div>
             <svg viewBox="0 0 140 140" width="140" style="margin:4px auto 0">
               <circle cx="70" cy="70" r="54" fill="none" stroke="var(--border)" stroke-width="9"/>
@@ -654,7 +728,7 @@
             <div class="cap" style="margin-top:4px">字体 · 颜色 · 间距</div>
           </div>
           <!-- ring 2 -->
-          <div class="chart-panel" style="text-align:center">
+          <div class="chart-panel reveal reveal-scale reveal-d4" style="text-align:center">
             <div class="chart-title">PDF 排版保真</div>
             <svg viewBox="0 0 140 140" width="140" style="margin:4px auto 0">
               <circle cx="70" cy="70" r="54" fill="none" stroke="var(--border)" stroke-width="9"/>
@@ -666,7 +740,7 @@
             <div class="cap" style="margin-top:4px">投影 · 打印一致</div>
           </div>
           <!-- ring 3 -->
-          <div class="chart-panel" style="text-align:center">
+          <div class="chart-panel reveal reveal-scale reveal-d4" style="text-align:center">
             <div class="chart-title">布局一致性</div>
             <svg viewBox="0 0 140 140" width="140" style="margin:4px auto 0">
               <circle cx="70" cy="70" r="54" fill="none" stroke="var(--border)" stroke-width="9"/>
@@ -679,7 +753,7 @@
           </div>
         </div>
         <div class="cols32" style="gap:20px;align-items:stretch">
-          <div class="card" style="padding:12px 14px">
+          <div class="card reveal reveal-slide-l reveal-d5" style="padding:12px 14px">
             <div class="chart-title">保真度对比 · 跨工具</div>
             <table class="tbl" style="margin-top:4px">
               <tr><th>方案</th><th>PPTX</th><th>PDF</th><th>布局</th><th>本地</th></tr>
@@ -689,7 +763,7 @@
               <tr><td>浏览器打印</td><td>—</td><td>80</td><td>55</td><td>✓</td></tr>
             </table>
           </div>
-          <div class="sidebox">
+          <div class="sidebox reveal reveal-slide-r reveal-d5">
             <h4>导出原理</h4>
             <p style="font-size:11.5px;line-height:1.6">Headless 浏览器按 2× DPR 渲染每一页 → 字体内嵌检测 → 矢量切分 (PPTX) 或栅格截图 (PDF)。后端仅此刻经手，&lt;60s 抹除。</p>
           </div>
@@ -701,11 +775,11 @@
 
     <!-- ════════════ 07 · 数据生命周期桑基图 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">06 · 隐私承诺</div>
-      <h1 class="title">数据怎么流：始终在你的掌控之内</h1>
-      <p class="lead">编辑全程在浏览器内存，导出时短暂经过后端临时目录，完成后立即销毁。这是技术承诺，不是营销说辞。桑基流宽度映射数据驻留量。</p>
+      <div class="eyebrow reveal reveal-d1">06 · 隐私承诺</div>
+      <h1 class="title reveal reveal-blur reveal-d2">数据怎么流：始终在你的掌控之内</h1>
+      <p class="lead reveal reveal-d3">编辑全程在浏览器内存，导出时短暂经过后端临时目录，完成后立即销毁。这是技术承诺，不是营销说辞。桑基流宽度映射数据驻留量。</p>
       <div class="grow" style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
-        <div class="chart-panel">
+        <div class="chart-panel reveal reveal-scale reveal-d4">
           <div class="chart-title">数据生命周期桑基流 · 驻留量映射 (相对单位)</div>
           <svg viewBox="0 0 1130 280" width="100%" height="260">
             <!-- node 1: 用户磁盘 100 -->
@@ -763,7 +837,7 @@
             </g>
           </svg>
         </div>
-        <div class="cols3" style="gap:14px">
+        <div class="cols3 reveal reveal-d5" style="gap:14px">
           <div class="card"><div class="metric"><div class="v">0</div><div class="k">数据进数据库<br />/ 对象存储</div></div></div>
           <div class="card"><div class="metric"><div class="v">&lt; 60 s</div><div class="k">后端临时目录<br />驻留上限</div></div></div>
           <div class="card"><div class="metric"><div class="v">100%</div><div class="k">进程退出 hook<br />自动清理</div></div></div>
@@ -775,11 +849,11 @@
 
     <!-- ════════════ 08 · 性能基准 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">07 · 性能基准</div>
-      <h1 class="title">编辑延迟与导出耗时，随文件大小线性可控</h1>
+      <div class="eyebrow reveal reveal-d1">07 · 性能基准</div>
+      <h1 class="title reveal reveal-blur reveal-d2">编辑延迟与导出耗时，随文件大小线性可控</h1>
       <div class="cols32 grow" style="margin-top:14px;align-items:stretch">
         <!-- dual-axis line chart -->
-        <div class="chart-panel" style="display:flex;flex-direction:column">
+        <div class="chart-panel reveal reveal-scale reveal-d4" style="display:flex;flex-direction:column">
           <div class="chart-title">双轴折线 · 编辑延迟 vs 文件大小 / 导出耗时</div>
           <svg viewBox="0 0 560 320" width="100%" style="flex:1;max-height:330px">
             <!-- axes -->
@@ -826,9 +900,9 @@
             <polyline points="100,223 180,216 260,199 340,171 420,124 486,51"
               fill="none" stroke="var(--brand)" stroke-width="2"/>
             <g fill="var(--brand)">
-              <circle cx="100" cy="223" r="3"/><circle cx="180" cy="216" r="3"/>
-              <circle cx="260" cy="199" r="3"/><circle cx="340" cy="171" r="3"/>
-              <circle cx="420" cy="124" r="3"/><circle cx="486" cy="51" r="3"/>
+              <circle class="data-point" cx="100" cy="223" r="3"/><circle class="data-point" cx="180" cy="216" r="3"/>
+              <circle class="data-point" cx="260" cy="199" r="3"/><circle class="data-point" cx="340" cy="171" r="3"/>
+              <circle class="data-point" cx="420" cy="124" r="3"/><circle class="data-point" cx="486" cy="51" r="3"/>
             </g>
             <!-- line 2: export time s (stone dashed): 2.1 2.8 3.9 6.2 9.8 15.4 -->
             <!-- y = 270 - val/16*250 -->
@@ -854,7 +928,7 @@
           </svg>
         </div>
         <!-- bar chart + table -->
-        <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="reveal reveal-slide-r reveal-d3" style="display:flex;flex-direction:column;gap:12px">
           <div class="chart-panel">
             <div class="chart-title">冷启动 vs 热启动 (s)</div>
             <svg viewBox="0 0 280 150" width="100%" height="140">
@@ -866,14 +940,14 @@
                 <text x="36" y="44" text-anchor="end">2.4</text>
               </g>
               <!-- cold bars -->
-              <rect x="60" y="36" width="28" height="84" fill="var(--brand)"/>
+              <rect class="bar-grow" style="animation-delay:0.1s" x="60" y="36" width="28" height="84" fill="var(--brand)"/>
               <text x="74" y="30" text-anchor="middle" class="s-val" style="font-size:9.5px">2.1</text>
-              <rect x="150" y="56" width="28" height="64" fill="var(--brand)"/>
+              <rect class="bar-grow" style="animation-delay:0.2s" x="150" y="56" width="28" height="64" fill="var(--brand)"/>
               <text x="164" y="50" text-anchor="middle" class="s-val" style="font-size:9.5px">1.6</text>
               <!-- warm bars -->
-              <rect x="92" y="100" width="28" height="20" fill="var(--b-34)"/>
+              <rect class="bar-grow" style="animation-delay:0.3s" x="92" y="100" width="28" height="20" fill="var(--b-34)"/>
               <text x="106" y="94" text-anchor="middle" class="s-mono" style="font-size:9px;fill:var(--dark)">0.5</text>
-              <rect x="182" y="92" width="28" height="28" fill="var(--b-34)"/>
+              <rect class="bar-grow" style="animation-delay:0.4s" x="182" y="92" width="28" height="28" fill="var(--b-34)"/>
               <text x="196" y="86" text-anchor="middle" class="s-mono" style="font-size:9px;fill:var(--dark)">0.7</text>
               <text x="88" y="138" text-anchor="middle" class="s-mono-xs">冷</text>
               <text x="178" y="138" text-anchor="middle" class="s-mono-xs">热</text>
@@ -899,11 +973,11 @@
 
     <!-- ════════════ 09 · 用户增长堆叠面积图 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">08 · 增长</div>
-      <h1 class="title">按渠道堆叠的用户增长，与关键里程碑</h1>
-      <p class="lead">上线 12 个月，月活从 0 增至 4,260。GitHub 是主增长引擎，小红书垂直转化最高，Product Hunt 首发带来一次性放大。</p>
+      <div class="eyebrow reveal reveal-d1">08 · 增长</div>
+      <h1 class="title reveal reveal-blur reveal-d2">按渠道堆叠的用户增长，与关键里程碑</h1>
+      <p class="lead reveal reveal-d3">上线 12 个月，月活从 0 增至 4,260。GitHub 是主增长引擎，小红书垂直转化最高，Product Hunt 首发带来一次性放大。</p>
       <div class="grow" style="margin-top:14px;display:flex;flex-direction:column;gap:12px">
-        <div class="chart-panel">
+        <div class="chart-panel reveal reveal-scale reveal-d4">
           <div class="chart-title">月活用户堆叠面积 · 按渠道 (2025-08 → 2026-07)</div>
           <svg viewBox="0 0 1130 300" width="100%" height="280">
             <!-- axes -->
@@ -988,7 +1062,7 @@
             <!-- milestone markers -->
             <g>
               <line x1="428" y1="95.4" x2="428" y2="240" stroke="var(--brand)" stroke-width=".8" stroke-dasharray="2 2"/>
-              <circle cx="428" cy="95.4" r="3.5" fill="var(--brand)"/>
+              <circle class="glow" cx="428" cy="95.4" r="3.5" fill="var(--brand)"/>
               <text x="434" y="80" class="s-val" style="font-size:9.5px">M5 · PH 首发</text>
               <text x="434" y="92" class="s-mono-xs">+1,025 单月</text>
             </g>
@@ -1024,8 +1098,8 @@
             </g>
           </svg>
         </div>
-        <div class="cols3" style="gap:14px">
-          <div class="card"><div class="metric"><div class="v">4,260</div><div class="k">12 月累计 MAU</div></div></div>
+        <div class="cols3 reveal reveal-d5" style="gap:14px">
+          <div class="card"><div class="metric"><div class="v metric-num" data-num="4260">0</div><div class="k">12 月累计 MAU</div></div></div>
           <div class="card"><div class="metric"><div class="v">44%</div><div class="k">GitHub 渠道占比</div></div></div>
           <div class="card"><div class="metric"><div class="v">+1,025</div><div class="k">PH 首发单月增量</div></div></div>
         </div>
@@ -1036,13 +1110,13 @@
 
     <!-- ════════════ 10 · 竞品对比热力矩阵 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">09 · 竞品对比</div>
-      <h1 class="title">八维度 × 五产品，热力矩阵看清差距</h1>
-      <p class="lead">色深越浓表示能力越强。NextPPT 在本地优先、保真导出、零学习成本三项上唯一达到 3 分；在线工具在协作上占优但牺牲隐私。</p>
+      <div class="eyebrow reveal reveal-d1">09 · 竞品对比</div>
+      <h1 class="title reveal reveal-blur reveal-d2">八维度 × 五产品，热力矩阵看清差距</h1>
+      <p class="lead reveal reveal-d3">色深越浓表示能力越强。NextPPT 在本地优先、保真导出、零学习成本三项上唯一达到 3 分；在线工具在协作上占优但牺牲隐私。</p>
       <div class="cols32 grow" style="margin-top:14px;align-items:stretch">
-        <div class="chart-panel">
+        <div class="chart-panel reveal reveal-scale reveal-d4">
           <div class="chart-title">能力热力矩阵 · 0=缺失 1=弱 2=中 3=强 (焦点格=NextPPT 满分)</div>
-          <svg viewBox="0 0 620 410" width="100%" style="max-height:430px">
+          <svg viewBox="0 0 620 430" width="100%" style="max-height:430px">
             <!-- column headers -->
             <g class="s-mono-xs" style="text-transform:uppercase;letter-spacing:1px">
               <text x="20" y="24">能力维度</text>
@@ -1122,13 +1196,13 @@
             </g>
           </svg>
         </div>
-        <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="reveal reveal-slide-r reveal-d3" style="display:flex;flex-direction:column;gap:12px">
           <div class="sidebox">
             <h4>解读</h4>
             <p style="font-size:11.5px;line-height:1.6"><b style="color:var(--near)">NextPPT 21 分领先。</b>本地优先 + 保真导出 + HTML 原生三项满分，是唯一不牺牲隐私即可高保真导出的方案。协作是明确放弃项。</p>
           </div>
           <div class="cols2" style="gap:10px">
-            <div class="card"><div class="metric"><div class="v">21</div><div class="k">NextPPT 合计</div></div></div>
+            <div class="card"><div class="metric"><div class="v metric-num" data-num="21">0</div><div class="k">NextPPT 合计</div></div></div>
             <div class="card"><div class="metric"><div class="v">+5</div><div class="k">领先第二名</div></div></div>
           </div>
         </div>
@@ -1139,10 +1213,10 @@
 
     <!-- ════════════ 11 · 用户画像气泡图 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">10 · 用户画像</div>
-      <h1 class="title">三类用户，按技术力与交付频率聚类</h1>
+      <div class="eyebrow reveal reveal-d1">10 · 用户画像</div>
+      <h1 class="title reveal reveal-blur reveal-d2">三类用户，按技术力与交付频率聚类</h1>
       <div class="cols32 grow" style="margin-top:14px;align-items:stretch">
-        <div class="chart-panel" style="display:flex;flex-direction:column">
+        <div class="chart-panel reveal reveal-scale reveal-d4" style="display:flex;flex-direction:column">
           <div class="chart-title">气泡图 · X=技术熟练度 Y=交付频率 气泡大小=人群规模</div>
           <svg viewBox="0 0 620 380" width="100%" style="flex:1;max-height:400px">
             <!-- axes -->
@@ -1188,7 +1262,7 @@
             <text x="382" y="73" class="s-mono-xs" style="fill:var(--brand)">高频交付</text>
           </svg>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="reveal reveal-slide-r reveal-d3" style="display:flex;flex-direction:column;gap:10px">
           <div class="card" style="padding:12px 14px">
             <div class="chart-title">人群画像</div>
             <table class="tbl" style="margin-top:4px;font-size:10.5px">
@@ -1210,15 +1284,15 @@
 
     <!-- ════════════ 12 · 路线线时间线 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">11 · 路线图</div>
-      <h1 class="title">2026 季度规划，从能用打磨到值得托付</h1>
-      <div class="grow" style="margin-top:14px;display:flex;gap:20px">
+      <div class="eyebrow reveal reveal-d1">11 · 路线图</div>
+      <h1 class="title reveal reveal-blur reveal-d2">2026 季度规划，从能用打磨到值得托付</h1>
+      <div class="grow reveal reveal-scale reveal-d4" style="margin-top:14px;display:flex;gap:20px">
         <!-- vertical timeline -->
         <svg viewBox="0 0 1130 470" width="100%" style="max-height:100%">
           <!-- spine -->
           <line x1="60" y1="20" x2="60" y2="450" stroke="var(--border)" stroke-width="1.5"/>
           <!-- Q1 -->
-          <circle cx="60" cy="60" r="8" fill="var(--brand)"/>
+          <circle class="glow" cx="60" cy="60" r="8" fill="var(--brand)"/>
           <circle cx="60" cy="60" r="3" fill="var(--ivory)"/>
           <text x="84" y="50" class="s-mono" style="font-size:11px;fill:var(--brand);letter-spacing:1.4px">Q1 · 2026</text>
           <text x="84" y="68" class="s-lab" style="font-size:14px">基础编辑与导出</text>
@@ -1278,11 +1352,11 @@
 
     <!-- ════════════ 13 · 生态树状图 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">12 · 生态占比</div>
-      <h1 class="title">功能投入分布：核心六成，扩展与集成各占其位</h1>
-      <p class="lead">树状图按工程投入占比切分。核心编辑与导出占 60%，是长期打磨的主轴；扩展与集成在不膨胀核心的前提下延展边界。</p>
+      <div class="eyebrow reveal reveal-d1">12 · 生态占比</div>
+      <h1 class="title reveal reveal-blur reveal-d2">功能投入分布：核心六成，扩展与集成各占其位</h1>
+      <p class="lead reveal reveal-d3">树状图按工程投入占比切分。核心编辑与导出占 60%，是长期打磨的主轴；扩展与集成在不膨胀核心的前提下延展边界。</p>
       <div class="cols32 grow" style="margin-top:14px;align-items:stretch">
-        <div class="chart-panel" style="display:flex;flex-direction:column">
+        <div class="chart-panel reveal reveal-scale reveal-d4" style="display:flex;flex-direction:column">
           <div class="chart-title">功能投入树状图 · Treemap (面积=占比%)</div>
           <svg viewBox="0 0 640 410" width="100%" style="flex:1;max-height:430px">
             <!-- total area 600x360 starting x=20 y=30 -->
@@ -1340,7 +1414,7 @@
             </g>
           </svg>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="reveal reveal-slide-r reveal-d3" style="display:flex;flex-direction:column;gap:10px">
           <div class="card" style="padding:12px 14px">
             <div class="chart-title">投入占比明细</div>
             <table class="tbl" style="margin-top:4px;font-size:10.5px">
@@ -1366,9 +1440,9 @@
 
     <!-- ════════════ 14 · 结语 ════════════ -->
     <section class="slide">
-      <div class="eyebrow">尾声 · Get Started</div>
+      <div class="eyebrow reveal reveal-d1">尾声 · Get Started</div>
       <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:36px;flex:1;align-items:center">
-        <div>
+        <div class="reveal reveal-slide-l reveal-d3">
           <p class="quote lg" style="font-size:30px;line-height:1.34;border-left-width:3px;padding-left:22px">
             把一件小事做到不丢人，<br />本身就是一种<span class="acc">理想主义</span>。
           </p>
@@ -1382,7 +1456,7 @@
           </div>
         </div>
         <!-- decorative summary svg -->
-        <svg viewBox="0 0 360 320" width="360" height="320">
+        <svg viewBox="0 0 360 320" width="360" height="320" class="reveal reveal-scale reveal-d4">
           <text x="0" y="18" class="s-mono-xs" style="letter-spacing:1.4px;text-transform:uppercase">一页回顾</text>
           <line x1="0" y1="26" x2="360" y2="26" stroke="var(--border)"/>
           <!-- mini flow -->
@@ -1423,12 +1497,67 @@
 
 <script>
 (function(){
+  // === Cinematic Reveal: IntersectionObserver ===
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){
-      if(e.isIntersecting){ e.target.classList.add('is-visible'); }
+      if(e.isIntersecting){
+        e.target.classList.add('is-visible');
+        io.unobserve(e.target);
+        // Trigger count-up for metric numbers in this slide
+        e.target.querySelectorAll('.metric-num[data-num]').forEach(function(el){
+          countUp(el, parseFloat(el.getAttribute('data-num')));
+        });
+      }
     });
-  }, { threshold: 0.15 });
+  }, { threshold: 0.18 });
   document.querySelectorAll('.slide').forEach(function(s){ io.observe(s); });
+
+  // === Count-Up Animation ===
+  function countUp(el, target){
+    var dur = 1800, start = performance.now(), isFloat = target % 1 !== 0;
+    function fmt(v){ return v >= 1000 ? Math.round(v).toLocaleString('en-US') : (isFloat ? v.toFixed(1) : Math.round(v)); }
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * eased);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // === Parallax ===
+  var parallaxEls = document.querySelectorAll('.parallax-bg');
+  if(parallaxEls.length){
+    var ticking = false;
+    function updateParallax(){
+      ticking = false;
+      parallaxEls.forEach(function(el){
+        var slide = el.closest('.slide');
+        if(!slide) return;
+        var rect = slide.getBoundingClientRect();
+        var center = rect.top + rect.height / 2;
+        var offset = (center - window.innerHeight / 2) / window.innerHeight;
+        el.style.setProperty('--parallax', (offset * -30) + 'px');
+      });
+    }
+    window.addEventListener('scroll', function(){
+      if(!ticking){ requestAnimationFrame(updateParallax); ticking = true; }
+    }, { passive: true });
+    updateParallax();
+  }
+
+  // === Cursor Spotlight (cover only) ===
+  var cover = document.querySelector('.slide:first-child');
+  if(cover && cover.classList.contains('cursor-spotlight') !== false){
+    cover.addEventListener('mousemove', function(e){
+      var rect = cover.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+      var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+      cover.style.setProperty('--cursor-x', x + '%');
+      cover.style.setProperty('--cursor-y', y + '%');
+    });
+  }
+
 })();
 </script>
   </body>

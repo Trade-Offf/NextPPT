@@ -1,0 +1,1794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Brutalist Newspaper — Slide Template</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --newsprint: #f4f1ea;
+    --ink:       #1a1a1a;
+    --ink-2:     #3d3d3d;
+    --muted:     #6b6b6b;
+    --faint:     #9a9a9a;
+    --spot-red:  #C8102E;
+    --rule:      #1a1a1a;
+    /* ── Brutalist motion easings ── steps() for hard-cut, cubic for snap ── */
+    --ease:      steps(8, end);
+    --ease-hard: cubic-bezier(0.7, 0, 0.3, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0e0e0e; }
+  body {
+    font-family: 'Libre Caslon Text', 'Times New Roman', Georgia, serif;
+    color: var(--ink);
+  }
+
+  @page { size: 1280px 720px; margin: 0; }
+
+  .slide {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: var(--newsprint);
+    isolation: isolate;
+  }
+  /* Halftone paper-grain overlay baked into every slide */
+  .slide::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    opacity: 0.12;
+    background-image: radial-gradient(circle at 1px 1px, rgba(26,26,26,0.6) 0.8px, transparent 1.4px);
+    background-size: 3px 3px;
+    z-index: 1;
+  }
+
+  /* ─── TYPE SYSTEM ───────────────────────────────────────────── */
+  .serif    { font-family: 'Libre Caslon Text', 'Times New Roman', Georgia, serif; }
+  .sans     { font-family: 'Inter', 'Helvetica Neue', sans-serif; }
+  .mono     { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .upper    { text-transform: uppercase; letter-spacing: 0.16em; }
+  .micro    { font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; font-size: 10px; }
+  .caption  { font-family: 'Inter', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.16em; font-size: 11px; }
+  .body-tx  { font-family: 'Libre Caslon Text', serif; font-weight: 400; line-height: 1.42; font-size: 13.5px; }
+  .lead-tx  { font-family: 'Libre Caslon Text', serif; font-style: italic; line-height: 1.4; font-size: 16px; }
+
+  /* ─── PAGE NUMBER ───────────────────────────────────────────── */
+  .pagenum {
+    position: absolute;
+    right: 32px;
+    bottom: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    z-index: 9;
+  }
+
+  /* ─── MASTHEAD (shared top bar) ─────────────────────────────── */
+  .masthead {
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 18px 32px 12px;
+    border-bottom: 1.5px solid var(--ink);
+    column-gap: 24px;
+  }
+  .masthead .mh-left,
+  .masthead .mh-right {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 10px;
+    color: var(--ink);
+  }
+  .masthead .mh-right { text-align: right; }
+  .masthead .mh-name {
+    font-family: 'Libre Caslon Text', serif;
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .masthead .mh-name .ornament { color: var(--spot-red); }
+
+  /* Section tag — spot-red pill at top of body */
+  .section-tag {
+    display: inline-block;
+    background: var(--spot-red);
+    color: var(--newsprint);
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 10px;
+    padding: 3px 8px 2px;
+  }
+
+  /* ─── FOOTER (shared bottom bar) ────────────────────────────── */
+  .footer {
+    position: absolute;
+    left: 32px;
+    right: 32px;
+    bottom: 16px;
+    border-top: 1px solid var(--ink);
+    padding-top: 8px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 9.5px;
+    color: var(--ink);
+    z-index: 5;
+  }
+  .footer .f-right { text-align: right; }
+  .footer .f-mid { font-family: 'Libre Caslon Text', serif; font-style: italic; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 11px; color: var(--ink-2); }
+
+  /* ─── DROP CAP ──────────────────────────────────────────────── */
+  .dropcap::first-letter {
+    float: left;
+    font-family: 'Libre Caslon Text', serif;
+    font-weight: 700;
+    font-size: 78px;
+    line-height: 0.82;
+    color: var(--spot-red);
+    padding: 6px 8px 0 0;
+    margin-top: 2px;
+  }
+
+  /* ─── PULL QUOTE ────────────────────────────────────────────── */
+  .pullquote {
+    border-left: 3px solid var(--spot-red);
+    padding: 6px 0 6px 18px;
+    font-family: 'Libre Caslon Text', serif;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--ink);
+  }
+
+  /* ─── STAMP (rotated rectangular frame) ─────────────────────── */
+  .stamp {
+    display: inline-block;
+    border: 2.5px solid var(--spot-red);
+    color: var(--spot-red);
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 13px;
+    padding: 6px 12px 5px;
+    transform: rotate(-8deg);
+    line-height: 1;
+    background: rgba(244,241,234,0.6);
+  }
+
+  /* ─── STAT BLOCK ────────────────────────────────────────────── */
+  .stat .sval {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 56px;
+    color: var(--spot-red);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+  }
+  .stat .sval .unit { font-size: 22px; color: var(--ink); margin-left: 4px; }
+  .stat .slab {
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    color: var(--ink);
+    margin-top: 4px;
+  }
+  .stat .sdesc {
+    font-family: 'Libre Caslon Text', serif;
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--ink-2);
+    margin-top: 4px;
+  }
+
+  /* ─── DATA TABLE ────────────────────────────────────────────── */
+  .dtable {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+  }
+  .dtable th {
+    background: var(--ink);
+    color: var(--newsprint);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 800;
+    font-size: 10px;
+    padding: 6px 8px;
+    text-align: left;
+    border-right: 1px solid var(--ink-2);
+  }
+  .dtable td {
+    padding: 5px 8px;
+    border-right: 1px solid var(--faint);
+    border-bottom: 1px solid var(--faint);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .dtable td.lbl { font-family: 'Inter', sans-serif; font-weight: 700; }
+  .dtable tr:last-child td { border-bottom: none; }
+  .dtable td:last-child { border-right: none; }
+  .dtable td.up { color: var(--spot-red); font-weight: 700; }
+
+  /* ─── HALFTONE FIGURE (1.5px ink stroke + dot overlay) ──────── */
+  .halftone {
+    border: 1.5px solid var(--ink);
+    position: relative;
+    overflow: hidden;
+    background: var(--newsprint);
+  }
+  .halftone::after {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    opacity: 0.32;
+    background-image: radial-gradient(circle at 1px 1px, rgba(26,26,26,0.85) 0.9px, transparent 1.4px);
+    background-size: 3px 3px;
+  }
+  .halftone .hcap {
+    position: relative;
+    z-index: 2;
+    border-top: 1px solid var(--ink);
+    padding: 4px 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 9px;
+    color: var(--ink);
+    background: var(--newsprint);
+  }
+
+  /* ─── 12-COLUMN BODY GRID ───────────────────────────────────── */
+  .grid12 {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+  /* Vertical column rules */
+  .cols3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    column-gap: 14px;
+  }
+  .cols3 > div { padding: 0 14px; border-right: 1px solid var(--faint); }
+  .cols3 > div:first-child { padding-left: 0; }
+  .cols3 > div:last-child { border-right: none; padding-right: 0; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SLIDE 1 — COVER
+     ═══════════════════════════════════════════════════════════════ */
+  .s-cover .cover-masthead {
+    position: absolute;
+    top: 36px; left: 40px; right: 40px;
+    z-index: 5;
+    text-align: center;
+    border-top: 1.5px solid var(--ink);
+    border-bottom: 4px double var(--ink);
+    padding: 10px 0 14px;
+  }
+  .s-cover .cover-masthead .topbar {
+    display: flex; justify-content: space-between;
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    font-size: 10px; color: var(--ink);
+    margin-bottom: 14px;
+    padding: 0 8px;
+  }
+  .s-cover .cover-name {
+    font-family: 'Libre Caslon Text', serif;
+    font-weight: 700;
+    font-size: 84px;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .s-cover .cover-name .dot { color: var(--spot-red); }
+  .s-cover .cover-sub {
+    margin-top: 8px;
+    font-family: 'Libre Caslon Text', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-2);
+    letter-spacing: 0.02em;
+  }
+
+  .s-cover .cover-body {
+    position: absolute;
+    top: 260px; left: 40px; right: 40px; bottom: 110px;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 32px;
+  }
+  .s-cover .cover-kicker {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 11px;
+    color: var(--spot-red);
+    margin-bottom: 10px;
+  }
+  .s-cover .cover-h1 {
+    font-family: 'Libre Caslon Text', serif;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .s-cover .cover-h1 em { color: var(--spot-red); font-style: normal; }
+  .s-cover .cover-deck {
+    margin-top: 16px;
+    font-family: 'Libre Caslon Text', serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.4;
+    color: var(--ink-2);
+    max-width: 52ch;
+    border-top: 1px solid var(--ink);
+    padding-top: 12px;
+  }
+  .s-cover .cover-side {
+    border-left: 1px solid var(--ink);
+    padding-left: 24px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .s-cover .cover-side .byline {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 10px; color: var(--ink);
+  }
+  .s-cover .cover-side .byline b { color: var(--spot-red); font-weight: 900; }
+  .s-cover .cover-side .ticker {
+    border: 1px solid var(--ink);
+    padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--ink);
+    line-height: 1.6;
+  }
+  .s-cover .cover-side .ticker .row { display: flex; justify-content: space-between; }
+  .s-cover .cover-side .ticker .up { color: var(--spot-red); font-weight: 700; }
+  .s-cover .cover-side .stamp-wrap {
+    display: flex; gap: 14px; align-items: center;
+    margin-top: 4px;
+  }
+
+  .s-cover .cover-footer {
+    position: absolute;
+    left: 40px; right: 40px; bottom: 30px;
+    border-top: 1.5px solid var(--ink);
+    padding-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 10px;
+    color: var(--ink);
+    z-index: 5;
+  }
+  .s-cover .cover-footer .sec { border-right: 1px solid var(--faint); padding-right: 8px; }
+  .s-cover .cover-footer .sec:last-child { border-right: none; }
+  .s-cover .cover-footer .sec .pg { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--muted); letter-spacing: 0.04em; font-size: 10px; display: block; margin-top: 3px; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SLIDE 2 — FRONT PAGE LEAD STORY
+     ═══════════════════════════════════════════════════════════════ */
+  .s-lead .body-frame {
+    position: absolute;
+    top: 78px; left: 32px; right: 32px; bottom: 56px;
+    z-index: 4;
+    display: flex; flex-direction: column;
+  }
+  .s-lead .lead-top {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 16px;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  .s-lead .lead-top .lk {
+    font-family: 'Inter', sans-serif; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.22em;
+    font-size: 11px; color: var(--spot-red);
+  }
+  .s-lead .lead-top .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--ink-2);
+    letter-spacing: 0.06em;
+  }
+  .s-lead .h1 {
+    font-family: 'Libre Caslon Text', serif;
+    font-weight: 700;
+    font-size: 50px;
+    line-height: 0.98;
+    letter-spacing: -0.005em;
+    color: var(--ink);
+    margin: 0 0 6px;
+  }
+  .s-lead .h1 em { color: var(--spot-red); font-style: normal; }
+  .s-lead .deck {
+    font-family: 'Libre Caslon Text', serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.4;
+    color: var(--ink-2);
+    margin: 0 0 14px;
+    border-bottom: 1px solid var(--faint);
+    padding-bottom: 10px;
+  }
+  .s-lead .byline {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 10px; color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .s-lead .byline b { color: var(--spot-red); }
+  .s-lead .lead-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 260px;
+    gap: 18px;
+    flex: 1;
+    min-height: 0;
+  }
+  .s-lead .col {
+    border-right: 1px solid var(--faint);
+    padding-right: 14px;
+  }
+  .s-lead .col:last-of-type { border-right: none; padding-right: 0; }
+  .s-lead .col p {
+    font-family: 'Libre Caslon Text', serif;
+    font-size: 12.5px;
+    line-height: 1.42;
+    margin: 0 0 7px;
+    color: var(--ink);
+    text-align: justify;
+    hyphens: auto;
+  }
+  .s-lead .col p b { font-weight: 700; }
+  .s-lead .figure-col {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .s-lead .halftone { flex: 1; min-height: 0; }
+  .s-lead .halftone svg { display: block; width: 100%; height: 100%; }
+  .s-lead .pullquote { font-size: 14px; padding: 4px 0 4px 12px; line-height: 1.32; }
+  .s-lead .pullquote .attr {
+    display: block;
+    font-family: 'Inter', sans-serif; font-style: normal;
+    font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.16em; font-size: 9px;
+    color: var(--ink-2); margin-top: 6px;
+  }
+  .s-lead .stamp-pos { position: absolute; top: 6px; right: 28px; z-index: 7; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SLIDE 3 — DATA PAGE (bars + stat + table)
+     ═══════════════════════════════════════════════════════════════ */
+  .s-data .body-frame {
+    position: absolute;
+    top: 78px; left: 32px; right: 32px; bottom: 56px;
+    z-index: 4;
+    display: flex; flex-direction: column;
+  }
+  .s-data .head-row {
+    display: flex; justify-content: space-between; align-items: end;
+    border-bottom: 1px solid var(--ink); padding-bottom: 8px;
+    margin-bottom: 14px;
+  }
+  .s-data .h2 {
+    font-family: 'Libre Caslon Text', serif; font-weight: 700;
+    font-size: 34px; line-height: 1; color: var(--ink);
+    margin: 0;
+  }
+  .s-data .h2 em { color: var(--spot-red); font-style: normal; }
+  .s-data .head-row .meta {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 10px; color: var(--ink-2); text-align: right;
+  }
+  .s-data .content {
+    display: grid; grid-template-columns: 1.5fr 1fr; gap: 22px;
+    flex: 1; min-height: 0;
+  }
+  .s-data .chart-wrap {
+    border: 1px solid var(--ink); padding: 14px 14px 10px;
+    display: flex; flex-direction: column;
+    background: var(--newsprint);
+  }
+  .s-data .chart-wrap .ctitle {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 10px; color: var(--ink);
+    border-bottom: 1px solid var(--faint);
+    padding-bottom: 6px; margin-bottom: 8px;
+    display: flex; justify-content: space-between;
+  }
+  .s-data .chart-wrap svg { flex: 1; width: 100%; min-height: 0; }
+  .s-data .right-stack { display: flex; flex-direction: column; gap: 12px; }
+  .s-data .stats-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    border: 1px solid var(--ink); padding: 12px;
+    background: var(--newsprint);
+  }
+  .s-data .stat .sval { font-size: 42px; }
+  .s-data .stat .sdesc { font-size: 11px; }
+  .s-data .table-wrap {
+    border: 1px solid var(--ink); flex: 1; overflow: hidden;
+    background: var(--newsprint);
+  }
+  .s-data .table-wrap .ttitle {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 10px; color: var(--newsprint);
+    background: var(--ink); padding: 5px 10px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SLIDE 4 — PULL QUOTE PAGE
+     ═══════════════════════════════════════════════════════════════ */
+  .s-pull .body-frame {
+    position: absolute;
+    top: 78px; left: 32px; right: 32px; bottom: 56px;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 32px;
+  }
+  .s-pull .quote-area {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 18px 0;
+    position: relative;
+  }
+  .s-pull .qmark {
+    font-family: 'Libre Caslon Text', serif;
+    font-size: 140px; line-height: 0.7;
+    color: var(--spot-red);
+    margin-bottom: -10px;
+    height: 50px;
+  }
+  .s-pull .qbody {
+    font-family: 'Libre Caslon Text', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 38px;
+    line-height: 1.18;
+    color: var(--ink);
+    border-left: 3px solid var(--spot-red);
+    padding: 4px 0 4px 24px;
+    letter-spacing: -0.005em;
+  }
+  .s-pull .qbody b { color: var(--spot-red); font-style: normal; font-weight: 700; }
+  .s-pull .qattr {
+    margin-top: 24px;
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    font-size: 11px; color: var(--ink);
+    padding-left: 27px;
+  }
+  .s-pull .qattr .role {
+    display: block; font-weight: 500; color: var(--muted);
+    letter-spacing: 0.08em; font-size: 10px; margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace; text-transform: none;
+  }
+  .s-pull .side-rail {
+    border-left: 1px solid var(--ink);
+    padding-left: 20px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .s-pull .side-rail .stamp { align-self: flex-start; }
+  .s-pull .side-rail .topic {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 10px; color: var(--ink);
+    border-bottom: 1px solid var(--ink); padding-bottom: 6px;
+  }
+  .s-pull .side-rail .ctx {
+    font-family: 'Libre Caslon Text', serif;
+    font-size: 12.5px; line-height: 1.42;
+    color: var(--ink-2);
+    text-align: justify; hyphens: auto;
+  }
+  .s-pull .side-rail .ctx p { margin: 0 0 6px; }
+  .s-pull .stat-mini .sval { font-size: 38px; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SLIDE 5 — TIMELINE PAGE
+     ═══════════════════════════════════════════════════════════════ */
+  .s-tl .body-frame {
+    position: absolute;
+    top: 78px; left: 32px; right: 32px; bottom: 56px;
+    z-index: 4;
+    display: flex; flex-direction: column;
+  }
+  .s-tl .head-row {
+    display: flex; justify-content: space-between; align-items: end;
+    border-bottom: 1px solid var(--ink); padding-bottom: 8px;
+    margin-bottom: 18px;
+  }
+  .s-tl .tl-canvas {
+    flex: 1; position: relative; min-height: 0;
+    padding: 20px 0;
+  }
+  .s-tl .tl-canvas svg { display: block; width: 100%; height: 100%; }
+  .s-tl .tl-legend {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    border-top: 1px solid var(--ink); padding-top: 10px;
+  }
+  .s-tl .tl-legend .lg {
+    border-left: 2px solid var(--ink); padding-left: 10px;
+  }
+  .s-tl .tl-legend .lg.hot { border-color: var(--spot-red); }
+  .s-tl .tl-legend .lg .dt {
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+    font-size: 11px; color: var(--ink); letter-spacing: 0.04em;
+  }
+  .s-tl .tl-legend .lg.hot .dt { color: var(--spot-red); }
+  .s-tl .tl-legend .lg .tt {
+    font-family: 'Libre Caslon Text', serif; font-weight: 700;
+    font-size: 13px; color: var(--ink); line-height: 1.2; margin-top: 3px;
+  }
+  .s-tl .tl-legend .lg .ds {
+    font-family: 'Libre Caslon Text', serif;
+    font-size: 11px; color: var(--ink-2); line-height: 1.35; margin-top: 3px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SLIDE 6 — DATA MATRIX PAGE
+     ═══════════════════════════════════════════════════════════════ */
+  .s-mx .body-frame {
+    position: absolute;
+    top: 78px; left: 32px; right: 32px; bottom: 56px;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 24px;
+  }
+  .s-mx .mx-wrap {
+    border: 1px solid var(--ink); padding: 14px;
+    display: flex; flex-direction: column;
+    background: var(--newsprint);
+  }
+  .s-mx .mx-title {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 10px; color: var(--ink);
+    border-bottom: 1px solid var(--faint);
+    padding-bottom: 6px; margin-bottom: 8px;
+    display: flex; justify-content: space-between;
+  }
+  .s-mx .mx-table { flex: 1; }
+  .s-mx .mx-table table {
+    width: 100%; border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .s-mx .mx-table th {
+    background: var(--ink); color: var(--newsprint);
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    font-size: 9px; padding: 5px 4px;
+    border-right: 1px solid var(--ink-2);
+  }
+  .s-mx .mx-table th:first-child { background: var(--newsprint); color: var(--ink); border-right: 1px solid var(--ink); text-align: left; }
+  .s-mx .mx-table td {
+    border: 1px solid var(--faint);
+    padding: 7px 6px; text-align: center;
+    color: var(--ink);
+  }
+  .s-mx .mx-table td.rowlbl {
+    background: var(--newsprint);
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    font-size: 9.5px; text-align: left;
+    border-left: none; color: var(--ink);
+  }
+  .s-mx .mx-table td.focus {
+    background: var(--spot-red); color: var(--newsprint);
+    font-weight: 700;
+  }
+  .s-mx .mx-table td.strong { font-weight: 700; color: var(--ink); }
+  .s-mx .mx-side { display: flex; flex-direction: column; gap: 14px; }
+  .s-mx .mx-side .sb {
+    border: 1px solid var(--ink); padding: 12px;
+    background: var(--newsprint);
+  }
+  .s-mx .mx-side .sb .st {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 9.5px; color: var(--ink);
+    border-bottom: 1px solid var(--ink); padding-bottom: 5px; margin-bottom: 8px;
+  }
+  .s-mx .mx-side .sb .sd {
+    font-family: 'Libre Caslon Text', serif;
+    font-size: 11.5px; line-height: 1.4; color: var(--ink-2);
+  }
+  .s-mx .mx-side .sb .sd b { color: var(--spot-red); font-weight: 700; }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SLIDE 7 — SIDEBAR / FIELD NOTES
+     ═══════════════════════════════════════════════════════════════ */
+  .s-sb .body-frame {
+    position: absolute;
+    top: 78px; left: 32px; right: 32px; bottom: 56px;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+  }
+  .s-sb .main-col { display: flex; flex-direction: column; }
+  .s-sb .head-row {
+    border-bottom: 1px solid var(--ink); padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .s-sb .lk {
+    font-family: 'Inter', sans-serif; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.2em;
+    font-size: 10px; color: var(--spot-red);
+  }
+  .s-sb .h2 {
+    font-family: 'Libre Caslon Text', serif; font-weight: 700;
+    font-size: 32px; line-height: 1.02; color: var(--ink);
+    margin: 4px 0 0;
+  }
+  .s-sb .h2 em { color: var(--spot-red); font-style: normal; }
+  .s-sb .deck {
+    font-family: 'Libre Caslon Text', serif; font-style: italic;
+    font-size: 14px; color: var(--ink-2); margin-top: 4px; line-height: 1.35;
+  }
+  .s-sb .body-cols {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    flex: 1; min-height: 0;
+  }
+  .s-sb .body-cols .c {
+    border-right: 1px solid var(--faint); padding-right: 12px;
+  }
+  .s-sb .body-cols .c:last-child { border-right: none; padding-right: 0; }
+  .s-sb .body-cols p {
+    font-family: 'Libre Caslon Text', serif;
+    font-size: 12px; line-height: 1.42; margin: 0 0 6px;
+    color: var(--ink); text-align: justify; hyphens: auto;
+  }
+  .s-sb .body-cols .sh {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    font-size: 9.5px; color: var(--ink);
+    border-bottom: 1px solid var(--ink); padding-bottom: 3px; margin-bottom: 6px;
+  }
+  .s-sb .side-col {
+    border-left: 1px solid var(--ink); padding-left: 18px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .s-sb .side-col .byx {
+    background: var(--ink); color: var(--newsprint);
+    padding: 10px 12px;
+    font-family: 'Inter', sans-serif; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    font-size: 11px;
+  }
+  .s-sb .side-col .byx .sub {
+    display: block; font-weight: 500; color: var(--faint);
+    letter-spacing: 0.08em; font-size: 9px; margin-top: 3px;
+    font-family: 'JetBrains Mono', monospace; text-transform: none;
+  }
+  .s-sb .side-col .stat-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .s-sb .side-col .stat-row .stat .sval { font-size: 30px; }
+  .s-sb .side-col .stat-row .stat .slab { font-size: 9.5px; }
+  .s-sb .side-col .ticker {
+    border: 1px solid var(--ink); padding: 8px 10px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    line-height: 1.7;
+  }
+  .s-sb .side-col .ticker .r { display: flex; justify-content: space-between; }
+  .s-sb .side-col .ticker .up { color: var(--spot-red); font-weight: 700; }
+  .s-sb .side-col .ticker .dn { color: var(--ink-2); }
+  .s-sb .side-col .note {
+    font-family: 'Libre Caslon Text', serif; font-style: italic;
+    font-size: 11px; color: var(--ink-2); line-height: 1.4;
+    border-top: 1px solid var(--faint); padding-top: 8px;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     SLIDE 8 — COLOPHON / CLOSING
+     ═══════════════════════════════════════════════════════════════ */
+  .s-colo .body-frame {
+    position: absolute;
+    top: 100px; left: 40px; right: 40px; bottom: 70px;
+    z-index: 4;
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 18px;
+  }
+  .s-colo .colo-h {
+    text-align: center;
+    border-top: 1.5px solid var(--ink);
+    border-bottom: 4px double var(--ink);
+    padding: 12px 0 14px;
+  }
+  .s-colo .colo-h .nm {
+    font-family: 'Libre Caslon Text', serif; font-weight: 700;
+    font-size: 56px; letter-spacing: 0.04em; line-height: 1;
+    text-transform: uppercase; color: var(--ink);
+  }
+  .s-colo .colo-h .nm .d { color: var(--spot-red); }
+  .s-colo .colo-h .tag {
+    margin-top: 6px;
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.22em;
+    font-size: 10px; color: var(--ink-2);
+  }
+  .s-colo .colo-band {
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  }
+  .s-colo .colo-band .end-stamp {
+    border: 3px solid var(--spot-red); color: var(--spot-red);
+    font-family: 'Inter', sans-serif; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 0.2em;
+    font-size: 16px; padding: 8px 18px;
+    transform: rotate(-3deg); line-height: 1;
+  }
+  .s-colo .colo-band .center {
+    flex: 1; text-align: center;
+    font-family: 'Libre Caslon Text', serif; font-style: italic;
+    font-size: 18px; color: var(--ink-2);
+    border-left: 1px solid var(--faint); border-right: 1px solid var(--faint);
+    padding: 6px 20px;
+  }
+  .s-colo .colo-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
+    border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
+    padding: 14px 0;
+  }
+  .s-colo .colo-grid .cg {
+    border-right: 1px solid var(--faint); padding-right: 14px;
+  }
+  .s-colo .colo-grid .cg:last-child { border-right: none; }
+  .s-colo .colo-grid .cg .ct {
+    font-family: 'Inter', sans-serif; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 10px; color: var(--spot-red);
+    border-bottom: 1px solid var(--ink); padding-bottom: 4px; margin-bottom: 6px;
+  }
+  .s-colo .colo-grid .cg .cd {
+    font-family: 'Libre Caslon Text', serif;
+    font-size: 11.5px; line-height: 1.4; color: var(--ink);
+  }
+  .s-colo .colo-grid .cg .cd b { font-weight: 700; }
+  .s-colo .colo-fine {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+    color: var(--ink-2); letter-spacing: 0.06em;
+  }
+  .s-colo .colo-fine .r { text-align: right; }
+  .s-colo .colo-fine .m {
+    font-family: 'Libre Caslon Text', serif; font-style: italic;
+    font-size: 11px; color: var(--muted); letter-spacing: 0;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     MOTION LAYER — Brutalist Newspaper (steps + hard-cut, no soft ease)
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* ─── Page Transition ─── */
+  .slide { transition: opacity 0.5s var(--ease-hard); }
+  .slide:not(.is-visible) { opacity: 0.6; }
+
+  /* ─── Cinematic Reveal — 5 entrances, all transition with snap ease ─── */
+  .slide:not(.is-visible) .reveal         { opacity: 0; transform: translateY(20px); }
+  .slide:not(.is-visible) .reveal-scale   { opacity: 0; transform: scale(0.94); }
+  .slide:not(.is-visible) .reveal-blur    { opacity: 0; transform: translateY(16px); filter: blur(6px); }
+  .slide:not(.is-visible) .reveal-slide-l { opacity: 0; transform: translateX(-24px); }
+  .slide:not(.is-visible) .reveal-slide-r { opacity: 0; transform: translateX(24px); }
+
+  .slide.is-visible .reveal,
+  .slide.is-visible .reveal-scale,
+  .slide.is-visible .reveal-blur,
+  .slide.is-visible .reveal-slide-l,
+  .slide.is-visible .reveal-slide-r {
+    opacity: 1; transform: none; filter: none;
+    transition: opacity 0.55s var(--ease-hard), transform 0.55s var(--ease-hard), filter 0.55s steps(6, end);
+  }
+  .reveal-d1 { transition-delay: 0s; }
+  .reveal-d2 { transition-delay: 0.10s; }
+  .reveal-d3 { transition-delay: 0.20s; }
+  .reveal-d4 { transition-delay: 0.30s; }
+  .reveal-d5 { transition-delay: 0.42s; }
+  .reveal-d6 { transition-delay: 0.54s; }
+
+  /* ─── Cover Signature Keyframes (brutalist-tailored) ─── */
+
+  /* Drop cap slam: letters drop from above + scale-down + hard freeze.
+     Self-carries drop-cap visual so the wrapping <span> doesn't break ::first-letter. */
+  .drop-cap-slam {
+    float: left;
+    display: inline-block;
+    font-family: 'Libre Caslon Text', serif;
+    font-weight: 700;
+    font-size: 78px;
+    line-height: 0.82;
+    color: var(--spot-red);
+    padding: 6px 8px 0 0;
+    margin-top: 2px;
+    opacity: 0;
+    transform: translateY(-40px) scale(1.5);
+  }
+  .slide.is-visible .drop-cap-slam {
+    animation: drop-cap-slam 0.6s steps(7, end) forwards;
+    animation-delay: 0.35s;
+  }
+  @keyframes drop-cap-slam {
+    0%   { opacity: 0; transform: translateY(-40px) scale(1.5); }
+    60%  { opacity: 1; transform: translateY(4px) scale(1.08); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Stamp rotate: snap from -15deg to -8deg */
+  .stamp-rotate {
+    transform: rotate(-15deg);
+    opacity: 0;
+  }
+  .slide.is-visible .stamp-rotate {
+    animation: stamp-rotate 0.45s steps(6, end) forwards;
+    animation-delay: 0.5s;
+  }
+  @keyframes stamp-rotate {
+    0%   { opacity: 0; transform: rotate(-15deg) scale(1.1); }
+    70%  { opacity: 1; transform: rotate(-6deg) scale(0.98); }
+    100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+  }
+
+  /* Halftone reveal: clip-path inset unwraps + opacity fades in */
+  .halftone-reveal {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+  }
+  .slide.is-visible .halftone-reveal {
+    animation: halftone-reveal 0.7s steps(10, end) forwards;
+    animation-delay: 0.3s;
+  }
+  @keyframes halftone-reveal {
+    0%   { clip-path: inset(0 100% 0 0); opacity: 0; }
+    100% { clip-path: inset(0 0 0 0); opacity: 1; }
+  }
+
+  /* Pull quote slash: horizontal clip wipe left → right */
+  .pull-quote-slash {
+    clip-path: inset(0 100% 0 0);
+  }
+  .slide.is-visible .pull-quote-slash {
+    animation: pull-quote-slash 0.65s var(--ease-hard) forwards;
+    animation-delay: 0.45s;
+  }
+  @keyframes pull-quote-slash {
+    0%   { clip-path: inset(0 100% 0 0); }
+    100% { clip-path: inset(0 0 0 0); }
+  }
+
+  /* ─── SVG Trio: draw-path / bar-grow / data-point ─── */
+  .draw-path {
+    stroke-dasharray: var(--len, 1000);
+    stroke-dashoffset: var(--len, 1000);
+  }
+  .slide.is-visible .draw-path {
+    animation: path-draw 1.4s var(--ease-hard) forwards;
+  }
+  @keyframes path-draw { to { stroke-dashoffset: 0; } }
+
+  .bar-grow { transform: scaleY(0); transform-origin: bottom; transform-box: fill-box; }
+  .slide.is-visible .bar-grow {
+    animation: bar-grow 0.55s steps(8, end) forwards;
+  }
+  @keyframes bar-grow { to { transform: scaleY(1); } }
+
+  .data-point { opacity: 0; transform: scale(0); transform-origin: center; transform-box: fill-box; }
+  .slide.is-visible .data-point {
+    animation: point-pop 0.3s steps(5, end) forwards;
+    animation-delay: 1.2s;
+  }
+  @keyframes point-pop { to { opacity: 1; transform: scale(1); } }
+
+  /* ─── Parallax background ─── */
+  .parallax-bg { transform: translateY(var(--parallax, 0px)); transition: transform 0.1s linear; }
+
+  /* ─── Cursor Spotlight (cover only, spot-red @ 5% alpha) ─── */
+  .cursor-spotlight {
+    background: radial-gradient(300px circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
+      rgba(200, 16, 46, 0.05), transparent 70%);
+    transition: background 0.25s steps(4, end);
+  }
+
+  /* ─── Count-Up target ─── */
+  .metric-num { font-variant-numeric: tabular-nums; }
+
+  /* ─── Reduced-Motion Fallback (required) ─── */
+  @media (prefers-reduced-motion: reduce) {
+    .slide:not(.is-visible) .reveal,
+    .slide:not(.is-visible) .reveal-scale,
+    .slide:not(.is-visible) .reveal-blur,
+    .slide:not(.is-visible) .reveal-slide-l,
+    .slide:not(.is-visible) .reveal-slide-r { opacity: 1; transform: none; filter: none; }
+    .slide:not(.is-visible) { opacity: 1; }
+    .slide.is-visible .reveal,
+    .slide.is-visible .reveal-scale,
+    .slide.is-visible .reveal-blur,
+    .slide.is-visible .reveal-slide-l,
+    .slide.is-visible .reveal-slide-r { transition: none; }
+    .drop-cap-slam, .stamp-rotate, .halftone-reveal, .pull-quote-slash,
+    .draw-path, .bar-grow, .data-point { animation: none; opacity: 1; transform: none; clip-path: none; stroke-dashoffset: 0; }
+    .parallax-bg { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ═══ 1. COVER ═════════════════════════════════════════════════ -->
+  <section class="slide s-cover cursor-spotlight">
+    <div class="cover-masthead reveal reveal-d1">
+      <div class="topbar">
+        <span>VOL. IX · NO. 26</span>
+        <span>EST. 2018 · DAILY EDITION</span>
+        <span>MONDAY · JULY 14, 2026</span>
+      </div>
+      <div class="cover-name">THE AI STANDARD<span class="dot">.</span></div>
+      <div class="cover-sub">— A daily record of the machine intelligence industry, printed on pressed newsprint —</div>
+    </div>
+
+    <div class="cover-body">
+      <div>
+        <div class="cover-kicker reveal reveal-d1">▍ Front Page · Annual Industry Report</div>
+        <h1 class="cover-h1 reveal reveal-blur reveal-d2">AI Economy Crosses <em>$1.2&nbsp;Trillion</em> as Compute Demand Outpaces Every Forecast.</h1>
+        <p class="cover-deck reveal reveal-d3">Twelve months of breakneck capital, model scaling, and regulatory friction compressed into one volume. Inside: where the money went, which labs pulled ahead, and the four bottlenecks still unresolved at press time.</p>
+      </div>
+      <div class="cover-side reveal reveal-slide-r reveal-d4">
+        <div class="byline">By <b>H. Marsh</b> · K. Okafor · Data Desk</div>
+        <div class="ticker">
+          <div class="row"><span>NVDA</span><span class="up">+184.2%</span></div>
+          <div class="row"><span>MSFT</span><span class="up">+62.7%</span></div>
+          <div class="row"><span>GOOGL</span><span class="up">+41.3%</span></div>
+          <div class="row"><span>META</span><span class="up">+38.9%</span></div>
+          <div class="row"><span>AMZN</span><span class="up">+27.1%</span></div>
+          <div class="row"><span>005930.KS</span><span class="up">+19.4%</span></div>
+        </div>
+        <div class="stamp-wrap">
+          <div class="stamp stamp-rotate">BREAKING</div>
+          <div class="caption" style="color:var(--muted);">12mo · 247 pp.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cover-footer reveal reveal-d5">
+      <div class="sec">Front Page<span class="pg">01</span></div>
+      <div class="sec">Markets<span class="pg">03</span></div>
+      <div class="sec">Opinion<span class="pg">04</span></div>
+      <div class="sec">Timeline<span class="pg">05</span></div>
+      <div class="sec">Data Matrix<span class="pg">06</span></div>
+      <div class="sec">Colophon<span class="pg">08</span></div>
+    </div>
+
+    <div class="pagenum">01 / 08</div>
+  </section>
+
+  <!-- ═══ 2. FRONT PAGE LEAD STORY ═══════════════════════════════ -->
+  <section class="slide s-lead">
+    <div class="masthead">
+      <div class="mh-left">VOL. IX · NO. 26</div>
+      <div class="mh-name">THE AI <span class="ornament">·</span> STANDARD</div>
+      <div class="mh-right">MON · JUL 14 · 2026</div>
+    </div>
+
+    <div class="body-frame">
+      <div class="stamp-pos"><div class="stamp stamp-rotate">EXCLUSIVE</div></div>
+
+      <div class="lead-top">
+        <div>
+          <div class="lk reveal reveal-d1">▍ INDUSTRY REPORT · CAPITAL &amp; COMPUTE</div>
+        </div>
+        <div class="meta reveal reveal-d1">SECTION A · P.01 · DATA: 247 SOURCES</div>
+      </div>
+
+      <h1 class="h1 reveal reveal-blur reveal-d2">The Year the <em>Trillion-Dollar</em> Floor Held — and Three Cracks Opened Above It.</h1>
+      <p class="deck reveal reveal-d3">Investment flooded in faster than grids could absorb it, models kept doubling on schedule, and the industry quietly split into a frontier tier and everyone else. A field report from the twelve months that ended the debate about whether AI was a sector at all.</p>
+      <div class="byline reveal reveal-d1">By <b>H. Marsh</b> · K. Okafor · D. Reyes · Reporting from San Francisco, London &amp; Singapore · Filed 06:14 EDT</div>
+
+      <div class="lead-body">
+        <div class="col reveal reveal-slide-l reveal-d3">
+          <p class="dropcap"><span class="drop-cap-slam">G</span>lobal spending on artificial intelligence crossed the $1.2 trillion mark in the twelve months ending June 2026, according to a tally assembled from 247 disclosure filings, earnings transcripts, and government budget documents reviewed by this desk.</p>
+          <p>The figure — a 38% jump over the prior year — exceeded the most aggressive Wall Street forecast by nearly $180 billion and confirmed what every boardroom had already begun to suspect: that AI is no longer a line item but the line item.</p>
+          <p>Roughly 61 cents of every dollar flowed into three buckets — frontier model training, data-center construction, and the silicon that powers both — leaving software, services, and the long tail of applications to fight over the remainder.</p>
+          <p>"The capital is no longer the constraint," said one infrastructure investor granted anonymity to discuss live deals. "Power, permits, and people are."</p>
+        </div>
+        <div class="col reveal reveal-d4">
+          <p><b>Compute remained the dominant story.</b> Nvidia alone booked more revenue in the period than the entire global semiconductor industry did in 2014, and its order book at quarter's end stretched into late 2027.</p>
+          <p>The build-out of new data-center capacity, meantime, set records of its own. Construction starts for dedicated AI facilities exceeded 22 gigawatts of contracted power — roughly the nameplate capacity of Sweden's entire grid.</p>
+          <p>Yet for all the headline numbers, the year's most consequential shifts happened quietly. Three bottlenecks matured into structural problems the industry can no longer treat as transitional.</p>
+          <p>The first is power. Grid interconnection queues in three of the largest U.S. markets now average 4.7 years. The second is talent. Senior research engineers command compensation packages north of $8 million. The third — and least visible — is data.</p>
+        </div>
+        <div class="col reveal reveal-slide-r reveal-d5">
+          <p><b>The data wall moved closer.</b> A study published in May estimated that the share of high-quality public text remaining for pretraining, on current consumption trajectories, would be exhausted by mid-2027.</p>
+          <p>Labs responded by accelerating investments in synthetic data, multimodal corpora scraped from video, and proprietary licensing deals with publishers — including, notably, this newspaper's parent company.</p>
+          <p>Regulators, meanwhile, moved at their own pace. The EU's AI Act entered full enforcement in August 2025; the U.S. issued no comprehensive federal statute, leaving a patchwork of state rules and executive orders that one senator called "a regulatory Moiré pattern."</p>
+          <p>Below, the desk's full accounting of the year — by the numbers, by the deals, and by the moments that mattered.</p>
+        </div>
+        <div class="figure-col">
+          <div class="halftone halftone-reveal" style="flex:0 0 200px;">
+            <svg viewBox="0 0 260 200" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+              <rect width="260" height="200" fill="#d8d2c4"/>
+              <rect x="10" y="120" width="22" height="80" fill="#1a1a1a"/>
+              <rect x="34" y="80" width="30" height="120" fill="#1a1a1a"/>
+              <rect x="66" y="50" width="26" height="150" fill="#1a1a1a"/>
+              <rect x="94" y="100" width="20" height="100" fill="#3d3d3d"/>
+              <rect x="116" y="30" width="34" height="170" fill="#1a1a1a"/>
+              <rect x="152" y="90" width="22" height="110" fill="#3d3d3d"/>
+              <rect x="176" y="60" width="28" height="140" fill="#1a1a1a"/>
+              <rect x="206" y="105" width="18" height="95" fill="#3d3d3d"/>
+              <rect x="226" y="75" width="24" height="125" fill="#1a1a1a"/>
+              <polygon points="0,200 260,200 260,160 200,160 180,140 140,160 100,130 60,160 30,150 0,170" fill="#1a1a1a" opacity="0.85"/>
+              <circle cx="205" cy="40" r="14" fill="#f4f1ea" opacity="0.85"/>
+              <rect x="0" y="0" width="260" height="200" fill="url(#halftonePattern)" />
+              <defs>
+                <pattern id="halftonePattern" x="0" y="0" width="3" height="3" patternUnits="userSpaceOnUse">
+                  <circle cx="1" cy="1" r="0.9" fill="#1a1a1a" opacity="0.45"/>
+                </pattern>
+              </defs>
+            </svg>
+            <div class="hcap">FIG. 1 · SKYLINE OF A 22-GW DATA-CENTER CORRIDOR · ILLUSTRATIVE</div>
+          </div>
+          <div class="pullquote pull-quote-slash">
+            "The capital is no longer the constraint. Power, permits, and people are."
+            <span class="attr">— Infra investor · anon.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="f-left">Section A · Industry Report</div>
+      <div class="f-mid">— All figures audited through Q2 2026 —</div>
+      <div class="f-right">The AI Standard · Page 02</div>
+    </div>
+    <div class="pagenum">02 / 08</div>
+  </section>
+
+  <!-- ═══ 3. DATA PAGE ═══════════════════════════════════════════ -->
+  <section class="slide s-data">
+    <div class="masthead">
+      <div class="mh-left">VOL. IX · NO. 26</div>
+      <div class="mh-name">THE AI <span class="ornament">·</span> STANDARD</div>
+      <div class="mh-right">MON · JUL 14 · 2026</div>
+    </div>
+
+    <div class="body-frame">
+      <div class="head-row">
+        <div>
+          <span class="section-tag reveal reveal-d1">DATA · MARKETS</span>
+          <h2 class="h2 reveal reveal-blur reveal-d2">Capital Flows: <em>Where the Money Went.</em></h2>
+        </div>
+        <div class="meta reveal reveal-d1">FY ending Jun 2026<br/>Sources: 247 filings</div>
+      </div>
+
+      <div class="content">
+        <div class="chart-wrap reveal reveal-scale reveal-d4">
+          <div class="ctitle">
+            <span>FIG. 2 · GLOBAL AI CAPEX BY YEAR · USD BILLIONS</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-weight:500;">2019 → 2026</span>
+          </div>
+          <svg viewBox="0 0 520 280" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+            <!-- baseline -->
+            <line x1="40" y1="240" x2="510" y2="240" stroke="#1a1a1a" stroke-width="1"/>
+            <line x1="40" y1="40" x2="40" y2="240" stroke="#1a1a1a" stroke-width="1"/>
+            <!-- y ticks -->
+            <g font-family="JetBrains Mono, monospace" font-size="9" fill="#6b6b6b">
+              <text x="36" y="244" text-anchor="end">0</text>
+              <text x="36" y="194" text-anchor="end">400</text>
+              <text x="36" y="144" text-anchor="end">800</text>
+              <text x="36" y="94" text-anchor="end">1200</text>
+              <text x="36" y="54" text-anchor="end">1600</text>
+            </g>
+            <!-- gridlines -->
+            <line x1="40" y1="190" x2="510" y2="190" stroke="#9a9a9a" stroke-width="0.5" stroke-dasharray="2 3"/>
+            <line x1="40" y1="140" x2="510" y2="140" stroke="#9a9a9a" stroke-width="0.5" stroke-dasharray="2 3"/>
+            <line x1="40" y1="90" x2="510" y2="90" stroke="#9a9a9a" stroke-width="0.5" stroke-dasharray="2 3"/>
+            <!-- bars (staggered bar-grow) -->
+            <g>
+              <rect class="bar-grow" style="animation-delay:0.05s" x="58"  y="222" width="42" height="18"  fill="#1a1a1a"/>
+              <rect class="bar-grow" style="animation-delay:0.12s" x="116" y="214" width="42" height="26"  fill="#1a1a1a"/>
+              <rect class="bar-grow" style="animation-delay:0.19s" x="174" y="200" width="42" height="40"  fill="#1a1a1a"/>
+              <rect class="bar-grow" style="animation-delay:0.26s" x="232" y="178" width="42" height="62"  fill="#1a1a1a"/>
+              <rect class="bar-grow" style="animation-delay:0.33s" x="290" y="150" width="42" height="90"  fill="#1a1a1a"/>
+              <rect class="bar-grow" style="animation-delay:0.40s" x="348" y="118" width="42" height="122" fill="#1a1a1a"/>
+              <rect class="bar-grow" style="animation-delay:0.47s" x="406" y="78"  width="42" height="162" fill="#1a1a1a"/>
+              <rect class="bar-grow" style="animation-delay:0.54s" x="464" y="50"  width="42" height="190" fill="#C8102E"/>
+            </g>
+            <!-- value labels -->
+            <g font-family="JetBrains Mono, monospace" font-size="9" fill="#1a1a1a" text-anchor="middle">
+              <text x="79"  y="216">142</text>
+              <text x="137" y="208">208</text>
+              <text x="195" y="194">322</text>
+              <text x="253" y="172">496</text>
+              <text x="311" y="144">720</text>
+              <text x="369" y="112">976</text>
+              <text x="427" y="72">1296</text>
+              <text x="485" y="44" fill="#C8102E" font-weight="700">1204*</text>
+            </g>
+            <!-- x labels -->
+            <g font-family="JetBrains Mono, monospace" font-size="9" fill="#1a1a1a" text-anchor="middle">
+              <text x="79"  y="256">'19</text>
+              <text x="137" y="256">'20</text>
+              <text x="195" y="256">'21</text>
+              <text x="253" y="256">'22</text>
+              <text x="311" y="256">'23</text>
+              <text x="369" y="256">'24</text>
+              <text x="427" y="256">'25</text>
+              <text x="485" y="256" fill="#C8102E" font-weight="700">'26*</text>
+            </g>
+            <!-- annotation -->
+            <line x1="485" y1="58" x2="485" y2="30" stroke="#C8102E" stroke-width="1"/>
+            <text x="478" y="24" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#C8102E" text-anchor="end">FY26 · $1.2T</text>
+          </svg>
+        </div>
+
+        <div class="right-stack reveal reveal-slide-r reveal-d3">
+          <div class="stats-row">
+            <div class="stat">
+              <div class="sval">+<span class="metric-num" data-num="38">0</span><span class="unit">%</span></div>
+              <div class="slab">YoY Growth</div>
+              <div class="sdesc">vs. FY25 total of $976B.</div>
+            </div>
+            <div class="stat">
+              <div class="sval"><span class="metric-num" data-num="61">0</span><span class="unit">¢</span></div>
+              <div class="slab">Per Dollar → Frontier</div>
+              <div class="sdesc">Models · DCs · silicon.</div>
+            </div>
+          </div>
+          <div class="table-wrap reveal reveal-d5">
+            <div class="ttitle">TABLE I · CAPEX BY SEGMENT · FY26</div>
+            <table class="dtable">
+              <thead>
+                <tr>
+                  <th style="width:42%;">Segment</th>
+                  <th style="text-align:right;">USD B</th>
+                  <th style="text-align:right;">Share</th>
+                  <th style="text-align:right;">YoY</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td class="lbl">Frontier models</td><td style="text-align:right;">312</td><td style="text-align:right;">25.9%</td><td style="text-align:right;" class="up">+52%</td></tr>
+                <tr><td class="lbl">Data-center build</td><td style="text-align:right;">286</td><td style="text-align:right;">23.8%</td><td style="text-align:right;" class="up">+44%</td></tr>
+                <tr><td class="lbl">Accelerator silicon</td><td style="text-align:right;">216</td><td style="text-align:right;">17.9%</td><td style="text-align:right;" class="up">+41%</td></tr>
+                <tr><td class="lbl">Energy &amp; grid</td><td style="text-align:right;">128</td><td style="text-align:right;">10.6%</td><td style="text-align:right;" class="up">+89%</td></tr>
+                <tr><td class="lbl">Enterprise software</td><td style="text-align:right;">114</td><td style="text-align:right;">9.5%</td><td style="text-align:right;">+19%</td></tr>
+                <tr><td class="lbl">Robotics &amp; autos</td><td style="text-align:right;">78</td><td style="text-align:right;">6.5%</td><td style="text-align:right;" class="up">+33%</td></tr>
+                <tr><td class="lbl">Research &amp; safety</td><td style="text-align:right;">42</td><td style="text-align:right;">3.5%</td><td style="text-align:right;">+12%</td></tr>
+                <tr><td class="lbl">Other / long tail</td><td style="text-align:right;">28</td><td style="text-align:right;">2.3%</td><td style="text-align:right;">+7%</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="f-left">Section B · Markets &amp; Data</div>
+      <div class="f-mid">— * FY26 figures annualized from Q2 run-rate —</div>
+      <div class="f-right">The AI Standard · Page 03</div>
+    </div>
+    <div class="pagenum">03 / 08</div>
+  </section>
+
+  <!-- ═══ 4. PULL QUOTE ══════════════════════════════════════════ -->
+  <section class="slide s-pull">
+    <div class="masthead">
+      <div class="mh-left">VOL. IX · NO. 26</div>
+      <div class="mh-name">THE AI <span class="ornament">·</span> STANDARD</div>
+      <div class="mh-right">MON · JUL 14 · 2026</div>
+    </div>
+
+    <div class="body-frame">
+      <div class="quote-area">
+        <div class="qmark reveal reveal-d1">"</div>
+        <blockquote class="qbody pull-quote-slash">We have moved from a world where AI was a <b>feature</b> to one where it is the <b>floor</b> — and the floor, it turns out, costs about a trillion dollars a year to keep level.</blockquote>
+        <div class="qattr reveal reveal-d3">
+          Dr. Lena Ostrowski
+          <span class="role">Chief Economist · Global Compute Institute · Interview 04 Jun 2026</span>
+        </div>
+      </div>
+
+      <aside class="side-rail reveal reveal-slide-r reveal-d3">
+        <div class="stamp stamp-rotate">EXCLUSIVE</div>
+
+        <div class="topic">Context · This Quote</div>
+        <div class="ctx">
+          <p>Ostrowski's remark, delivered at the Geneva Compute Summit, has become the most-cited single sentence of the year in industry research notes — appearing in 38 distinct earnings-call transcripts reviewed by this desk.</p>
+          <p>The "floor" framing rejects the previous vocabulary of AI as an optional layer; the year's capital data, profiled on the preceding page, is the empirical case for it.</p>
+        </div>
+
+        <div class="topic">By the Numbers</div>
+        <div class="stat stat-mini">
+          <div class="sval">$1.2T</div>
+          <div class="slab">Annualized AI spend · FY26</div>
+        </div>
+        <div class="stat stat-mini">
+          <div class="sval">4.7<span class="unit">YR</span></div>
+          <div class="slab">Avg. grid interconnect queue</div>
+        </div>
+        <div class="stat stat-mini">
+          <div class="sval"><span class="metric-num" data-num="38">0</span><span class="unit">×</span></div>
+          <div class="slab">Quote citations in earnings calls</div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="footer">
+      <div class="f-left">Section C · Opinion</div>
+      <div class="f-mid">— "The floor costs a trillion dollars a year to keep level." —</div>
+      <div class="f-right">The AI Standard · Page 04</div>
+    </div>
+    <div class="pagenum">04 / 08</div>
+  </section>
+
+  <!-- ═══ 5. TIMELINE PAGE ═══════════════════════════════════════ -->
+  <section class="slide s-tl">
+    <div class="masthead">
+      <div class="mh-left">VOL. IX · NO. 26</div>
+      <div class="mh-name">THE AI <span class="ornament">·</span> STANDARD</div>
+      <div class="mh-right">MON · JUL 14 · 2026</div>
+    </div>
+
+    <div class="body-frame">
+      <div class="head-row">
+        <div>
+          <span class="section-tag reveal reveal-d1">TIMELINE · YEAR IN REVIEW</span>
+          <h2 class="h2 reveal reveal-blur reveal-d2">Twelve Months That <em>Reshaped AI.</em></h2>
+        </div>
+        <div class="meta reveal reveal-d1">8 inflection points<br/>Jul 2025 → Jun 2026</div>
+      </div>
+
+      <div class="tl-canvas reveal reveal-scale reveal-d4">
+        <svg viewBox="0 0 1180 360" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+          <!-- main axis (draw-path) -->
+          <line class="draw-path" style="--len:1100" x1="40" y1="180" x2="1140" y2="180" stroke="#1a1a1a" stroke-width="1.2"/>
+          <!-- year markers -->
+          <line x1="40" y1="170" x2="40" y2="190" stroke="#1a1a1a" stroke-width="1"/>
+          <line x1="1140" y1="170" x2="1140" y2="190" stroke="#1a1a1a" stroke-width="1"/>
+          <text x="40" y="210" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b6b6b" text-anchor="start">JUL '25</text>
+          <text x="1140" y="210" font-family="JetBrains Mono, monospace" font-size="10" fill="#6b6b6b" text-anchor="end">JUN '26</text>
+
+          <!-- nodes (8 events, alternating above/below) — data-point staggered -->
+          <!-- 1 -->
+          <g>
+            <line x1="140" y1="180" x2="140" y2="110" stroke="#1a1a1a" stroke-width="0.8"/>
+            <rect class="data-point" style="animation-delay:1.20s" x="132" y="102" width="16" height="16" fill="#1a1a1a"/>
+            <text x="140" y="92" font-family="JetBrains Mono, monospace" font-size="10" fill="#1a1a1a" font-weight="700" text-anchor="middle">AUG 12</text>
+            <text x="140" y="78" font-family="Inter, sans-serif" font-size="9" fill="#3d3d3d" text-anchor="middle" font-weight="700">EU AI ACT</text>
+            <text x="140" y="66" font-family="Inter, sans-serif" font-size="9" fill="#3d3d3d" text-anchor="middle" font-weight="700">FULL FORCE</text>
+          </g>
+          <!-- 2 hot -->
+          <g>
+            <line x1="270" y1="180" x2="270" y2="250" stroke="#C8102E" stroke-width="0.8"/>
+            <rect class="data-point" style="animation-delay:1.32s" x="262" y="242" width="16" height="16" fill="#C8102E"/>
+            <text x="270" y="276" font-family="JetBrains Mono, monospace" font-size="10" fill="#C8102E" font-weight="700" text-anchor="middle">OCT 03</text>
+            <text x="270" y="290" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">$50B ENERGY</text>
+            <text x="270" y="302" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">DEAL SIGNED</text>
+          </g>
+          <!-- 3 -->
+          <g>
+            <line x1="400" y1="180" x2="400" y2="110" stroke="#1a1a1a" stroke-width="0.8"/>
+            <circle class="data-point" style="animation-delay:1.44s" cx="400" cy="110" r="8" fill="#1a1a1a"/>
+            <text x="400" y="92" font-family="JetBrains Mono, monospace" font-size="10" fill="#1a1a1a" font-weight="700" text-anchor="middle">NOV 18</text>
+            <text x="400" y="78" font-family="Inter, sans-serif" font-size="9" fill="#3d3d3d" text-anchor="middle" font-weight="700">FRONTIER MODEL</text>
+            <text x="400" y="66" font-family="Inter, sans-serif" font-size="9" fill="#3d3d3d" text-anchor="middle" font-weight="700">FLOP-PRICE −62%</text>
+          </g>
+          <!-- 4 -->
+          <g>
+            <line x1="530" y1="180" x2="530" y2="250" stroke="#1a1a1a" stroke-width="0.8"/>
+            <rect class="data-point" style="animation-delay:1.56s" x="522" y="242" width="16" height="16" fill="#1a1a1a"/>
+            <text x="530" y="276" font-family="JetBrains Mono, monospace" font-size="10" fill="#1a1a1a" font-weight="700" text-anchor="middle">JAN 09</text>
+            <text x="530" y="290" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">STARGATE PHASE II</text>
+            <text x="530" y="302" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">BREAKS GROUND</text>
+          </g>
+          <!-- 5 hot -->
+          <g>
+            <line x1="660" y1="180" x2="660" y2="110" stroke="#C8102E" stroke-width="0.8"/>
+            <circle class="data-point" style="animation-delay:1.68s" cx="660" cy="110" r="9" fill="#C8102E"/>
+            <text x="660" y="92" font-family="JetBrains Mono, monospace" font-size="10" fill="#C8102E" font-weight="700" text-anchor="middle">FEB 22</text>
+            <text x="660" y="78" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">AGENT BENCHMARK</text>
+            <text x="660" y="66" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">CROSSES 70%</text>
+          </g>
+          <!-- 6 -->
+          <g>
+            <line x1="790" y1="180" x2="790" y2="250" stroke="#1a1a1a" stroke-width="0.8"/>
+            <rect class="data-point" style="animation-delay:1.80s" x="782" y="242" width="16" height="16" fill="#1a1a1a"/>
+            <text x="790" y="276" font-family="JetBrains Mono, monospace" font-size="10" fill="#1a1a1a" font-weight="700" text-anchor="middle">MAR 14</text>
+            <text x="790" y="290" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">OPEN WEIGHTS</text>
+            <text x="790" y="302" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">10T-PARAM RELEASE</text>
+          </g>
+          <!-- 7 hot -->
+          <g>
+            <line x1="920" y1="180" x2="920" y2="110" stroke="#C8102E" stroke-width="0.8"/>
+            <rect class="data-point" style="animation-delay:1.92s" x="912" y="102" width="16" height="16" fill="#C8102E"/>
+            <text x="920" y="92" font-family="JetBrains Mono, monospace" font-size="10" fill="#C8102E" font-weight="700" text-anchor="middle">MAY 06</text>
+            <text x="920" y="78" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">DATA-WALL PAPER</text>
+            <text x="920" y="66" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">PUBLISHED</text>
+          </g>
+          <!-- 8 -->
+          <g>
+            <line x1="1060" y1="180" x2="1060" y2="250" stroke="#1a1a1a" stroke-width="0.8"/>
+            <circle class="data-point" style="animation-delay:2.04s" cx="1060" cy="250" r="8" fill="#1a1a1a"/>
+            <text x="1060" y="276" font-family="JetBrains Mono, monospace" font-size="10" fill="#1a1a1a" font-weight="700" text-anchor="middle">JUN 30</text>
+            <text x="1060" y="290" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">FY26 CLOSE</text>
+            <text x="1060" y="302" font-family="Inter, sans-serif" font-size="9" fill="#1a1a1a" text-anchor="middle" font-weight="700">$1.2T TALLY</text>
+          </g>
+
+          <!-- mid-rule label -->
+          <text x="590" y="174" font-family="Libre Caslon Text, serif" font-style="italic" font-size="11" fill="#9a9a9a" text-anchor="middle">— main axis · 12 months —</text>
+        </svg>
+      </div>
+
+      <div class="tl-legend">
+        <div class="lg reveal reveal-d5" style="transition-delay:0.42s;">
+          <div class="dt">AUG 12 · 2025</div>
+          <div class="tt">EU AI Act enters full force.</div>
+          <div class="ds">First major economy to enforce general-purpose model rules; 14 providers file GPAI notifications in week one.</div>
+        </div>
+        <div class="lg hot reveal reveal-d5" style="transition-delay:0.50s;">
+          <div class="dt">OCT 03 · 2025</div>
+          <div class="tt">$50B energy deal signed.</div>
+          <div class="ds">Three hyperscalers commit to a 9-GW nuclear+grid package — the largest private power purchase in history.</div>
+        </div>
+        <div class="lg reveal reveal-d5" style="transition-delay:0.58s;">
+          <div class="dt">NOV 18 · 2025</div>
+          <div class="tt">Frontier flop-price falls 62%.</div>
+          <div class="ds">Year-over-year cost per training flop drops below the long-run trend line for the first time since 2021.</div>
+        </div>
+        <div class="lg hot reveal reveal-d5" style="transition-delay:0.66s;">
+          <div class="dt">FEB 22 · 2026</div>
+          <div class="tt">Agent benchmark crosses 70%.</div>
+          <div class="ds">Long-horizon agentic task suite — previously stalled at 41% — jumps to 73% on a single frontier system.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="f-left">Section D · Timeline</div>
+      <div class="f-mid">— Red nodes mark structural inflections —</div>
+      <div class="f-right">The AI Standard · Page 05</div>
+    </div>
+    <div class="pagenum">05 / 08</div>
+  </section>
+
+  <!-- ═══ 6. DATA MATRIX ════════════════════════════════════════ -->
+  <section class="slide s-mx">
+    <div class="masthead">
+      <div class="mh-left">VOL. IX · NO. 26</div>
+      <div class="mh-name">THE AI <span class="ornament">·</span> STANDARD</div>
+      <div class="mh-right">MON · JUL 14 · 2026</div>
+    </div>
+
+    <div class="body-frame">
+      <div class="mx-wrap reveal reveal-scale reveal-d4">
+        <div class="mx-title">
+          <span>MATRIX I · MODEL CAPABILITY INDEX · Q2 2026 · SCORES 0–100</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-weight:500;">n = 6 systems</span>
+        </div>
+        <div class="mx-table">
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align:left;">System</th>
+                <th>Reason</th>
+                <th>Code</th>
+                <th>Agent</th>
+                <th>Multi-modal</th>
+                <th>Long-ctx</th>
+                <th>Safety</th>
+                <th>Avg</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="rowlbl">Frontier-A</td>
+                <td class="strong">94</td><td class="strong">96</td><td class="focus">91</td><td>88</td><td>93</td><td>82</td><td class="strong">90.7</td>
+              </tr>
+              <tr>
+                <td class="rowlbl">Frontier-B</td>
+                <td class="strong">91</td><td>89</td><td>84</td><td class="strong">92</td><td>90</td><td>85</td><td>88.5</td>
+              </tr>
+              <tr>
+                <td class="rowlbl">Frontier-C</td>
+                <td>87</td><td class="strong">91</td><td>79</td><td>86</td><td class="strong">94</td><td>88</td><td>87.5</td>
+              </tr>
+              <tr>
+                <td class="rowlbl">Open-Weights-1</td>
+                <td>83</td><td>87</td><td>72</td><td>78</td><td>85</td><td>79</td><td>80.7</td>
+              </tr>
+              <tr>
+                <td class="rowlbl">Mid-Tier-1</td>
+                <td>71</td><td>74</td><td>58</td><td>69</td><td>76</td><td>81</td><td>71.5</td>
+              </tr>
+              <tr>
+                <td class="rowlbl">Mid-Tier-2</td>
+                <td>64</td><td>68</td><td>52</td><td>61</td><td>70</td><td>83</td><td>66.3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="mx-side">
+        <div class="sb reveal reveal-d3">
+          <div class="st">Reading the Matrix</div>
+          <div class="sd">
+            Scores are normalized against the Q2 2026 frontier ceiling in each column. The <b>red focus cell</b> marks the single highest score of the period — Frontier-A's <b>91</b> on agentic long-horizon tasks, the breakthrough noted on the preceding page.
+          </div>
+        </div>
+        <div class="sb reveal reveal-d4">
+          <div class="st">Tier Spread</div>
+          <div class="sd">
+            The gap between the top of the frontier tier (Avg <b>90.7</b>) and the bottom of the mid-tier (<b>66.3</b>) widened to <b><span class="metric-num" data-num="24.4">0</span> points</b> — the largest since the index began. The industry is bifurcating, not converging.
+          </div>
+        </div>
+        <div class="sb reveal reveal-d5">
+          <div class="st">Methodology</div>
+          <div class="sd">
+            1,840 tasks across six domains; weighted by enterprise deployment share. Safety column audited by an independent panel. Full protocol at <b>aistandard.io/matrix</b>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="f-left">Section E · Data Matrix</div>
+      <div class="f-mid">— The frontier pulled away from the field. —</div>
+      <div class="f-right">The AI Standard · Page 06</div>
+    </div>
+    <div class="pagenum">06 / 08</div>
+  </section>
+
+  <!-- ═══ 7. SIDEBAR / FIELD NOTES ══════════════════════════════ -->
+  <section class="slide s-sb">
+    <div class="masthead">
+      <div class="mh-left">VOL. IX · NO. 26</div>
+      <div class="mh-name">THE AI <span class="ornament">·</span> STANDARD</div>
+      <div class="mh-right">MON · JUL 14 · 2026</div>
+    </div>
+
+    <div class="body-frame">
+      <div class="main-col">
+        <div class="head-row">
+          <div class="lk reveal reveal-d1">▍ FIELD NOTES · FROM THE DESK</div>
+          <h2 class="h2 reveal reveal-blur reveal-d2">Three Bottlenecks the <em>Trillion-Dollar Year</em> Did Not Solve.</h2>
+          <p class="deck reveal reveal-d3">A side column from the reporters who built the lead story — on the friction that capital alone cannot buy off.</p>
+        </div>
+        <div class="body-cols">
+          <div class="c reveal reveal-slide-l reveal-d3">
+            <div class="sh">I. The Power Queue</div>
+            <p>Interconnection requests in PJM, ERCOT and MISO now average <b>4.7 years</b> from filing to energization. Three hyperscalers responded in 2025 by signing behind-the-meter deals for nuclear capacity — a strategy that works for them and, grid operators note quietly, for almost no one else.</p>
+            <p>The result is a two-tier physical infrastructure: a private fast-lane for the largest buyers, and a public queue that everyone else waits in. State regulators have begun to push back, but no rule has yet reversed the trend.</p>
+            <div class="sh" style="margin-top:8px;">II. The Talent Ceiling</div>
+            <p>Senior research-engineer compensation crossed $8 million in total value for the period, with several packages reported above $20 million. Labs compete not on salary but on compute allocation: the right to train is now itself a benefit.</p>
+            <p>The deeper problem is the bench. One lab estimated that the global pool of engineers capable of leading a frontier training run is below <b>400 people</b> — a number smaller than the senior roster of a single mid-cap software firm.</p>
+          </div>
+          <div class="c reveal reveal-slide-r reveal-d4">
+            <div class="sh">III. The Data Wall</div>
+            <p>The May paper estimating public-text exhaustion by mid-2027 did not surprise the labs — but it did force a public accounting. Responses fall into three buckets: synthetic data (uneven), multimodal corpora from video (legally fraught), and proprietary licensing (expensive and slow).</p>
+            <p>The most consequential deals of the year were not model releases but <b>data licenses</b>: 14 of the top 20 by value involved publishers, studios, or archives rather than software.</p>
+            <p>What the desk could not find, in any of the 247 filings, was a lab that claimed to have solved the problem. The wall moved closer; nobody claimed to have walked through it.</p>
+            <div class="sh" style="margin-top:8px;">What Comes Next</div>
+            <p>If FY26 was the year capital arrived in force, FY27 is shaping up to be the year the constraints under it became visible. The next volume of this report will spend less time on totals and more on what the totals cannot buy.</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side-col reveal reveal-slide-r reveal-d3">
+        <div class="byx">By the Numbers<span class="sub">sidebar · 06 stats</span></div>
+        <div class="stat-row">
+          <div class="stat">
+            <div class="sval">4.7<span class="unit">YR</span></div>
+            <div class="slab">Grid queue</div>
+          </div>
+          <div class="stat">
+            <div class="sval">$8M</div>
+            <div class="slab">Sr. eng. comp</div>
+          </div>
+          <div class="stat">
+            <div class="sval"><span class="metric-num" data-num="400">0</span></div>
+            <div class="slab">Frontier leads</div>
+          </div>
+          <div class="stat">
+            <div class="sval">14/20</div>
+            <div class="slab">Top deals = data</div>
+          </div>
+        </div>
+        <div class="ticker">
+          <div class="r"><span>Interconnect (PJM)</span><span class="up">+1.2 YR</span></div>
+          <div class="r"><span>Interconnect (ERCOT)</span><span class="up">+0.8 YR</span></div>
+          <div class="r"><span>Interconnect (MISO)</span><span class="up">+1.4 YR</span></div>
+          <div class="r"><span>Sr. eng. comp (YoY)</span><span class="up">+22%</span></div>
+          <div class="r"><span>Public-text pool</span><span class="dn">−34%</span></div>
+          <div class="r"><span>Synthetic share</span><span class="up">+18 pp</span></div>
+        </div>
+        <div class="note">"The wall moved closer; nobody claimed to have walked through it." — Desk note, p.07</div>
+      </aside>
+    </div>
+
+    <div class="footer">
+      <div class="f-left">Section F · Field Notes</div>
+      <div class="f-mid">— Power, talent, data: the three unsolved bottlenecks. —</div>
+      <div class="f-right">The AI Standard · Page 07</div>
+    </div>
+    <div class="pagenum">07 / 08</div>
+  </section>
+
+  <!-- ═══ 8. COLOPHON / CLOSING ═════════════════════════════════ -->
+  <section class="slide s-colo">
+    <div class="masthead">
+      <div class="mh-left">VOL. IX · NO. 26</div>
+      <div class="mh-name">THE AI <span class="ornament">·</span> STANDARD</div>
+      <div class="mh-right">MON · JUL 14 · 2026</div>
+    </div>
+
+    <div class="body-frame">
+      <div class="colo-h">
+        <div class="nm reveal reveal-blur reveal-d2">COLOPHON<span class="d">.</span></div>
+        <div class="tag reveal reveal-d1">— Volume IX · Issue 26 · End of Edition —</div>
+      </div>
+
+      <div class="colo-band">
+        <div class="end-stamp reveal reveal-scale reveal-d3">END OF VOL.</div>
+        <div class="center reveal reveal-d3">"A daily record of the machine intelligence industry, printed on pressed newsprint, signed off at the desk."</div>
+        <div class="end-stamp reveal reveal-scale reveal-d3" style="transform:rotate(3deg);transition-delay:0.30s;">FILED 06:14 EDT</div>
+      </div>
+
+      <div class="colo-grid">
+        <div class="cg reveal reveal-d4" style="transition-delay:0.30s;">
+          <div class="ct">Editorial</div>
+          <div class="cd">
+            <b>Editor-in-Chief</b> · H. Marsh<br/>
+            <b>Managing</b> · K. Okafor<br/>
+            <b>Data Desk</b> · D. Reyes<br/>
+            <b>Markets</b> · S. Lindqvist<br/>
+            <b>Field</b> · A. Mehta (Singapore)
+          </div>
+        </div>
+        <div class="cg reveal reveal-d4" style="transition-delay:0.38s;">
+          <div class="ct">This Issue</div>
+          <div class="cd">
+            <span class="metric-num" data-num="247">0</span> source filings reviewed.<br/>
+            8 pages · 6,400 words set.<br/>
+            12 charts and matrices.<br/>
+            1,840 benchmark tasks.<br/>
+            Press run: 41,200 copies.
+          </div>
+        </div>
+        <div class="cg reveal reveal-d4" style="transition-delay:0.46s;">
+          <div class="ct">Type &amp; Stock</div>
+          <div class="cd">
+            Set in <b>Libre Caslon Text</b> for body and headline; <b>Inter</b> for kicker and labels; <b>JetBrains Mono</b> for figures and folios. Pressed on 52-gsm uncoated newsprint. Single spot-red ink.
+          </div>
+        </div>
+        <div class="cg reveal reveal-d4" style="transition-delay:0.54s;">
+          <div class="ct">Next Volume</div>
+          <div class="cd">
+            Volume X opens <b>July 2026</b>. Annual subscribers receive the year-end almanac in December. Reprints and corrections at <b>aistandard.io/x</b>. Letters to the editor: <b>desk@aistandard.io</b>.
+          </div>
+        </div>
+      </div>
+
+      <div class="colo-fine reveal reveal-d5">
+        <div>© 2026 THE AI STANDARD · ALL RIGHTS RESERVED</div>
+        <div class="m">— set, proofed, and signed off at the desk —</div>
+        <div class="r">ISSN 2768-0419 · PRINTED IN SF · NO. 26 / 26</div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="f-left">Section G · Colophon</div>
+      <div class="f-mid">— "The floor costs a trillion dollars a year to keep level." —</div>
+      <div class="f-right">The AI Standard · Page 08</div>
+    </div>
+    <div class="pagenum">08 / 08</div>
+  </section>
+
+<script>
+(function(){
+  // === Cinematic Reveal: IntersectionObserver ===
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('is-visible');
+        io.unobserve(e.target);
+        e.target.querySelectorAll('.metric-num[data-num]').forEach(function(el){
+          countUp(el, parseFloat(el.getAttribute('data-num')));
+        });
+      }
+    });
+  }, { threshold: 0.18 });
+  document.querySelectorAll('.slide').forEach(function(s){ io.observe(s); });
+
+  // === Count-Up — quantized steps for brutalist feel ===
+  function countUp(el, target){
+    var dur = 1500, start = performance.now(), isFloat = target % 1 !== 0;
+    function fmt(v){
+      if(v >= 1000) return Math.round(v).toLocaleString('en-US');
+      return isFloat ? v.toFixed(1) : Math.round(v).toString();
+    }
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      var stepped = Math.floor(p * 10) / 10;       // 10 discrete frames
+      el.textContent = fmt(target * stepped);
+      if(p < 1) requestAnimationFrame(tick);
+      else el.textContent = fmt(target);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // === Parallax ===
+  var parallaxEls = document.querySelectorAll('.parallax-bg');
+  if(parallaxEls.length){
+    var ticking = false;
+    function updateParallax(){
+      ticking = false;
+      parallaxEls.forEach(function(el){
+        var slide = el.closest('.slide');
+        if(!slide) return;
+        var rect = slide.getBoundingClientRect();
+        var center = rect.top + rect.height / 2;
+        var offset = (center - window.innerHeight / 2) / window.innerHeight;
+        el.style.setProperty('--parallax', (offset * -24) + 'px');
+      });
+    }
+    window.addEventListener('scroll', function(){
+      if(!ticking){ requestAnimationFrame(updateParallax); ticking = true; }
+    }, { passive: true });
+    updateParallax();
+  }
+
+  // === Cursor Spotlight (cover only) ===
+  var cover = document.querySelector('.slide.cursor-spotlight');
+  if(cover){
+    cover.addEventListener('mousemove', function(e){
+      var rect = cover.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+      var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+      cover.style.setProperty('--cursor-x', x + '%');
+      cover.style.setProperty('--cursor-y', y + '%');
+    });
+  }
+})();
+</script>
+</body>
+</html>

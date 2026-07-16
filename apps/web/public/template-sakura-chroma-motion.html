@@ -1,0 +1,1471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Sakura Chroma — Slide Template</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800;900&family=Albert+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --paper:    #F1E6CB;   /* warm cream paper canvas */
+    --paper-dk: #E5D6B0;   /* slightly darker paper for layering */
+    --ink:      #3A2516;   /* dark warm brown ink, the type colour */
+    --red:      #E5392A;
+    --pink:     #E54489;
+    --orange:   #F09131;
+    --green:    #3D9F47;
+    --blue:     #3F8BC4;
+    --yellow:   #F0BC2A;
+    --line:     #3A2516;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0e0e0e; }
+  body {
+    font-family: 'Albert Sans', 'Helvetica Neue', sans-serif;
+    color: var(--ink);
+  }
+
+  @page { size: 1280px 720px; margin: 0; }
+
+  /* Each slide is a fixed 1280×720 canvas. Slides stack naturally in the
+     document flow (body has no padding/centering). The subtle halftone-dot
+     paper texture — originally a viewport-fluid stage overlay in the source
+     template — is now baked into each slide directly. */
+  .slide {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    overflow: hidden;
+    background: var(--paper);
+    isolation: isolate;
+  }
+  .slide::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    opacity: 0.16;
+    background-image: radial-gradient(circle at 1px 1px, rgba(58,37,22,0.55) 1px, transparent 1.6px);
+    background-size: 4px 4px;
+    z-index: 1;
+  }
+
+  /* ─── TYPE SYSTEM ────────────────────────────────────────────── */
+  .disp {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    line-height: 0.84;
+    letter-spacing: -0.012em;
+  }
+  .disp-700 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: 0;
+  }
+  .micro {
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+  .body-tx {
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  .mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-weight: 400;
+  }
+  .jp {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+  }
+
+  /* Single page-number marker, shared */
+  .pagenum {
+    position: absolute;
+    right: 44px;
+    bottom: 36px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    color: var(--ink);
+    letter-spacing: 0.06em;
+    z-index: 9;
+  }
+
+  /* ─── DECORATIVE: petal-blob cluster ────────────────────────── */
+  /* Five overlapping rounded petal shapes in primary colours.    */
+  .petals {
+    position: absolute;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .petal {
+    /* Perfect circles. aspect-ratio: 1 forces height to match the
+       width set per-petal below, so percentages on the parent stay
+       useful but the shape is always round. */
+    position: absolute;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+  }
+
+  /* ─── DECORATIVE: diagonal stripe band ──────────────────────── */
+  /* A bundle of coloured ribbons that sweep diagonally then bend
+     to horizontal — echoes the cassette-label motif. Built from
+     a rotated container with stacked horizontal coloured bars. */
+  .stripe-rail {
+    position: absolute;
+    pointer-events: none;
+    z-index: 3;
+    transform-origin: 0 50%;
+  }
+  .stripe-rail .bar {
+    height: 0; /* set per-instance below */
+  }
+
+  /* ─── DECORATIVE: rosette / seal badge ──────────────────────── */
+  .rosette {
+    position: absolute;
+    pointer-events: none;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    width: 110px;
+    height: 110px;
+    background: var(--ink);
+    color: var(--paper);
+    /* 12-point starburst shape via clip-path */
+    clip-path: polygon(50% 0%, 60% 8%, 73% 4%, 76% 17%, 89% 18%, 87% 31%, 100% 35%, 92% 47%, 100% 60%, 87% 64%, 90% 77%, 76% 78%, 75% 91%, 62% 88%, 53% 100%, 42% 90%, 30% 96%, 25% 84%, 12% 86%, 13% 73%, 0% 70%, 7% 58%, 0% 47%, 11% 39%, 4% 27%, 17% 25%, 13% 12%, 27% 14%, 25% 1%, 38% 7%);
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 38px;
+    letter-spacing: -0.01em;
+  }
+  .stamp {
+    position: absolute;
+    background: var(--red);
+    color: var(--paper);
+    z-index: 5;
+    padding: 14px 22px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    transform: rotate(-3deg);
+  }
+
+  /* ─── SLIDE 1 — COVER (cassette package echo) ────────────────── */
+  .s-cover { background: var(--paper); }
+
+  .s-cover .cover-frame {
+    position: absolute;
+    inset: 72px 72px 120px;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  /* Petal cluster top-left — five overlapping perfect circles */
+  .s-cover .petals {
+    top: 56px;
+    left: 72px;
+    width: 260px;
+    height: 200px;
+  }
+  .s-cover .petals .p1 { background: var(--red);    width: 50%; left: 0;   top: 28%; }
+  .s-cover .petals .p2 { background: var(--orange); width: 38%; left: 14%; top: 50%; }
+  .s-cover .petals .p3 { background: var(--blue);   width: 44%; left: 28%; top: 0; }
+  .s-cover .petals .p4 { background: var(--green);  width: 50%; left: 50%; top: 22%; }
+  .s-cover .petals .p5 { background: var(--yellow); width: 32%; left: 36%; top: 50%; }
+
+  /* Brand lockup next to petals */
+  .s-cover .brand {
+    position: absolute;
+    top: 88px;
+    left: 360px;
+    z-index: 5;
+  }
+  .s-cover .brand .b1 {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 56px;
+    color: var(--ink);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
+  .s-cover .brand .b2 {
+    margin-top: 4px;
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+
+  /* Hero number — gigantic ink-coloured T-26 as the left-half focal point. */
+  .s-cover .hero {
+    position: absolute;
+    left: 72px;
+    top: 268px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 260px;
+    color: var(--ink);
+    line-height: 0.84;
+    letter-spacing: -0.025em;
+    z-index: 4;
+  }
+
+  /* Subtitle lockup — pink bar with cream type, anchored below the hero
+     number so the two never collide. */
+  .s-cover .lockup {
+    position: absolute;
+    left: 72px;
+    top: 500px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 64px;
+    color: var(--paper);
+    -webkit-text-stroke: 0;
+    line-height: 0.9;
+    letter-spacing: -0.015em;
+    background: var(--pink);
+    padding: 10px 24px 8px;
+    z-index: 4;
+  }
+
+  /* Diagonal multi-colour stripe band — pure decoration in the right-half,
+     kept clear of the hero number on the left. */
+  .s-cover .ribbons {
+    position: absolute;
+    right: 0;
+    top: 268px;
+    width: 42%;
+    height: 220px;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .s-cover .ribbon {
+    position: absolute;
+    left: -20%;
+    width: 160%;
+    transform-origin: 0 50%;
+  }
+  .s-cover .ribbon.r-pink   { background: var(--pink);   }
+  .s-cover .ribbon.r-orange { background: var(--orange); }
+  .s-cover .ribbon.r-yellow { background: var(--yellow); }
+  .s-cover .ribbon.r-green  { background: var(--green);  }
+  .s-cover .ribbon.r-blue   { background: var(--blue);   }
+
+  /* Cover footer row */
+  .s-cover .cfooter {
+    position: absolute;
+    left: 72px;
+    right: 72px;
+    bottom: 48px;
+    border-top: 1.5px solid var(--ink);
+    padding-top: 18px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 40px;
+    align-items: center;
+    z-index: 5;
+  }
+  .s-cover .cfooter .made {
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+  }
+  .s-cover .cfooter .made .jp {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 500;
+    margin-right: 12px;
+  }
+  .s-cover .cfooter .seal {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    background: var(--ink);
+    color: var(--paper);
+    clip-path: polygon(50% 0%, 60% 8%, 73% 4%, 76% 17%, 89% 18%, 87% 31%, 100% 35%, 92% 47%, 100% 60%, 87% 64%, 90% 77%, 76% 78%, 75% 91%, 62% 88%, 53% 100%, 42% 90%, 30% 96%, 25% 84%, 12% 86%, 13% 73%, 0% 70%, 7% 58%, 0% 47%, 11% 39%, 4% 27%, 17% 25%, 13% 12%, 27% 14%, 25% 1%, 38% 7%);
+    display: grid; place-items: center;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    line-height: 1;
+  }
+  .s-cover .cfooter .stamp {
+    position: relative;
+    background: var(--red); color: var(--paper);
+    padding: 6px 14px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    transform: none;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .s-cover .cfooter .stamp .lab2 {
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    line-height: 1;
+  }
+
+  /* ─── SLIDE 2 — MANIFESTO (single bold statement, scattered blobs) ─ */
+  .s-manifesto { background: var(--paper); }
+  .s-manifesto .blob {
+    /* Perfect circles: width === height. */
+    position: absolute;
+    border-radius: 50%;
+    z-index: 2;
+  }
+  .s-manifesto .blob.b-red    { background: var(--red);    width: 115px; height: 115px; top: 8%;  left: 6%; }
+  .s-manifesto .blob.b-orange { background: var(--orange); width: 86px;  height: 86px;  top: 22%; left: 16%; }
+  .s-manifesto .blob.b-yellow { background: var(--yellow); width: 86px;  height: 86px;  top: 75%; left: 8%; }
+  .s-manifesto .blob.b-green  { background: var(--green);  width: 101px; height: 101px; top: 70%; left: 78%; }
+  .s-manifesto .blob.b-blue   { background: var(--blue);   width: 94px;  height: 94px;  top: 14%; left: 78%; }
+  .s-manifesto .blob.b-pink   { background: var(--pink);   width: 79px;  height: 79px;  top: 30%; left: 86%; }
+
+  .s-manifesto .stmt-wrap {
+    position: relative; z-index: 5;
+    height: 100%;
+    display: grid; place-items: center;
+    padding: 0 220px;
+  }
+  .s-manifesto .stmt {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 104px;
+    line-height: 0.86;
+    color: var(--ink);
+    letter-spacing: -0.022em;
+    text-align: center;
+  }
+  .s-manifesto .stmt em {
+    color: var(--red); font-style: normal;
+  }
+  .s-manifesto .kicker {
+    position: absolute;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.32em;
+    font-size: 14px;
+    color: var(--ink);
+    z-index: 6;
+  }
+
+  /* ─── SLIDE 3 — CATALOGUE GRID (4-up product cards) ──────────── */
+  .s-catalogue { background: var(--paper); }
+  .s-catalogue .frame {
+    position: absolute; inset: 72px 72px 110px;
+    display: grid; grid-template-rows: auto 1fr; gap: 36px;
+    z-index: 4;
+  }
+  .s-catalogue .topbar {
+    display: flex; align-items: end; justify-content: space-between;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 22px;
+    gap: 30px;
+  }
+  .s-catalogue .topbar .ttl {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 100px;
+    line-height: 0.9;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+  }
+  .s-catalogue .topbar .ttl em { color: var(--red); font-style: normal; }
+  .s-catalogue .topbar .lab {
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-size: 14px;
+    color: var(--ink);
+    text-align: right;
+  }
+  .s-catalogue .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 26px;
+  }
+  .s-catalogue .card {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .s-catalogue .card .topstrip {
+    height: 32px;
+  }
+  .s-catalogue .card.c-red    .topstrip { background: var(--red); }
+  .s-catalogue .card.c-pink   .topstrip { background: var(--pink); }
+  .s-catalogue .card.c-orange .topstrip { background: var(--orange); }
+  .s-catalogue .card.c-blue   .topstrip { background: var(--blue); }
+
+  .s-catalogue .card .body {
+    padding: 24px 20px;
+    display: flex; flex-direction: column; gap: 16px;
+    flex: 1;
+  }
+  .s-catalogue .card .desc + .extras {
+    display: none;
+  }
+  .s-catalogue .card .specs {
+    margin-top: auto;
+  }
+  .s-catalogue .card .nm {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 48px;
+    line-height: 0.94;
+    color: var(--ink);
+    letter-spacing: -0.012em;
+  }
+  .s-catalogue .card .desc {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--ink);
+    flex: 1;
+  }
+  .s-catalogue .card .specs {
+    border-top: 1px dashed var(--ink);
+    padding-top: 14px;
+    display: flex; flex-direction: column; gap: 4px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+  }
+  .s-catalogue .card .specs .row {
+    display: flex; justify-content: space-between; gap: 8px;
+  }
+  .s-catalogue .card .specs .row .k { opacity: 0.7; }
+
+  /* ─── SLIDE 4 — DIAGONAL STRIPE SPREAD ───────────────────────── */
+  .s-stripe { background: var(--paper); }
+  .s-stripe .ribbon-stack {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+  }
+  .s-stripe .ribbon-stack .rib {
+    position: absolute;
+    height: 96px;
+    width: 160%;
+    left: -20%;
+    transform-origin: 50% 50%;
+    transform: rotate(-22deg);
+  }
+  .s-stripe .ribbon-stack .rib.r1 { background: var(--pink);   top: 18%; }
+  .s-stripe .ribbon-stack .rib.r2 { background: var(--orange); top: 30%; }
+  .s-stripe .ribbon-stack .rib.r3 { background: var(--yellow); top: 42%; }
+  .s-stripe .ribbon-stack .rib.r4 { background: var(--green);  top: 54%; }
+  .s-stripe .ribbon-stack .rib.r5 { background: var(--blue);   top: 66%; }
+
+  .s-stripe .quote-wrap {
+    position: absolute;
+    left: 80px;
+    right: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    display: flex; flex-direction: column;
+    align-items: flex-start;
+    gap: 28px;
+  }
+  .s-stripe .qkicker {
+    background: var(--paper);
+    padding: 12px 22px;
+    border: 1.5px solid var(--ink);
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .s-stripe .qbody {
+    background: var(--paper);
+    padding: 40px 48px;
+    border: 1.5px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+    max-width: 78%;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 110px;
+    line-height: 0.92;
+    color: var(--ink);
+    letter-spacing: -0.018em;
+  }
+  .s-stripe .qbody em { color: var(--red); font-style: normal; }
+  .s-stripe .qattr {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 22px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ─── SLIDE 5 — DATA / EQUALIZER BARS ─────────────────────────── */
+  .s-data { background: var(--paper); }
+  .s-data .frame {
+    position: absolute;
+    inset: 72px 72px 110px;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: 32px;
+    z-index: 4;
+  }
+  .s-data .topbar {
+    display: flex; align-items: end; justify-content: space-between;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 22px;
+    gap: 30px;
+  }
+  .s-data .topbar .ttl {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 96px;
+    line-height: 0.9; letter-spacing: -0.014em;
+    color: var(--ink);
+  }
+  .s-data .topbar .lab {
+    font-family: 'Albert Sans', sans-serif; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    font-size: 14px;
+    color: var(--ink); text-align: right;
+  }
+  .s-data .body {
+    display: grid;
+    grid-template-columns: 0.9fr 1.6fr;
+    gap: 56px;
+  }
+  .s-data .col-a {
+    display: flex; flex-direction: column; justify-content: center;
+    gap: 36px;
+  }
+  .s-data .stat .vbig {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 160px;
+    line-height: 0.86;
+    color: var(--red);
+    letter-spacing: -0.025em;
+  }
+  .s-data .stat .vbig sub {
+    font-size: 0.34em; vertical-align: baseline;
+    color: var(--ink); letter-spacing: 0; margin-left: 8px;
+  }
+  .s-data .stat .lab-tag {
+    font-family: 'Albert Sans', sans-serif; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.16em;
+    font-size: 15px;
+    color: var(--ink); margin-top: 6px;
+  }
+  .s-data .stat .desc {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 30ch;
+    margin-top: 6px;
+  }
+
+  .s-data .eq {
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+    padding: 28px 28px 22px;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 18px;
+    overflow: hidden;
+  }
+  .s-data .eq .bars {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 16px;
+    align-items: end;
+    height: 100%;
+  }
+  .s-data .eq .bcol { display: flex; flex-direction: column-reverse; justify-content: start; height: 100%; gap: 8px; }
+  .s-data .eq .bcol .seg {
+    /* Each segment is one equal-height tile; flex-direction: column-reverse
+       means the first segment in source order sits at the BOTTOM of the
+       column, and lit segments stack upward like a real VU level meter.
+       flex:1 makes all 6 segments share the column's available height. */
+    flex: 1 1 0;
+    min-height: 12px;
+    background: rgba(58, 37, 22, 0.10);
+    border: 1px solid rgba(58, 37, 22, 0.22);
+  }
+  /* Eight tracks — varying heights, varying colours */
+  .s-data .eq .bcol[data-c="r"]  .seg.on { background: var(--red);    border-color: var(--red); }
+  .s-data .eq .bcol[data-c="p"]  .seg.on { background: var(--pink);   border-color: var(--pink); }
+  .s-data .eq .bcol[data-c="o"]  .seg.on { background: var(--orange); border-color: var(--orange); }
+  .s-data .eq .bcol[data-c="y"]  .seg.on { background: var(--yellow); border-color: var(--yellow); }
+  .s-data .eq .bcol[data-c="g"]  .seg.on { background: var(--green);  border-color: var(--green); }
+  .s-data .eq .bcol[data-c="b"]  .seg.on { background: var(--blue);   border-color: var(--blue); }
+
+  .s-data .eq .ticks {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 16px;
+    border-top: 1px solid var(--ink);
+    padding-top: 14px;
+  }
+  .s-data .eq .ticks .ticklab {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  /* ─── SLIDE 6 — QUOTE + PETALS ─────────────────────────────── */
+  .s-quote { background: var(--paper); }
+  .s-quote .qpetals {
+    position: absolute;
+    top: 72px;
+    right: 80px;
+    width: 360px;
+    height: 260px;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .s-quote .qpetals .p1 { background: var(--pink);   width: 50%; left: 0;   top: 28%; }
+  .s-quote .qpetals .p2 { background: var(--orange); width: 38%; left: 16%; top: 50%; }
+  .s-quote .qpetals .p3 { background: var(--yellow); width: 44%; left: 30%; top: 0; }
+  .s-quote .qpetals .p4 { background: var(--blue);   width: 50%; left: 50%; top: 26%; }
+  .s-quote .qpetals .p5 { background: var(--green);  width: 32%; left: 36%; top: 50%; }
+
+  .s-quote .qframe {
+    position: absolute;
+    left: 80px;
+    right: 80px;
+    bottom: 180px;
+    z-index: 4;
+  }
+  .s-quote .qkicker {
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 14px;
+    color: var(--red);
+    margin-bottom: 24px;
+  }
+  .s-quote .qbody {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 72px;
+    line-height: 0.9;
+    color: var(--ink);
+    letter-spacing: -0.018em;
+    max-width: 92%;
+  }
+  .s-quote .qbody em { color: var(--blue); font-style: normal; }
+  .s-quote .qattr-row {
+    margin-top: 36px;
+    display: flex; gap: 24px; align-items: center;
+    border-top: 1.5px solid var(--ink);
+    padding-top: 18px;
+  }
+  .s-quote .qattr-row .who-tag {
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 15px;
+    color: var(--ink);
+  }
+  .s-quote .qattr-row .meta-tag {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    opacity: 0.78;
+  }
+
+  /* ─── SLIDE 7 — RELEASE SCHEDULE (tabular) ─────────────────── */
+  .s-cal { background: var(--paper); }
+  .s-cal .frame {
+    position: absolute; inset: 72px 72px 110px;
+    display: flex; flex-direction: column;
+    z-index: 4;
+  }
+  .s-cal .topbar {
+    display: flex; align-items: end; justify-content: space-between;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 22px;
+    gap: 30px;
+    margin-bottom: 24px;
+  }
+  .s-cal .topbar .ttl {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 96px;
+    line-height: 0.9; letter-spacing: -0.014em;
+    color: var(--ink);
+  }
+  .s-cal .topbar .lab {
+    font-family: 'Albert Sans', sans-serif; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    font-size: 14px;
+    color: var(--ink); text-align: right;
+  }
+  .s-cal .ledger { display: flex; flex-direction: column; gap: 0; flex: 1; }
+  .s-cal .row {
+    display: grid;
+    grid-template-columns: 96px 1.4fr 0.9fr 0.6fr 64px;
+    gap: 24px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(58,37,22,0.22);
+  }
+  .s-cal .row.headrow { border-bottom: 1.5px solid var(--ink); padding: 8px 0; }
+  .s-cal .row.headrow > div { font-family: 'Albert Sans', sans-serif; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; font-size: 12px; color: var(--ink); }
+  .s-cal .date-tag { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 16px; color: var(--ink); letter-spacing: 0.02em; }
+  .s-cal .ttl-row {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  .s-cal .ttl-row em { color: var(--red); font-style: normal; }
+  .s-cal .ven { font-family: 'Albert Sans', sans-serif; font-size: 15px; color: var(--ink); }
+  .s-cal .chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 4px 10px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: var(--paper);
+    text-transform: uppercase;
+    width: fit-content;
+  }
+  .s-cal .chip.c-red    { background: var(--red); }
+  .s-cal .chip.c-pink   { background: var(--pink); }
+  .s-cal .chip.c-orange { background: var(--orange); }
+  .s-cal .chip.c-blue   { background: var(--blue); }
+  .s-cal .chip.c-green  { background: var(--green); }
+  .s-cal .nr-cell {
+    display: flex; gap: 6px; justify-content: end;
+  }
+  .s-cal .nr-cell .b {
+    width: 14px; height: 14px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+  }
+  .s-cal .nr-cell .b.fill { background: var(--ink); }
+
+  /* ─── SLIDE 8 — COLOPHON / CLOSING (mirror of cover) ────────── */
+  .s-colophon { background: var(--paper); }
+  .s-colophon .ribbons {
+    position: absolute;
+    left: 0;
+    top: 240px;
+    bottom: 260px;
+    width: 60%;
+    z-index: 3;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .s-colophon .ribbon {
+    position: absolute;
+    right: -20%;
+    width: 160%;
+    transform-origin: 100% 50%;
+  }
+  .s-colophon .ribbon.r-pink   { background: var(--pink);   }
+  .s-colophon .ribbon.r-orange { background: var(--orange); }
+  .s-colophon .ribbon.r-yellow { background: var(--yellow); }
+  .s-colophon .ribbon.r-green  { background: var(--green);  }
+  .s-colophon .ribbon.r-blue   { background: var(--blue);   }
+
+  .s-colophon .col-petals {
+    position: absolute;
+    bottom: 140px;
+    right: 80px;
+    width: 280px;
+    height: 220px;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .s-colophon .col-petals .p1 { background: var(--red);    width: 50%; left: 0;   top: 28%; }
+  .s-colophon .col-petals .p2 { background: var(--orange); width: 38%; left: 16%; top: 50%; }
+  .s-colophon .col-petals .p3 { background: var(--green);  width: 44%; left: 30%; top: 0; }
+  .s-colophon .col-petals .p4 { background: var(--blue);   width: 50%; left: 50%; top: 22%; }
+
+  .s-colophon .titlewrap {
+    position: absolute;
+    left: 72px;
+    top: 96px;
+    z-index: 5;
+    max-width: 92%;
+  }
+  .s-colophon .ktag {
+    font-family: 'Albert Sans', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    font-size: 14px;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .s-colophon .ttl {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 140px;
+    line-height: 0.86;
+    color: var(--ink);
+    letter-spacing: -0.022em;
+  }
+  /* Colophon emphasis stays ink — the ribbons behind the title are
+     too colour-saturated for a red em to clear contrast. */
+  .s-colophon .ttl em { color: var(--ink); font-weight: 900; }
+
+  .s-colophon .col-footer {
+    position: absolute;
+    left: 72px;
+    bottom: 110px;
+    right: 320px;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1.1fr;
+    gap: 44px;
+    z-index: 5;
+  }
+  .s-colophon .col-footer > div {
+    border-top: 1.5px solid var(--ink);
+    padding-top: 16px;
+  }
+  .s-colophon .col-footer .ftag {
+    text-transform: uppercase; letter-spacing: 0.18em; font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .s-colophon .col-footer .ftxt {
+    font-family: 'Albert Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .s-colophon .seal-stack {
+    position: absolute;
+    right: 80px;
+    top: 96px;
+    display: flex; flex-direction: column; gap: 14px; align-items: end;
+    z-index: 6;
+  }
+  .s-colophon .seal {
+    width: 130px;
+    height: 130px;
+    background: var(--ink); color: var(--paper);
+    clip-path: polygon(50% 0%, 60% 8%, 73% 4%, 76% 17%, 89% 18%, 87% 31%, 100% 35%, 92% 47%, 100% 60%, 87% 64%, 90% 77%, 76% 78%, 75% 91%, 62% 88%, 53% 100%, 42% 90%, 30% 96%, 25% 84%, 12% 86%, 13% 73%, 0% 70%, 7% 58%, 0% 47%, 11% 39%, 4% 27%, 17% 25%, 13% 12%, 27% 14%, 25% 1%, 38% 7%);
+    display: grid; place-items: center;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 42px;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    text-align: center;
+  }
+  .s-colophon .red-stamp {
+    background: var(--red); color: var(--paper);
+    padding: 14px 22px;
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    transform: rotate(-3deg);
+  }
+
+  /* ────────────────────────────────────────────────────────────────
+     MOTION LAYER (Cinematic) — sakura-chroma signature
+     ──────────────────────────────────────────────────────────────── */
+  :root { --ease: cubic-bezier(0.16, 1, 0.3, 1); --ease-soft: cubic-bezier(0.32, 0.72, 0, 1); }
+
+  /* === Cinematic Reveal System — 5 entrances × 6 delays === */
+  .slide:not(.is-visible) .reveal         { opacity: 0; transform: translateY(20px); }
+  .slide:not(.is-visible) .reveal-scale   { opacity: 0; transform: scale(0.94); }
+  .slide:not(.is-visible) .reveal-blur    { opacity: 0; transform: translateY(16px); filter: blur(6px); }
+  .slide:not(.is-visible) .reveal-slide-l { opacity: 0; transform: translateX(-24px); }
+  .slide:not(.is-visible) .reveal-slide-r { opacity: 0; transform: translateX(24px); }
+
+  .slide.is-visible .reveal,
+  .slide.is-visible .reveal-scale,
+  .slide.is-visible .reveal-blur,
+  .slide.is-visible .reveal-slide-l,
+  .slide.is-visible .reveal-slide-r {
+    opacity: 1; transform: none; filter: none;
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), filter 0.7s ease;
+  }
+  .reveal-d1 { transition-delay: 0s; }
+  .reveal-d2 { transition-delay: 0.12s; }
+  .reveal-d3 { transition-delay: 0.24s; }
+  .reveal-d4 { transition-delay: 0.36s; }
+  .reveal-d5 { transition-delay: 0.48s; }
+  .reveal-d6 { transition-delay: 0.6s; }
+
+  /* === Cover Signature 1: petal-fall — 花瓣簇持续飘落 === */
+  @keyframes petal-fall {
+    0%   { transform: translateY(-12px) rotate(0deg);  opacity: 0.82; }
+    50%  { transform: translateY(10px)  rotate(10deg); opacity: 1; }
+    100% { transform: translateY(-12px) rotate(0deg);  opacity: 0.82; }
+  }
+  .petal-fall .petal { animation: petal-fall 6s ease-in-out infinite; transform-origin: center; }
+  .petal-fall .petal.p1 { animation-delay: 0s; }
+  .petal-fall .petal.p2 { animation-delay: 0.7s; }
+  .petal-fall .petal.p3 { animation-delay: 1.4s; }
+  .petal-fall .petal.p4 { animation-delay: 2.1s; }
+  .petal-fall .petal.p5 { animation-delay: 2.8s; }
+
+  /* === Cover Signature 2: stamp-drop — 12 角星芒印章砸落定格 === */
+  @keyframes stamp-drop {
+    0%   { transform: translateY(-40px) scale(1.2) rotate(-15deg); opacity: 0; }
+    60%  { transform: translateY(4px)   scale(0.96) rotate(2deg);  opacity: 1; }
+    100% { transform: translateY(0)     scale(1)    rotate(0deg);  opacity: 1; }
+  }
+  .slide:not(.is-visible) .stamp-drop { opacity: 0; }
+  .slide.is-visible .stamp-drop { animation: stamp-drop 0.9s var(--ease) forwards; animation-delay: 0.35s; }
+
+  /* === Cover Signature 3: rainbow-shimmer — 彩虹缎带持续微动 === */
+  @keyframes rainbow-shimmer {
+    0%   { filter: brightness(1) saturate(1);    transform: translateX(0); }
+    50%  { filter: brightness(1.08) saturate(1.12); transform: translateX(3px); }
+    100% { filter: brightness(1) saturate(1);    transform: translateX(0); }
+  }
+  .rainbow-shimmer .ribbon,
+  .rainbow-shimmer .rib { animation: rainbow-shimmer 7s ease-in-out infinite; }
+  .rainbow-shimmer .ribbon.r-pink,
+  .rainbow-shimmer .rib.r1 { animation-delay: 0s; }
+  .rainbow-shimmer .ribbon.r-orange,
+  .rainbow-shimmer .rib.r2 { animation-delay: 0.5s; }
+  .rainbow-shimmer .ribbon.r-yellow,
+  .rainbow-shimmer .rib.r3 { animation-delay: 1s; }
+  .rainbow-shimmer .ribbon.r-green,
+  .rainbow-shimmer .rib.r4 { animation-delay: 1.5s; }
+  .rainbow-shimmer .ribbon.r-blue,
+  .rainbow-shimmer .rib.r5 { animation-delay: 2s; }
+
+  /* === Cover Signature 4: halftone-breathe — 半色调纸纹呼吸 === */
+  @keyframes halftone-breathe {
+    0%, 100% { opacity: 0.30; }
+    50%      { opacity: 0.50; }
+  }
+  .s-cover::before { animation: halftone-breathe 6s ease-in-out infinite; }
+
+  /* === SVG trio: draw-path / bar-grow / data-point (按需启用) === */
+  .draw-path { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000); }
+  .slide.is-visible .draw-path { animation: path-draw 2s var(--ease) forwards; }
+  @keyframes path-draw { to { stroke-dashoffset: 0; } }
+
+  .bar-grow { transform: scaleY(0); transform-origin: bottom; transform-box: fill-box; }
+  .slide.is-visible .bar-grow { animation: bar-grow 0.8s var(--ease) forwards; }
+  @keyframes bar-grow { to { transform: scaleY(1); } }
+
+  .data-point { opacity: 0; transform: scale(0); transform-origin: center; transform-box: fill-box; }
+  .slide.is-visible .data-point { animation: point-pop 0.4s var(--ease) forwards; animation-delay: 1.7s; }
+  @keyframes point-pop { to { opacity: 1; transform: scale(1); } }
+
+  /* === Parallax === */
+  .parallax-bg { transform: translateY(var(--parallax, 0px)); transition: transform 0.1s linear; }
+
+  /* === Page transition (opacity 不低于 0.6) + slide 已含 isolation: isolate === */
+  .slide { transition: opacity 0.5s ease; }
+  .slide:not(.is-visible) { opacity: 0.6; }
+
+  /* === Cursor Spotlight — 封面用，ink #3A2516 的 6% alpha === */
+  .cursor-spotlight {
+    background: radial-gradient(300px circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
+      rgba(58, 37, 22, 0.06), transparent 70%);
+    transition: background 0.3s ease;
+  }
+
+  /* === Ambient: breathe / glow === */
+  @keyframes breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes glow    { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
+  .breathe { animation: breathe 4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+  .glow    { animation: glow 3s ease-in-out infinite; }
+  /* manifesto blobs — staggered breathe */
+  .s-manifesto .blob.b-red    { animation-delay: 0s; }
+  .s-manifesto .blob.b-orange { animation-delay: 0.5s; }
+  .s-manifesto .blob.b-yellow { animation-delay: 1s; }
+  .s-manifesto .blob.b-green  { animation-delay: 1.5s; }
+  .s-manifesto .blob.b-blue   { animation-delay: 0.8s; }
+  .s-manifesto .blob.b-pink   { animation-delay: 2s; }
+
+  /* === Count-Up numerals === */
+  .metric-num { font-variant-numeric: tabular-nums; }
+
+  /* === Reduced Motion 兜底（必须） === */
+  @media (prefers-reduced-motion: reduce) {
+    .slide:not(.is-visible) .reveal,
+    .slide:not(.is-visible) .reveal-scale,
+    .slide:not(.is-visible) .reveal-blur,
+    .slide:not(.is-visible) .reveal-slide-l,
+    .slide:not(.is-visible) .reveal-slide-r { opacity: 1; transform: none; filter: none; }
+    .slide:not(.is-visible) { opacity: 1; }
+    .slide.is-visible .reveal,
+    .slide.is-visible .reveal-scale,
+    .slide.is-visible .reveal-blur,
+    .slide.is-visible .reveal-slide-l,
+    .slide.is-visible .reveal-slide-r { transition: none; }
+    .draw-path { stroke-dashoffset: 0; animation: none; }
+    .bar-grow { transform: scaleY(1); animation: none; }
+    .data-point { opacity: 1; transform: scale(1); animation: none; }
+    .petal-fall .petal, .stamp-drop, .rainbow-shimmer .ribbon, .rainbow-shimmer .rib,
+    .s-cover::before, .breathe, .glow { animation: none; }
+    .slide:not(.is-visible) .stamp-drop,
+    .stamp-drop { opacity: 1; transform: none; }
+    .parallax-bg { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+    <!-- 1. COVER ─────────────────────────────────────────────── -->
+    <section class="slide s-cover cursor-spotlight">
+      <!-- petal cluster top-left -->
+      <div class="petals petal-fall" aria-hidden="true">
+        <div class="petal p1"></div>
+        <div class="petal p2"></div>
+        <div class="petal p3"></div>
+        <div class="petal p4"></div>
+        <div class="petal p5"></div>
+      </div>
+
+      <!-- brand lockup -->
+      <div class="brand reveal reveal-slide-l reveal-d1">
+        <div class="b1">tape<br/>garden</div>
+        <div class="b2">CATALOGUE NO. 7</div>
+      </div>
+
+      <!-- diagonal ribbons sweeping right and down -->
+      <div class="ribbons rainbow-shimmer" aria-hidden="true">
+        <div class="ribbon r-pink"   style="top: 0%;   height: 18%; transform: rotate(-22deg);"></div>
+        <div class="ribbon r-orange" style="top: 18%;  height: 16%; transform: rotate(-22deg);"></div>
+        <div class="ribbon r-yellow" style="top: 35%;  height: 16%; transform: rotate(-22deg);"></div>
+        <div class="ribbon r-green"  style="top: 52%;  height: 16%; transform: rotate(-22deg);"></div>
+        <div class="ribbon r-blue"   style="top: 70%;  height: 18%; transform: rotate(-22deg);"></div>
+      </div>
+
+      <!-- hero number / lockup -->
+      <div class="hero reveal reveal-blur reveal-d2">T-<span class="metric-num" data-num="26">26</span></div>
+      <div class="lockup reveal reveal-d3">SUPERCATALOG</div>
+
+      <!-- footer -->
+      <div class="cfooter reveal reveal-d5">
+        <div class="made caption"><span class="jp caption">限定版</span>made in matsumoto</div>
+        <div class="cfooter-right" style="display:flex; gap:24px; align-items:center;">
+          <div class="seal caption stamp-drop">26</div>
+          <div class="stamp caption">
+            <div class="lab2 caption">AS SEEN ON</div>
+            <div>TG</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pagenum">01 / 08</div>
+    </section>
+
+    <!-- 2. MANIFESTO ─────────────────────────────────────────── -->
+    <section class="slide s-manifesto">
+      <div class="kicker caption reveal reveal-d1">A short letter from the studio, January 2026</div>
+      <div class="blob b-red breathe"    aria-hidden="true"></div>
+      <div class="blob b-orange breathe" aria-hidden="true"></div>
+      <div class="blob b-yellow breathe" aria-hidden="true"></div>
+      <div class="blob b-green breathe"  aria-hidden="true"></div>
+      <div class="blob b-blue breathe"   aria-hidden="true"></div>
+      <div class="blob b-pink breathe"   aria-hidden="true"></div>
+      <div class="stmt-wrap">
+        <h1 class="stmt reveal reveal-blur reveal-d2">We make small analog things for the people who keep tape recorders on their desks.</h1>
+      </div>
+      <div class="pagenum">02 / 08</div>
+    </section>
+
+    <!-- 3. CATALOGUE GRID ────────────────────────────────────── -->
+    <section class="slide s-catalogue">
+      <div class="frame">
+        <div class="topbar">
+          <div class="ttl reveal reveal-blur reveal-d2">The 2026 Catalogue</div>
+          <div class="lab caption reveal reveal-d1">Four products · spring &amp; summer release</div>
+        </div>
+        <div class="grid">
+          <div class="card c-red reveal reveal-slide-l reveal-d3">
+            <div class="topstrip"></div>
+            <div class="body">
+              <div class="nm">SC-01<br/>BLOOM&nbsp;PEDAL</div>
+              <div class="desc">A tape-saturation pedal voiced after late-70s cassette decks. Three knobs, one switch.</div>
+              <div class="extras">
+                <div>Hand-wired in our Matsumoto workshop, one batch at a time, with a small cream rosette stamped on the bottom plate.</div>
+              </div>
+              <div class="specs">
+                <div class="row"><span class="k caption">FORMAT</span><span class="caption">9V pedal</span></div>
+                <div class="row"><span class="k caption">CHANNELS</span><span class="caption">Mono · TRS</span></div>
+                <div class="row"><span class="k caption">PRICE</span><span class="caption">¥38,000</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card c-pink reveal reveal-d3">
+            <div class="topstrip"></div>
+            <div class="body">
+              <div class="nm">SC-02<br/>CHROMA&nbsp;DECK</div>
+              <div class="desc">A studio cassette deck reissued from our 1981 design. Quartz-locked transport.</div>
+              <div class="extras">
+                <div>Each unit ships with a numbered plate, a hand-cut sleeve, and a letter explaining how to wear it in slowly.</div>
+              </div>
+              <div class="specs">
+                <div class="row"><span class="k caption">FORMAT</span><span class="caption">Hardware deck</span></div>
+                <div class="row"><span class="k caption">EDITION</span><span class="caption">Limited · <span class="metric-num" data-num="320">320</span> units</span></div>
+                <div class="row"><span class="k caption">PRICE</span><span class="caption">¥184,000</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card c-orange reveal reveal-d4">
+            <div class="topstrip"></div>
+            <div class="body">
+              <div class="nm">SC-03<br/>SUPER&nbsp;TAPE</div>
+              <div class="desc">Seven C-60 cassettes labelled by colour and season. Hand-drawn cream-stock inserts.</div>
+              <div class="extras">
+                <div>Refill packs ship four times a year. Subscribers get a small note from the studio with each delivery.</div>
+              </div>
+              <div class="specs">
+                <div class="row"><span class="k caption">FORMAT</span><span class="caption">7 × C-60 set</span></div>
+                <div class="row"><span class="k caption">EDITION</span><span class="caption">Open · refilled monthly</span></div>
+                <div class="row"><span class="k caption">PRICE</span><span class="caption">¥7,200 / box</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card c-blue reveal reveal-slide-r reveal-d5">
+            <div class="topstrip"></div>
+            <div class="body">
+              <div class="nm">SC-04<br/>MIX&nbsp;CHAIR</div>
+              <div class="desc">A listening chair upholstered in cassette-loop fabric, woven from studio off-cuts.</div>
+              <div class="extras">
+                <div>Each chair is signed on the underside by the maker and dated to the day it left the workshop.</div>
+              </div>
+              <div class="specs">
+                <div class="row"><span class="k caption">FORMAT</span><span class="caption">Furniture · 1 piece</span></div>
+                <div class="row"><span class="k caption">FRAME</span><span class="caption">Solid ash</span></div>
+                <div class="row"><span class="k caption">PRICE</span><span class="caption">¥420,000</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">03 / 08</div>
+    </section>
+
+    <!-- 4. STRIPE SPREAD ─────────────────────────────────────── -->
+    <section class="slide s-stripe">
+      <div class="ribbon-stack rainbow-shimmer" aria-hidden="true">
+        <div class="rib r1"></div>
+        <div class="rib r2"></div>
+        <div class="rib r3"></div>
+        <div class="rib r4"></div>
+        <div class="rib r5"></div>
+      </div>
+      <div class="quote-wrap">
+        <div class="qkicker caption reveal reveal-d1">A note pinned above the workbench</div>
+        <h2 class="qbody reveal reveal-blur reveal-d2">Build the thing first, then write the spec sheet.</h2>
+        <div class="qattr caption reveal reveal-d3">— Ren Kobayashi · founder · 2024</div>
+      </div>
+      <div class="pagenum">04 / 08</div>
+    </section>
+
+    <!-- 5. DATA / EQUALIZER ──────────────────────────────────── -->
+    <section class="slide s-data">
+      <div class="frame">
+        <div class="topbar">
+          <div class="ttl reveal reveal-blur reveal-d2">Output, by year</div>
+          <div class="lab caption reveal reveal-d1">Units shipped · 2019—2026 · Q3 estimate</div>
+        </div>
+        <div class="body">
+          <div class="col-a reveal reveal-slide-l reveal-d3">
+            <div class="stat">
+              <div class="vbig"><span class="metric-num" data-num="26">26</span><sub>K</sub></div>
+              <div class="lab-tag caption">Units shipped, 2026</div>
+              <div class="desc">Led by Bloom Pedal sales.</div>
+            </div>
+            <div class="stat">
+              <div class="vbig" style="color: var(--blue); font-size: 100px;"><span class="metric-num" data-num="61">61</span><span style="font-size: 40px; color: var(--ink); margin-left: 6px;">%</span></div>
+              <div class="lab-tag caption">Repeat customers</div>
+              <div class="desc">3 in 5 are repeat buyers.</div>
+            </div>
+          </div>
+          <div class="eq reveal reveal-scale reveal-d4">
+            <div class="bars">
+              <!-- Each column is a year. With column-reverse on .bcol, the
+                   first .seg in source sits at the BOTTOM, so .on segments
+                   come first and stack upward like a real level meter. -->
+              <div class="bcol" data-c="b"><!-- 2019: 2 on -->
+                <div class="seg on"></div><div class="seg on"></div>
+                <div class="seg"></div><div class="seg"></div><div class="seg"></div><div class="seg"></div>
+              </div>
+              <div class="bcol" data-c="g"><!-- 2020: 3 on -->
+                <div class="seg on"></div><div class="seg on"></div><div class="seg on"></div>
+                <div class="seg"></div><div class="seg"></div><div class="seg"></div>
+              </div>
+              <div class="bcol" data-c="y"><!-- 2021: 3 on -->
+                <div class="seg on"></div><div class="seg on"></div><div class="seg on"></div>
+                <div class="seg"></div><div class="seg"></div><div class="seg"></div>
+              </div>
+              <div class="bcol" data-c="o"><!-- 2022: 4 on -->
+                <div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div>
+                <div class="seg"></div><div class="seg"></div>
+              </div>
+              <div class="bcol" data-c="o"><!-- 2023: 4 on -->
+                <div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div>
+                <div class="seg"></div><div class="seg"></div>
+              </div>
+              <div class="bcol" data-c="p"><!-- 2024: 5 on -->
+                <div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div>
+                <div class="seg"></div>
+              </div>
+              <div class="bcol" data-c="p"><!-- 2025: 5 on -->
+                <div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div>
+                <div class="seg"></div>
+              </div>
+              <div class="bcol" data-c="r"><!-- 2026: peak, all on -->
+                <div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div><div class="seg on"></div>
+              </div>
+            </div>
+            <div class="ticks">
+              <div class="ticklab caption">2019</div>
+              <div class="ticklab caption">2020</div>
+              <div class="ticklab caption">2021</div>
+              <div class="ticklab caption">2022</div>
+              <div class="ticklab caption">2023</div>
+              <div class="ticklab caption">2024</div>
+              <div class="ticklab caption">2025</div>
+              <div class="ticklab caption">2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">05 / 08</div>
+    </section>
+
+    <!-- 6. QUOTE + PETALS ────────────────────────────────────── -->
+    <section class="slide s-quote">
+      <div class="qpetals petal-fall" aria-hidden="true">
+        <div class="petal p1"></div>
+        <div class="petal p2"></div>
+        <div class="petal p3"></div>
+        <div class="petal p4"></div>
+        <div class="petal p5"></div>
+      </div>
+      <div class="qframe">
+        <div class="qkicker caption reveal reveal-d1">A reader writes</div>
+        <p class="qbody reveal reveal-blur reveal-d2">"It feels less like a gadget and more like a small machine that has decided to be friendly with my desk."</p>
+        <div class="qattr-row reveal reveal-d3">
+          <div class="who-tag caption">Mei Tanaka</div>
+          <div class="meta-tag caption">Reader letter · Bloom Pedal owner · April 2025</div>
+        </div>
+      </div>
+      <div class="pagenum">06 / 08</div>
+    </section>
+
+    <!-- 7. RELEASE SCHEDULE ──────────────────────────────────── -->
+    <section class="slide s-cal">
+      <div class="frame">
+        <div class="topbar">
+          <div class="ttl reveal reveal-blur reveal-d2">Release schedule</div>
+          <div class="lab caption reveal reveal-d1">Spring &amp; summer · 2026</div>
+        </div>
+        <div class="ledger reveal reveal-d3">
+          <div class="row headrow">
+            <div class="caption">Date</div>
+            <div class="caption">Title</div>
+            <div class="caption">Edition</div>
+            <div class="caption">Track</div>
+            <div class="caption">N.R.</div>
+          </div>
+          <div class="row">
+            <div class="date-tag caption">14.03</div>
+            <div class="ttl-row">SC-01 Bloom Pedal · first run</div>
+            <div class="ven">Open edition · <span class="metric-num" data-num="600">600</span> units</div>
+            <div><span class="chip c-red caption">PEDAL</span></div>
+            <div class="nr-cell"><span class="b fill"></span><span class="b"></span></div>
+          </div>
+          <div class="row">
+            <div class="date-tag caption">02.05</div>
+            <div class="ttl-row">SC-02 Chroma Deck · numbered run</div>
+            <div class="ven">Limited · 320 units</div>
+            <div><span class="chip c-pink caption">DECK</span></div>
+            <div class="nr-cell"><span class="b fill"></span><span class="b"></span></div>
+          </div>
+          <div class="row">
+            <div class="date-tag caption">14.06</div>
+            <div class="ttl-row">SC-03 Super Tape boxset</div>
+            <div class="ven">Open · refilled monthly</div>
+            <div><span class="chip c-orange caption">TAPE</span></div>
+            <div class="nr-cell"><span class="b"></span><span class="b fill"></span></div>
+          </div>
+          <div class="row">
+            <div class="date-tag caption">12.07</div>
+            <div class="ttl-row">SC-03b Summer side · 4 cassettes</div>
+            <div class="ven">Refill kit</div>
+            <div><span class="chip c-orange caption">TAPE</span></div>
+            <div class="nr-cell"><span class="b"></span><span class="b fill"></span></div>
+          </div>
+          <div class="row">
+            <div class="date-tag caption">22.08</div>
+            <div class="ttl-row">SC-04 Mix Chair · workshop run</div>
+            <div class="ven">Single piece</div>
+            <div><span class="chip c-blue caption">CHAIR</span></div>
+            <div class="nr-cell"><span class="b fill"></span><span class="b"></span></div>
+          </div>
+          <div class="row">
+            <div class="date-tag caption">03.10</div>
+            <div class="ttl-row">Open studio &amp; listening night</div>
+            <div class="ven">Matsumoto workshop</div>
+            <div><span class="chip c-green caption">EVENT</span></div>
+            <div class="nr-cell"><span class="b"></span><span class="b fill"></span></div>
+          </div>
+          <div class="row">
+            <div class="date-tag caption">14.11</div>
+            <div class="ttl-row">Catalogue No. 8 · early preview</div>
+            <div class="ven">Subscribers only</div>
+            <div><span class="chip c-pink caption">PREVIEW</span></div>
+            <div class="nr-cell"><span class="b fill"></span><span class="b"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="pagenum">07 / 08</div>
+    </section>
+
+    <!-- 8. COLOPHON / CLOSING ───────────────────────────────── -->
+    <section class="slide s-colophon">
+      <div class="ribbons rainbow-shimmer" aria-hidden="true">
+        <div class="ribbon r-blue"   style="bottom: 0%;   height: 18%; transform: rotate(22deg);"></div>
+        <div class="ribbon r-green"  style="bottom: 18%;  height: 16%; transform: rotate(22deg);"></div>
+        <div class="ribbon r-yellow" style="bottom: 35%;  height: 16%; transform: rotate(22deg);"></div>
+        <div class="ribbon r-orange" style="bottom: 52%;  height: 16%; transform: rotate(22deg);"></div>
+        <div class="ribbon r-pink"   style="bottom: 70%;  height: 18%; transform: rotate(22deg);"></div>
+      </div>
+
+      <div class="col-petals petal-fall" aria-hidden="true">
+        <div class="petal p1"></div>
+        <div class="petal p2"></div>
+        <div class="petal p3"></div>
+        <div class="petal p4"></div>
+      </div>
+
+      <div class="seal-stack" aria-hidden="false">
+        <div class="seal caption stamp-drop">VOL<br/><span class="metric-num" data-num="26">26</span></div>
+        <div class="red-stamp caption">COMPLETE</div>
+      </div>
+
+      <div class="titlewrap">
+        <div class="ktag caption reveal reveal-d1">Colophon · Catalogue No. 7</div>
+        <h2 class="ttl reveal reveal-blur reveal-d2">See you in volume eight.</h2>
+      </div>
+
+      <div class="col-footer reveal reveal-d4">
+        <div>
+          <div class="ftag caption">Studio</div>
+          <div class="ftxt">Tape Garden · Matsumoto<br/>est. 2018</div>
+        </div>
+        <div>
+          <div class="ftag caption">Designed</div>
+          <div class="ftxt">In a small room beside the<br/>tape archive · over six months</div>
+        </div>
+        <div>
+          <div class="ftag caption">Until next year</div>
+          <div class="ftxt">Catalogue No. 8 ships January 2027. Mailing list opens with the snow.</div>
+        </div>
+      </div>
+
+      <div class="pagenum">08 / 08</div>
+    </section>
+
+<script>
+(function(){
+  // === Cinematic Reveal: IntersectionObserver ===
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('is-visible');
+        io.unobserve(e.target);
+        e.target.querySelectorAll('.metric-num[data-num]').forEach(function(el){
+          countUp(el, parseFloat(el.getAttribute('data-num')));
+        });
+      }
+    });
+  }, { threshold: 0.18 });
+  document.querySelectorAll('.slide').forEach(function(s){ io.observe(s); });
+
+  // === Count-Up Animation ===
+  function countUp(el, target){
+    var dur = 1800, start = performance.now(), isFloat = target % 1 !== 0;
+    function fmt(v){ return v >= 1000 ? Math.round(v).toLocaleString('en-US') : (isFloat ? v.toFixed(1) : Math.round(v)); }
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * eased);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // === Parallax ===
+  var parallaxEls = document.querySelectorAll('.parallax-bg');
+  if(parallaxEls.length){
+    var ticking = false;
+    function updateParallax(){
+      ticking = false;
+      parallaxEls.forEach(function(el){
+        var slide = el.closest('.slide');
+        if(!slide) return;
+        var rect = slide.getBoundingClientRect();
+        var center = rect.top + rect.height / 2;
+        var offset = (center - window.innerHeight / 2) / window.innerHeight;
+        el.style.setProperty('--parallax', (offset * -30) + 'px');
+      });
+    }
+    window.addEventListener('scroll', function(){
+      if(!ticking){ requestAnimationFrame(updateParallax); ticking = true; }
+    }, { passive: true });
+    updateParallax();
+  }
+
+  // === Cursor Spotlight (cover only) ===
+  var cover = document.querySelector('.slide.cursor-spotlight');
+  if(cover){
+    cover.addEventListener('mousemove', function(e){
+      var rect = cover.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+      var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+      cover.style.setProperty('--cursor-x', x + '%');
+      cover.style.setProperty('--cursor-y', y + '%');
+    });
+  }
+})();
+</script>
+</body>
+</html>

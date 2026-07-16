@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>产品研发组 · 项目管理分析 · 示例</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      :root {
+        --bg:#f6f5f0; --panel:#ffffff; --panel2:#fbfaf6;
+        --ink:#16181d; --ink2:#3c3f47; --muted:#6a6e77; --faint:#9aa0a8;
+        --brand:#14457a; --brand2:#1d4ed8; --brand-tint:#e9eff7; --brand-tint2:#dde8f5;
+        --green:#2e7d52; --green-tint:#e6f1ea;
+        --amber:#a9781b; --amber-tint:#f5ecd8;
+        --red:#bb3a2b;   --red-tint:#f6e6e2;
+        --line:#e4e2d8; --line2:#eceae1;
+        --sans:"Inter","Noto Sans SC","PingFang SC",-apple-system,"Microsoft YaHei",sans-serif;
+      }
+
+      @page { size:1280px 720px; margin:0; }
+
+      body {
+        background:#cfccc0; color:var(--ink); font-family:var(--sans);
+        display:flex; flex-direction:column; align-items:center; gap:26px;
+        padding:34px 20px; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      }
+
+      .slide {
+        width:1280px; height:720px; background:var(--bg);
+        padding:52px 76px 58px; position:relative; overflow:hidden; flex-shrink:0;
+        display:flex; flex-direction:column;
+        isolation: isolate;
+      }
+      .slide::after { content:""; position:absolute; left:0; top:0; width:100%; height:6px; background:var(--brand); }
+
+      /* chrome */
+      .eyebrow { font-size:15px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--brand); margin-bottom:14px; }
+      .pgnum { position:absolute; right:76px; bottom:26px; font-size:14px; font-weight:600; color:var(--faint); font-variant-numeric:tabular-nums; }
+      .mark { position:absolute; left:76px; bottom:26px; font-size:13px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--faint); }
+
+      /* type */
+      h1.title { font-weight:800; font-size:46px; line-height:1.18; letter-spacing:-.5px; color:var(--ink); }
+      .lead { font-weight:400; font-size:22px; line-height:1.5; color:var(--ink2); margin-top:14px; max-width:62ch; }
+      .lead b, .body b { font-weight:700; color:var(--ink); }
+      .body { font-weight:400; font-size:19px; line-height:1.6; color:var(--ink2); }
+      .cap { font-size:16.5px; line-height:1.55; color:var(--muted); }
+      .acc { color:var(--brand); font-weight:700; }
+      .rd { color:var(--red); font-weight:700; } .am { color:var(--amber); font-weight:700; } .gn { color:var(--green); font-weight:700; }
+      .num { font-variant-numeric:tabular-nums; }
+      .grow { flex:1; min-height:0; }
+      .center { justify-content:center; }
+
+      .sect { font-weight:700; font-size:19px; line-height:1.3; color:var(--ink); border-left:4px solid var(--brand); padding-left:13px; }
+      .quote { border-left:4px solid var(--brand); padding:4px 0 4px 20px; font-weight:600; font-size:24px; line-height:1.5; color:var(--ink2); }
+
+      /* tags */
+      .tags { display:flex; gap:12px; flex-wrap:wrap; }
+      .tag { display:inline-flex; align-items:center; gap:9px; font-size:16px; font-weight:600; color:var(--brand); background:var(--brand-tint); padding:9px 16px; border-radius:7px; }
+      .tag .dot { width:9px; height:9px; border-radius:50%; background:var(--brand); }
+      .tag.g { color:var(--green); background:var(--green-tint); } .tag.g .dot { background:var(--green); }
+      .tag.a { color:var(--amber); background:var(--amber-tint); } .tag.a .dot { background:var(--amber); }
+      .tag.r { color:var(--red);   background:var(--red-tint);   } .tag.r .dot { background:var(--red); }
+
+      .lv { display:inline-flex; align-items:center; font-weight:800; font-size:15px; letter-spacing:.5px; padding:4px 11px; border-radius:6px; }
+      .lv-p0 { color:#fff; background:var(--red); } .lv-p1 { color:#fff; background:var(--amber); } .lv-p2 { color:#fff; background:var(--brand); }
+
+      /* dash list */
+      .dash { list-style:none; display:flex; flex-direction:column; gap:16px; }
+      .dash li { position:relative; padding-left:24px; font-size:19px; line-height:1.5; color:var(--ink2); }
+      .dash li::before { content:""; position:absolute; left:0; top:11px; width:11px; height:11px; border-radius:3px; background:var(--brand); }
+      .dash li b { font-weight:700; color:var(--ink); }
+
+      /* cards */
+      .cols2 { display:grid; grid-template-columns:1fr 1fr; gap:34px; }
+      .cols3 { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+      .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:26px 26px; display:flex; flex-direction:column; }
+      .card.b-red   { border-top:5px solid var(--red); }
+      .card.b-amber { border-top:5px solid var(--amber); }
+      .card.b-green { border-top:5px solid var(--green); }
+      .card.b-brand { border-top:5px solid var(--brand); }
+      .card h3 { font-weight:800; font-size:21px; color:var(--ink); margin:12px 0 9px; line-height:1.25; }
+      .card p { font-size:16.5px; line-height:1.6; color:var(--ink2); }
+      .card .no { font-size:16px; font-weight:800; letter-spacing:.5px; }
+
+      .rule { height:1px; background:var(--line); border:0; }
+
+      /* table */
+      .tbl { width:100%; border-collapse:collapse; }
+      .tbl th { font-size:15px; font-weight:700; letter-spacing:.5px; color:var(--muted); text-align:left; padding:0 16px 13px 0; border-bottom:2px solid var(--line); }
+      .tbl td { padding:15px 16px 15px 0; border-bottom:1px solid var(--line2); color:var(--ink2); font-size:18px; line-height:1.45; vertical-align:middle; }
+      .tbl tr:last-child td { border-bottom:0; }
+      .tbl td b { font-weight:700; color:var(--ink); }
+
+      /* health rows */
+      .hrows { display:flex; flex-direction:column; gap:14px; }
+      .hrow { display:flex; align-items:center; gap:16px; }
+      .hrow .nm { font-size:19px; font-weight:700; color:var(--ink); width:300px; flex-shrink:0; }
+      .hrow .st { font-size:16px; color:var(--muted); flex:1; }
+      .pill { display:inline-flex; align-items:center; gap:8px; font-size:15px; font-weight:700; padding:5px 13px; border-radius:20px; flex-shrink:0; }
+      .pill .d { width:10px; height:10px; border-radius:50%; }
+      .pill.g { color:var(--green); background:var(--green-tint); } .pill.g .d { background:var(--green); }
+      .pill.a { color:var(--amber); background:var(--amber-tint); } .pill.a .d { background:var(--amber); }
+      .pill.r { color:var(--red);   background:var(--red-tint);   } .pill.r .d { background:var(--red); }
+
+      /* heat matrix */
+      .mtx { display:grid; grid-template-columns:230px repeat(6,1fr); gap:7px; align-items:center; }
+      .mtx .mh { font-size:15px; font-weight:700; color:var(--muted); text-align:center; padding-bottom:4px; }
+      .mtx .mh.l { text-align:left; }
+      .mtx .mn { font-size:17px; font-weight:600; color:var(--ink2); white-space:nowrap; }
+      .mtx .mn.hot { color:var(--brand); font-weight:800; }
+      .mtx .cell { height:30px; border-radius:6px; background:var(--line2); }
+      .mtx .cell.core { background:var(--brand); }
+      .mtx .cell.sup  { background:var(--brand-tint2); border:1.5px solid var(--brand-tint); }
+      .mtx-row-hot { background:var(--brand-tint); border-radius:7px; }
+
+      /* chart text */
+      svg { display:block; }
+      .s-lab { font-family:var(--sans); font-weight:700; fill:var(--ink); }
+      .s-sub { font-family:var(--sans); font-weight:400; fill:var(--muted); }
+      .s-axis { font-family:var(--sans); font-weight:600; fill:var(--faint); }
+
+      .legend { display:flex; gap:20px; margin-top:14px; font-size:16px; }
+      .legend span { display:flex; align-items:center; gap:8px; color:var(--ink2); font-weight:600; }
+      .legend i { width:14px; height:14px; border-radius:4px; display:inline-block; }
+
+      /* ── Motion layer (Cinematic · deck-report) ── */
+      :root { --ease: cubic-bezier(0.16, 1, 0.3, 1); --ease-soft: cubic-bezier(0.32, 0.72, 0, 1); }
+
+      /* === Cinematic Reveal System === */
+      .slide:not(.is-visible) .reveal { opacity: 0; transform: translateY(20px); }
+      .slide:not(.is-visible) .reveal-scale { opacity: 0; transform: scale(0.94); }
+      .slide:not(.is-visible) .reveal-blur { opacity: 0; transform: translateY(16px); filter: blur(6px); }
+      .slide:not(.is-visible) .reveal-slide-l { opacity: 0; transform: translateX(-24px); }
+      .slide:not(.is-visible) .reveal-slide-r { opacity: 0; transform: translateX(24px); }
+
+      .slide.is-visible .reveal,
+      .slide.is-visible .reveal-scale,
+      .slide.is-visible .reveal-blur,
+      .slide.is-visible .reveal-slide-l,
+      .slide.is-visible .reveal-slide-r {
+        opacity: 1; transform: none; filter: none;
+        transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), filter 0.7s ease;
+      }
+      .reveal-d1 { transition-delay: 0s; }
+      .reveal-d2 { transition-delay: 0.12s; }
+      .reveal-d3 { transition-delay: 0.24s; }
+      .reveal-d4 { transition-delay: 0.36s; }
+      .reveal-d5 { transition-delay: 0.48s; }
+      .reveal-d6 { transition-delay: 0.6s; }
+
+      /* === SVG Chart Draw === */
+      .draw-path { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000); }
+      .slide.is-visible .draw-path { animation: path-draw 2s var(--ease) forwards; }
+      @keyframes path-draw { to { stroke-dashoffset: 0; } }
+
+      .bar-grow { transform: scaleY(0); transform-origin: bottom; transform-box: fill-box; }
+      .slide.is-visible .bar-grow { animation: bar-grow 0.8s var(--ease) forwards; }
+      @keyframes bar-grow { to { transform: scaleY(1); } }
+
+      .data-point { opacity: 0; transform: scale(0); transform-origin: center; transform-box: fill-box; }
+      .slide.is-visible .data-point { animation: point-pop 0.4s var(--ease) forwards; animation-delay: 1.8s; }
+      @keyframes point-pop { to { opacity: 1; transform: scale(1); } }
+
+      /* === Parallax & Page Transition === */
+      .parallax-bg { transform: translateY(var(--parallax, 0px)); transition: transform 0.1s linear; }
+      .slide { transition: opacity 0.5s ease; isolation: isolate; }
+      .slide:not(.is-visible) { opacity: 0.6; }
+
+      /* === Cursor Spotlight (cover) · #14457a 6% alpha === */
+      .cursor-spotlight {
+        background: radial-gradient(300px circle at var(--cursor-x, 50%) var(--cursor-y, 50%),
+          rgba(20, 69, 122, 0.06), transparent 70%);
+        transition: background 0.3s ease;
+      }
+
+      /* === Ambient focus dot === */
+      @keyframes glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+      .glow { animation: glow 3s ease-in-out infinite; }
+
+      /* === Count-Up === */
+      .metric-num { font-variant-numeric: tabular-nums; }
+
+      /* === Reduced Motion === */
+      @media (prefers-reduced-motion: reduce) {
+        .slide:not(.is-visible) .reveal,
+        .slide:not(.is-visible) .reveal-scale,
+        .slide:not(.is-visible) .reveal-blur,
+        .slide:not(.is-visible) .reveal-slide-l,
+        .slide:not(.is-visible) .reveal-slide-r { opacity: 1; transform: none; filter: none; }
+        .slide:not(.is-visible) { opacity: 1; }
+        .slide.is-visible .reveal,
+        .slide.is-visible .reveal-scale,
+        .slide.is-visible .reveal-blur,
+        .slide.is-visible .reveal-slide-l,
+        .slide.is-visible .reveal-slide-r { transition: none; }
+        .draw-path { stroke-dashoffset: 0; animation: none; }
+        .bar-grow { transform: scaleY(1); animation: none; }
+        .data-point { opacity: 1; transform: scale(1); animation: none; }
+        .glow { animation: none; }
+        .parallax-bg { transform: none; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ════════ 01 · 封面 ════════ -->
+    <section class="slide center cursor-spotlight" style="align-items:flex-start">
+      <div class="eyebrow reveal reveal-d1">产品研发组 · 项目管理分析</div>
+      <h1 class="title reveal reveal-blur reveal-d2" style="font-size:64px;line-height:1.14;max-width:22ch">
+        进度健康度、风险<br/>与<span style="color:var(--brand)">资源瓶颈</span>分析
+      </h1>
+      <p class="lead reveal reveal-d3" style="font-size:24px;margin-top:26px;max-width:50ch">
+        本周期 <span class="num">W1</span>，结合近 <span class="num metric-num" data-num="11">0</span> 个 Sprint 的历史研发趋势，<br/>从资深项目管理视角对交付、风险、资源与管理动作的系统判断。
+      </p>
+      <div class="tags reveal reveal-d4" style="margin-top:44px">
+        <span class="tag r"><span class="dot"></span>整体 · 偏紧张 / 局部高风险</span>
+        <span class="tag"><span class="dot"></span>主线 · 3 条</span>
+        <span class="tag r"><span class="dot"></span>P0 风险 · 3 项</span>
+        <span class="tag a"><span class="dot"></span>近期窗口 · W3 / W4</span>
+      </div>
+      <span class="mark">Product Team · PMO</span><span class="pgnum">01 / 12</span>
+    </section>
+
+    <!-- ════════ 02 · 整体判断 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">01 · 整体判断</div>
+      <h1 class="title reveal reveal-blur reveal-d2">偏紧张、局部已进入<span class="rd">高风险</span></h1>
+      <p class="lead reveal reveal-d3">多模块"已提测 / 已联调"只是表面进展，<b>核心收口项的问题并未收敛</b>。</p>
+
+      <div class="cols2 grow" style="margin-top:30px;align-items:center;gap:48px">
+        <ul class="dash reveal reveal-slide-l reveal-d3">
+          <li><b>主线项目（3）：</b>项目 A · 项目 B · 项目 C 迁移</li>
+          <li><b>已上线（3）：</b><span class="gn">模块 X · 模块 Y · 模块 Z</span></li>
+          <li><b>收口高风险：</b>项目 A、项目 B 已提测但缺陷与口径未收敛</li>
+          <li><b>仍处早期：</b>项目 D 前端、项目 E、项目 C 用例评审</li>
+        </ul>
+        <div class="reveal reveal-slide-r reveal-d3" style="display:flex;flex-direction:column;gap:20px">
+          <div class="sect">最大管理矛盾</div>
+          <div class="quote">老主线尚未收口，新主线<span class="acc">已经插入</span>，并争抢同一批关键人力——收口窗口正在被拉长。</div>
+        </div>
+      </div>
+      <span class="mark">Overall</span><span class="pgnum">02 / 12</span>
+    </section>
+
+    <!-- ════════ 03 · 健康度总览 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">02 · 项目进度健康度</div>
+      <h1 class="title reveal reveal-blur reveal-d2">六大项目健康度总览</h1>
+      <p class="lead reveal reveal-d3">当前分布 <span class="gn">2 绿</span> / <span class="am">3 黄</span> / <span class="rd">1 红</span>，仅模块 X 完成闭环。</p>
+
+      <div class="grow" style="display:flex;align-items:center;gap:48px;margin-top:14px">
+        <div class="reveal reveal-scale reveal-d4" style="flex-shrink:0;text-align:center">
+          <svg viewBox="0 0 220 220" width="248" height="248" aria-label="健康度环形图">
+            <g transform="rotate(-90 110 110)" fill="none" stroke-width="34">
+              <circle cx="110" cy="110" r="80" stroke="var(--green)" stroke-dasharray="167.5 335.1" stroke-dashoffset="0"/>
+              <circle cx="110" cy="110" r="80" stroke="var(--amber)" stroke-dasharray="251.3 251.3" stroke-dashoffset="-167.5"/>
+              <circle cx="110" cy="110" r="80" stroke="var(--red)" stroke-dasharray="83.8 418.8" stroke-dashoffset="-418.8"/>
+            </g>
+            <text x="110" y="103" text-anchor="middle" class="s-lab metric-num" data-num="6" style="font-size:46px">0</text>
+            <text x="110" y="132" text-anchor="middle" class="s-sub" style="font-size:18px">个项目</text>
+          </svg>
+          <div class="legend" style="justify-content:center;margin-top:6px">
+            <span><i style="background:var(--green)"></i>绿 2</span>
+            <span><i style="background:var(--amber)"></i>黄 3</span>
+            <span><i style="background:var(--red)"></i>红 1</span>
+          </div>
+        </div>
+
+        <div class="hrows reveal reveal-slide-r reveal-d3" style="flex:1">
+          <div class="hrow"><span class="nm">项目 A / 客服后台</span><span class="pill r"><span class="d"></span>红</span><span class="st">核心场景测试仅 62%、新增 5 问题</span></div>
+          <div class="hrow"><span class="nm">项目 B / 数据看板</span><span class="pill a"><span class="d"></span>黄</span><span class="st">数据口径数据侧反复复验</span></div>
+          <div class="hrow"><span class="nm">项目 C / 迁移合并</span><span class="pill a"><span class="d"></span>黄</span><span class="st">联调完成，提测卡用例评审</span></div>
+          <div class="hrow"><span class="nm">模块 X / 实时风控</span><span class="pill g"><span class="d"></span>绿</span><span class="st">已上线 + 核心场景回归完成</span></div>
+          <div class="hrow"><span class="nm">项目 D / 前端 H5</span><span class="pill g"><span class="d"></span>绿</span><span class="st">已上线，灰度放量验证中</span></div>
+          <div class="hrow"><span class="nm">项目 E / 跨团队事项</span><span class="pill a"><span class="d"></span>黄</span><span class="st">未形成上线闭环，工具链受阻</span></div>
+        </div>
+      </div>
+      <span class="mark">Health</span><span class="pgnum">03 / 12</span>
+    </section>
+
+    <!-- ════════ 04 · 为什么红/黄 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">02 · 健康度判断说明</div>
+      <h1 class="title reveal reveal-blur reveal-d2">为什么这三项给到 <span class="rd">红</span> / <span class="am">黄</span></h1>
+      <p class="lead reveal reveal-d3">识别"表面提测、实则未收敛"的隐性交付风险，而非复述进度。</p>
+
+      <div class="cols3 grow" style="margin-top:28px;align-items:stretch">
+        <div class="card b-red reveal reveal-slide-l reveal-d3">
+          <span class="no rd">项目 A · 红</span>
+          <h3>提测 ≠ 收敛</h3>
+          <p>核心场景测试仅 62%、一周新增 5 个问题，接口与权限待确认——缺陷曲线未收敛、上线边界未锁定，临近窗口存在带病上线或延期风险。</p>
+        </div>
+        <div class="card b-amber reveal reveal-d4">
+          <span class="no am">项目 B · 黄</span>
+          <h3>口径未闭环</h3>
+          <p>功能测试快，但关键指标依赖数据侧"再次验证"，BI/后端/测试口径不一致。带错误数据上线会损害业务可信度。</p>
+        </div>
+        <div class="card b-amber reveal reveal-slide-r reveal-d5">
+          <span class="no am">项目 C · 黄</span>
+          <h3>提测前置卡死</h3>
+          <p>联调完成，但提测卡在用例评审；落地页报错定位为底层公共组件，依赖外部团队修复，跨组不可控。</p>
+        </div>
+      </div>
+      <span class="mark">Why Red / Amber</span><span class="pgnum">04 / 12</span>
+    </section>
+
+    <!-- ════════ 05 · 风险全景 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">03 · 关键风险与阻塞</div>
+      <h1 class="title reveal reveal-blur reveal-d2">风险全景 · 按优先级分层</h1>
+      <p class="lead reveal reveal-d3">P0 影响近期上线与核心交付 · P1 影响排期质量资源 · P2 需跟踪不阻断。</p>
+
+      <div class="grow" style="display:flex;align-items:center;gap:50px;margin-top:6px">
+        <svg viewBox="0 0 640 250" width="560" class="reveal reveal-scale reveal-d4" style="flex-shrink:0" aria-label="风险分层金字塔">
+          <g>
+            <rect x="60"  y="6"   width="520" height="66" rx="9" fill="var(--red-tint)" stroke="var(--red)" stroke-width="1.5"/>
+            <text x="92"  y="47" class="s-lab" style="font-size:26px;fill:var(--red)">P0</text>
+            <text x="150" y="34" class="s-lab" style="font-size:19px;fill:var(--red)">3 项 · 影响近期上线</text>
+            <text x="150" y="58" class="s-sub" style="font-size:15px;fill:var(--red)">项目 A 收口 · 项目 B 口径 · 关键人双线</text>
+
+            <rect x="115" y="82"  width="410" height="66" rx="9" fill="var(--amber-tint)" stroke="var(--amber)" stroke-width="1.5"/>
+            <text x="147" y="123" class="s-lab" style="font-size:26px;fill:var(--amber)">P1</text>
+            <text x="205" y="110" class="s-lab" style="font-size:19px;fill:var(--amber)">5 项 · 影响排期质量</text>
+            <text x="205" y="134" class="s-sub" style="font-size:15px;fill:var(--amber)">项目 C 提测 · 新需求插入 · 测试瓶颈</text>
+
+            <rect x="170" y="158" width="300" height="66" rx="9" fill="var(--brand-tint)" stroke="var(--brand)" stroke-width="1.5"/>
+            <text x="202" y="199" class="s-lab" style="font-size:26px;fill:var(--brand)">P2</text>
+            <text x="260" y="186" class="s-lab" style="font-size:19px;fill:var(--brand)">4 项 · 需跟踪</text>
+            <text x="260" y="210" class="s-sub" style="font-size:15px;fill:var(--brand)">跨组依赖 · 工具链 · 模块 X 后续</text>
+          </g>
+        </svg>
+        <div class="reveal reveal-slide-r reveal-d3" style="flex:1">
+          <div class="quote" style="font-size:22px"><span class="num metric-num" data-num="12">0</span> 条风险中，<span class="rd">3 条 P0 全部压在同一个节点</span> 上——上线边界与数据口径是本周必须收口的两道闸。</div>
+        </div>
+      </div>
+      <span class="mark">Risk Overview</span><span class="pgnum">05 / 12</span>
+    </section>
+
+    <!-- ════════ 06 · P0 详解 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">03 · 关键风险与阻塞</div>
+      <h1 class="title reveal reveal-blur reveal-d2"><span class="rd">P0</span> 风险 · 影响近期上线与核心交付</h1>
+      <p class="lead reveal reveal-d3">三项 P0 直接关系近期上线，需在本周内拍板收口。</p>
+
+      <div class="cols3 grow" style="margin-top:26px;align-items:stretch">
+        <div class="card b-red reveal reveal-slide-l reveal-d3">
+          <div style="display:flex;align-items:center;gap:10px"><span class="lv lv-p0">P0</span><b style="font-size:19px">项目 A 收口</b></div>
+          <p style="margin-top:14px">提测后仍持续新增问题，核心场景仅 62%，上线边界未锁定。</p>
+          <p class="cap" style="margin-top:auto;padding-top:14px"><span class="rd">后果：</span>窗口延期或带病上线</p>
+          <p class="cap" style="margin-top:7px"><span class="acc">处理：</span>拉齐"必上线/可延期/阻断"清单</p>
+        </div>
+        <div class="card b-red reveal reveal-d4">
+          <div style="display:flex;align-items:center;gap:10px"><span class="lv lv-p0">P0</span><b style="font-size:19px">项目 B 数据口径</b></div>
+          <p style="margin-top:14px">关键指标多方反复复验，无统一验收样例。</p>
+          <p class="cap" style="margin-top:auto;padding-top:14px"><span class="rd">后果：</span>带错数据上线，损可信度</p>
+          <p class="cap" style="margin-top:7px"><span class="acc">处理：</span>单一口径确认人 + 验收样例表</p>
+        </div>
+        <div class="card b-red reveal reveal-slide-r reveal-d5">
+          <div style="display:flex;align-items:center;gap:10px"><span class="lv lv-p0">P0</span><b style="font-size:19px">关键成员双线</b></div>
+          <p style="margin-top:14px">m.alpha 同时担项目 A 收尾与项目 D 前端迁移。</p>
+          <p class="cap" style="margin-top:auto;padding-top:14px"><span class="rd">后果：</span>双线半收口，无单点保障</p>
+          <p class="cap" style="margin-top:7px"><span class="acc">处理：</span>明确本周单一优先级</p>
+        </div>
+      </div>
+      <span class="mark">P0 Risks</span><span class="pgnum">06 / 12</span>
+    </section>
+
+    <!-- ════════ 07 · P1 / P2 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">03 · 关键风险与阻塞</div>
+      <h1 class="title reveal reveal-blur reveal-d2"><span class="am">P1</span> 排期质量风险 · <span class="acc">P2</span> 需跟踪事项</h1>
+
+      <div class="cols2 grow" style="margin-top:24px;align-items:start;gap:48px">
+        <div class="reveal reveal-slide-l reveal-d3">
+          <div class="sect" style="margin-bottom:20px;border-color:var(--amber)">P1 · 影响排期 / 质量 / 资源</div>
+          <ul class="dash">
+            <li><b>项目 C 提测前置未闭环</b>——联调完成但卡用例评审，影响下个窗口。</li>
+            <li><b>新需求持续插入挤压收口</b>——多个新方向与收口争资源。</li>
+            <li><b>测试资源成为收口瓶颈</b>——三项目同期回归 + 多语言 + 旧版兼容。</li>
+          </ul>
+        </div>
+        <div class="reveal reveal-slide-r reveal-d3">
+          <div class="sect" style="margin-bottom:20px">P2 · 需跟踪，短期不阻断</div>
+          <ul class="dash">
+            <li><b>跨组公共依赖无反馈节点</b>——公共组件/接口中转依赖外部同学。</li>
+            <li><b>工具链接入受阻</b>——部分工具无法访问内部环境，阻断工作流。</li>
+            <li><b>模块 X 后续无 owner/deadline</b>——复盘已开展，后续安排悬挂（信息不足）。</li>
+          </ul>
+        </div>
+      </div>
+      <span class="mark">P1 / P2 Risks</span><span class="pgnum">07 / 12</span>
+    </section>
+
+    <!-- ════════ 08 · 资源瓶颈 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">04 · 资源投入与瓶颈</div>
+      <h1 class="title reveal reveal-blur reveal-d2">研发产能<span class="rd">饱和</span>，关键人多线并行</h1>
+      <p class="lead reveal reveal-d3"><span class="acc">蓝实心</span> 核心承担 · <span style="color:var(--brand)">浅蓝</span> 参与支援；高亮行为最高瓶颈，任一受阻直接影响主线收口。</p>
+
+      <div class="grow" style="margin-top:14px">
+        <div class="mtx reveal reveal-scale reveal-d4">
+          <div class="mh l">成员</div><div class="mh">项目 A</div><div class="mh">项目 B</div><div class="mh">项目 C</div><div class="mh">项目 D</div><div class="mh">模块 X</div><div class="mh">项目 E</div>
+
+          <div class="mn hot">m.alpha ★</div><div class="cell core"></div><div class="cell sup"></div><div class="cell"></div><div class="cell core"></div><div class="cell"></div><div class="cell core"></div>
+          <div class="mn hot">m.bravo ★</div><div class="cell"></div><div class="cell core"></div><div class="cell core"></div><div class="cell"></div><div class="cell sup"></div><div class="cell core"></div>
+          <div class="mn hot">m.charlie ★</div><div class="cell core"></div><div class="cell"></div><div class="cell sup"></div><div class="cell core"></div><div class="cell"></div><div class="cell"></div>
+          <div class="mn">m.delta</div><div class="cell"></div><div class="cell core"></div><div class="cell"></div><div class="cell sup"></div><div class="cell core"></div><div class="cell"></div>
+          <div class="mn">m.echo</div><div class="cell sup"></div><div class="cell"></div><div class="cell core"></div><div class="cell"></div><div class="cell"></div><div class="cell core"></div>
+          <div class="mn">m.foxtrot</div><div class="cell core"></div><div class="cell"></div><div class="cell"></div><div class="cell core"></div><div class="cell sup"></div><div class="cell"></div>
+          <div class="mn">m.golf</div><div class="cell"></div><div class="cell sup"></div><div class="cell"></div><div class="cell"></div><div class="cell core"></div><div class="cell"></div>
+          <div class="mn">m.hotel</div><div class="cell"></div><div class="cell"></div><div class="cell core"></div><div class="cell"></div><div class="cell"></div><div class="cell sup"></div>
+          <div class="mn">m.india</div><div class="cell core"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell core"></div><div class="cell"></div>
+          <div class="mn">m.juliet</div><div class="cell"></div><div class="cell core"></div><div class="cell"></div><div class="cell sup"></div><div class="cell"></div><div class="cell"></div>
+        </div>
+      </div>
+      <p class="cap reveal reveal-d5" style="margin-top:8px"><b style="color:var(--ink)">瓶颈研判：</b>m.alpha（收尾+前端双线）、m.bravo（多项目测试主线）、m.charlie（口径关键人）为高瓶颈；部分成员周报信息有限，需进一步确认（未列入）。</p>
+      <span class="mark">Bottleneck</span><span class="pgnum">08 / 12</span>
+    </section>
+
+    <!-- ════════ 09 · 历史趋势 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">05 · 历史趋势对比</div>
+      <h1 class="title reveal reveal-blur reveal-d2">不是单周冲刺，是<span class="rd">结构性</span>产能问题</h1>
+      <p class="lead reveal reveal-d3">近 <span class="num metric-num" data-num="11">0</span> 个 Sprint：负载长期贴近饱和线，仅出现一次明显回落，随后再度走高。</p>
+
+      <div class="grow" style="display:flex;flex-direction:column;justify-content:center">
+        <svg viewBox="0 0 1080 280" width="100%" aria-label="产能负荷折线图">
+          <!-- 饱和参考线 -->
+          <line x1="60" y1="70" x2="1020" y2="70" stroke="var(--amber)" stroke-width="1.5" stroke-dasharray="6 6"/>
+          <text x="1024" y="75" class="s-axis" style="font-size:14px;fill:var(--amber)">饱和线</text>
+          <!-- 基线 -->
+          <line x1="60" y1="240" x2="1020" y2="240" stroke="var(--line)" stroke-width="1.5"/>
+          <!-- 面积 -->
+          <path d="M60,150 L140,96 L220,132 L300,78 L380,116 L460,64 L540,138 L620,88 L700,104 L780,60 L860,122 L940,84 L1020,100 L1020,240 L60,240 Z"
+                fill="var(--brand-tint)" opacity="0.7"/>
+          <!-- 折线 -->
+          <path class="draw-path" style="--len:1500" d="M60,150 L140,96 L220,132 L300,78 L380,116 L460,64 L540,138 L620,88 L700,104 L780,60 L860,122 L940,84 L1020,100"
+                fill="none" stroke="var(--brand)" stroke-width="3"/>
+          <!-- 数据点 -->
+          <g fill="var(--brand)">
+            <circle class="data-point" cx="60" cy="150" r="5"/><circle class="data-point" cx="140" cy="96" r="5"/><circle class="data-point" cx="220" cy="132" r="5"/><circle class="data-point" cx="300" cy="78" r="5"/>
+            <circle class="data-point" cx="380" cy="116" r="5"/><circle class="glow" cx="460" cy="64" r="6" fill="var(--red)"/><circle class="data-point" cx="540" cy="138" r="5"/><circle class="data-point" cx="620" cy="88" r="5"/>
+            <circle class="data-point" cx="700" cy="104" r="5"/><circle class="glow" cx="780" cy="60" r="6" fill="var(--red)"/><circle class="data-point" cx="860" cy="122" r="5"/><circle class="data-point" cx="940" cy="84" r="5"/><circle class="data-point" cx="1020" cy="100" r="5"/>
+          </g>
+          <!-- 关键标注 -->
+          <text x="60"  y="172" text-anchor="middle" class="s-sub" style="font-size:14px">起步</text>
+          <text x="540" y="162" text-anchor="middle" class="s-sub" style="font-size:14px;fill:var(--green)">短暂回落</text>
+          <text x="780" y="46"  text-anchor="middle" class="s-lab" style="font-size:15px;fill:var(--red)">峰值</text>
+          <!-- x 轴 -->
+          <g class="s-axis" style="font-size:14px" text-anchor="middle">
+            <text x="60" y="262">SP12</text><text x="300" y="262">SP14</text><text x="460" y="262">SP16</text>
+            <text x="620" y="262">SP18</text><text x="780" y="262">SP20</text><text x="1020" y="262">SP22</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="quote reveal reveal-d5" style="font-size:20px;margin-top:4px">需求供给持续大于产能，缺乏<span class="acc">"需求准入 + 收口纪律"</span>两道闸门；本周收口风险是结构性问题的最新爆发，非孤立事件。</div>
+      <span class="mark">Capacity Trend</span><span class="pgnum">09 / 12</span>
+    </section>
+
+    <!-- ════════ 10 · 主线接力 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">05 · 历史趋势对比</div>
+      <h1 class="title reveal reveal-blur reveal-d2">主线接力 · 一条未收口，下一条已启动</h1>
+      <p class="lead reveal reveal-d3">从早期到当前，主线持续交接，且多次"未完全收口即插入新主线"。</p>
+
+      <div class="grow" style="display:flex;align-items:center">
+        <svg class="reveal reveal-scale reveal-d4" viewBox="0 0 1140 200" width="100%" aria-label="主线接力流程图">
+          <defs>
+            <marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 Z" fill="var(--faint)"/>
+            </marker>
+          </defs>
+          <g font-family="var(--sans)">
+            <!-- nodes -->
+            <g>
+              <rect x="6"   y="74" width="160" height="62" rx="11" fill="var(--panel)" stroke="var(--line)"/>
+              <text x="86"  y="100" text-anchor="middle" class="s-lab" style="font-size:18px">项目 C</text>
+              <text x="86"  y="122" text-anchor="middle" class="s-sub" style="font-size:13px">早期</text>
+
+              <rect x="196" y="74" width="160" height="62" rx="11" fill="var(--panel)" stroke="var(--line)"/>
+              <text x="276" y="100" text-anchor="middle" class="s-lab" style="font-size:18px">项目 D</text>
+              <text x="276" y="122" text-anchor="middle" class="s-sub" style="font-size:13px">早–中期</text>
+
+              <rect x="386" y="74" width="160" height="62" rx="11" fill="var(--panel)" stroke="var(--line)"/>
+              <text x="466" y="98"  text-anchor="middle" class="s-lab" style="font-size:17px">子功能</text>
+              <text x="466" y="120" text-anchor="middle" class="s-sub" style="font-size:13px">中期</text>
+
+              <rect x="576" y="74" width="160" height="62" rx="11" fill="var(--panel)" stroke="var(--line)"/>
+              <text x="656" y="100" text-anchor="middle" class="s-lab" style="font-size:18px">项目 A</text>
+              <text x="656" y="122" text-anchor="middle" class="s-sub" style="font-size:13px">中–近期</text>
+
+              <rect x="766" y="68" width="160" height="74" rx="11" fill="var(--brand-tint)" stroke="var(--brand)" stroke-width="2"/>
+              <text x="846" y="98"  text-anchor="middle" class="s-lab" style="font-size:18px;fill:var(--brand)">项目 B</text>
+              <text x="846" y="122" text-anchor="middle" class="s-sub" style="font-size:13px;fill:var(--brand)">收尾上线 · 当前</text>
+
+              <rect x="956" y="68" width="178" height="74" rx="11" fill="var(--red-tint)" stroke="var(--red)" stroke-width="2"/>
+              <text x="1045" y="98"  text-anchor="middle" class="s-lab" style="font-size:18px;fill:var(--red)">项目 A 收口</text>
+              <text x="1045" y="122" text-anchor="middle" class="s-sub" style="font-size:13px;fill:var(--red)">收口中 · 窗口</text>
+            </g>
+            <!-- arrows -->
+            <g stroke="var(--faint)" stroke-width="2" fill="none">
+              <line x1="166" y1="105" x2="190" y2="105" marker-end="url(#ar)"/>
+              <line x1="356" y1="105" x2="380" y2="105" marker-end="url(#ar)"/>
+              <line x1="546" y1="105" x2="570" y2="105" marker-end="url(#ar)"/>
+              <line x1="736" y1="105" x2="760" y2="105" marker-end="url(#ar)"/>
+              <line x1="926" y1="105" x2="950" y2="105" marker-end="url(#ar)"/>
+            </g>
+            <!-- overlap note -->
+            <text x="50" y="184" class="s-sub" style="font-size:15px;fill:var(--red)">▲ 多次出现：上一条主线尚未收口，下一条主线已经启动并抢占人力</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="cols2 reveal reveal-d5" style="gap:48px">
+        <p class="cap"><b style="color:var(--ink)">长期牺牲项：</b>部分低优需求多次暂停/重启；测试环境、低优业务自中期起"暂停低优"至今未恢复。</p>
+        <p class="cap"><b style="color:var(--ink)">管理含义：</b>属组织级资源结构问题，需在准入与收口两端设闸，而非靠团队内部消化。</p>
+      </div>
+      <span class="mark">Main-line Relay</span><span class="pgnum">10 / 12</span>
+    </section>
+
+    <!-- ════════ 11 · 未来 1-2 周 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">06 · 未来 1-2 周管理重点</div>
+      <h1 class="title reveal reveal-blur reveal-d2">可执行管理动作 · 谁、何时、产出什么</h1>
+
+      <div class="grow reveal reveal-scale reveal-d4" style="margin-top:18px">
+        <table class="tbl">
+          <thead><tr><th style="width:8%">等级</th><th style="width:42%">管理动作 · 产出</th><th style="width:32%">Owner / 参与方</th><th>截止</th></tr></thead>
+          <tbody>
+            <tr><td><span class="lv lv-p0">P0</span></td><td><b>项目 A 上线边界评审</b>，产出"必上线/可延期/阻断"清单</td><td>m.delta · m.india · m.alpha</td><td><span class="tag r" style="padding:5px 12px;font-size:15px">W2 前</span></td></tr>
+            <tr><td><span class="lv lv-p0">P0</span></td><td><b>指定项目 B 口径单一确认人</b>，产出验收样例表</td><td>m.charlie · m.golf + 数据/BI</td><td><span class="tag r" style="padding:5px 12px;font-size:15px">W2 前</span></td></tr>
+            <tr><td><span class="lv lv-p0">P0</span></td><td><b>明确 m.alpha 本周单一优先级</b>（收口 &gt; 前端）</td><td>m.alpha + 负责人</td><td><span class="tag r" style="padding:5px 12px;font-size:15px">本周内</span></td></tr>
+            <tr><td><span class="lv lv-p1">P1</span></td><td><b>项目 C 用例评审当天</b>输出提测结论 + 风险清单</td><td>m.echo · m.hotel · m.bravo</td><td><span class="tag a" style="padding:5px 12px;font-size:15px">评审当天</span></td></tr>
+            <tr><td><span class="lv lv-p1">P1</span></td><td><b>建立新需求准入/冻结机制</b>，新方向后置</td><td>m.delta + 产品 + 负责人</td><td><span class="tag a" style="padding:5px 12px;font-size:15px">W3 前</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <span class="mark">Next 1–2 Weeks</span><span class="pgnum">11 / 12</span>
+    </section>
+
+    <!-- ════════ 12 · 管理层摘要 ════════ -->
+    <section class="slide">
+      <div class="eyebrow reveal reveal-d1">07 · 管理层汇报版摘要</div>
+      <h1 class="title reveal reveal-blur reveal-d2">需要管理层拍板的<span class="acc">三件事</span></h1>
+      <p class="lead reveal reveal-d3">本质是组织级"需求供给 &gt; 研发产能"的结构问题，需在准入与收口纪律两个闸门上拍板。</p>
+
+      <div class="cols3" style="margin-top:30px;align-items:stretch">
+        <div class="card b-brand reveal reveal-slide-l reveal-d3">
+          <span class="no acc">01</span>
+          <h3>项目 A 上线边界</h3>
+          <p>窗口前明确"必上线/可延期/阻断"清单，让缺陷收敛有目标，而非无限制修复。</p>
+        </div>
+        <div class="card b-brand reveal reveal-d4">
+          <span class="no acc">02</span>
+          <h3>项目 B 口径单一 Owner</h3>
+          <p>由单一确认人 + 一张验收样例表收口，打通数据/BI/后端/测试的口径分歧。</p>
+        </div>
+        <div class="card b-brand reveal reveal-slide-r reveal-d5">
+          <span class="no acc">03</span>
+          <h3>决策"先收口后扩张"</h3>
+          <p>对新需求设准入/冻结闸门，明确关键人本周优先级，遏制结构性饱和复现。</p>
+        </div>
+      </div>
+
+      <hr class="rule" style="margin-top:28px"/>
+      <p class="cap reveal reveal-d5" style="margin-top:16px;font-size:17px"><span class="acc">未来一周判断：</span>若窗口前完成上线边界与口径两项收口，主线可控、风险降为偏紧张；若仍悬而未决并继续插入新需求，临近窗口存在延期或带病上线风险。建议本周以"<b style="color:var(--ink)">收口优先、冻结非必要新需求</b>"为基调。</p>
+      <span class="mark">Executive Brief</span><span class="pgnum">12 / 12</span>
+    </section>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // === Cinematic Reveal: IntersectionObserver ===
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        e.target.classList.add('is-visible');
+        io.unobserve(e.target);
+        e.target.querySelectorAll('.metric-num[data-num]').forEach(function(el){
+          countUp(el, parseFloat(el.getAttribute('data-num')));
+        });
+      }
+    });
+  }, { threshold: 0.18 });
+  document.querySelectorAll('.slide').forEach(function(s){ io.observe(s); });
+
+  // === Count-Up (rAF · 1800ms · easeOutCubic) ===
+  function fmtFinal(t){ return t >= 1000 ? Math.round(t).toLocaleString('en-US') : (t % 1 !== 0 ? t.toFixed(1) : Math.round(t)); }
+  function countUp(el, target){
+    if(reduce){ el.textContent = fmtFinal(target); return; }
+    var dur = 1800, start = performance.now(), isFloat = target % 1 !== 0;
+    function fmt(v){ return v >= 1000 ? Math.round(v).toLocaleString('en-US') : (isFloat ? v.toFixed(1) : Math.round(v)); }
+    function tick(now){
+      var p = Math.min(1, (now - start) / dur);
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * eased);
+      if(p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // === Parallax ===
+  var parallaxEls = document.querySelectorAll('.parallax-bg');
+  if(parallaxEls.length && !reduce){
+    var ticking = false;
+    function updateParallax(){
+      ticking = false;
+      parallaxEls.forEach(function(el){
+        var slide = el.closest('.slide');
+        if(!slide) return;
+        var rect = slide.getBoundingClientRect();
+        var center = rect.top + rect.height / 2;
+        var offset = (center - window.innerHeight / 2) / window.innerHeight;
+        el.style.setProperty('--parallax', (offset * -30) + 'px');
+      });
+    }
+    window.addEventListener('scroll', function(){
+      if(!ticking){ requestAnimationFrame(updateParallax); ticking = true; }
+    }, { passive: true });
+    updateParallax();
+  }
+
+  // === Cursor Spotlight (cover only) ===
+  var cover = document.querySelector('.slide.cursor-spotlight');
+  if(cover && !reduce){
+    cover.addEventListener('mousemove', function(e){
+      var rect = cover.getBoundingClientRect();
+      var x = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+      var y = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+      cover.style.setProperty('--cursor-x', x + '%');
+      cover.style.setProperty('--cursor-y', y + '%');
+    });
+  }
+})();
+</script>
+  </body>
+</html>
