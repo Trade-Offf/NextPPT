@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -11,8 +12,24 @@ import { useTranslation } from 'react-i18next';
  */
 export function EditorPreview() {
   const { t } = useTranslation('landing');
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Pause CSS animations when the preview scrolls out of the viewport.
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        el.dataset.paused = entry.isIntersecting ? 'false' : 'true';
+      },
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <div className="relative w-full max-w-4xl mx-auto">
+    <div ref={ref} className="relative w-full max-w-4xl mx-auto" data-paused="false">
       <div className="hds-preview-glow" aria-hidden="true" />
       <div className="hds-preview-frame" aria-hidden="true">
         {/* Window chrome */}

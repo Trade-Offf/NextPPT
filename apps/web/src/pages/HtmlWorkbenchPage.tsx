@@ -610,32 +610,36 @@ function EmptyState({
 
         {/* Right — upload card (dropzone + sample). */}
         <div className="hds-empty-card">
-          {/* Icon — gentle breathing draws the eye without being noisy. */}
-          <div className="hds-empty-icon-wrap">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <path d="M9 13l2 2 4-4" />
-            </svg>
+          {/* Window-frame glyph — a mini browser/preview window skeleton.
+              Hints at what will render here once an HTML file is dropped in. */}
+          <div className="hds-empty-window" aria-hidden="true">
+            <div className="hds-empty-window-bar">
+              <span className="hds-empty-window-dot" />
+              <span className="hds-empty-window-dot" />
+              <span className="hds-empty-window-dot" />
+              <span className="hds-empty-window-url" />
+            </div>
+            <div className="hds-empty-window-body">
+              <div className="hds-empty-window-line hds-empty-window-line--w70" />
+              <div className="hds-empty-window-line hds-empty-window-line--w50" />
+              <div className="hds-empty-window-line hds-empty-window-line--w90" />
+              <div className="hds-empty-window-line hds-empty-window-line--w40" />
+            </div>
           </div>
 
-          <p className="hds-empty-card-title">{t('page.empty')}</p>
+          {/* Visual anchor — the </> mark, HTML's native glyph. */}
+          <div className="hds-empty-glyph" aria-hidden="true">
+            <span className="hds-empty-glyph-lt">&lt;</span>
+            <span className="hds-empty-glyph-slash">/</span>
+            <span className="hds-empty-glyph-gt">&gt;</span>
+          </div>
 
           {error && (
             <p className="hds-empty-error">{error}</p>
           )}
 
-          {/* Primary CTA + drag hint merged into one dropzone. */}
+          {/* Dropzone — viewfinder corners replace the clichéd dashed border.
+              The whole card is the target; the corners focus the eye. */}
           <div
             className="hds-empty-dropzone"
             onClick={() => { if (!loading) onPick(); }}
@@ -643,33 +647,28 @@ function EmptyState({
             tabIndex={0}
             aria-disabled={loading}
           >
-            <svg
-              className="hds-empty-drop-icon"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12" />
-            </svg>
+            {/* Four L-shaped corner accents — viewfinder framing. */}
+            <span className="hds-empty-corner hds-empty-corner--tl" aria-hidden="true" />
+            <span className="hds-empty-corner hds-empty-corner--tr" aria-hidden="true" />
+            <span className="hds-empty-corner hds-empty-corner--bl" aria-hidden="true" />
+            <span className="hds-empty-corner hds-empty-corner--br" aria-hidden="true" />
+
+            <p className="hds-empty-drop-title">
+              {loading ? t('page.loading') : t('page.empty')}
+              {!loading && <span className="hds-empty-caret" aria-hidden="true">_</span>}
+            </p>
             <button
               type="button"
               disabled={loading}
               tabIndex={-1}
               aria-hidden="true"
-              className="hds-btn-primary px-6 py-2.5 text-sm disabled:opacity-50"
+              className="hds-empty-browse"
             >
-              {loading ? t('page.loading') : t('page.pickFile')}
+              {t('page.browse')}
             </button>
-            <p className="hds-empty-drag-hint">{t('page.dragHint')}</p>
           </div>
 
-          {/* Secondary action on the same visual level, not orphaned. */}
+          {/* Secondary action — link, not button. Same visual weight as footnote. */}
           <button
             onClick={onTrySample}
             disabled={loading}

@@ -89,11 +89,14 @@ export function SiteHeader({ trailing, alwaysScrolled = false, hideProgress = fa
     if (hideProgress) return;
 
     let raf = 0;
+    let cachedScrollHeight = 0;
+    const updateScrollHeight = () => {
+      cachedScrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    };
+    updateScrollHeight();
     const update = () => {
       raf = 0;
-      const doc = document.documentElement;
-      const max = doc.scrollHeight - window.innerHeight;
-      const ratio = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+      const ratio = cachedScrollHeight > 0 ? Math.min(1, window.scrollY / cachedScrollHeight) : 0;
       // Direct DOM write — no React state for continuous scroll value.
       if (progressRef.current) {
         progressRef.current.style.transform = `scaleX(${ratio})`;
@@ -106,13 +109,17 @@ export function SiteHeader({ trailing, alwaysScrolled = false, hideProgress = fa
       if (raf) return;
       raf = requestAnimationFrame(update);
     };
+    const onResize = () => {
+      updateScrollHeight();
+      onScroll();
+    };
     update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', onResize);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('resize', onResize);
     };
   }, [alwaysScrolled, hideProgress]);
 

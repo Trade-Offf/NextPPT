@@ -136,20 +136,25 @@ export function TemplateCarousel({ onOpenSample, loading }: TemplateCarouselProp
             '0 24px 48px -16px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06)',
         }}
       >
-        {/* Stacked slides */}
-        {slides.map((slide, i) => (
-          <div
-            key={slide.id}
-            className="absolute inset-0"
-            style={{
-              opacity: i === index ? 1 : 0,
-              transition: 'opacity 700ms cubic-bezier(0.4, 0, 0.2, 1)',
-              zIndex: i === index ? 2 : 1,
-            }}
-          >
-            <SlidePreview url={slide.sampleUrl || ''} kind={slide.kind} active={i === index} />
-          </div>
-        ))}
+        {/* Stacked slides — only mount current + adjacent for perf (3 vs 5 iframes) */}
+        {slides.map((slide, i) => {
+          const dist = Math.abs(i - index);
+          const visible = dist <= 1;
+          return (
+            <div
+              key={slide.id}
+              className="absolute inset-0"
+              style={{
+                opacity: i === index ? 1 : 0,
+                transition: 'opacity 700ms cubic-bezier(0.4, 0, 0.2, 1)',
+                zIndex: i === index ? 2 : 1,
+                visibility: visible ? 'visible' : 'hidden',
+              }}
+            >
+              {visible && <SlidePreview url={slide.sampleUrl || ''} kind={slide.kind} active={i === index} />}
+            </div>
+          );
+        })}
 
         {/* ── Top-left: index badge (with scrim for legibility on any bg) ── */}
         <div className="absolute top-4 left-4 flex items-center gap-2" style={{ zIndex: 4 }}>

@@ -43,7 +43,7 @@ export function SiteFluidBackdrop() {
   const lite = tier === 'lite';
 
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
+    <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
       <Suspense fallback={null}>
         <LiquidEther
           colors={FLUID_COLORS}

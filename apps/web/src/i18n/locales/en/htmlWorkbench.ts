@@ -2,8 +2,9 @@ export default {
   page: {
     title: 'HTML Deck',
     subtitle: 'Keep interactions, edit text only, export full HTML',
-    empty: 'Drop or pick an HTML file',
+    empty: 'Drop an HTML file',
     pickFile: 'Pick file',
+    browse: 'Browse local',
     dragHint: 'or drop a .html file',
     trySample: 'Try a sample first',
     errorNoHtml: 'Please pick a .html file',

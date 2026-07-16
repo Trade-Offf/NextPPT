@@ -2,8 +2,9 @@ export default {
   page: {
     title: 'HTML 演示台',
     subtitle: '保留交互，只改文字，导出完整 HTML',
-    empty: '拖入或选择一个 HTML 文件',
+    empty: '拖入 HTML 文件',
     pickFile: '选择文件',
+    browse: '浏览本地',
     dragHint: '或拖入 .html 文件',
     trySample: '或先看示例',
     errorNoHtml: '请选择 .html 文件',
