@@ -78,17 +78,20 @@ export function LiveFrame({ sourceHtml, onMessage, iframeRef, remountKey }: Live
 function injectRuntime(html: string, runtimeSource: string): string {
   const base = `<base data-hds-shim href="${location.origin}${location.pathname}">`;
   const shim = `<script data-hds-shim>(function(){var P=History.prototype;var wrap=function(fn){return function(state,title,url){return fn.call(this,state,title)}};P.replaceState=wrap(P.replaceState);P.pushState=wrap(P.pushState)})()</script>`;
+  // Neutral document scrollbar — fixed grey that reads on both light and
+  // dark deck backgrounds. Scoped to the html element only, so deck-internal
+  // scrollbars (e.g. code blocks) keep their own styling. Injected at <head>
+  // start so deck CSS can override if needed.
+  const scrollbarStyle = `<style data-hds-shim>html::-webkit-scrollbar{width:8px;height:8px}html::-webkit-scrollbar-track{background:transparent}html::-webkit-scrollbar-thumb{background:rgba(128,128,142,.32);border-radius:9999px;border:2px solid transparent;background-clip:content-box}html::-webkit-scrollbar-thumb:hover{background:rgba(128,128,142,.52);background-clip:content-box}html::-webkit-scrollbar-corner{background:transparent}html{scrollbar-width:thin;scrollbar-color:rgba(128,128,142,.32) transparent}</style>`;
   const runtime = `<script data-hds-runtime>${runtimeSource}${'<'}/script>`;
 
-  // Inject <base> + shim as the first children of <head> so they take effect
-  // before any user stylesheet or script. Runtime goes before </body> as usual.
   const headOpen = /<head[^>]*>/i;
   const closing = /<\/body>\s*<\/html>\s*$/i;
   let out = html;
   if (headOpen.test(out)) {
-    out = out.replace(headOpen, (m) => `${m}${base}${shim}`);
+    out = out.replace(headOpen, (m) => `${m}${base}${shim}${scrollbarStyle}`);
   } else {
-    out = `${base}${shim}${out}`;
+    out = `${base}${shim}${scrollbarStyle}${out}`;
   }
   if (closing.test(out)) {
     out = out.replace(closing, `${runtime}</body></html>`);

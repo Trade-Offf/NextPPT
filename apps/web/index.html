@@ -33,7 +33,8 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <!-- Cloudflare Web Analytics is injected automatically at the edge for this
-         proxied Pages site; no manual beacon snippet needed. -->
+    <!-- Cloudflare Web Analytics — manual snippet (DNS is grey-cloud, so CF
+         cannot auto-inject at the edge). Token scoped to next-ppt.com. -->
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "81c79a2fc7044292a3a8cf6598372ebd"}'></script>
   </body>
 </html>

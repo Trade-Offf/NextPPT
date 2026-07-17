@@ -803,6 +803,7 @@ function restoreScripts() {
 function cleanup(root: ParentNode): void {
   root.querySelectorAll('[data-hds-overlay]').forEach((n) => n.remove());
   root.querySelectorAll('[data-hds-guide]').forEach((n) => n.remove());
+  root.querySelectorAll('[data-hds-warn]').forEach((n) => n.remove());
 }
 
 function serializeSection(): string {

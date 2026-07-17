@@ -19,6 +19,33 @@ export interface TemplateItem {
   easterEgg?: boolean;
 }
 
+/** 模板选择指南 — 按场景推荐最合适的模板，避免场景错配。拼接到每个 motionPrompt 最前面，让 AI 先自检场景匹配。 */
+const TEMPLATE_SELECTION_GUIDE = `
+模板选择自检（开始生成前先确认场景与模板匹配）：
+  · 品牌叙事 / 产品介绍 / 编辑刊物 / 个人作品集 → nextppt-kami（衬线 + 暖米黄 + Ink Blue）
+  · 数据密集型商务汇报 / 项目简报 / 述职 / 项目管理分析 → deck-report（无衬线 + 状态色 + 表格密集）
+  · 金融数据 / 市场分析 / 数据新闻 → bloomberg-editorial（数据新闻级编排）
+  · 极简简历 / 个人介绍 → resume
+  · 樱花彩虹 / 创意展示 → sakura-chroma
+  · 钴蓝网格 / 技术架构 → cobalt-grid
+  · 长表格 / 数据对照 → long-table
+  · 人物平台 / 团队介绍 → peoples-platform
+  · 报章砸落 / 强冲击封面 → brutalist-newspaper
+  · Swiss Grid / 极简理性 → swiss-grid
+  · 经典 Deck / 通用 → deck-classic
+
+选错模板的典型表现（如果你判断内容属于"不适用场景"，在第一页顶部插入可见 banner 提醒用户切换模板）：
+  · 用 Kami 做数据汇报 → 衬线+米黄底让数据可读性变差，显得"文艺范过重"
+  · 用 deck-report 做品牌叙事 → 无衬线+状态色让品牌感丧失，显得"过于商务"
+  · 用 brutalist-newspaper 做正式汇报 → 强冲击封面与严肃场景冲突
+
+Banner 标准格式（必须可见，不要用 HTML 注释）：
+  <div data-hds-warn style="position:absolute;top:0;left:0;right:0;background:#fef3c7;color:#92400e;padding:8px 76px;font-family:-apple-system,sans-serif;font-size:12px;letter-spacing:.02em;z-index:9999;border-bottom:1px solid #fde68a">⚠ 此内容更适合 {推荐模板} 模板，建议切换后重新生成</div>
+  · data-hds-warn 属性会被编辑器运行时 cleanup() 自动剔除（与 data-hds-guide 同机制），保存/导出时不会污染最终 deck
+  · 必须放在第一个 <section class="slide"> 内部最顶部
+  · 用 sans-serif 字体（即使模板用衬线），保证可读性
+`;
+
 const KAMI_CREDIT = { name: 'Kami · Tw93', href: 'https://kami.tw93.fun/index-zh.html' } as const;
 const FRONTEND_SLIDES_CREDIT = { name: 'zarazhangrui/frontend-slides', href: 'https://github.com/zarazhangrui/frontend-slides' } as const;
 const PPT_MASTER_CREDIT = { name: 'hugohe3/ppt-master', href: 'https://github.com/hugohe3/ppt-master' } as const;
@@ -34,6 +61,13 @@ HTML 相比 PPT 的核心优势是"活的"——不是简单 fade-in，而是有
 ▎入场编排系统（Cinematic Reveal）
 每个 .slide 进入视口时，子元素按"标题→副标题→正文→图表→数据卡"顺序依次入场，
 每层之间错开 120ms，整体在 1.2s 内完成。默认隐藏态用 opacity:0 + 多种 transform 组合（不要只用 translateY）。
+
+信息密度硬性要求：
+  · 内容页至少 4 个独立信息块（卡片 / 图表 / 列表 / 引语）；封面 / 章节分隔 / quote 页除外（这些页面留白是设计语言的一部分）
+  · SVG 图表 viewBox 高度利用率 ≥ 85%（禁止底部留白超过 15%）
+  · 网格布局必须用 flex:1 或 grow class 撑满，禁止半页空白
+  · 如果内容不足以填满 720px 高度，改用更紧凑的布局而非留白
+
 位移幅度必须克制——超过 24px 会让 inline-block / SVG 文字触发换行或裁切：
   · class="reveal"         → opacity:0; transform:translateY(20px) （上浮，用于正文/卡片）
   · class="reveal reveal-scale"    → opacity:0; transform:scale(0.94) （缩放，用于图表/SVG 容器）
@@ -67,9 +101,25 @@ HTML 相比 PPT 的核心优势是"活的"——不是简单 fade-in，而是有
   · 折线图/曲线：stroke-dashoffset 全长→0，2s cubic-bezier(0.16,1,0.3,1)，绘制后保持
   · 柱状图：每根柱子 transform:scaleY(0)→scaleY(1)，transform-origin:bottom，0.8s，依次延迟 .1s
   · 环形图/饼图：stroke-dashoffset 从周长→目标值，1.5s ease-out（不是全画完，画到比例停止）
+    环形图计算公式：
+      周长 C = 2 × π × r
+      stroke-dasharray = C（完整周长）
+      stroke-dashoffset 起始 = C（完全隐藏）
+      stroke-dashoffset 目标 = C × (1 - 比例)
+      例：r=70, 测试占比 32.6%
+        C = 2 × 3.1416 × 70 = 439.8
+        dasharray = 439.8
+        target = 439.8 × (1 - 0.326) = 296.5
   · 填充区域（area chart）：clip-path 从 width:0→width:100%，1.5s 延迟 .3s（在线条绘制后填充）
   · 数据点圆点：在线条绘制完成后依次弹出，scale(0→1) + opacity(0→1)，0.4s，stagger .08s
   · 所有 SVG 动画在 slide 可见时由 JS 添加 .is-animated class 触发
+
+SVG 坐标与 dasharray 校验（必须执行）：
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（用 viewBox 单位计算）
+    例：x1=40 x2=520，线长 = 480，dasharray 必须 = 480（不是固定 400）
+  · 所有 <text> 必须按 text-anchor 估算宽度后留 ≥4px 安全余量
+  · 所有 <rect>/<circle>/<polygon> 坐标 + 尺寸必须落在 viewBox 范围内
+  · <g transform="translate(x,y)"> 内的子元素坐标要叠加 translate 值核算
 
 ▎视差效果（Parallax — 滚动时元素以不同速度移动）
   · 背景装饰元素（大号数字、几何图形、水印）：translateY 按滚动比例的 0.3 倍移动
@@ -86,7 +136,9 @@ HTML 相比 PPT 的核心优势是"活的"——不是简单 fade-in，而是有
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(27,54,93,0.06), transparent)
+  · CSS：background-image: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(27,54,93,0.06), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction）
@@ -113,26 +165,25 @@ HTML 相比 PPT 的核心优势是"活的"——不是简单 fade-in，而是有
     text 元素需按 text-anchor 估算文字宽度后留 ≥4px 安全余量；SVG width 属性用 "100%" 而非固定像素，避免超出 slide 内容区
   · 页面转场透明度：.slide:not(.is-visible) 的 opacity 不低于 0.6（低于 0.6 会让 parchment 透出 body 灰底，显得脏）
   · body 背景色用暖灰（#d8d3c4 系），不要用偏冷的 #c9c5b8，否则半透明 slide 露出的间隔色会发灰
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#ddd9cc"/></marker></defs>
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有（会导致视觉跳变）
 `;
 
-const KAMI_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
+const KAMI_MOTION_ANTI_PATTERNS = `✗ 用 Kami 做数据密集型汇报（请切换到 deck-report 或 bloomberg-editorial）
+✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式（必须有 scale/blur/slide-l/slide-r 多样性）
-✗ 动画触发 layout / reflow（只允许 transform/opacity/filter/clip-path）
-✗ 单页入场总时长超过 1.5s
-✗ 持续动画超过 2 个/页（呼吸感不是嘈杂感）
-✗ filter:blur() 超过 6px（会溢出遮盖相邻元素）
-✗ transform 位移超过 24px（会让 inline-block 文字 / SVG 标注触发换行或裁切）
 ✗ 用 JS 拆字逐字入场（inline-block span 破坏 letter-spacing 一致性，多行标题左对齐错位）
-✗ SVG 内 text/rect 坐标超出 viewBox（<g transform> 的 translate 值要叠加子元素坐标核算）
-✗ SVG width 用固定像素超出 slide 内容区（必须用 "100%" 或留 ≥4px 余量）
-✗ .slide 缺少 isolation:isolate（filter/transform 会污染相邻 slide）
+✗ .slide padding 缩水（必须 54px 76px 56px，缩水会导致内容贴边）
+✗ 缺失 editorial chrome（.eyebrow / .pgnum / .mark 必备，数据页额外 .src）
 ✗ .slide:not(.is-visible) opacity 低于 0.6（parchment 透出 body 灰底，画面发脏）
 ✗ body 背景用偏冷灰 #c9c5b8（半透明时间隔色发灰，不配 Kami 暖调）`;
 
 /** Static Kami prompt — chapters 01–08 + anti-patterns + organization. */
 const KAMI_STATIC_PROMPT = `用 Kami 设计系统帮我把内容排成一份演示稿（主题与内容我会另行提供，或见下文）。
+适用场景：品牌叙事 / 产品介绍 / 编辑刊物 / 个人作品集 / 文化内容。
+不适用场景：数据密集型商务汇报 / 项目简报 / 述职 / 财务报告（请改用 deck-report 或 bloomberg-editorial）。
+如果你判断内容属于"不适用场景"，请在第一页顶部插入可见 banner（见上方模板选择指南的 Banner 标准格式）提醒用户切换模板。
 输出自包含 HTML，遵循 section.slide 协议（每页 <section class="slide">，固定 1280×720px），信息密度高，每页布满内容。
 以下只规定视觉与排版规范，不限定你写什么内容。
 
@@ -144,13 +195,14 @@ const KAMI_STATIC_PROMPT = `用 Kami 设计系统帮我把内容排成一份演�
 交互面/按钮默认背景：warm-sand #e8e6dc
 深色主题页：deep-dark #141413（保留橄榄底色，不取纯黑）
 禁止：纯白 #ffffff 和冷蓝灰 #f3f4f6
+.slide padding 强制值：54px 76px 56px（上 / 左右 / 下），不可缩水。缩水会导致内容贴边，丧失 Kami 的"留白呼吸感"。
 
 ────────────────────────────────────────
 02 · Accent 强调色
 ────────────────────────────────────────
 唯一强调色：Ink Blue #1B365D
 深色底亮变体：#2D5A8A
-全页面 Ink Blue 占比不超过 5%，超过即从克制变成堆砌
+Ink Blue 用量见 08 · SVG 配色规则的可执行校验（不要凭面积估算）
 禁止引入第二种彩色（无红、绿、橙、紫）
 
 ────────────────────────────────────────
@@ -231,6 +283,13 @@ Featured Card：box-shadow whisper + border-radius 16px
 Section divider：水平线高度 1px，色 #ddd9cc（暖灰）
 数字章节编号：font-family mono，color #1B365D，font-size 12px
 
+Editorial Chrome（必备，缺失即丧失 Kami 质感）：
+  .eyebrow  顶部 mono 小标，letter-spacing 2.4px，uppercase，作为章节标识
+  .pgnum    右下角页码，mono，tabular-nums，格式 "01 / 09"
+  .mark     左下角品牌标识，mono，uppercase，如 "NEXTPPT · KAMI"
+  .src      左下角数据来源（仅数据页），mono 9.5px，opacity 0.85
+  每页必须有 .eyebrow + .pgnum + .mark；数据页额外加 .src。
+
 ────────────────────────────────────────
 08 · Inline SVG Charts 内联图表（至少 5 处）
 ────────────────────────────────────────
@@ -246,6 +305,13 @@ SVG 配色规则：
   文字：fill olive #504E49（说明）/ near-black #141413（数值）
   SVG 内 font-family 与页面同步，text-anchor/dominant-baseline 精确对齐
 
+  Ink Blue 占比校验（用可执行规则代替面积估算）：
+    · 单个 SVG 内 #1B365D fill 最多用于 2 个元素：1 个焦点节点 + 1 个最大数据段（或关键路径）
+    · 其余数据段一律用次色块：#355D8A → #5E7DA3 → #90A8C4 → #C9D4E2（按数值降序分配）
+    · 堆叠条形图：仅最大的 1 个 segment 用 #1B365D，其余按数值降序用 #355D8A / #5E7DA3 / #90A8C4
+    · 甘特图：仅关键路径用 #1B365D，其余任务用 #5E7DA3 / #90A8C4
+    · 整页层面：#1B365D 只出现在"标题强调字 + 1 个 SVG 焦点 + 1 个数据卡数字"三处，不要铺满
+
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
 ────────────────────────────────────────
@@ -254,7 +320,6 @@ Anti-Patterns 反面示例（必须规避）
 ✗ 标题 font-weight: 600 或 700 合成 bold
 ✗ box-shadow 硬投影（0.3 透明度以上）
 ✗ 引入红 / 绿 / 橙 / 紫等第二强调色
-✗ Ink Blue 占面积超过 5%
 
 ────────────────────────────────────────
 组织方式
@@ -263,7 +328,8 @@ Anti-Patterns 反面示例（必须规避）
 每页都要信息密度高、版面布满，标题用 serif、正文用 sans，遵循以上全部规范。`;
 
 /** Motion Kami prompt = static prompt + Motion chapter + motion anti-patterns. */
-const KAMI_MOTION_PROMPT = `${KAMI_STATIC_PROMPT}
+const KAMI_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${KAMI_STATIC_PROMPT}
 ${KAMI_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -273,7 +339,6 @@ Anti-Patterns 反面示例（必须规避）
 ✗ 标题 font-weight: 600 或 700 合成 bold
 ✗ box-shadow 硬投影（0.3 透明度以上）
 ✗ 引入红 / 绿 / 橙 / 紫等第二强调色
-✗ Ink Blue 占面积超过 5%
 ${KAMI_MOTION_ANTI_PATTERNS}
 ────────────────────────────────────────
 组织方式
@@ -453,7 +518,9 @@ const DECK_REPORT_MOTION_CHAPTER = `
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(320px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(20,69,122,0.05), transparent)
+  · CSS：background-image: radial-gradient(320px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(20,69,122,0.05), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction）
@@ -478,27 +545,24 @@ const DECK_REPORT_MOTION_CHAPTER = `
   · 文字不换行：多行标题不要用 JS 拆字逐字入场，改用 reveal-slide-l 整体入场
   · SVG 边界安全：所有 SVG 内部元素坐标 + 尺寸必须落在 viewBox 范围内；text 元素需按 text-anchor 估算文字宽度后留 ≥4px 安全余量；SVG width 属性用 "100%"
   · 汇报场景特有：禁止旋转、模糊、彩色脉冲等炫技动效；入场缓动统一用 cubic-bezier(0.16,1,0.3,1)，不要弹性回弹
-  · 语义色不参与动画：green/amber/red 仅用于状态标记，不作为动效主色（环形图分段除外）`;
+  · 语义色不参与动画：green/amber/red 仅用于状态标记，不作为动效主色（环形图分段除外）
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const DECK_REPORT_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式（必须有 scale/slide-l/slide-r/fade 多样性）
-✗ 动画触发 layout / reflow（只允许 transform/opacity/filter/clip-path）
-✗ 单页入场总时长超过 1.5s
-✗ 持续动画超过 2 个/页
-✗ filter:blur() 超过 6px
-✗ transform 位移超过 24px
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ SVG width 用固定像素超出 slide 内容区
-✗ .slide 缺少 isolation:isolate
 ✗ 用旋转、模糊、弹性回弹等炫技动效（管理层汇报要稳）
 ✗ 语义色 green/amber/red 当作动效主色铺底闪烁
-✗ 缓动用弹性曲线（应统一用 cubic-bezier(0.16,1,0.3,1) 庄重缓动）`;
+✗ 缓动用弹性曲线（应统一用 cubic-bezier(0.16,1,0.3,1) 庄重缓动）
+`;
 
 /** Motion deck-report prompt = static prompt + Motion chapter + motion anti-patterns. */
-const DECK_REPORT_MOTION_PROMPT = `${DECK_REPORT_PROMPT}
+const DECK_REPORT_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${DECK_REPORT_PROMPT}
 ${DECK_REPORT_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -616,7 +680,9 @@ Sakura Chroma 的动效语言是"墨纸上的彩虹戏剧"——花瓣飘落、�
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑（棕墨色，极淡）
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(280px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(58,37,22,0.05), transparent)
+  · CSS：background-image: radial-gradient(280px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(58,37,22,0.05), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction）
@@ -641,27 +707,25 @@ Sakura Chroma 的动效语言是"墨纸上的彩虹戏剧"——花瓣飘落、�
   · 文字不换行：多行标题不要用 JS 拆字逐字入场，改用 reveal-blur 整体入场
   · SVG 边界安全：所有 SVG 内部元素坐标 + 尺寸必须落在 viewBox 范围内；text 元素需留 ≥4px 安全余量；SVG width 用 "100%"
   · 樱花场景特有：6 色彩虹仅用于装饰缎带/印章/数据条动效，不在正文文字上使用；花瓣飘落数量每页不超过 8 片，避免遮挡内容
-  · 半色调纸纹 opacity 上限 0.18，超过会让奶油底发灰`;
+  · 半色调纸纹 opacity 上限 0.18，超过会让奶油底发灰
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const SAKURA_CHROMA_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式
-✗ 动画触发 layout / reflow
-✗ 单页入场总时长超过 1.5s
-✗ 持续动画超过 2 个/页
-✗ filter:blur() 超过 6px
-✗ transform 位移超过 24px
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ .slide 缺少 isolation:isolate
 ✗ 6 色彩虹用在正文文字上（仅限装饰缎带/印章/数据条）
 ✗ 花瓣飘落数量超过 8 片/页（遮挡内容）
 ✗ 半色调纸纹 opacity 超过 0.18（奶油底发灰）
-✗ 印章砸落用柔软缓动（应用 cubic-bezier(0.34,1.56,0.64,1) 略带弹性）`;
+✗ 印章砸落用柔软缓动（应用 cubic-bezier(0.34,1.56,0.64,1) 略带弹性）
+`;
 
 /** Motion sakura-chroma prompt = static prompt + Motion chapter + motion anti-patterns. */
-const SAKURA_CHROMA_MOTION_PROMPT = `${SAKURA_CHROMA_PROMPT}
+const SAKURA_CHROMA_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${SAKURA_CHROMA_PROMPT}
 ${SAKURA_CHROMA_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -736,7 +800,7 @@ Cobalt Grid 的动效语言是"方格纸上的电路绘制"——网格扩散、
     background-size 0→100%，1.2s cubic-bezier(0.16,1,0.3,1)，网格线像被电光扫描画出
   · QR 块 qr-blink：@keyframes qr-blink 多个钴蓝方块逐格亮起，
     opacity(0→1) + scale(0.5→1)，0.3s/格，stagger 0.04s，形成扫描轨迹
-  · 像素阶梯 draw-path：stroke-dashoffset 全长→0，2s cubic-bezier(0.16,1,0.3,1)，
+  · 像素阶梯 line-anim：stroke-dashoffset 全长→0，2s cubic-bezier(0.16,1,0.3,1)，
     阶梯像被逐级点亮
   · 封面 hero 标题：reveal-blur 整体入场（opacity:0 + translateY(16px) + blur(6px) → opacity:1 + none），
     不要用 JS 拆字逐字入场
@@ -771,7 +835,9 @@ Cobalt Grid 的动效语言是"方格纸上的电路绘制"——网格扩散、
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑（钴蓝电光感）
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(31,43,224,0.08), transparent)
+  · CSS：background-image: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(31,43,224,0.08), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction）
@@ -796,27 +862,25 @@ Cobalt Grid 的动效语言是"方格纸上的电路绘制"——网格扩散、
   · 文字不换行：多行标题不要用 JS 拆字逐字入场，改用 reveal-blur 整体入场
   · SVG 边界安全：所有 SVG 内部元素坐标 + 尺寸必须落在 viewBox 范围内；text 元素需留 ≥4px 安全余量；SVG width 用 "100%"
   · 网格场景特有：graph-paper 网格背景动效 opacity 上限 0.10，超过会盖住象牙纸底色；QR 闪烁每页格子数不超过 30 个，避免性能与视觉过载
-  · 钴蓝占比：动效中钴蓝 #1F2BE0 占面积不超过 10%，与静态规范一致`;
+  · 钴蓝占比：动效中钴蓝 #1F2BE0 占面积不超过 10%，与静态规范一致
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const COBALT_GRID_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式
-✗ 动画触发 layout / reflow
-✗ 单页入场总时长超过 1.5s
-✗ 持续动画超过 2 个/页
-✗ filter:blur() 超过 6px
-✗ transform 位移超过 24px
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ .slide 缺少 isolation:isolate
 ✗ graph-paper 网格动效 opacity 超过 0.10（盖住象牙纸底色）
 ✗ QR 闪烁格子数超过 30 个/页（性能与视觉过载）
 ✗ 钴蓝动效占面积超过 10%
-✗ 用渐变或彩色填充（钴蓝网格应为实色 + 线条）`;
+✗ 用渐变或彩色填充（钴蓝网格应为实色 + 线条）
+`;
 
 /** Motion cobalt-grid prompt = static prompt + Motion chapter + motion anti-patterns. */
-const COBALT_GRID_MOTION_PROMPT = `${COBALT_GRID_PROMPT}
+const COBALT_GRID_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${COBALT_GRID_PROMPT}
 ${COBALT_GRID_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -999,7 +1063,9 @@ Brutalist 报章风的动效语言是"印刷机的暴力美学"——砸落、�
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑（spot-red 极淡）
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(280px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(200,16,46,0.04), transparent)
+  · CSS：background-image: radial-gradient(280px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(200,16,46,0.04), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction — 硬切响应）
@@ -1025,27 +1091,28 @@ Brutalist 报章风的动效语言是"印刷机的暴力美学"——砸落、�
   · SVG 边界安全：所有 SVG 内部元素坐标 + 尺寸必须落在 viewBox 范围内；text 元素需留 ≥4px 安全余量；SVG width 用 "100%"
   · 报章场景特有：禁止柔软缓动（ease / ease-out / cubic-bezier(0.16,1,0.3,1)），统一用 cubic-bezier(0.7,0,0.3,1) 或 steps()
   · spot-red 占比：动效中 spot-red #C8102E 占面积不超过 3%，与静态规范一致
-  · 禁止圆角动效：所有动效元素的圆角不超过 4px，与报章方正风格一致`;
+  · 禁止圆角动效：所有动效元素的圆角不超过 4px，与报章方正风格一致
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const BRUTALIST_NEWSPAPER_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式
-✗ 动画触发 layout / reflow
 ✗ 单页入场总时长超过 1.0s（报章节奏更快）
-✗ 持续动画超过 2 个/页
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ .slide 缺少 isolation:isolate
 ✗ 用柔软缓动 ease / ease-out / cubic-bezier(0.16,1,0.3,1)（报章必须硬切）
 ✗ Drop cap 砸落用弹性回弹（应硬砸定格）
 ✗ Stamp 旋转用柔和过渡（应用 steps() 机械定格）
 ✗ spot-red 动效占面积超过 3%
 ✗ 动效元素圆角超过 4px（破坏方正报章感）
-✗ 用彩色或渐变动效（应 ink + spot-red 双色）`;
+✗ 用彩色或渐变动效（应 ink + spot-red 双色）
+`;
 
 /** Motion brutalist-newspaper prompt = static prompt + Motion chapter + motion anti-patterns. */
-const BRUTALIST_NEWSPAPER_MOTION_PROMPT = `${BRUTALIST_NEWSPAPER_PROMPT}
+const BRUTALIST_NEWSPAPER_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${BRUTALIST_NEWSPAPER_PROMPT}
 ${BRUTALIST_NEWSPAPER_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -1200,10 +1267,10 @@ Bloomberg 编辑风的动效语言是"数据被编辑审视的过程"——折�
   · 示例：<span class="metric-num" data-num="1280000">0</span>
 
 ▎SVG 图表高级绘制（数据新闻微型图表群）
-  · 折线图 draw-path：stroke-dashoffset 全长→0，2s cubic-bezier(0.16,1,0.3,1)，绘制后保持；
+  · 折线图 line-anim：stroke-dashoffset 全长→0，2s cubic-bezier(0.16,1,0.3,1)，绘制后保持；
     数据点圆点在线条完成后依次弹出 scale(0→1) + opacity(0→1)，0.4s，stagger 0.08s；
     amber 焦点点最后高亮 + 文字标注
-  · 柱状图 bar-grow：每根柱子 transform:scaleY(0)→scaleY(1)，transform-origin:bottom，0.8s，
+  · 柱状图 bar-anim：每根柱子 transform:scaleY(0)→scaleY(1)，transform-origin:bottom，0.8s，
     依次延迟 0.1s；amber 焦点柱最后生长 + 数值弹出
   · 环形图 stroke-dashoffset：从周长→目标比例值停止（不是全画完），1.5s ease-out；
     中心 mono 总数 count-up；navy 主段 + muted 次段
@@ -1228,7 +1295,9 @@ Bloomberg 编辑风的动效语言是"数据被编辑审视的过程"——折�
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑（navy 极淡）
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(31,58,95,0.05), transparent)
+  · CSS：background-image: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(31,58,95,0.05), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction）
@@ -1254,27 +1323,25 @@ Bloomberg 编辑风的动效语言是"数据被编辑审视的过程"——折�
   · SVG 边界安全：所有 SVG 内部元素坐标 + 尺寸必须落在 viewBox 范围内；text 元素需留 ≥4px 安全余量；SVG width 用 "100%"
   · 数据新闻场景特有：环形图必须按比例停止（不能全画完），桑基图必须自左向右扩张（不能从中心扩散）；
     amber/green 仅用于语义状态（上升/下降/向好/警示），不作装饰动效主色
-  · 微型图表密集：每页 SVG 图表可多达 4-6 个，动画 stagger 必须极小（0.04-0.08s），避免总时长超限`;
+  · 微型图表密集：每页 SVG 图表可多达 4-6 个，动画 stagger 必须极小（0.04-0.08s），避免总时长超限
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const BLOOMBERG_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式
-✗ 动画触发 layout / reflow
-✗ 单页入场总时长超过 1.5s
-✗ 持续动画超过 2 个/页
-✗ filter:blur() 超过 6px
-✗ transform 位移超过 24px
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ .slide 缺少 isolation:isolate
 ✗ 环形图全画完（应按比例停止）
 ✗ 桑基图从中心扩散（应自左向右扩张）
 ✗ amber/green 当作装饰动效主色（仅限语义状态）
-✗ 微型图表动画 stagger 过大导致总时长超限（应 0.04-0.08s）`;
+✗ 微型图表动画 stagger 过大导致总时长超限（应 0.04-0.08s）
+`;
 
 /** Motion bloomberg-editorial prompt = static prompt + Motion chapter + motion anti-patterns. */
-const BLOOMBERG_MOTION_PROMPT = `${BLOOMBERG_EDITORIAL_PROMPT}
+const BLOOMBERG_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${BLOOMBERG_EDITORIAL_PROMPT}
 ${BLOOMBERG_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -1386,12 +1453,15 @@ A4 doc 不分 slide，整页用 IntersectionObserver（threshold:0.05）一次�
     · transform 位移幅度 ≤16px（避免 A4 排版错位）
     · filter:blur() ≤4px（避免姓名溢出遮盖）
     · 全篇动效极简：只用 reveal-fade + reveal-blur（姓名）+ count-up，不要旋转、脉冲、彩色动画
-    · 不用 JS 拆字逐字入场（serif 字距一致性）`;
+    · 不用 JS 拆字逐字入场（serif 字距一致性）
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例）
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const RESUME_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式（应有 fade / blur / slide-l 多样性，但极简）
 ✗ 动画触发 layout / reflow（只允许 transform/opacity/filter）
 ✗ 入场总时长超过 1.2s（HR 阅读等待）
 ✗ 用 JS 拆字逐字入场（serif 字距一致性）
@@ -1400,10 +1470,12 @@ const RESUME_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ filter:blur() 超过 4px（姓名溢出遮盖）
 ✗ 使用旋转、彩色脉冲、彩色动画（简历要稳）
 ✗ 使用 slide 转场 / 硬切（A4 doc 不适用）
-✗ 脚本超过 60 行（简历场景 count-up + IntersectionObserver 即可）`;
+✗ 脚本超过 60 行（简历场景 count-up + IntersectionObserver 即可）
+`;
 
 /** Motion resume prompt = static prompt + Motion chapter + motion anti-patterns. */
-const RESUME_MOTION_PROMPT = `${RESUME_PROMPT}
+const RESUME_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${RESUME_PROMPT}
 ${RESUME_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -1592,7 +1664,9 @@ Deck Classic 的动效语言是"IDE 在被使用的过程"——titlebar 打字�
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑（Terminal Orange 极淡）
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(247,129,102,0.06), transparent)
+  · CSS：background-image: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(247,129,102,0.06), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction）
@@ -1619,28 +1693,26 @@ Deck Classic 的动效语言是"IDE 在被使用的过程"——titlebar 打字�
   · SVG 边界安全：所有 SVG 内部元素坐标 + 尺寸必须落在 viewBox 范围内；text 元素需留 ≥4px 安全余量；SVG width 用 "100%"
   · 终端场景特有：语义色（green/blue/yellow/purple/red）仅用于代码高亮，不参与动画主色；
     打字机效果必须用 steps() 硬切，不要用 ease 柔和过渡
-  · Terminal Orange 占比：动效中 #f78166 占面积不超过 10%，与静态规范一致`;
+  · Terminal Orange 占比：动效中 #f78166 占面积不超过 10%，与静态规范一致
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const DECK_CLASSIC_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式
-✗ 动画触发 layout / reflow
-✗ 单页入场总时长超过 1.5s
-✗ 持续动画超过 2 个/页
-✗ filter:blur() 超过 6px
-✗ transform 位移超过 24px
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ .slide 缺少 isolation:isolate
 ✗ 语义色（green/blue/yellow/purple/red）当装饰动效主色闪烁（仅限代码高亮）
 ✗ 打字机效果用 ease 柔和过渡（必须 steps() 硬切）
 ✗ Titlebar 打字机用 JS 字符串拼接（应用 CSS steps() clip-path）
 ✗ Terminal Orange 动效占面积超过 10%
-✗ 引入第三方装饰色或彩色渐变铺底`;
+✗ 引入第三方装饰色或彩色渐变铺底
+`;
 
 /** Motion deck-classic prompt = static prompt + Motion chapter + motion anti-patterns. */
-const DECK_CLASSIC_MOTION_PROMPT = `${DECK_CLASSIC_PROMPT}
+const DECK_CLASSIC_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${DECK_CLASSIC_PROMPT}
 ${DECK_CLASSIC_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -1758,7 +1830,9 @@ text-shadow 逐层叠加、Caveat 手写体横向滑入，像一份正在被工�
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑（混合三色，极淡）
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(44,44,220,0.05), transparent)
+  · CSS：background-image: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(44,44,220,0.05), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction）
@@ -1784,28 +1858,26 @@ text-shadow 逐层叠加、Caveat 手写体横向滑入，像一份正在被工�
   · SVG 边界安全：所有 SVG 内部元素坐标 + 尺寸必须落在 viewBox 范围内；text 元素需留 ≥4px 安全余量；SVG width 用 "100%"
   · 色块场景特有：三色块（蓝/橙/红）仅限大面积平涂区域，不在正文文字上使用；
     slab-slam 砸落幅度 ≤30px，避免破坏 slab 字距一致性
-  · grain 噪点 opacity 上限 0.18，超过会让奶油底发灰`;
+  · grain 噪点 opacity 上限 0.18，超过会让奶油底发灰
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const PEOPLES_PLATFORM_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式
-✗ 动画触发 layout / reflow
-✗ 单页入场总时长超过 1.5s
-✗ 持续动画超过 2 个/页
-✗ filter:blur() 超过 6px
-✗ transform 位移超过 24px
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ .slide 缺少 isolation:isolate
 ✗ 三色块（蓝/橙/红）用在正文文字上（仅限大面积平涂区域）
 ✗ slab-slam 砸落幅度超过 30px（破坏 slab 字距一致性）
 ✗ slab-slam 用弹性回弹（应硬砸定格）
 ✗ shadow-stack 用柔和过渡（应 steps(3) 逐层叠加）
-✗ grain 噪点 opacity 超过 0.18（奶油底发灰）`;
+✗ grain 噪点 opacity 超过 0.18（奶油底发灰）
+`;
 
 /** Motion peoples-platform prompt = static prompt + Motion chapter + motion anti-patterns. */
-const PEOPLES_PLATFORM_MOTION_PROMPT = `${PEOPLES_PLATFORM_PROMPT}
+const PEOPLES_PLATFORM_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${PEOPLES_PLATFORM_PROMPT}
 ${PEOPLES_PLATFORM_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -1912,7 +1984,9 @@ Long Table 的动效语言是"被侍者端上的菜单"——菜单行依次滑�
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑（锈红，极淡）
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(181,61,42,0.05), transparent)
+  · CSS：background-image: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(181,61,42,0.05), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction）
@@ -1939,28 +2013,26 @@ Long Table 的动效语言是"被侍者端上的菜单"——菜单行依次滑�
   · SVG 边界安全：所有 SVG 内部元素坐标 + 尺寸必须落在 viewBox 范围内；text 元素需留 ≥4px 安全余量；SVG width 用 "100%"
   · 菜单场景特有：锈红 #B53D2A 占比 ≤8%，与静态规范一致；
     菜单行滑入有仪式感但不花哨（stagger 0.06s，translateX ≤30px）
-  · 单一锈红：禁止引入第二种彩色动效；徽章弹性仅限圆形，矩形元素用 cubic-bezier(0.16,1,0.3,1)`;
+  · 单一锈红：禁止引入第二种彩色动效；徽章弹性仅限圆形，矩形元素用 cubic-bezier(0.16,1,0.3,1)
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const LONG_TABLE_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式
-✗ 动画触发 layout / reflow
-✗ 单页入场总时长超过 1.5s
-✗ 持续动画超过 2 个/页
-✗ filter:blur() 超过 6px
-✗ transform 位移超过 24px
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ .slide 缺少 isolation:isolate
 ✗ 锈红 #B53D2A 占面积超过 8%（与静态规范一致）
 ✗ 引入第二种彩色动效（Long Table 单一锈红）
 ✗ 菜单行滑入 stagger 过大（超过 0.06s，失去仪式感节奏）
 ✗ 菜单行滑入 translateX 超过 30px（位移过夸张，不克制）
-✗ 矩形元素用弹性曲线（仅圆形徽章允许 cubic-bezier(0.34,1.56,0.64,1)）`;
+✗ 矩形元素用弹性曲线（仅圆形徽章允许 cubic-bezier(0.34,1.56,0.64,1)）
+`;
 
 /** Motion long-table prompt = static prompt + Motion chapter + motion anti-patterns. */
-const LONG_TABLE_MOTION_PROMPT = `${LONG_TABLE_PROMPT}
+const LONG_TABLE_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${LONG_TABLE_PROMPT}
 ${LONG_TABLE_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）
@@ -2130,7 +2202,9 @@ Swiss Grid 的动效语言是"网格被精确填充的过程"——标题网格�
 ▎光标跟随效果（Cursor Spotlight — 仅封面）
   · 封面背景有一个 radial-gradient 跟随鼠标位置的光斑（swiss-red 极淡）
   · JS：mousemove 更新 CSS 变量 --cursor-x / --cursor-y
-  · CSS：background: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(200,16,46,0.04), transparent)
+  · CSS：background-image: radial-gradient(300px circle at var(--cursor-x,50%) var(--cursor-y,50%), rgba(200,16,46,0.04), transparent 70%)
+  · 必须用 transparent 70% 终止（不能只写 transparent），否则渐变会延伸到角落，整个封面被淡色雾覆盖，parchment 底色被遮住
+  · 必须用 background-image 属性（不能是 background shorthand），否则会覆盖 .slide 的 background-color，导致封面失去容器底色、透出 body 灰底
   · 离开封面区域时光斑淡出
 
 ▎悬停微交互（Hover Micro-Interaction — 网格内硬切）
@@ -2158,27 +2232,28 @@ Swiss Grid 的动效语言是"网格被精确填充的过程"——标题网格�
     · 禁止 cubic-bezier(0.16,1,0.3,1) 柔软缓动，统一用 linear 或 cubic-bezier(0.5,0,0.5,1)
     · 禁止打破网格的位移动效（如 translateX/Y 大幅度位移、旋转、模糊）；动效只能在网格列内进行
     · 几何块硬切缩放：scale(0)→scale(1) 无回弹，不要弹性曲线
-  · swiss-red 占比：动效中 swiss-red #C8102E 占面积不超过 8%，与静态规范一致`;
+  · swiss-red 占比：动效中 swiss-red #C8102E 占面积不超过 8%，与静态规范一致
+  · SVG marker 引用：使用 marker-end="url(#id)" 前，必须在 SVG 内 <defs> 中定义 <marker>，否则箭头不显示。标准 marker 定义：
+    <defs><marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1 L7 4 L1 7 Z" fill="#999"/></marker></defs>
+    fill 颜色按本模板的轴线/辅助线色设置（Kami 用 #ddd9cc，deck-report 用 #e5e7eb，cobalt-grid 用 #1F2BE0，bloomberg 用 #1F3A5F 等）
+  · bar-anim 一致性：同一图表内所有柱子必须统一使用 bar-anim class + bar-dN 延迟，禁止部分柱子有动画部分没有
+  · 环形图 stroke-dasharray 必须 = 2πr（周长公式），stroke-dashoffset 目标 = C × (1 - 比例)
+  · 折线图 line-anim 的 stroke-dasharray 必须等于实际路径长度（不是固定数值）`;
 
 const SWISS_GRID_MOTION_ANTI_PATTERNS = `✗ 引入 GSAP / Motion / 外部动画库
 ✗ 动效无 prefers-reduced-motion 降级
-✗ 页面一加载就全量播放动画（必须 scroll-triggered）
-✗ 所有元素用同一种入场方式
-✗ 动画触发 layout / reflow
-✗ 单页入场总时长超过 1.5s
 ✗ 持续动画超过 1 个/页（瑞士网格要克制）
-✗ 用 JS 拆字逐字入场
-✗ SVG 内 text/rect 坐标超出 viewBox
-✗ .slide 缺少 isolation:isolate
 ✗ 用 cubic-bezier(0.16,1,0.3,1) 柔软缓动（瑞士网格禁用，应用 linear 或 cubic-bezier(0.5,0,0.5,1)）
 ✗ 打破网格的位移动效（translateX/Y 大幅度位移、旋转、模糊）
 ✗ 几何块缩放用弹性回弹（应 scale(0)→scale(1) 硬切）
 ✗ 横向视差位移（会打破网格，仅允许纵向 translateY）
 ✗ swiss-red 动效占面积超过 8%
-✗ 引入 swiss-red / ink 以外的彩色`;
+✗ 引入 swiss-red / ink 以外的彩色
+`;
 
 /** Motion swiss-grid prompt = static prompt + Motion chapter + motion anti-patterns. */
-const SWISS_GRID_MOTION_PROMPT = `${SWISS_GRID_PROMPT}
+const SWISS_GRID_MOTION_PROMPT = `${TEMPLATE_SELECTION_GUIDE}
+${SWISS_GRID_PROMPT}
 ${SWISS_GRID_MOTION_CHAPTER}
 ────────────────────────────────────────
 Anti-Patterns 反面示例（必须规避）

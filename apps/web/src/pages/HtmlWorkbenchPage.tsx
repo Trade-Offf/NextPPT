@@ -410,13 +410,15 @@ export function HtmlWorkbenchPage() {
 
             {/* Canvas + inspector */}
             <div className="flex-1 flex min-h-0">
-              <div className="flex-1 min-w-0 overflow-hidden bg-[var(--window-bg)]">
-                <LiveFrame
-                  sourceHtml={sourceHtml}
-                  onMessage={handleMessage}
-                  iframeRef={iframeRef}
-                  remountKey={remountKey}
-                />
+              <div className="flex-1 min-w-0 overflow-hidden bg-[var(--window-bg)] p-3 sm:p-4">
+                <div className="w-full h-full rounded-lg overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.45)] ring-1 ring-[var(--separator)]">
+                  <LiveFrame
+                    sourceHtml={sourceHtml}
+                    onMessage={handleMessage}
+                    iframeRef={iframeRef}
+                    remountKey={remountKey}
+                  />
+                </div>
               </div>
 
               {/* Inspector */}

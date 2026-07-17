@@ -1680,7 +1680,24 @@ select.hds-input {
   color-scheme: dark;
   color: var(--label);
   background: var(--window-bg);
+  /* Cinema is forced-dark — override the global scrollbar so it stays readable
+     regardless of the user's prefers-color-scheme. Tinted neutral that
+     harmonises with --system-blue. */
+  scrollbar-color: rgba(200, 204, 220, 0.28) transparent;
 }
+.hds-cinema ::-webkit-scrollbar { width: 8px; height: 8px; }
+.hds-cinema ::-webkit-scrollbar-track { background: transparent; }
+.hds-cinema ::-webkit-scrollbar-thumb {
+  background: rgba(200, 204, 220, 0.28);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.hds-cinema ::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 204, 220, 0.48);
+  background-clip: content-box;
+}
+.hds-cinema ::-webkit-scrollbar-corner { background: transparent; }
 
 /* HTML Workbench shares the same dark Linear palette as cinema, so the
    SiteHeader (alwaysScrolled) and toolbar match the dark canvas regardless
@@ -1703,7 +1720,21 @@ select.hds-input {
   color-scheme: dark;
   color: var(--label);
   background: var(--window-bg);
+  scrollbar-color: rgba(200, 204, 220, 0.28) transparent;
 }
+.hds-html-workbench ::-webkit-scrollbar { width: 8px; height: 8px; }
+.hds-html-workbench ::-webkit-scrollbar-track { background: transparent; }
+.hds-html-workbench ::-webkit-scrollbar-thumb {
+  background: rgba(200, 204, 220, 0.28);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.hds-html-workbench ::-webkit-scrollbar-thumb:hover {
+  background: rgba(200, 204, 220, 0.48);
+  background-clip: content-box;
+}
+.hds-html-workbench ::-webkit-scrollbar-corner { background: transparent; }
 
 /* Linear-style page stage: near-black + a soft cool top glow + faint grid */
 .hds-hero {
