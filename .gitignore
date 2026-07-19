@@ -59,3 +59,9 @@ __snapshots__/
 # Local design skills (per-user, not shared)
 .agents/
 skills-lock.json
+
+# Trae IDE internal (per-user, not shared)
+.trae/
+
+# Local self-media PPT exports (user-generated, not part of codebase)
+apps/web/public/biz-trend-*.html
