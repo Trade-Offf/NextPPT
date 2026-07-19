@@ -284,6 +284,14 @@ export function HtmlWorkbenchPage() {
     showToast(t('toast.reset'));
   }, [selection, postToRuntime, showToast, t]);
 
+  const handleDeleteElement = useCallback(() => {
+    if (!selection) return;
+    // The runtime emits live-clear-select + live-patched + live-changes-updated
+    // + live-history-changed in response; handleMessage already routes those
+    // to the right state setters, so no extra bookkeeping is needed here.
+    postToRuntime({ type: 'live-delete-element', tweakId: selection.tweakId });
+  }, [selection, postToRuntime]);
+
   const handleResetAll = useCallback(() => {
     postToRuntime({ type: 'live-reset-all' });
     showToast(t('toast.reset'));
@@ -297,26 +305,38 @@ export function HtmlWorkbenchPage() {
     postToRuntime({ type: 'live-redo' });
   }, [postToRuntime]);
 
-  // Host-level undo/redo shortcut. The runtime also handles Cmd/Ctrl+Z inside
-  // the iframe, but we listen here too so the shortcut works even when the
+  // Host-level undo/redo + delete shortcut. The runtime also handles these
+  // keys inside the iframe, but we listen here too so they work even when the
   // iframe doesn't have focus (e.g. right after clicking a toolbar button).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const mod = isMac ? e.metaKey : e.ctrlKey;
-      if (!mod) return;
-      if (e.key === 'z' || e.key === 'Z') {
+      if (mod) {
+        if (e.key === 'z' || e.key === 'Z') {
+          e.preventDefault();
+          if (e.shiftKey) handleRedo();
+          else handleUndo();
+        } else if (e.key === 'y' || e.key === 'Y') {
+          e.preventDefault();
+          handleRedo();
+        }
+        return;
+      }
+      // Fallback Delete / Backspace for when the iframe lost focus but the
+      // host still has a selection (e.g. user just clicked a toolbar button).
+      // Skip when an input / textarea / contenteditable is focused so we don't
+      // eat character deletion.
+      const ae = document.activeElement;
+      if (ae instanceof HTMLElement && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) return;
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selection && editMode) {
         e.preventDefault();
-        if (e.shiftKey) handleRedo();
-        else handleUndo();
-      } else if (e.key === 'y' || e.key === 'Y') {
-        e.preventDefault();
-        handleRedo();
+        handleDeleteElement();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [handleUndo, handleRedo]);
+  }, [handleUndo, handleRedo, handleDeleteElement, selection, editMode]);
 
   return (
     <div
@@ -467,25 +487,36 @@ export function HtmlWorkbenchPage() {
                       {editMode ? t('inspector.none') : t('inspector.noneBrowse')}
                     </p>
                   ) : (
-                    <div className="space-y-2">
-                      <InspectorRow label={t('inspector.tag')} value={selection.tagName} />
-                      {selection.text && (
+                    <>
+                      <div className="space-y-2">
+                        <InspectorRow label={t('inspector.tag')} value={selection.tagName} />
+                        {selection.text && (
+                          <InspectorRow
+                            label={t('inspector.text')}
+                            value={selection.text.length > 60 ? selection.text.slice(0, 60) + '…' : selection.text}
+                          />
+                        )}
                         <InspectorRow
-                          label={t('inspector.text')}
-                          value={selection.text.length > 60 ? selection.text.slice(0, 60) + '…' : selection.text}
+                          label={t('inspector.translate')}
+                          value={selection.translate || t('inspector.placeholder')}
+                          muted={!selection.translate}
                         />
-                      )}
-                      <InspectorRow
-                        label={t('inspector.translate')}
-                        value={selection.translate || t('inspector.placeholder')}
-                        muted={!selection.translate}
-                      />
-                      <InspectorRow
-                        label={t('inspector.scale')}
-                        value={selection.scale || t('inspector.placeholder')}
-                        muted={!selection.scale}
-                      />
-                    </div>
+                        <InspectorRow
+                          label={t('inspector.scale')}
+                          value={selection.scale || t('inspector.placeholder')}
+                          muted={!selection.scale}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleDeleteElement}
+                        disabled={!editMode || !ready}
+                        className="w-full mt-3 px-2 py-1.5 text-xs rounded border border-[var(--separator)] text-[var(--system-red)] hover:bg-[var(--system-red)] hover:text-white hover:border-[var(--system-red)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[var(--system-red)] disabled:hover:border-[var(--separator)]"
+                        title={t('inspector.deleteHint')}
+                      >
+                        {t('inspector.delete')}
+                      </button>
+                    </>
                   )}
                 </div>
 

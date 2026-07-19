@@ -20,7 +20,8 @@ export type LiveHostMessage =
   | LiveRedoMessage
   | LiveSetEditModeMessage
   | LiveFocusElementMessage
-  | LiveSearchMessage;
+  | LiveSearchMessage
+  | LiveDeleteElementMessage;
 
 /** Request the current serialized full document HTML (text edits + tweaks applied). */
 export interface LiveRequestHtmlMessage {
@@ -72,6 +73,13 @@ export interface LiveSearchMessage {
   type: 'live-search';
   query: string;
   action: 'run' | 'next' | 'prev';
+}
+
+/** Delete the currently-selected element (or the element with the given
+ *  tweakId if it matches the current selection). Recoverable via undo. */
+export interface LiveDeleteElementMessage {
+  type: 'live-delete-element';
+  tweakId: string;
 }
 
 // ─── Runtime → Host ─────────────────────────────────────────────────────────

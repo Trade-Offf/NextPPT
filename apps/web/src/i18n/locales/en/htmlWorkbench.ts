@@ -45,6 +45,8 @@ export default {
     translate: 'Translate',
     scale: 'Scale',
     placeholder: 'Not adjusted',
+    delete: 'Delete element',
+    deleteHint: 'Delete selected element (Delete / Backspace)',
   },
   search: {
     placeholder: 'Search text…',

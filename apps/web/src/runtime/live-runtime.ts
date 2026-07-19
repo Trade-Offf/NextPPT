@@ -134,6 +134,10 @@ interface ElementSnapshot {
   translate: string;
   scale: string;
   html: string;
+  // ── delete-operation-only fields (used to rebuild a removed element on undo) ──
+  outerHtml?: string;
+  parentTweakId?: string | '__body__';
+  nextSiblingTweakId?: string | null;
 }
 
 interface HistoryEntry {
@@ -141,6 +145,9 @@ interface HistoryEntry {
   before: Map<string, ElementSnapshot>;
   /** Snapshots after the operation (for redo). */
   after: Map<string, ElementSnapshot>;
+  /** Operation kind. 'delete' entries have an empty `after` Map and undo by
+   *  re-inserting the element rather than restoring in-place styles. */
+  op?: 'modify' | 'delete';
 }
 
 const undoStack: HistoryEntry[] = [];
@@ -164,25 +171,49 @@ function snapshotElements(els: HTMLElement[]): Map<string, ElementSnapshot> {
   return m;
 }
 
-function restoreSnapshot(snap: Map<string, ElementSnapshot>) {
-  snap.forEach((s, id) => {
-    const el = elementCache.get(id);
-    if (!el) return;
-    el.style.translate = s.translate;
-    el.style.scale = s.scale;
-    if (el.innerHTML !== s.html) el.innerHTML = s.html;
-    if (selected === el) {
-      syncSelectionBox();
-      send({
-        type: 'live-select',
-        tweakId: id,
-        tagName: el.tagName.toLowerCase(),
-        text: el.textContent?.slice(0, 200) || undefined,
-        translate: el.style.translate || undefined,
-        scale: el.style.scale || undefined,
-      });
-    }
-  });
+function restoreSnapshot(snap: Map<string, ElementSnapshot>, op?: string) {
+  if (op === 'delete') {
+    // Delete undo: rebuild each removed element and re-insert it at its
+    // original position. The element is no longer in elementCache, so we
+    // recreate it from outerHtml and re-register it.
+    snap.forEach((s, id) => {
+      if (!s.outerHtml) return;
+      const parent = !s.parentTweakId || s.parentTweakId === '__body__'
+        ? document.body
+        : (elementCache.get(s.parentTweakId) || document.body);
+      const temp = document.createElement('div');
+      temp.innerHTML = s.outerHtml;
+      const newEl = temp.firstElementChild as HTMLElement | null;
+      if (!newEl) return;
+      const ref = s.nextSiblingTweakId
+        ? (elementCache.get(s.nextSiblingTweakId) || null)
+        : null;
+      parent.insertBefore(newEl, ref);
+      newEl.setAttribute(TWEAK_ATTR, id);
+      newEl.style.translate = s.translate;
+      newEl.style.scale = s.scale;
+      elementCache.set(id, newEl);
+    });
+  } else {
+    snap.forEach((s, id) => {
+      const el = elementCache.get(id);
+      if (!el) return;
+      el.style.translate = s.translate;
+      el.style.scale = s.scale;
+      if (el.innerHTML !== s.html) el.innerHTML = s.html;
+      if (selected === el) {
+        syncSelectionBox();
+        send({
+          type: 'live-select',
+          tweakId: id,
+          tagName: el.tagName.toLowerCase(),
+          text: el.textContent?.slice(0, 200) || undefined,
+          translate: el.style.translate || undefined,
+          scale: el.style.scale || undefined,
+        });
+      }
+    });
+  }
   recomputeDirty(snap);
 }
 
@@ -234,7 +265,7 @@ function undo() {
   if (!entry) return;
   // Current state becomes the redo "after" (it already is entry.after, but the
   // user may have re-selected since). Restore "before" to roll back.
-  restoreSnapshot(entry.before);
+  restoreSnapshot(entry.before, entry.op);
   redoStack.push(entry);
   notifyHistory();
   notifyChanges();
@@ -244,7 +275,20 @@ function undo() {
 function redo() {
   const entry = redoStack.pop();
   if (!entry) return;
-  restoreSnapshot(entry.after);
+  if (entry.op === 'delete') {
+    // Redo a delete: remove the element(s) again. `after` is empty for delete
+    // entries, so we can't use restoreSnapshot — re-remove by tweakId.
+    entry.before.forEach((_, id) => {
+      const el = elementCache.get(id);
+      if (!el) return;
+      if (selected === el) clearSelection();
+      el.remove();
+      elementCache.delete(id);
+      dirtyElements.delete(id);
+    });
+  } else {
+    restoreSnapshot(entry.after, entry.op);
+  }
   undoStack.push(entry);
   notifyHistory();
   notifyChanges();
@@ -811,10 +855,74 @@ function onKeydown(e: KeyboardEvent) {
   // undo/redo shortcuts (already handled above).
   if (e.key === 'Escape') {
     clearSelection();
+    return;
+  }
+
+  // Delete the selected element on Delete / Backspace. Must run in capture
+  // phase + stopImmediatePropagation so the user's page-flip / animation
+  // scripts never see the key. preventDefault also stops Backspace from
+  // triggering browser back-navigation.
+  if (selected && (e.key === 'Delete' || e.key === 'Backspace')) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    deleteSelected();
   }
 }
 
 // ─── Reset helpers ──────────────────────────────────────────────────────────
+
+/** Delete the currently-selected element. Records a 'delete' history entry so
+ *  the action is reversible via undo. Refuses to delete <body>/<html> or any
+ *  runtime chrome (overlay / selection outline / handles). */
+function deleteSelected() {
+  if (!selected) return;
+  const el = selected;
+  if (el === document.body || el === document.documentElement) return;
+  if (el.hasAttribute(CHROME_ATTR)) return;
+  const tweakId = el.getAttribute(TWEAK_ATTR);
+  if (!tweakId) return;
+
+  const parent = el.parentElement;
+  if (!parent) return;
+
+  // Capture parent + next-sibling so undo can re-insert at the right spot.
+  const parentTweakId = parent === document.body
+    ? '__body__'
+    : (parent.getAttribute(TWEAK_ATTR) || '__body__');
+  const nextSibling = el.nextElementSibling instanceof HTMLElement
+    ? el.nextElementSibling
+    : null;
+  const nextSiblingTweakId = nextSibling && nextSibling.hasAttribute(TWEAK_ATTR)
+    ? nextSibling.getAttribute(TWEAK_ATTR)
+    : null;
+
+  const before = new Map<string, ElementSnapshot>();
+  before.set(tweakId, {
+    translate: el.style.translate,
+    scale: el.style.scale,
+    html: el.innerHTML,
+    outerHtml: el.outerHTML,
+    parentTweakId,
+    nextSiblingTweakId,
+  });
+  undoStack.push({ before, after: new Map(), op: 'delete' });
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  redoStack.length = 0;
+
+  // Drop the element from caches so later ops can't reference a detached node.
+  elementCache.delete(tweakId);
+  dirtyElements.delete(tweakId);
+
+  // Clear selection + overlay before removing the DOM node, otherwise the
+  // ResizeObserver would fire on a detached element.
+  clearSelection();
+  el.remove();
+
+  notifyHistory();
+  notifyChanges();
+  send({ type: 'live-patched', bodyHtml: document.body.innerHTML });
+}
 
 function resetTweak(tweakId: string) {
   const el = elementCache.get(tweakId);
@@ -993,6 +1101,13 @@ function onMessage(evt: MessageEvent) {
       case 'live-search':
         if (msg.action === 'run') runSearch(msg.query);
         else gotoSearchMatch(msg.action);
+        break;
+      case 'live-delete-element':
+        // Guard against stale host messages: only delete if the tweakId still
+        // matches the live selection.
+        if (selected && selected.getAttribute(TWEAK_ATTR) === msg.tweakId) {
+          deleteSelected();
+        }
         break;
     }
   } catch (err) {

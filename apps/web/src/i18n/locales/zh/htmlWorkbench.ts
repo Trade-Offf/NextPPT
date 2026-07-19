@@ -45,6 +45,8 @@ export default {
     translate: '位移',
     scale: '缩放',
     placeholder: '未调整',
+    delete: '删除元素',
+    deleteHint: '删除选中元素 (Delete / Backspace)',
   },
   search: {
     placeholder: '搜索文本…',
