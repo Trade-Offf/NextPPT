@@ -9,11 +9,13 @@
 English | [简体中文](README.zh-CN.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
-![Local-first](https://img.shields.io/badge/local--first-no%20upload-blue.svg)
+![Local-first](https://img.shields.io/badge/local--first-clone%20and%20run-blue.svg)
 ![Open Source](https://img.shields.io/badge/open%20source-free-orange.svg)
+![Status](https://img.shields.io/badge/hosted%20site-discontinued-lightgrey.svg)
 
 </div>
+
+> **Hosted site discontinued.** `next-ppt.com` is no longer operated or maintained. Usage was limited, and platforms like Feishu / Lark keep shipping similar AI-side tooling, so running a public instance is no longer worth it. The repo stays MIT: **clone it and run locally** (see Quick start). No uptime promise, no product roadmap. Forks welcome.
 
 > Your AI tool already writes beautiful `deck.html`. NextPPT is the missing last mile: click to fix one word, drag to rearrange, ship it as a slide — without another prompt round.
 
@@ -39,13 +41,17 @@ It is *not* an AI slide generator, not another DSL like reveal.js / Slidev, not 
 
 ## Quick start
 
+Requires Node.js 20+ and [pnpm](https://pnpm.io) 10+. Export needs Chrome on the machine, or the Chromium Puppeteer downloads during `pnpm install`.
+
 ```bash
+git clone https://github.com/Trade-Offf/NextPPT.git
+cd NextPPT   # or html-deck-studio
 pnpm install
 pnpm dev
-# web → http://localhost:5173   api → http://localhost:3000
+# web → http://localhost:5173   api → http://localhost:3310
 ```
 
-In a Chromium browser (Chrome / Edge / Brave / Arc):
+Open `http://localhost:5173` in a Chromium browser (Chrome / Edge / Brave / Arc — editing uses the File System Access API). In dev, export goes through Vite's `/v1` proxy to local `:3310`. **Do not** set `VITE_API_BASE` (that used to point at the public API).
 
 1. **Open** — pick a folder with your `deck.html` and assets, drag in a single `.html`, or try the built-in sample on the home page. Open a file that isn't a valid deck and you get a clear inline hint that links straight to the guide's prompt — no silent failure.
 2. **Edit** — **Edit** mode: click text, tweak fonts/colors in the panel, double-click to type inline. **Move** mode: drag, resize, and reorder layers (bring to front / send to back, forward / backward one step) like PowerPoint — no code. Entering Move mode auto-detects draggable elements, so anything is movable on the first try.
@@ -94,15 +100,20 @@ flowchart LR
 
 **During editing, your data never leaves your machine.** Export sends content to a temp worker for a few dozen seconds, then deletes it. Nothing persisted, nothing trained on.
 
+## Hosted site discontinued
+
+There is no public instance. Run it locally with the Quick start above. Historical hosting notes live in [apps/web/DEPLOY.md](apps/web/DEPLOY.md) (archived — you do not need to deploy).
+
 ## Docs
 
+- [apps/web/DEPLOY.md](apps/web/DEPLOY.md) — archived hosting notes
 - [docs/ROADMAP.md](docs/ROADMAP.md) — what's next
 - [docs/GROWTH.md](docs/GROWTH.md) — positioning and channels
 - [docs/PRD.md](docs/PRD.md) · [docs/TRD.md](docs/TRD.md) — product & technical specs
 
 ## Contributing
 
-Built for people who live this workflow. Issues and PRs welcome — if it saves you one painful night before a talk, that's already worth it.
+Open source for self-host / local use. Forks welcome; this is no longer scheduled as a hosted product. If it saves you one painful night before a talk, that's already worth it.
 
 ## License
 

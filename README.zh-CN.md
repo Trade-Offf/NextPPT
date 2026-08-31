@@ -9,11 +9,13 @@
 [English](README.md) | 简体中文
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#参与贡献)
-![Local-first](https://img.shields.io/badge/本地优先-不上传-blue.svg)
+![Local-first](https://img.shields.io/badge/本地优先-clone自用-blue.svg)
 ![Open Source](https://img.shields.io/badge/开源-免费-orange.svg)
+![Status](https://img.shields.io/badge/线上站点-已停运-lightgrey.svg)
 
 </div>
+
+> **线上已停运。** `next-ppt.com` 不再运营、也不再维护。用户量有限，飞书 / Lark 等平台也在持续补齐同类「AI 工具侧」能力，继续挂公网服务的性价比不高。仓库仍 MIT 开源：**clone 到本机使用**（见下方快速开始）。不再承诺线上可用性，也不再作为产品持续迭代。欢迎 fork 自用。
 
 > 你的 AI 工具已经能写出很漂亮的 `deck.html`，NextPPT 补的是最后一公里：改一个字不用重开一轮对话，像 PPT 一样拖图层，本地导出能投影的幻灯片。
 
@@ -39,13 +41,17 @@
 
 ## 快速开始
 
+前置：Node.js 20+、[pnpm](https://pnpm.io) 10+。导出需要本机已安装 Chrome，或 `pnpm install` 时 Puppeteer 下载的 Chromium。
+
 ```bash
+git clone https://github.com/Trade-Offf/NextPPT.git
+cd NextPPT   # 或 html-deck-studio
 pnpm install
 pnpm dev
-# 前端 → http://localhost:5173   后端 → http://localhost:3000
+# 前端 → http://localhost:5173   后端 → http://localhost:3310
 ```
 
-用 Chromium 内核浏览器（Chrome / Edge / Brave / Arc）：
+用 Chromium 内核浏览器打开 `http://localhost:5173`（Chrome / Edge / Brave / Arc；编辑依赖 File System Access API）。开发态导出走 Vite 代理 `/v1` → 本机 `:3310`，**不要**设置 `VITE_API_BASE`（那是当年打公网 API 的）。
 
 1. **打开** — 选包含 `deck.html` 和图片的文件夹，拖入单个 `.html`，或在首页点「试用样例」。打开的文件若不是合法演示稿，会给出明确的行内提示并直达指南里的提示词，不会「点了没反应」。
 2. **编辑** — **编辑**模式：点文字、右侧面板改字号颜色，双击行内输入。**拖动**模式：拖位置、拖角缩放、调层级（置顶 / 置底、上移 / 下移一层），像 PPT，不用写代码。进入拖动模式会自动提取可拖元素，任何元素第一次就能拖。
@@ -94,28 +100,20 @@ flowchart LR
 
 **编辑期间，数据不离开本机。** 只有点导出时，内容在临时目录待几十秒就被删掉。不持久化，不拿去训练。
 
-## 部署与发版校验
+## 线上已停运
 
-**生产前端**部署在香港 VPS（Caddy 静态站），完整说明见 [apps/web/DEPLOY.md](apps/web/DEPLOY.md)。Cloudflare Pages（`*.pages.dev`）仅作海外备份。
-
-发版：
-
-```bash
-pnpm deploy-web   # build + rsync 到 VPS + verify-deploy
-```
-
-DNS 须为**灰云**指向 VPS（`47.243.33.162`）。橙云（Cloudflare 代理）在大陆会概率性 TLS 重置（`ERR_CONNECTION_RESET`）。
+公网站点不再提供。若要自用，按上方「快速开始」在本机运行即可。历史托管说明见 [apps/web/DEPLOY.md](apps/web/DEPLOY.md)（已归档，不必再部署）。
 
 ## 文档
 
-- [apps/web/DEPLOY.md](apps/web/DEPLOY.md) — VPS 主部署、DNS 灰云切流、备份 Pages、排障
+- [apps/web/DEPLOY.md](apps/web/DEPLOY.md) — 历史托管记录（已归档）
 - [docs/ROADMAP.md](docs/ROADMAP.md) — 后续规划
 - [docs/GROWTH.md](docs/GROWTH.md) — 定位与渠道
 - [docs/PRD.md](docs/PRD.md) · [docs/TRD.md](docs/TRD.md) — 产品与技术方案
 
 ## 参与贡献
 
-给真正天天用这个工作流的人做的。欢迎 Issue 和 PR — 如果它能帮你省下答辩前那一个难受的晚上，就已经值了。
+仓库开源自用。欢迎 fork；不再按线上产品排期收 PR。如果你靠它省下答辩前那一个难受的晚上，就已经值了。
 
 ## License
 

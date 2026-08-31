@@ -7,8 +7,9 @@ import { getBlobToPathMap } from '../fs/assetResolver.js';
 import { useFocusTrap } from '../hooks/useFocusTrap.js';
 
 /**
- * Base URL of the export API. Empty in dev (Vite proxies /v1 to localhost:3000);
- * in production set VITE_API_BASE to e.g. https://api.next-ppt.com at build time.
+ * Base URL of the export API. Empty in dev (Vite proxies /v1 to localhost:3310);
+ * in production, scripts/deploy-web.sh injects VITE_API_BASE=https://api.next-ppt.com
+ * at build time. The deploy script also greps the bundle to verify injection.
  */
 const API_BASE = import.meta.env.VITE_API_BASE ?? '';
 

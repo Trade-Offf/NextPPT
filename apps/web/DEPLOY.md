@@ -1,7 +1,9 @@
 # Deploying the web app
 
-> **Primary host (since 2026-07):** Hong Kong VPS (`47.243.33.162`) via Caddy — Cloudflare Pages free anycast IPs are intermittently reset on mainland China TLS (`ERR_CONNECTION_RESET`).  
-> **Backup:** `https://htmldeckstudio.pages.dev` (Cloudflare Pages Git deploy still runs).
+> **Archived.** The hosted site (`next-ppt.com`) is discontinued. Run the app locally with `pnpm install && pnpm dev` — see the root README. This file is historical only.
+>
+> **Primary host (since 2026-07, no longer operated):** Hong Kong VPS (`47.243.33.162`) via Caddy — Cloudflare Pages free anycast IPs are intermittently reset on mainland China TLS (`ERR_CONNECTION_RESET`).  
+> **Backup:** `https://htmldeckstudio.pages.dev` (Cloudflare Pages Git deploy — also unmaintained).
 
 ## Architecture
 

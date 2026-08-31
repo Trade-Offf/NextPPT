@@ -25,7 +25,7 @@ app.get('/v1/download/:token', downloadHandler);
 
 app.get('/healthz', async () => ({ ok: true }));
 
-const port = parseInt(process.env['PORT'] ?? '3000', 10);
+const port = parseInt(process.env['PORT'] ?? '3310', 10);
 const host = process.env['HOST'] ?? '0.0.0.0';
 await app.listen({ port, host });
 
