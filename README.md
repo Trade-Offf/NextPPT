@@ -15,7 +15,21 @@ English | [简体中文](README.zh-CN.md)
 
 </div>
 
-> **Hosted site discontinued.** `next-ppt.com` is no longer operated or maintained. Usage was limited, and platforms like Feishu / Lark keep shipping similar AI-side tooling, so running a public instance is no longer worth it. The repo stays MIT: **clone it and run locally** (see Quick start). No uptime promise, no product roadmap. Forks welcome.
+## A note on shutting down
+
+`next-ppt.com` **is no longer operated or maintained.** The repo stays MIT; if you want the tool, **clone it and run it locally** (see Quick start).
+
+I meant this. Take an HTML deck the AI already wrote, click to edit it in the browser, export something you can actually present — I thought that was the last mile, and for a few people it was. The public site never found many users. Meanwhile Feishu, Lark, and every other big platform are wiring AI into docs, meetings, and slides faster than a solo developer can keep up. They have distribution, accounts, and a button people already click every day. On that workflow, a personal site is unlikely to become the default. Keeping a server on for a page almost nobody opens is not a strategy.
+
+So it stops. Not because the idea suddenly had no value — because this is no longer a race a person should run against the platforms.
+
+If you are also trying to turn an idea into something that can feed you, here is what I would tell myself next time: **do not compete with the AI workflows the giants have already noticed.** They will catch up; it is only a matter of time. Solo builders are better off in the corners those companies ignore — small, specific problems where someone will pay for an outcome, not for "another platform." Get a tiny loop closed: who shows up, why they stay, how money comes in, how you deliver. The way through is not a bigger model. It is a narrower problem and a loop you actually own.
+
+> **The world has never lacked smart people, and never lacked ideas. What it lacks are people who know their own edge.** Find a small circle, stand up a service, grow your influence, and slowly widen the radius of rules you get to write. That is the reluctant — and only walkable — path for a small founder.
+
+NextPPT stays here as code. The hosted site will not. Forks welcome.
+
+---
 
 > Your AI tool already writes beautiful `deck.html`. NextPPT is the missing last mile: click to fix one word, drag to rearrange, ship it as a slide — without another prompt round.
 
